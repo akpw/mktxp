@@ -111,7 +111,30 @@ class RouterMetric:
         except Exception as exc:
             print(f'Error getting pool active routes info from router{self.router_name}@{self.router_entry.hostname}: {exc}')
             return None
+            
+    def wireless_registration_table_records(self, registration_table_labels = []):
+        try:
+            registration_table_records = self.api_connection.router_api().get_resource('/interface/wireless/registration-table').get()
+            return self._trimmed_records(registration_table_records, registration_table_labels)
+        except Exception as exc:
+            print(f'Error getting wireless registration table info from router{self.router_name}@{self.router_entry.hostname}: {exc}')
+            return None
 
+    def capsman_remote_caps_records(self, remote_caps_labels = []):
+        try:
+            remote_caps_records = self.api_connection.router_api().get_resource('/caps-man/remote-cap').get()
+            return self._trimmed_records(remote_caps_records, remote_caps_labels)
+        except Exception as exc:
+            print(f'Error getting caps-man remote caps info from router{self.router_name}@{self.router_entry.hostname}: {exc}')
+            return None
+
+    def capsman_registration_table_records(self, registration_table_labels = []):
+        try:
+            registration_table_records = self.api_connection.router_api().get_resource('/caps-man/registration-table').get()
+            return self._trimmed_records(registration_table_records, registration_table_labels)
+        except Exception as exc:
+            print(f'Error getting caps-man registration table info from router{self.router_name}@{self.router_entry.hostname}: {exc}')
+            return None
 
     # Helpers
     def _trimmed_records(self, router_records, metric_labels):

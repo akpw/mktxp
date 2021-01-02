@@ -32,7 +32,7 @@ class RouteCollector(BaseCollector):
                                   MKTXPConfigKeys.ROUTERBOARD_ADDRESS: router_metric.router_id[MKTXPConfigKeys.ROUTERBOARD_ADDRESS],
                                   'count': total_routes
                                 }]
-        total_routes_metrics = BaseCollector.gauge_collector('total_routes', 'Overall number of routes in RIB', total_routes_records, 'count')
+        total_routes_metrics = BaseCollector.gauge_collector('routes_total_routes', 'Overall number of routes in RIB', total_routes_records, 'count')
         yield total_routes_metrics
 
 

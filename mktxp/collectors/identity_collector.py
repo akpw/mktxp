@@ -25,6 +25,6 @@ class IdentityCollector(BaseCollector):
         if not identity_records:
             return
 
-        identity_metrics = BaseCollector.info_collector('identity', 'System identity', identity_records, identity_labels)
+        identity_metrics = BaseCollector.info_collector('system_identity', 'System identity', identity_records, identity_labels)
         yield identity_metrics
 

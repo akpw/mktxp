@@ -20,6 +20,7 @@ from mktxp.collectors.pool_collector import PoolCollector
 from mktxp.collectors.resource_collector import SystemResourceCollector
 from mktxp.collectors.route_collector import RouteCollector
 from mktxp.collectors.wlan_collector import WLANCollector
+from mktxp.collectors.capsman_collector import CapsmanCollector
 
 class CollectorsHandler:
     ''' MKTXP Collectors Handler
@@ -51,7 +52,6 @@ class CollectorsHandler:
             if router_metric.router_entry.wireless:
                 yield from WLANCollector.collect(router_metric)
 
-
-
-
+            if router_metric.router_entry.capsman:
+                yield from CapsmanCollector.collect(router_metric)
 

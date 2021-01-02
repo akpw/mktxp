@@ -30,9 +30,9 @@ class WLANCollector(BaseCollector):
         tx_ccq_records = [monitor_record for monitor_record in monitor_records if monitor_record.get('overall_tx_ccq')]
 
         if noise_floor_records:
-            noise_floor_metrics = BaseCollector.gauge_collector('noise_floor', 'Noise floor threshold', noise_floor_records, 'noise_floor', ['channel'])
+            noise_floor_metrics = BaseCollector.gauge_collector('wlan_noise_floor', 'Noise floor threshold', noise_floor_records, 'noise_floor', ['channel'])
             yield noise_floor_metrics
 
         if tx_ccq_records:
-            overall_tx_ccq_metrics = BaseCollector.gauge_collector('overall_tx_ccq', ' Client Connection Quality for transmitting', tx_ccq_records, 'overall_tx_ccq', ['channel'])
+            overall_tx_ccq_metrics = BaseCollector.gauge_collector('wlan_overall_tx_ccq', ' Client Connection Quality for transmitting', tx_ccq_records, 'overall_tx_ccq', ['channel'])
             yield overall_tx_ccq_metrics

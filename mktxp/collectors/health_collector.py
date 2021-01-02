@@ -25,9 +25,9 @@ class HealthCollector(BaseCollector):
         if not health_records:
             return
 
-        voltage_metrics = BaseCollector.gauge_collector('routerboard_voltage', 'Supplied routerboard voltage', health_records, 'voltage')
+        voltage_metrics = BaseCollector.gauge_collector('system_routerboard_voltage', 'Supplied routerboard voltage', health_records, 'voltage')
         yield voltage_metrics
 
-        temperature_metrics = BaseCollector.gauge_collector('routerboard_temperature', ' Routerboard current temperature', health_records, 'temperature')
+        temperature_metrics = BaseCollector.gauge_collector('system_routerboard_temperature', ' Routerboard current temperature', health_records, 'temperature')
         yield temperature_metrics
 

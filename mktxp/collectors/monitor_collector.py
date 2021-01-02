@@ -33,16 +33,16 @@ class MonitorCollector(BaseCollector):
                 if value:            
                     monitor_record[monitor_label] = MonitorCollector._translated_values(monitor_label, value)
 
-        monitor_status_metrics = BaseCollector.gauge_collector('status', 'Current interface link status', monitor_records, 'status', ['name'])
+        monitor_status_metrics = BaseCollector.gauge_collector('interface_status', 'Current interface link status', monitor_records, 'status', ['name'])
         yield monitor_status_metrics
 
         # limit records according to the relevant metrics
         rate_records = [monitor_record for monitor_record in monitor_records if monitor_record.get('rate', None)]
-        monitor_rates_metrics = BaseCollector.gauge_collector('rate', 'Actual interface connection data rate', rate_records, 'rate', ['name'])
+        monitor_rates_metrics = BaseCollector.gauge_collector('interface_rate', 'Actual interface connection data rate', rate_records, 'rate', ['name'])
         yield monitor_rates_metrics
 
         full_duplex_records = [monitor_record for monitor_record in monitor_records if monitor_record.get('full_duplex', None)]
-        monitor_rates_metrics = BaseCollector.gauge_collector('full_duplex', 'Full duplex data transmission', full_duplex_records, 'full_duplex', ['name'])
+        monitor_rates_metrics = BaseCollector.gauge_collector('interface_full_duplex', 'Full duplex data transmission', full_duplex_records, 'full_duplex', ['name'])
         yield monitor_rates_metrics
 
 

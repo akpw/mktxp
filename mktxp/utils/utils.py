@@ -12,6 +12,7 @@
 ## GNU General Public License for more details.
 
 import os, sys, shlex, tempfile, shutil, re
+from datetime import timedelta
 import subprocess, hashlib
 import keyring, getpass
 from collections import Iterable
@@ -67,9 +68,9 @@ def get_last_digit(str_to_search):
     else:
         return -1
 
-def encfs_version():
-    cmd = 'encfs --version'
-    return get_last_digit_from_shell_cmd(cmd)
+def parse_uptime(time):
+    time_dict = re.match(r'((?P<weeks>\d+)w)?((?P<days>\d+)d)?((?P<hours>\d+)h)?((?P<minutes>\d+)m)?((?P<seconds>\d+)s)?', time).groupdict()
+    return timedelta(**{key: int(value) for key, value in time_dict.items() if value}).total_seconds()
 
 
 class FSHelper:
