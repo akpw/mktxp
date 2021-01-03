@@ -13,6 +13,7 @@
 
 import ssl
 import socket
+from datetime import datetime
 from routeros_api import RouterOsApiPool
 
 
@@ -28,7 +29,7 @@ class RouterAPIConnection:
         self.router_entry  = router_entry
         
         ctx = None
-        if not self.router_entry.ssl_certificate:
+        if self.router_entry.use_ssl and not self.router_entry.ssl_certificate:
             ctx = ssl.create_default_context()
             ctx.set_ciphers('ADH:@SECLEVEL=0')       
 
@@ -38,7 +39,7 @@ class RouterAPIConnection:
                 password = self.router_entry.password,
                 port = self.router_entry.port,
                 plaintext_login = True,
-                use_ssl = True,
+                use_ssl = self.router_entry.use_ssl,
                 ssl_context = ctx)
         
         self.connection.socket_timeout = 2
@@ -58,12 +59,13 @@ class RouterAPIConnection:
     def connect(self):
         if self.is_connected():
             return
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         try:
-            print('Connecting to router {0}@{1}'.format(self.router_name, self.router_entry.hostname))
+            print(f'Connecting to router {self.router_name}@{self.router_entry.hostname}')
             self.api = self.connection.get_api()
-            print('Connection to router {0}@{1} has been established'.format(self.router_name, self.router_entry.hostname))
+            print(f'{current_time} Connection to router {self.router_name}@{self.router_entry.hostname} has been established')
         except (socket.error, socket.timeout, Exception) as ex:
-            print('Connection to router {0}@{1} has failed: {2}'.format(self.router_name, self.router_entry.hostname, ex))
+            print(f'{current_time} Connection to router {self.router_name}@{self.router_entry.hostname} has failed: {ex}')
             raise 
 
     def router_api(self):

@@ -13,8 +13,10 @@
 ## GNU General Public License for more details.
 
 import sys
+import subprocess
 import pkg_resources
 import mktxp.cli.checks.chk_pv
+from mktxp.utils.utils import run_cmd
 from mktxp.cli.options import MKTXPOptionsParser, MKTXPCommands
 from mktxp.cli.config.config import config_handler, ConfigEntry
 from mktxp.basep import MKTXPProcessor
@@ -36,7 +38,7 @@ class MKTXPDispatcher:
             self.print_info()
 
         elif args['sub_cmd'] == MKTXPCommands.SHOW:
-            self.show_entries()
+            self.show_entries(args)
 
         elif args['sub_cmd'] == MKTXPCommands.ADD:
             self.add_entry(args)
@@ -61,40 +63,46 @@ class MKTXPDispatcher:
         ''' Prints MKTXP version info
         '''
         version = pkg_resources.require("mktxp")[0].version
-        print('Mikrotik RouterOS Prometheus Exporter version {}'.format(version))
+        print(f'Mikrotik RouterOS Prometheus Exporter version {version}')
 
     def print_info(self):
         ''' Prints MKTXP general info
         '''
-        print('Mikrotik RouterOS Prometheus Exporter: {}'.format(self.option_parser.script_name))
-        print(self.option_parser.description)
+        print(f'{self.option_parser.script_name}: {self.option_parser.description}')
 
 
-    def show_entries(self):
-        for entryname in config_handler.registered_entries():
-            entry = config_handler.entry(entryname)
-
-            print('[{}]'.format(entryname))
-            for field in entry._fields:
-                print('    {}: {}'.format(field, getattr(entry, field)))
-            print()
+    def show_entries(self, args):
+        if args['configpath']:
+            print(f'MKTX config path: {config_handler.usr_conf_data_path}')
+        else:
+            for entryname in config_handler.registered_entries():
+                if args['entry_name'] and entryname != args['entry_name']:
+                    continue
+                entry = config_handler.entry(entryname)
+                print(f'[{entryname}]')
+                divider_fields = set(['username', 'use_ssl', 'dhcp'])
+                for field in entry._fields:
+                    if field == 'password':
+                        print(f'    {field}: {"*" * len(entry.password)}')
+                    else:
+                        if field in divider_fields:
+                            print()
+                        print(f'    {field}: {getattr(entry, field)}')
+                print('\n')
 
     def add_entry(self, args):
-        args.pop('sub_cmd', None)
-        entry_name = args['entry_name']
-        args.pop('entry_name', None)
+        entry_args = {key: value for key, value in args.items() if key not in set(['sub_cmd', 'entry_name'])}
+        config_handler.register_entry(entry_name = args['entry_name'], entry_args = entry_args)
 
-        entry_info = ConfigEntry.MKTXPEntry(**args)
-        config_handler.register_entry(entry_name = entry_name, entry_info = entry_info)
-
-
-    def edit_entry(self, args):
-        pass
+    def edit_entry(self, args):        
+        editor = args['editor']
+        if not editor:
+            print(f'No editor to edit the following file with: {config_handler.usr_conf_data_path}')
+        subprocess.check_call([editor, config_handler.usr_conf_data_path])
 
     def delete_entry(self, args):
         config_handler.unregister_entry(entry_name = args['entry_name'])
         
-
     def start_export(self, args):
         MKTXPProcessor.start()
 

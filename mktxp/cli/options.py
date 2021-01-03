@@ -14,7 +14,7 @@
 import os
 from argparse import ArgumentParser, HelpFormatter
 from mktxp.cli.config.config import config_handler, MKTXPConfigKeys
-from mktxp.utils.utils import FSHelper, UniquePartialMatchList
+from mktxp.utils.utils import FSHelper, UniquePartialMatchList, run_cmd
 
 
 class MKTXPCommands:
@@ -29,13 +29,13 @@ class MKTXPCommands:
     @classmethod
     def commands_meta(cls):
         return ''.join(('{',
-                        '{}, '.format(cls.INFO),
-                        '{}'.format(cls.VERSION),
-                        '{}'.format(cls.SHOW),
-                        '{}'.format(cls.ADD),
-                        '{}'.format(cls.EDIT),
-                        '{}'.format(cls.DELETE),
-                        '{}'.format(cls.START),                        
+                        f'{cls.INFO}, ',
+                        f'{cls.VERSION}, ',
+                        f'{cls.SHOW}, ',
+                        f'{cls.ADD}, ',
+                        f'{cls.EDIT}, ',
+                        f'{cls.DELETE}, ',
+                        f'{cls.START}',                        
                         '}'))
 
 class MKTXPOptionsParser:
@@ -45,7 +45,8 @@ class MKTXPOptionsParser:
         self._script_name = 'MKTXP'
         self._description = \
     '''
-    Prometheus Exporter for Mikrotik RouterOS Devices
+    Prometheus Exporter for Mikrotik RouterOS Devices.
+
     '''
 
     @property
@@ -94,9 +95,13 @@ class MKTXPOptionsParser:
                                         formatter_class=MKTXPHelpFormatter)
 
         # Show command
-        subparsers.add_parser(MKTXPCommands.SHOW,
-                                        description = 'Displays MKTXP router entries',
+        show_parser = subparsers.add_parser(MKTXPCommands.SHOW,
+                                        description = 'Displays MKTXP config router entries',
                                         formatter_class=MKTXPHelpFormatter)
+        self._add_entry_name(show_parser, registered_only = True, required = False, help = "Config entry name")
+        show_parser.add_argument('-cp', '--configpath', dest='configpath',
+                                        help = "Shows MKTXP config file path",
+                                        action = 'store_true')
 
         # Add command
         add_parser = subparsers.add_parser(MKTXPCommands.ADD,
@@ -159,15 +164,14 @@ class MKTXPOptionsParser:
                 help = "Export CAPsMAN metrics",
                 action = 'store_true')
 
-#'hostname', 'port', 'username', 'password', 'use_ssl', 'ssl_certificate', 'dhcp', 'dhcp_lease', 'pool', 'interface', 'monitor', 'route', 'wireless', and 'capsman'
-
         # Edit command
         edit_parser = subparsers.add_parser(MKTXPCommands.EDIT,
                                         description = 'Edits an existing MKTXP router entry',
                                         formatter_class=MKTXPHelpFormatter)
-        required_args_group = edit_parser.add_argument_group('Required Arguments')
-        self._add_entry_name(required_args_group, registered_only = True, help = "Name of entry to edit")  
-
+        edit_parser.add_argument('-ed', '--editor', dest='editor',
+                help = f"command line editor to use ({self._system_editor()} by default)",
+                default = self._system_editor(),
+                type = str)        
 
         # Delete command
         delete_parser = subparsers.add_parser(MKTXPCommands.DELETE,
@@ -181,7 +185,6 @@ class MKTXPOptionsParser:
                                         description = 'Starts exporting Miktorik Router Metrics',
                                         formatter_class=MKTXPHelpFormatter)
 
-
     # Options checking
     def _check_args(self, args, parser):
         ''' Validation of supplied CLI arguments
@@ -189,13 +192,13 @@ class MKTXPOptionsParser:
         # check if there is a cmd to execute
         self._check_cmd_args(args, parser)
 
-        if args['sub_cmd'] in (MKTXPCommands.EDIT, MKTXPCommands.DELETE):
+        if args['sub_cmd'] == MKTXPCommands.DELETE:
             # Registered Entry name could be a partial match, need to expand
             args['entry_name'] = UniquePartialMatchList(config_handler.registered_entries()).find(args['entry_name'])
 
-        if args['sub_cmd'] == MKTXPCommands.ADD:
+        elif args['sub_cmd'] == MKTXPCommands.ADD:
             if args['entry_name'] in (config_handler.registered_entries()):
-                print('"{0}": entry name already exists'.format(args['entry_name']))
+                print(f"{args['entry_name']}: entry name already exists")
                 parser.exit()
 
     def _check_cmd_args(self, args, parser):
@@ -227,7 +230,7 @@ class MKTXPOptionsParser:
         '''
         path_arg = FSHelper.full_path(path_arg)
         if not (os.path.exists(path_arg) and os.path.isdir(path_arg)):
-            parser.error('"{}" does not seem to be an existing directory path'.format(path_arg))
+            parser.error(f'"{path_arg}" does not seem to be an existing directory path')
         else:
             return path_arg
 
@@ -237,16 +240,16 @@ class MKTXPOptionsParser:
         '''
         path_arg = FSHelper.full_path(path_arg)
         if not (os.path.exists(path_arg) and os.path.isfile(path_arg)):
-            parser.error('"{}" does not seem to be an existing file path'.format(path_arg))
+            parser.error('"{path_arg}" does not seem to be an existing file path')
         else:
             return path_arg
 
     @staticmethod
-    def _add_entry_name(parser, registered_only = False, help = 'MKTXP Entry name'):
+    def _add_entry_name(parser, registered_only = False, required = True, help = 'MKTXP Entry name'):
         parser.add_argument('-en', '--entry-name', dest = 'entry_name',
             type = str,
             metavar = config_handler.registered_entries() if registered_only else None,
-            required = True,
+            required = required,
             choices = UniquePartialMatchList(config_handler.registered_entries())if registered_only else None,
             help = help)
 
@@ -254,6 +257,19 @@ class MKTXPOptionsParser:
     def _add_entry_groups(parser):
         required_args_group = parser.add_argument_group('Required Arguments')
         MKTXPOptionsParser._add_entry_name(required_args_group)
+
+    @staticmethod
+    def _system_editor():
+        editor = os.environ.get('EDITOR')
+        if editor:
+            return editor
+
+        commands = ['which nano', 'which vi', 'which vim']
+        for command in commands:
+            editor = run_cmd(command, quiet = True).rstrip()
+            if editor:
+                break                                  
+        return editor
 
 
 class MKTXPHelpFormatter(HelpFormatter):
@@ -283,5 +299,4 @@ class MKTXPHelpFormatter(HelpFormatter):
                     parts.append('%s' % option_string)
                 parts[-1] += ' %s'%args_string
             return ', '.join(parts)
-
 

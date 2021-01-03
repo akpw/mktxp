@@ -39,14 +39,14 @@ def temp_dir(quiet = True):
 class CmdProcessingError(Exception):
     pass
 
-def run_cmd(cmd, shell = False):
+def run_cmd(cmd, shell = False, quiet = False):
     ''' Runs shell commands in a separate process
     '''
     if not shell:
         cmd = shlex.split(cmd)
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell = shell)
     output = proc.communicate()[0].decode('utf-8')
-    if proc.returncode != 0:
+    if proc.returncode != 0 and not quiet:
         raise CmdProcessingError(output)
     return output
 

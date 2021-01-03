@@ -84,7 +84,7 @@ class OSConfig(metaclass = ABCMeta):
             return OSXConfig()
         else:
             if not quiet:
-                print('Non-supported platform: {}'.format(sys.platform))
+                print(f'Non-supported platform: {sys.platform}')
             return None
 
     @property
@@ -136,7 +136,7 @@ class MKTXPConfigHandler:
 
     # MKTXP entries
     ##############
-    def register_entry(self, entry_name, entry_info, quiet = False):
+    def register_entry(self, entry_name, entry_args, quiet = False):
         ''' Registers MKTXP conf entry
         '''
         if entry_name in self.registered_entries():
@@ -144,8 +144,7 @@ class MKTXPConfigHandler:
                 print('"{0}": entry name already registered'.format(entry_name))
             return False
         else:
-            self.config[entry_name] = dict(entry_info._asdict())
-            print(f'adding entry: {self.config[entry_name]}')
+            self.config[entry_name] = entry_args
             self.config.write()
             if not quiet:
                 print('Entry registered: {0}'.format(entry_name))
