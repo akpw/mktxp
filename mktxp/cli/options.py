@@ -192,9 +192,10 @@ class MKTXPOptionsParser:
         # check if there is a cmd to execute
         self._check_cmd_args(args, parser)
 
-        if args['sub_cmd'] == MKTXPCommands.DELETE:
+        if args['sub_cmd'] in (MKTXPCommands.DELETE, MKTXPCommands.SHOW):
             # Registered Entry name could be a partial match, need to expand
-            args['entry_name'] = UniquePartialMatchList(config_handler.registered_entries()).find(args['entry_name'])
+            if args['entry_name']:
+                args['entry_name'] = UniquePartialMatchList(config_handler.registered_entries()).find(args['entry_name'])
 
         elif args['sub_cmd'] == MKTXPCommands.ADD:
             if args['entry_name'] in (config_handler.registered_entries()):
