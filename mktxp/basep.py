@@ -15,6 +15,7 @@
 from http.server import HTTPServer
 from prometheus_client.core import REGISTRY
 from prometheus_client import MetricsHandler, start_http_server
+from mktxp.cli.config.config import config_handler
 from mktxp.collectors_handler import CollectorsHandler
 from mktxp.metrics_handler import RouterMetricsHandler
 
@@ -26,10 +27,12 @@ class MKTXPProcessor:
     def start():
         router_metrics_handler = RouterMetricsHandler()
         REGISTRY.register(CollectorsHandler(router_metrics_handler))
-        MKTXPProcessor.run()
+        port=config_handler.mktxp_port()
+        MKTXPProcessor.run(port=port)
 
     @staticmethod
-    def run(server_class=HTTPServer, handler_class=MetricsHandler, port=8000):
+    def run(server_class=HTTPServer, handler_class=MetricsHandler, port = None):
         server_address = ('', port)
         httpd = server_class(server_address, handler_class)
+        print(f'Running HTTP collector server on port {port}')
         httpd.serve_forever()

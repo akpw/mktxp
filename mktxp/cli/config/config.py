@@ -44,7 +44,6 @@ class MKTXPConfigKeys:
     FE_WIRELESS_KEY = 'wireless'
     FE_CAPSMAN_KEY = 'capsman'
 
-
     # UnRegistered entries placeholder
     NO_ENTRIES_REGISTERED = 'NoEntriesRegistered'
 
@@ -55,11 +54,15 @@ class MKTXPConfigKeys:
     # Default ports
     DEFAULT_API_PORT = 8728
     DEFAULT_API_SSL_PORT = 8729
+    DEFAULT_MKTXP_PORT = 49090 
 
     BOOLEAN_KEYS = [ENABLED_KEY, SSL_KEY, SSL_CERTIFICATE,  
                       FE_DHCP_KEY, FE_DHCP_LEASE_KEY, FE_DHCP_POOL_KEY, FE_INTERFACE_KEY, 
                       FE_MONITOR_KEY, FE_ROUTE_KEY, FE_WIRELESS_KEY, FE_CAPSMAN_KEY]
     STR_KEYS = [HOST_KEY, USER_KEY, PASSWD_KEY]
+
+    # MKTXP config entry nane
+    MKTXP_CONFIG_ENTRY_NAME = 'MKTXP'
 
 
 class ConfigEntry:
@@ -121,17 +124,24 @@ class MKTXPConfigHandler:
 
         # if needed, stage the user config data
         self.usr_conf_data_path = os.path.join(self.os_config.mktxp_user_dir_path, 'mktxp.conf')
-        if not os.path.exists(self.usr_conf_data_path):
-            # stage from the mktxp conf template
-            lookup_path = resource_filename(Requirement.parse("mktxp"), "mktxp/cli/config/mktxp.conf")
-            shutil.copy(lookup_path, self.usr_conf_data_path)
+        self.mktxp_conf_path = os.path.join(self.os_config.mktxp_user_dir_path, '.mktxp.conf')
 
-        self.read_from_disk()
+        self._create_os_path(self.usr_conf_data_path, 'mktxp/cli/config/mktxp.conf')
+        self._create_os_path(self.mktxp_conf_path, 'mktxp/cli/config/.mktxp.conf')
 
-    def read_from_disk(self):
+        self._read_from_disk()
+
+    def _read_from_disk(self):
         ''' (Force-)Read conf data from disk
         '''
         self.config = ConfigObj(self.usr_conf_data_path)
+        self.mktxp_config = ConfigObj(self.mktxp_conf_path)
+
+    def _create_os_path(self, os_path, resource_path):
+        if not os.path.exists(os_path):
+            # stage from the conf templates
+            lookup_path = resource_filename(Requirement.parse("mktxp"), resource_path)
+            shutil.copy(lookup_path, os_path)
 
 
     # MKTXP entries
@@ -179,6 +189,12 @@ class MKTXPConfigHandler:
         entry_reader = self._entry_reader(entry_name)
         return ConfigEntry.MKTXPEntry(**entry_reader)
 
+    def mktxp_port(self):
+        if self.mktxp_config.get(MKTXPConfigKeys.MKTXP_CONFIG_ENTRY_NAME) and \
+                self.mktxp_config[MKTXPConfigKeys.MKTXP_CONFIG_ENTRY_NAME].get(MKTXPConfigKeys.PORT_KEY):
+                return self.mktxp_config[MKTXPConfigKeys.MKTXP_CONFIG_ENTRY_NAME].as_int(MKTXPConfigKeys.PORT_KEY)        
+        return MKTXPConfigKeys.DEFAULT_MKTXP_PORT
+
     # Helpers
     def _entry_reader(self, entry_name):
         entry = {}
@@ -206,3 +222,15 @@ class MKTXPConfigHandler:
 # Simplest possible Singleton impl
 config_handler = MKTXPConfigHandler()
 
+
+'''        if not os.path.exists(self.usr_conf_data_path):
+            # stage from the mktxp conf template
+            lookup_path = resource_filename(Requirement.parse("mktxp"), "mktxp/cli/config/mktxp.conf")
+            shutil.copy(lookup_path, self.usr_conf_data_path)
+
+        if not os.path.exists(self.mktxp_conf_path):
+            # stage from the mktxp conf template
+            lookup_path = resource_filename(Requirement.parse("mktxp"), "mktxp/cli/config/.mktxp.conf")
+            shutil.copy(lookup_path, self.mktxp_conf_path)
+
+'''
