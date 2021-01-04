@@ -112,7 +112,8 @@ class LinuxConfig(OSConfig):
     '''
     @property
     def mktxp_user_dir_path(self):
-        return FSHelper.full_path('/etc/mktxp')
+        return FSHelper.full_path('~/mktxp')
+        #return FSHelper.full_path('/etc/mktxp')
 
 
 class MKTXPConfigHandler:

@@ -14,7 +14,6 @@
 import os, sys, shlex, tempfile, shutil, re
 from datetime import timedelta
 import subprocess, hashlib
-import keyring, getpass
 from collections import Iterable
 from contextlib import contextmanager
 
@@ -176,55 +175,6 @@ class UniqueDirNamesChecker:
                     unique_names[fname] = 0
                     yield fname
                     break
-
-
-class PasswordHandler:
-    ''' Password Helper
-    '''
-    @staticmethod
-    def get_pwd_input(confirm = False):
-        ''' Gets password from command line
-        '''
-        pwd = getpass.getpass('Enter password:')
-        if pwd and confirm:
-            pwd_confirm = getpass.getpass('Confirm password:')
-            if pwd != pwd_confirm:
-                print ("Passwords do not match")
-                return None
-        return pwd
-
-    @classmethod
-    def get_pwd(cls, pwd_entry_name = None, confirm = False):
-        ''' Gets password from an OS-specific keyring or command line
-        '''
-        pwd = None
-        new_pwd = False
-
-        if pwd_entry_name:
-            pwd = keyring.get_password(pwd_entry_name, getpass.getuser())
-
-        if not pwd:
-            pwd = cls.get_pwd_input(confirm = confirm)
-            new_pwd = True
-
-        return pwd, new_pwd
-
-    @staticmethod
-    def store_pwd(pwd, pwd_entry_name):
-        ''' Store password into an OS-specific keyring
-        '''
-        if not (pwd and pwd_entry_name):
-            return
-        keyring.set_password(pwd_entry_name, getpass.getuser(), pwd)
-
-    @staticmethod
-    def delete_pwd(pwd_entry_name):
-        ''' Deletes password from an OS-specific keyring
-        '''
-        if pwd_entry_name:
-            pwd = keyring.get_password(pwd_entry_name, getpass.getuser())
-            if pwd:
-                keyring.delete_password(pwd_entry_name, getpass.getuser())
 
 
 class UniquePartialMatchList(list):
