@@ -17,7 +17,7 @@
     * Windows: TBD / maybe
 
 #### Install:
-- from [PyPI](https://pypi.python.org/pypi/batchmp): `$ pip install mktxp`
+- from [PyPI](https://pypi.org/project/mktxp/): `$ pip install mktxp`
 - latest from source repository: `$ pip install git+https://github.com/akpw/mktxp`
 
 

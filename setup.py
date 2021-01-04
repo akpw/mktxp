@@ -20,7 +20,7 @@ with open(path.join(pkg_dir, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='mktxp',
-    version='0.14',
+    version='0.16',
 
     url='https://github.com/akpw/mktxp',
 
@@ -43,7 +43,7 @@ setup(
 
     keywords = 'Mikrotik RouterOS Prometheus Exporter',
 
-    install_requires = ['prometheus-client>=0.9.0', 'RouterOS-api>=0.17.0'],
+    install_requires = ['prometheus-client>=0.9.0', 'RouterOS-api>=0.17.0', 'configobj>=5.0.6'],
 
     test_suite = 'tests.mktxp_test_suite',
 
