@@ -45,7 +45,9 @@ class MKTXPOptionsParser:
         self._script_name = 'MKTXP'
         self._description = \
     '''
-    Prometheus Exporter for Mikrotik RouterOS Devices.
+    Prometheus Exporter for Mikrotik RouterOS. 
+    Supports gathering metrics across multiple RouterOS devices, all easily configurable via built-in CLI interface.
+    Comes along with a dedicated Grafana dashboard(https://grafana.com/grafana/dashboards/13679)
 
     '''
 

@@ -13,6 +13,7 @@
 
 
 from http.server import HTTPServer
+from datetime import datetime
 from prometheus_client.core import REGISTRY
 from prometheus_client import MetricsHandler, start_http_server
 from mktxp.cli.config.config import config_handler
@@ -34,5 +35,6 @@ class MKTXPProcessor:
     def run(server_class=HTTPServer, handler_class=MetricsHandler, port = None):
         server_address = ('', port)
         httpd = server_class(server_address, handler_class)
-        print(f'Running HTTP collector server on port {port}')
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        print(f'{current_time} Running metrics HTTP server on port {port}')
         httpd.serve_forever()

@@ -36,3 +36,9 @@ class WLANCollector(BaseCollector):
         if tx_ccq_records:
             overall_tx_ccq_metrics = BaseCollector.gauge_collector('wlan_overall_tx_ccq', ' Client Connection Quality for transmitting', tx_ccq_records, 'overall_tx_ccq', ['channel'])
             yield overall_tx_ccq_metrics
+
+
+        # the client info metrics
+        if router_metric.router_entry.wireless_clients:
+            # TBD
+            pass

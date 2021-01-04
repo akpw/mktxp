@@ -42,7 +42,9 @@ class MKTXPConfigKeys:
     FE_MONITOR_KEY = 'monitor'
     FE_ROUTE_KEY = 'route'
     FE_WIRELESS_KEY = 'wireless'
+    FE_WIRELESS_CLIENTS_KEY = 'wireless_clients'
     FE_CAPSMAN_KEY = 'capsman'
+    FE_CAPSMAN_CLIENTS_KEY = 'capsman_clients'
 
     # UnRegistered entries placeholder
     NO_ENTRIES_REGISTERED = 'NoEntriesRegistered'
@@ -58,7 +60,7 @@ class MKTXPConfigKeys:
 
     BOOLEAN_KEYS = [ENABLED_KEY, SSL_KEY, SSL_CERTIFICATE,  
                       FE_DHCP_KEY, FE_DHCP_LEASE_KEY, FE_DHCP_POOL_KEY, FE_INTERFACE_KEY, 
-                      FE_MONITOR_KEY, FE_ROUTE_KEY, FE_WIRELESS_KEY, FE_CAPSMAN_KEY]
+                      FE_MONITOR_KEY, FE_ROUTE_KEY, FE_WIRELESS_KEY, FE_WIRELESS_CLIENTS_KEY, FE_CAPSMAN_KEY, FE_CAPSMAN_CLIENTS_KEY]
     STR_KEYS = [HOST_KEY, USER_KEY, PASSWD_KEY]
 
     # MKTXP config entry nane
@@ -71,7 +73,8 @@ class ConfigEntry:
                          MKTXPConfigKeys.SSL_KEY, MKTXPConfigKeys.SSL_CERTIFICATE, 
                          
                          MKTXPConfigKeys.FE_DHCP_KEY, MKTXPConfigKeys.FE_DHCP_LEASE_KEY, MKTXPConfigKeys.FE_DHCP_POOL_KEY, MKTXPConfigKeys.FE_INTERFACE_KEY, 
-                         MKTXPConfigKeys.FE_MONITOR_KEY, MKTXPConfigKeys.FE_ROUTE_KEY, MKTXPConfigKeys.FE_WIRELESS_KEY, MKTXPConfigKeys.FE_CAPSMAN_KEY
+                         MKTXPConfigKeys.FE_MONITOR_KEY, MKTXPConfigKeys.FE_ROUTE_KEY, MKTXPConfigKeys.FE_WIRELESS_KEY, MKTXPConfigKeys.FE_WIRELESS_CLIENTS_KEY,
+                         MKTXPConfigKeys.FE_CAPSMAN_KEY, MKTXPConfigKeys.FE_CAPSMAN_CLIENTS_KEY
                          ])
 
 class OSConfig(metaclass = ABCMeta):
@@ -221,16 +224,3 @@ class MKTXPConfigHandler:
 
 # Simplest possible Singleton impl
 config_handler = MKTXPConfigHandler()
-
-
-'''        if not os.path.exists(self.usr_conf_data_path):
-            # stage from the mktxp conf template
-            lookup_path = resource_filename(Requirement.parse("mktxp"), "mktxp/cli/config/mktxp.conf")
-            shutil.copy(lookup_path, self.usr_conf_data_path)
-
-        if not os.path.exists(self.mktxp_conf_path):
-            # stage from the mktxp conf template
-            lookup_path = resource_filename(Requirement.parse("mktxp"), "mktxp/cli/config/.mktxp.conf")
-            shutil.copy(lookup_path, self.mktxp_conf_path)
-
-'''
