@@ -1,5 +1,4 @@
 
-
 ![License](https://img.shields.io/badge/License-GNU%20GPL-blue.svg)
 ![Language](https://img.shields.io/badge/python-v3.6-blue)
 ![License](https://img.shields.io/badge/mikrotik-routeros-orange)
@@ -25,7 +24,7 @@
 ## Description
 Prometheus Exporter for Mikrotik RouterOS. 
 MKTXP enables gathering metrics across multiple RouterOS devices, all easily configurable via built-in CLI interface.
-Comes along with a dedicated [Grafana dashboard](https://grafana.com/grafana/dashboards/13679)
+Comes with a dedicated [Grafana dashboard](https://grafana.com/grafana/dashboards/13679)
 
 
 ## Getting started

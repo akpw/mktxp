@@ -43,7 +43,7 @@ setup(
 
     keywords = 'Mikrotik RouterOS Prometheus Exporter',
 
-    install_requires = ['prometheus-client>=0.9.0', 'librouteros>=3.0.2'],
+    install_requires = ['prometheus-client>=0.9.0', 'RouterOS-api>=0.17.0'],
 
     test_suite = 'tests.mktxp_test_suite',
 
@@ -59,7 +59,6 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3 :: Only',
-        'Intended Audience :: End Users.Desktop',
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
         'Intended Audience :: Information Technology',
@@ -67,11 +66,7 @@ setup(
         'Operating System :: POSIX :: Linux',
         'Topic :: System',
         'Topic :: System :: Systems Administration',
-        'Topic :: Utilities',
-        'Topic :: Mikrotik',
-        'Topic :: Mikrotik :: RouterOS',
-        'Topic :: Prometheus',
-        'Topic :: Prometheus :: Exporter'
+        'Topic :: Utilities'
     ]
 )
 
