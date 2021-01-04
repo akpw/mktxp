@@ -128,10 +128,10 @@ class MKTXPConfigHandler:
 
         # if needed, stage the user config data
         self.usr_conf_data_path = os.path.join(self.os_config.mktxp_user_dir_path, 'mktxp.conf')
-        self.mktxp_conf_path = os.path.join(self.os_config.mktxp_user_dir_path, '.mktxp.conf')
+        self.mktxp_conf_path = os.path.join(self.os_config.mktxp_user_dir_path, '_mktxp.conf')
 
         self._create_os_path(self.usr_conf_data_path, 'mktxp/cli/config/mktxp.conf')
-        self._create_os_path(self.mktxp_conf_path, 'mktxp/cli/config/.mktxp.conf')
+        self._create_os_path(self.mktxp_conf_path, 'mktxp/cli/config/_mktxp.conf')
 
         self._read_from_disk()
 
