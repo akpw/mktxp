@@ -25,7 +25,7 @@ class PoolCollector(BaseCollector):
         # initialize all pool counts, including those currently not used
         pool_records = router_metric.pool_records(['name'])
         if not pool_records:
-            return
+            return range(0)
 
         pool_used_labels = ['pool']
         pool_used_counts = {pool_record['name']: 0 for pool_record in pool_records}

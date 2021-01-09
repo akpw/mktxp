@@ -24,7 +24,7 @@ class RouteCollector(BaseCollector):
         route_labels = ['connect', 'dynamic', 'static', 'bgp', 'ospf']
         route_records = router_metric.route_records(route_labels)
         if not route_records:
-            return
+            return range(0)
         
         # compile total routes records
         total_routes = len(route_records)

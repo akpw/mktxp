@@ -30,6 +30,11 @@ class CollectorsHandler:
 
     def collect(self):
         for router_metric in self.metrics_handler.router_metrics:
+            if not router_metric.api_connection.is_connected():
+                # let's pick up on things in the next run
+                router_metric.api_connection.connect()
+                continue
+
             yield from IdentityCollector.collect(router_metric)
             yield from SystemResourceCollector.collect(router_metric)
             yield from HealthCollector.collect(router_metric)
@@ -55,3 +60,4 @@ class CollectorsHandler:
             if router_metric.router_entry.capsman:
                 yield from CapsmanCollector.collect(router_metric)
 
+        return range(0)

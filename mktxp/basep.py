@@ -28,8 +28,7 @@ class MKTXPProcessor:
     def start():
         router_metrics_handler = RouterMetricsHandler()
         REGISTRY.register(CollectorsHandler(router_metrics_handler))
-        port=config_handler.mktxp_port()
-        MKTXPProcessor.run(port=port)
+        MKTXPProcessor.run(port=config_handler._entry().port)
 
     @staticmethod
     def run(server_class=HTTPServer, handler_class=MetricsHandler, port = None):

@@ -24,7 +24,7 @@ class DHCPCollector(BaseCollector):
         dhcp_lease_labels = ['active_address', 'mac_address', 'host_name', 'comment', 'server', 'expires_after']
         dhcp_lease_records = router_metric.dhcp_lease_records(dhcp_lease_labels)
         if not dhcp_lease_records:
-            return
+            return range(0)
 
         # calculate number of leases per DHCP server
         dhcp_lease_servers = {}

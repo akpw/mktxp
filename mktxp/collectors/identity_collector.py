@@ -23,7 +23,7 @@ class IdentityCollector(BaseCollector):
         identity_labels = ['name']
         identity_records = router_metric.identity_records(identity_labels)
         if not identity_records:
-            return
+            return range(0)
 
         identity_metrics = BaseCollector.info_collector('system_identity', 'System identity', identity_records, identity_labels)
         yield identity_metrics

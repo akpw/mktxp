@@ -72,8 +72,10 @@ class MKTXPDispatcher:
 
 
     def show_entries(self, args):
-        if args['configpath']:
-            print(f'MKTX config path: {config_handler.usr_conf_data_path}')
+        if args['config']:
+            print(f'MKTXP data config: {config_handler.usr_conf_data_path}')
+            print(f'MKTXP internal config: {config_handler.mktxp_conf_path}')
+
         else:
             for entryname in config_handler.registered_entries():
                 if args['entry_name'] and entryname != args['entry_name']:

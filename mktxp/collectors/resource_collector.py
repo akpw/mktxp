@@ -28,7 +28,7 @@ class SystemResourceCollector(BaseCollector):
                            'architecture_name', 'board_name']
         resource_records = router_metric.system_resource_records(resource_labels)
         if not resource_records:
-            return
+            return range(0)
 
         # translate records to appropriate values
         translated_fields = ['uptime']        

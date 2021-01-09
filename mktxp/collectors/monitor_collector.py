@@ -21,10 +21,10 @@ class MonitorCollector(BaseCollector):
     '''    
     @staticmethod
     def collect(router_metric):
-        monitor_labels = ['status', 'rate', 'full_duplex', 'name']
-        monitor_records = router_metric.interface_monitor_records(monitor_labels)
+        monitor_labels = ('status', 'rate', 'full_duplex', 'name')
+        monitor_records = router_metric.interface_monitor_records(monitor_labels, include_comments = True)
         if not monitor_records:
-            return
+            return range(0)
 
         # translate records to appropriate values
         for monitor_record in monitor_records:

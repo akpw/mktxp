@@ -76,13 +76,20 @@ class RouterMetric:
             print(f'Error getting interface traffic info from router{self.router_name}@{self.router_entry.hostname}: {exc}')
             return None
 
-    def interface_monitor_records(self, interface_monitor_labels = [], kind = 'ethernet'):
+    def interface_monitor_records(self, interface_monitor_labels = [], kind = 'ethernet', include_comments = False):
         try:
             interfaces = self.api_connection.router_api().get_resource(f'/interface/{kind}').get()
-            interface_names = [interface['name'] for interface in interfaces]
+            interface_names = [(interface['name'], interface.get('comment')) for interface in interfaces]
 
             interface_monitor = lambda int_num : self.api_connection.router_api().get_resource(f'/interface/{kind}').call('monitor', {'once':'', 'numbers':f'{int_num}'})
             interface_monitor_records = [interface_monitor(int_num)[0] for int_num in range(len(interface_names))]
+
+            if include_comments:
+                # combine interfaces names with comments
+                for interface_monitor_record in interface_monitor_records:
+                    for interface_name in interface_names:
+                        if interface_name[1] and interface_name[0] == interface_monitor_record['name']:
+                            interface_monitor_record['name'] = f"{interface_monitor_record['name']} ({interface_name[1]})"
             return self._trimmed_records(interface_monitor_records, interface_monitor_labels)
         except Exception as exc:
             print(f'Error getting {kind} interface monitor info from router{self.router_name}@{self.router_entry.hostname}: {exc}')
@@ -109,7 +116,7 @@ class RouterMetric:
             route_records = self.api_connection.router_api().get_resource('/ip/route').get(active='yes')
             return self._trimmed_records(route_records, route_labels)
         except Exception as exc:
-            print(f'Error getting pool active routes info from router{self.router_name}@{self.router_entry.hostname}: {exc}')
+            print(f'Error getting routes info from router{self.router_name}@{self.router_entry.hostname}: {exc}')
             return None
             
     def wireless_registration_table_records(self, registration_table_labels = []):

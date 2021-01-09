@@ -33,7 +33,8 @@ class MKTXPConfigKeys:
     PASSWD_KEY = 'password'
 
     SSL_KEY = 'use_ssl'
-    SSL_CERTIFICATE = 'ssl_certificate'
+    NO_SSL_CERTIFICATE = 'no_ssl_certificate'
+    SSL_CERTIFICATE_VERIFY = 'ssl_certificate_verify'
 
     FE_DHCP_KEY = 'dhcp'
     FE_DHCP_LEASE_KEY = 'dhcp_lease'    
@@ -46,6 +47,12 @@ class MKTXPConfigKeys:
     FE_CAPSMAN_KEY = 'capsman'
     FE_CAPSMAN_CLIENTS_KEY = 'capsman_clients'
 
+    MKTXP_SOCKET_TIMEOUT = 'socket_timeout'    
+    MKTXP_SOCKET_TIMEOUT = 'socket_timeout'   
+    MKTXP_INITIAL_DELAY = 'initial_delay_on_failure'
+    MKTXP_MAX_DELAY = 'max_delay_on_failure'
+    MKTXP_INC_DIV = 'delay_inc_div'
+
     # UnRegistered entries placeholder
     NO_ENTRIES_REGISTERED = 'NoEntriesRegistered'
 
@@ -53,15 +60,21 @@ class MKTXPConfigKeys:
     ROUTERBOARD_NAME = 'routerboard_name'
     ROUTERBOARD_ADDRESS = 'routerboard_address'
 
-    # Default ports
+    # Default values
     DEFAULT_API_PORT = 8728
     DEFAULT_API_SSL_PORT = 8729
-    DEFAULT_MKTXP_PORT = 49090 
+    DEFAULT_MKTXP_PORT = 49090
+    DEFAULT_MKTXP_SOCKET_TIMEOUT = 2
+    DEFAULT_MKTXP_INITIAL_DELAY = 120
+    DEFAULT_MKTXP_MAX_DELAY = 900
+    DEFAULT_MKTXP_INC_DIV = 5
 
-    BOOLEAN_KEYS = [ENABLED_KEY, SSL_KEY, SSL_CERTIFICATE,  
+    BOOLEAN_KEYS = (ENABLED_KEY, SSL_KEY, NO_SSL_CERTIFICATE, SSL_CERTIFICATE_VERIFY, 
                       FE_DHCP_KEY, FE_DHCP_LEASE_KEY, FE_DHCP_POOL_KEY, FE_INTERFACE_KEY, 
-                      FE_MONITOR_KEY, FE_ROUTE_KEY, FE_WIRELESS_KEY, FE_WIRELESS_CLIENTS_KEY, FE_CAPSMAN_KEY, FE_CAPSMAN_CLIENTS_KEY]
+                      FE_MONITOR_KEY, FE_ROUTE_KEY, FE_WIRELESS_KEY, FE_WIRELESS_CLIENTS_KEY, FE_CAPSMAN_KEY, FE_CAPSMAN_CLIENTS_KEY)
+    
     STR_KEYS = [HOST_KEY, USER_KEY, PASSWD_KEY]
+    INT_KEYS = [PORT_KEY, MKTXP_SOCKET_TIMEOUT, MKTXP_INITIAL_DELAY, MKTXP_MAX_DELAY, MKTXP_INC_DIV]
 
     # MKTXP config entry nane
     MKTXP_CONFIG_ENTRY_NAME = 'MKTXP'
@@ -70,12 +83,15 @@ class MKTXPConfigKeys:
 class ConfigEntry:
     MKTXPEntry = namedtuple('MKTXPEntry', [MKTXPConfigKeys.ENABLED_KEY, MKTXPConfigKeys.HOST_KEY, MKTXPConfigKeys.PORT_KEY, 
                          MKTXPConfigKeys.USER_KEY, MKTXPConfigKeys.PASSWD_KEY, 
-                         MKTXPConfigKeys.SSL_KEY, MKTXPConfigKeys.SSL_CERTIFICATE, 
+                         MKTXPConfigKeys.SSL_KEY, MKTXPConfigKeys.NO_SSL_CERTIFICATE, MKTXPConfigKeys.SSL_CERTIFICATE_VERIFY,
                          
                          MKTXPConfigKeys.FE_DHCP_KEY, MKTXPConfigKeys.FE_DHCP_LEASE_KEY, MKTXPConfigKeys.FE_DHCP_POOL_KEY, MKTXPConfigKeys.FE_INTERFACE_KEY, 
                          MKTXPConfigKeys.FE_MONITOR_KEY, MKTXPConfigKeys.FE_ROUTE_KEY, MKTXPConfigKeys.FE_WIRELESS_KEY, MKTXPConfigKeys.FE_WIRELESS_CLIENTS_KEY,
                          MKTXPConfigKeys.FE_CAPSMAN_KEY, MKTXPConfigKeys.FE_CAPSMAN_CLIENTS_KEY
                          ])
+    _MKTXPEntry = namedtuple('_MKTXPEntry', [MKTXPConfigKeys.PORT_KEY, MKTXPConfigKeys.MKTXP_SOCKET_TIMEOUT, 
+                                            MKTXPConfigKeys.MKTXP_INITIAL_DELAY, MKTXPConfigKeys.MKTXP_MAX_DELAY, MKTXPConfigKeys.MKTXP_INC_DIV])
+
 
 class OSConfig(metaclass = ABCMeta):
     ''' OS-related config
@@ -139,7 +155,7 @@ class MKTXPConfigHandler:
         ''' (Force-)Read conf data from disk
         '''
         self.config = ConfigObj(self.usr_conf_data_path)
-        self.mktxp_config = ConfigObj(self.mktxp_conf_path)
+        self._config = ConfigObj(self.mktxp_conf_path)
 
     def _create_os_path(self, os_path, resource_path):
         if not os.path.exists(os_path):
@@ -190,37 +206,55 @@ class MKTXPConfigHandler:
     def entry(self, entry_name):
         ''' Given an entry name, reads and returns the entry info
         '''
-        entry_reader = self._entry_reader(entry_name)
+        entry_reader = self.entry_reader(entry_name)
         return ConfigEntry.MKTXPEntry(**entry_reader)
 
-    def mktxp_port(self):
-        if self.mktxp_config.get(MKTXPConfigKeys.MKTXP_CONFIG_ENTRY_NAME) and \
-                self.mktxp_config[MKTXPConfigKeys.MKTXP_CONFIG_ENTRY_NAME].get(MKTXPConfigKeys.PORT_KEY):
-                return self.mktxp_config[MKTXPConfigKeys.MKTXP_CONFIG_ENTRY_NAME].as_int(MKTXPConfigKeys.PORT_KEY)        
-        return MKTXPConfigKeys.DEFAULT_MKTXP_PORT
+    def _entry(self):
+        ''' MKTXP internal config entry
+        '''
+        _entry_reader = self._entry_reader()
+        return ConfigEntry._MKTXPEntry(**_entry_reader)
+
 
     # Helpers
-    def _entry_reader(self, entry_name):
-        entry = {}
+    def entry_reader(self, entry_name):
+        entry_reader = {}
         for key in MKTXPConfigKeys.BOOLEAN_KEYS:
             if self.config[entry_name].get(key):
-                entry[key] = self.config[entry_name].as_bool(key)
+                entry_reader[key] = self.config[entry_name].as_bool(key)
             else:
-                entry[key] = False
+                entry_reader[key] = False
 
         for key in MKTXPConfigKeys.STR_KEYS:
-            entry[key] = self.config[entry_name][key]
+            entry_reader[key] = self.config[entry_name][key]
 
         # port
         if self.config[entry_name].get(MKTXPConfigKeys.PORT_KEY):
-            entry[MKTXPConfigKeys.PORT_KEY] = self.config[entry_name].as_int(MKTXPConfigKeys.PORT_KEY)
+            entry_reader[MKTXPConfigKeys.PORT_KEY] = self.config[entry_name].as_int(MKTXPConfigKeys.PORT_KEY)
         else:
-            if entry[MKTXPConfigKeys.SSL_KEY]:
-                entry[MKTXPConfigKeys.PORT_KEY] = MKTXPConfigKeys.DEFAULT_API_SSL_PORT
-            else:
-                entry[MKTXPConfigKeys.PORT_KEY] = MKTXPConfigKeys.DEFAULT_API_PORT
+            entry_reader[MKTXPConfigKeys.PORT_KEY] = self._default_value_for_key(MKTXPConfigKeys.SSL_KEY, entry_reader[MKTXPConfigKeys.SSL_KEY])
 
-        return entry
+        return entry_reader
+
+    def _entry_reader(self):
+        _entry_reader = {}
+        entry_name = MKTXPConfigKeys.MKTXP_CONFIG_ENTRY_NAME
+        for key in MKTXPConfigKeys.INT_KEYS:
+            if self._config[entry_name].get(key):
+                _entry_reader[key] = self._config[entry_name].as_int(key)
+            else:
+                _entry_reader[key] = self._default_value_for_key(key)
+        return _entry_reader
+
+    def _default_value_for_key(self, key, value = None):
+        return {
+                MKTXPConfigKeys.SSL_KEY: lambda value: MKTXPConfigKeys.DEFAULT_API_SSL_PORT if value else MKTXPConfigKeys.DEFAULT_API_PORT,
+                MKTXPConfigKeys.PORT_KEY: lambda value: MKTXPConfigKeys.DEFAULT_MKTXP_PORT,
+                MKTXPConfigKeys.MKTXP_SOCKET_TIMEOUT: lambda value: MKTXPConfigKeys.DEFAULT_MKTXP_SOCKET_TIMEOUT,
+                MKTXPConfigKeys.MKTXP_INITIAL_DELAY: lambda value: MKTXPConfigKeys.DEFAULT_MKTXP_INITIAL_DELAY,
+                MKTXPConfigKeys.MKTXP_MAX_DELAY: lambda value: MKTXPConfigKeys.DEFAULT_MKTXP_MAX_DELAY,
+                MKTXPConfigKeys.MKTXP_INC_DIV: lambda value: MKTXPConfigKeys.DEFAULT_MKTXP_INC_DIV
+                }[key](value)
 
 
 # Simplest possible Singleton impl

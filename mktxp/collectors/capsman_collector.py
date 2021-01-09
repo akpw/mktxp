@@ -25,7 +25,7 @@ class CapsmanCollector(BaseCollector):
         remote_caps_labels = ['identity', 'version', 'base_mac', 'board', 'base_mac']
         remote_caps_records = router_metric.capsman_remote_caps_records(remote_caps_labels)
         if not remote_caps_records:
-            return
+            return range(0)
 
         remote_caps_metrics = BaseCollector.info_collector('capsman_remote_caps', 'CAPsMAN remote caps', remote_caps_records, remote_caps_labels)
         yield remote_caps_metrics
@@ -33,7 +33,7 @@ class CapsmanCollector(BaseCollector):
         registration_labels = ['interface', 'ssid', 'mac_address', 'tx_rate', 'rx_rate', 'rx_signal', 'uptime', 'bytes']
         registration_records = router_metric.capsman_registration_table_records(registration_labels)
         if not registration_records:
-            return
+            return range(0)
 
         # calculate number of registrations per interface
         registration_per_interface = {}
@@ -53,40 +53,28 @@ class CapsmanCollector(BaseCollector):
             dhcp_lease_labels = ['mac_address', 'host_name', 'comment']
             dhcp_lease_records = router_metric.dhcp_lease_records(dhcp_lease_labels)
             for registration_record in registration_records:
-                dhcp_lease_record = next((dhcp_lease_record for dhcp_lease_record in dhcp_lease_records if dhcp_lease_record['mac_address']==registration_record['mac_address']))
-                if dhcp_lease_record:
-                    registration_record['name'] = dhcp_lease_record.get('comment', dhcp_lease_record.get('host_name', dhcp_lease_record.get('mac_address')))
-                else:
-                    registration_record['name'] = registration_record['mac_address']            
+                try:
+                    dhcp_lease_record = next((dhcp_lease_record for dhcp_lease_record in dhcp_lease_records if dhcp_lease_record['mac_address']==registration_record['mac_address']))
+                    registration_record['name'] = dhcp_lease_record.get('comment', dhcp_lease_record.get('host_name', dhcp_lease_record.get('mac_address')))                   
+                except StopIteration:
+                    registration_record['name'] = f"{registration_record['mac_address']}: No DHCP registration"             
                 
                 # split out tx/rx bytes
                 registration_record['tx_bytes'] = registration_record['bytes'].split(',')[0]
                 registration_record['rx_bytes'] = registration_record['bytes'].split(',')[1]
                 del registration_record['bytes']
 
-            tx_byte_metrics = BaseCollector.counter_collector('capsman_traffic_tx_bytes', 'Number of sent packet bytes', registration_records, 'tx_bytes', ['name'])
+            tx_byte_metrics = BaseCollector.counter_collector('capsman_clients_tx_bytes', 'Number of sent packet bytes', registration_records, 'tx_bytes', ['name'])
             yield tx_byte_metrics
 
-            rx_byte_metrics = BaseCollector.counter_collector('capsman_traffic_rx_bytes', 'Number of received packet bytes', registration_records, 'rx_bytes', ['name'])
+            rx_byte_metrics = BaseCollector.counter_collector('capsman_clients_rx_bytes', 'Number of received packet bytes', registration_records, 'rx_bytes', ['name'])
             yield rx_byte_metrics
 
-            signal_strength_metrics = BaseCollector.gauge_collector('capsman_registered_signal_strength', 'Registered devices signal strength', registration_records, 'rx_signal', ['name'])
+            signal_strength_metrics = BaseCollector.gauge_collector('capsman_clients_signal_strength', 'Client devices signal strength', registration_records, 'rx_signal', ['name'])
             yield signal_strength_metrics
 
-            registration_metrics = BaseCollector.info_collector('capsman_registered_devices', 'Registered devices info', 
+            registration_metrics = BaseCollector.info_collector('capsman_clients_devices', 'Registered client devices info', 
                                     registration_records, ['name', 'rx_signal', 'ssid', 'tx_rate', 'rx_rate', 'interface', 'mac_address', 'uptime'])
             yield registration_metrics
-
-
-
-
-
-
-
-
-
-
-
-
 
 

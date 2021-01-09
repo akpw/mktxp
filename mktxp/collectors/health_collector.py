@@ -23,7 +23,7 @@ class HealthCollector(BaseCollector):
         health_labels = ['voltage', 'temperature']
         health_records = router_metric.health_records(health_labels)
         if not health_records:
-            return
+            return range(0)
 
         voltage_metrics = BaseCollector.gauge_collector('system_routerboard_voltage', 'Supplied routerboard voltage', health_records, 'voltage')
         yield voltage_metrics

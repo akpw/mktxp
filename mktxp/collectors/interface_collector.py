@@ -23,7 +23,11 @@ class InterfaceCollector(BaseCollector):
         interface_traffic_labels = ['name', 'comment', 'rx_byte', 'tx_byte', 'rx_packet', 'tx_packet', 'rx_error', 'tx_error', 'rx_drop', 'tx_drop']
         interface_traffic_records = router_metric.interface_traffic_records(interface_traffic_labels)
         if not interface_traffic_records:
-            return
+            return range(0)
+
+        for interface_traffic_record in interface_traffic_records:
+            if interface_traffic_record.get('comment'):
+                interface_traffic_record['name'] = f"{interface_traffic_record['name']} ({interface_traffic_record['comment']})"
 
         rx_byte_metric = BaseCollector.counter_collector('interface_rx_byte', 'Number of received bytes', interface_traffic_records, 'rx_byte', ['name'])
         yield rx_byte_metric

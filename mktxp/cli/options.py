@@ -101,8 +101,8 @@ class MKTXPOptionsParser:
                                         description = 'Displays MKTXP config router entries',
                                         formatter_class=MKTXPHelpFormatter)
         self._add_entry_name(show_parser, registered_only = True, required = False, help = "Config entry name")
-        show_parser.add_argument('-cp', '--configpath', dest='configpath',
-                                        help = "Shows MKTXP config file path",
+        show_parser.add_argument('-cfg', '--config', dest='config',
+                                        help = "Shows MKTXP config files paths",
                                         action = 'store_true')
 
         # Add command
@@ -137,7 +137,7 @@ class MKTXPOptionsParser:
         optional_args_group.add_argument('-ssl', '--use-ssl', dest='use_ssl',
                 help = "Connect via RouterOS api-ssl service",
                 action = 'store_true')
-        optional_args_group.add_argument('-ssl-cert', '--use-ssl-certificate', dest='ssl_certificate',
+        optional_args_group.add_argument('-no-ssl-cert', '--no-ssl-certificate', dest='no_ssl_certificate',
                 help = "Connect with configured RouterOS SSL ceritficate",
                 action = 'store_true')
 
