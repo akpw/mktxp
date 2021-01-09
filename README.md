@@ -41,10 +41,10 @@ Commands:
 ### mktxp
       . action commands:
         .. start    Starts collecting metrics for all enabled RouterOS configuration entries
-        .. add      Adds MKTXP RouterOS configuration entry
-        .. show   	Shows MKTXP configuration entries
-        .. delete   Deletes a MKTXP RouterOS configuration entry
-        .. edit     Open MKTXP configuration file in your editor of choice
+        .. edit     Open MKTXP configuration file in your editor of choice        
+        .. add      Adds MKTXP RouterOS configuration entry from the command line
+        .. show   	Shows MKTXP configuration entries on the command line
+        .. delete   Deletes a MKTXP RouterOS configuration entry from the command line
         .. info     Shows base MKTXP info
         .. version  Shows MKTXP version
 
