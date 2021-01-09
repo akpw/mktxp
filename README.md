@@ -5,7 +5,6 @@
 ![License](https://img.shields.io/badge/prometheus-exporter-blueviolet)
 
 ![dashboard](http://www.akpdev.com/images/mktxp_b.png)
-![capsman](http://www.akpdev.com/images/capsman.png)
 
 
 #### Requirements:
