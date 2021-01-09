@@ -8,6 +8,11 @@
 <img src="http://www.akpdev.com/images/mktxp_b_t.png" width="530" height="620">
 
 
+## Description
+Prometheus Exporter for Mikrotik RouterOS. 
+MKTXP enables gathering metrics across multiple RouterOS devices, all easily configurable via built-in CLI interface.
+Comes with a dedicated [Grafana dashboard](https://grafana.com/grafana/dashboards/13679)
+
 
 #### Requirements:
 - [Python 3.6.x](https://www.python.org/downloads/release/python-360/) or later
@@ -21,12 +26,6 @@
 #### Install:
 - from [PyPI](https://pypi.org/project/mktxp/): `$ pip install mktxp`
 - latest from source repository: `$ pip install git+https://github.com/akpw/mktxp`
-
-
-## Description
-Prometheus Exporter for Mikrotik RouterOS. 
-MKTXP enables gathering metrics across multiple RouterOS devices, all easily configurable via built-in CLI interface.
-Comes with a dedicated [Grafana dashboard](https://grafana.com/grafana/dashboards/13679)
 
 
 ## Getting started
