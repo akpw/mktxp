@@ -5,7 +5,7 @@
 ![License](https://img.shields.io/badge/prometheus-exporter-blueviolet)
 
 
-<img src="http://www.akpdev.com/images/mktxp_b_t.png" width="500" height="620">
+<img src="http://www.akpdev.com/images/mktxp_b_t.png" width="580" height="620">
 
 
 
