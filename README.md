@@ -4,8 +4,8 @@
 ![License](https://img.shields.io/badge/mikrotik-routeros-orange)
 ![License](https://img.shields.io/badge/prometheus-exporter-blueviolet)
 
-![dashboard](http://www.akpdev.com/images/mktxp_b_t.png)
-![capsman](http://www.akpdev.com/images/capsman.png)
+![dashboard](http://www.akpdev.com/images/mktxp_b_t.png| width=100 height=132)
+![dashboard](http://www.akpdev.com/images/mktxp_b_t.png=100x132) 
 
 
 
