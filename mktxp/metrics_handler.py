@@ -26,4 +26,15 @@ class RouterMetricsHandler:
             if entry.enabled:
                 self.router_metrics.append(RouterMetric(router_name))
 
-
+    @staticmethod
+    def router_metric(entry_name, enabled_only = False):
+        router_metric = None
+        for router_name in config_handler.registered_entries():
+            if router_name == entry_name:
+                if enabled_only:
+                    entry = config_handler.entry(router_name)
+                    if not entry.enabled:
+                        break
+                router_metric = RouterMetric(router_name)
+                break
+        return router_metric

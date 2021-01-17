@@ -39,17 +39,18 @@ Commands:
 ## Full description of CLI Commands
 ### mktxp
       . action commands:
-        .. start    Starts collecting metrics for all enabled RouterOS configuration entries
+        .. export   Starts collecting metrics for all enabled RouterOS configuration entries
+        .. print    Displays seleted metrics on the command line
+        .. info     Shows base MKTXP info
         .. edit     Open MKTXP configuration file in your editor of choice        
         .. add      Adds MKTXP RouterOS configuration entry from the command line
         .. show   	Shows MKTXP configuration entries on the command line
         .. delete   Deletes a MKTXP RouterOS configuration entry from the command line
-        .. info     Shows base MKTXP info
-        .. version  Shows MKTXP version
 
 
 ## Installing Development version
 - Clone the repo, then run: `$ python setup.py develop`
+
 
 **Running Tests**
 - TDB

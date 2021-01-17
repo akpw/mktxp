@@ -21,15 +21,20 @@ from mktxp.collectors.resource_collector import SystemResourceCollector
 from mktxp.collectors.route_collector import RouteCollector
 from mktxp.collectors.wlan_collector import WLANCollector
 from mktxp.collectors.capsman_collector import CapsmanCollector
+from mktxp.collectors.mktxp_collector import MKTXPCollector
 
 class CollectorsHandler:
     ''' MKTXP Collectors Handler
     '''
     def __init__(self, metrics_handler):
         self.metrics_handler = metrics_handler
+        self.mktxpCollector = MKTXPCollector()
 
     def collect(self):
-        for router_metric in self.metrics_handler.router_metrics:
+        # process mktxp internal metrics
+        self.mktxpCollector.collect()
+
+        for router_metric in self.metrics_handler.router_metrics:           
             if not router_metric.api_connection.is_connected():
                 # let's pick up on things in the next run
                 router_metric.api_connection.connect()

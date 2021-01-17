@@ -11,10 +11,8 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
-import re
 from mktxp.collectors.base_collector import BaseCollector
-from mktxp.router_metric import RouterMetric
-
+from mktxp.cli.output.base_out import BaseOutputProcessor
 
 class MonitorCollector(BaseCollector):
     ''' Ethernet Interface Monitor Metrics collector
@@ -71,7 +69,9 @@ class MonitorCollector(BaseCollector):
         if rate_value:
             return rate_value
         
-        # ...or just calculate if it's not
-        rate = lambda rate_option: 1000 if rate_option.find('Mbps') < 0 else 1
-        return(int(float(re.sub('[^.\-\d]', '', rate_option)) * rate(rate_option)))
+        # ...or just calculate in case it's not
+        return BaseOutputProcessor.parse_interface_rate(rate_option)
+
+
+
 

@@ -12,8 +12,6 @@
 ## GNU General Public License for more details.
 
 from mktxp.collectors.base_collector import BaseCollector
-from mktxp.router_metric import RouterMetric
-
 
 class HealthCollector(BaseCollector):
     ''' System Health Metrics collector

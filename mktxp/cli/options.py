@@ -12,6 +12,7 @@
 ## GNU General Public License for more details.
 
 import os
+import pkg_resources
 from argparse import ArgumentParser, HelpFormatter
 from mktxp.cli.config.config import config_handler, MKTXPConfigKeys
 from mktxp.utils.utils import FSHelper, UniquePartialMatchList, run_cmd
@@ -19,37 +20,38 @@ from mktxp.utils.utils import FSHelper, UniquePartialMatchList, run_cmd
 
 class MKTXPCommands:
     INFO = 'info'
-    VERSION = 'version'
+    EDIT = 'edit'
+    EXPORT = 'export'
+    PRINT = 'print'
     SHOW = 'show'
     ADD = 'add'
-    EDIT = 'edit'
     DELETE = 'delete' 
-    START = 'start'
 
     @classmethod
     def commands_meta(cls):
         return ''.join(('{',
                         f'{cls.INFO}, ',
-                        f'{cls.VERSION}, ',
+                        f'{cls.EDIT}, ',
+                        f'{cls.EXPORT}, ',
+                        f'{cls.PRINT}, ',
                         f'{cls.SHOW}, ',
                         f'{cls.ADD}, ',
-                        f'{cls.EDIT}, ',
-                        f'{cls.DELETE}, ',
-                        f'{cls.START}',                        
+                        f'{cls.DELETE}',
                         '}'))
 
 class MKTXPOptionsParser:
     ''' Base MKTXP Options Parser
     '''
     def __init__(self):
-        self._script_name = 'MKTXP'
-        self._description = \
-    '''
-    Prometheus Exporter for Mikrotik RouterOS. 
-    Supports gathering metrics across multiple RouterOS devices, all easily configurable via built-in CLI interface.
-    Comes along with a dedicated Grafana dashboard(https://grafana.com/grafana/dashboards/13679)
-
-    '''
+        self._script_name = f'MKTXP'
+        version = pkg_resources.require("mktxp")[0].version
+        self._description =  \
+f'''
+Prometheus Exporter for Mikrotik RouterOS, version {version}
+Supports gathering metrics across multiple RouterOS devices, all easily configurable via built-in CLI interface.
+Comes along with a dedicated Grafana dashboard (https://grafana.com/grafana/dashboards/13679)
+Selected metrics info can be printed on the command line. For more information, run: 'mktxp -h'
+'''
 
     @property
     def description(self):
@@ -64,7 +66,7 @@ class MKTXPOptionsParser:
         ''' General Options parsing workflow
         '''
         parser = ArgumentParser(prog = self._script_name,
-                                description = self._description,
+                                description = 'Prometheus Exporter for Mikrotik RouterOS',
                                 formatter_class=MKTXPHelpFormatter)
 
         self.parse_global_options(parser)
@@ -91,11 +93,6 @@ class MKTXPOptionsParser:
         subparsers.add_parser(MKTXPCommands.INFO,
                                         description = 'Displays MKTXP info',
                                         formatter_class=MKTXPHelpFormatter)
-        # Version command
-        subparsers.add_parser(MKTXPCommands.VERSION,
-                                        description = 'Displays MKTXP version info',
-                                        formatter_class=MKTXPHelpFormatter)
-
         # Show command
         show_parser = subparsers.add_parser(MKTXPCommands.SHOW,
                                         description = 'Displays MKTXP config router entries',
@@ -170,10 +167,14 @@ class MKTXPOptionsParser:
         edit_parser = subparsers.add_parser(MKTXPCommands.EDIT,
                                         description = 'Edits an existing MKTXP router entry',
                                         formatter_class=MKTXPHelpFormatter)
-        edit_parser.add_argument('-ed', '--editor', dest='editor',
-                help = f"command line editor to use ({self._system_editor()} by default)",
+        optional_args_group = edit_parser.add_argument_group('Optional Arguments')
+        optional_args_group.add_argument('-ed', '--editor', dest='editor',
+                help = f"Command line editor to use ({self._system_editor()} by default)",
                 default = self._system_editor(),
                 type = str)        
+        optional_args_group.add_argument('-i', '--internal', dest='internal',
+                help = f"Edit MKTXP internal configuration (advanced)",
+                action = 'store_true')        
 
         # Delete command
         delete_parser = subparsers.add_parser(MKTXPCommands.DELETE,
@@ -183,9 +184,26 @@ class MKTXPOptionsParser:
         self._add_entry_name(required_args_group, registered_only = True, help = "Name of entry to delete")
 
         # Start command
-        start_parser = subparsers.add_parser(MKTXPCommands.START,
-                                        description = 'Starts exporting Miktorik Router Metrics',
+        start_parser = subparsers.add_parser(MKTXPCommands.EXPORT,
+                                        description = 'Starts exporting Miktorik Router Metrics to Prometheus',
                                         formatter_class=MKTXPHelpFormatter)
+
+        # Print command
+        print_parser = subparsers.add_parser(MKTXPCommands.PRINT,
+                                        description = 'Displays seleted metrics on the command line',
+                                        formatter_class=MKTXPHelpFormatter)
+        required_args_group = print_parser.add_argument_group('Required Arguments')
+        self._add_entry_name(required_args_group, registered_only = True, help = "Name of config RouterOS entry")
+
+        optional_args_group = print_parser.add_argument_group('Optional Arguments')
+        optional_args_group.add_argument('-cc', '--capsman_clients', dest='capsman_clients',
+                help = "CAPsMAN clients metrics",
+                action = 'store_true')
+
+        optional_args_group.add_argument('-wc', '--wifi_clients', dest='wifi_clients',
+                help = "WiFi clients metrics",
+                action = 'store_true')
+
 
     # Options checking
     def _check_args(self, args, parser):
@@ -194,14 +212,19 @@ class MKTXPOptionsParser:
         # check if there is a cmd to execute
         self._check_cmd_args(args, parser)
 
-        if args['sub_cmd'] in (MKTXPCommands.DELETE, MKTXPCommands.SHOW):
+        if args['sub_cmd'] in (MKTXPCommands.DELETE, MKTXPCommands.SHOW, MKTXPCommands.PRINT):
             # Registered Entry name could be a partial match, need to expand
             if args['entry_name']:
                 args['entry_name'] = UniquePartialMatchList(config_handler.registered_entries()).find(args['entry_name'])
 
-        elif args['sub_cmd'] == MKTXPCommands.ADD:
+        if args['sub_cmd'] == MKTXPCommands.ADD:
             if args['entry_name'] in (config_handler.registered_entries()):
                 print(f"{args['entry_name']}: entry name already exists")
+                parser.exit()
+
+        elif args['sub_cmd'] == MKTXPCommands.PRINT:
+            if not config_handler.entry(args['entry_name']).enabled:
+                print(f"Can not print metrics for disabled RouterOS entry: {args['entry_name']}\nRun 'mktxp edit' to review and enable it in the configuration file first")
                 parser.exit()
 
     def _check_cmd_args(self, args, parser):
@@ -223,7 +246,7 @@ class MKTXPOptionsParser:
     def _default_command(self):
         ''' If no command was specified, print INFO by default
         '''
-        return MKTXPCommands.START
+        return MKTXPCommands.INFO
 
 
     # Internal helpers

@@ -11,11 +11,9 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
-from mktxp.utils.utils import parse_uptime
+from mktxp.cli.output.base_out import BaseOutputProcessor
 from mktxp.cli.config.config import MKTXPConfigKeys
 from mktxp.collectors.base_collector import BaseCollector
-from mktxp.router_metric import RouterMetric
-
 
 class CapsmanCollector(BaseCollector):
     ''' CAPsMAN Metrics collector
@@ -50,31 +48,22 @@ class CapsmanCollector(BaseCollector):
         # the client info metrics
         if router_metric.router_entry.capsman_clients:
             # translate / trim / augment registration records
-            dhcp_lease_labels = ['mac_address', 'host_name', 'comment']
+            dhcp_lease_labels = ['mac_address', 'address', 'host_name', 'comment']
             dhcp_lease_records = router_metric.dhcp_lease_records(dhcp_lease_labels)
             for registration_record in registration_records:
-                try:
-                    dhcp_lease_record = next((dhcp_lease_record for dhcp_lease_record in dhcp_lease_records if dhcp_lease_record['mac_address']==registration_record['mac_address']))
-                    registration_record['name'] = dhcp_lease_record.get('comment', dhcp_lease_record.get('host_name', dhcp_lease_record.get('mac_address')))                   
-                except StopIteration:
-                    registration_record['name'] = f"{registration_record['mac_address']}: No DHCP registration"             
+                BaseOutputProcessor.augment_record(router_metric, registration_record, dhcp_lease_records)
                 
-                # split out tx/rx bytes
-                registration_record['tx_bytes'] = registration_record['bytes'].split(',')[0]
-                registration_record['rx_bytes'] = registration_record['bytes'].split(',')[1]
-                del registration_record['bytes']
-
-            tx_byte_metrics = BaseCollector.counter_collector('capsman_clients_tx_bytes', 'Number of sent packet bytes', registration_records, 'tx_bytes', ['name'])
+            tx_byte_metrics = BaseCollector.counter_collector('capsman_clients_tx_bytes', 'Number of sent packet bytes', registration_records, 'tx_bytes', ['dhcp_name'])
             yield tx_byte_metrics
 
-            rx_byte_metrics = BaseCollector.counter_collector('capsman_clients_rx_bytes', 'Number of received packet bytes', registration_records, 'rx_bytes', ['name'])
+            rx_byte_metrics = BaseCollector.counter_collector('capsman_clients_rx_bytes', 'Number of received packet bytes', registration_records, 'rx_bytes', ['dhcp_name'])
             yield rx_byte_metrics
 
-            signal_strength_metrics = BaseCollector.gauge_collector('capsman_clients_signal_strength', 'Client devices signal strength', registration_records, 'rx_signal', ['name'])
+            signal_strength_metrics = BaseCollector.gauge_collector('capsman_clients_signal_strength', 'Client devices signal strength', registration_records, 'rx_signal', ['dhcp_name'])
             yield signal_strength_metrics
 
             registration_metrics = BaseCollector.info_collector('capsman_clients_devices', 'Registered client devices info', 
-                                    registration_records, ['name', 'rx_signal', 'ssid', 'tx_rate', 'rx_rate', 'interface', 'mac_address', 'uptime'])
+                                    registration_records, ['dhcp_name', 'dhcp_address', 'rx_signal', 'ssid', 'tx_rate', 'rx_rate', 'interface', 'mac_address', 'uptime'])
             yield registration_metrics
 
 

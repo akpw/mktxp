@@ -12,8 +12,6 @@
 ## GNU General Public License for more details.
 
 from mktxp.collectors.base_collector import BaseCollector
-from mktxp.router_metric import RouterMetric
-
 
 class InterfaceCollector(BaseCollector):
     ''' Router Interface Metrics collector
@@ -27,7 +25,8 @@ class InterfaceCollector(BaseCollector):
 
         for interface_traffic_record in interface_traffic_records:
             if interface_traffic_record.get('comment'):
-                interface_traffic_record['name'] = f"{interface_traffic_record['name']} ({interface_traffic_record['comment']})"
+                interface_traffic_record['name'] = interface_traffic_record['comment'] if router_metric.router_entry.use_comments_over_names \
+                                                                            else f"{interface_traffic_record['name']} ({interface_traffic_record['comment']})"
 
         rx_byte_metric = BaseCollector.counter_collector('interface_rx_byte', 'Number of received bytes', interface_traffic_records, 'rx_byte', ['name'])
         yield rx_byte_metric

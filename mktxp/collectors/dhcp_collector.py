@@ -13,8 +13,6 @@
 
 from mktxp.cli.config.config import MKTXPConfigKeys
 from mktxp.collectors.base_collector import BaseCollector
-from mktxp.router_metric import RouterMetric
-
 
 class DHCPCollector(BaseCollector):
     ''' DHCP Metrics collector

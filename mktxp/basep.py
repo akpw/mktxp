@@ -11,7 +11,6 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
-
 from http.server import HTTPServer
 from datetime import datetime
 from prometheus_client.core import REGISTRY
@@ -20,6 +19,8 @@ from mktxp.cli.config.config import config_handler
 from mktxp.collectors_handler import CollectorsHandler
 from mktxp.metrics_handler import RouterMetricsHandler
 
+from mktxp.cli.output.capsman_out import CapsmanOutput
+from mktxp.cli.output.wifi_out import WirelessOutput
 
 class MKTXPProcessor:
     ''' Base Export Processing
@@ -35,5 +36,22 @@ class MKTXPProcessor:
         server_address = ('', port)
         httpd = server_class(server_address, handler_class)
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f'{current_time} Running metrics HTTP server on port {port}')
+        print(f'{current_time} Running HTTP metrics server on port {port}')
         httpd.serve_forever()
+
+
+class MKTXPCLIProcessor:
+    ''' Base CLI Processing
+    '''    
+    @staticmethod
+    def capsman_clients(entry_name):
+        router_metric = RouterMetricsHandler.router_metric(entry_name)
+        if router_metric:
+            CapsmanOutput.clients_summary(router_metric)
+        
+    @staticmethod
+    def wifi_clients(entry_name):
+        router_metric = RouterMetricsHandler.router_metric(entry_name)
+        if router_metric:
+            WirelessOutput.clients_summary(router_metric)
+        

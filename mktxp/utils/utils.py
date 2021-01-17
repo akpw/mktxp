@@ -12,14 +12,14 @@
 ## GNU General Public License for more details.
 
 import os, sys, shlex, tempfile, shutil, re
-from datetime import timedelta
 import subprocess, hashlib
-from collections import Iterable
+from collections.abc import Iterable
 from contextlib import contextmanager
+from multiprocessing import Process, Event
+
 
 ''' Utilities / Helpers
 '''
-
 @contextmanager
 def temp_dir(quiet = True):
     ''' Temp dir context manager
@@ -66,11 +66,6 @@ def get_last_digit(str_to_search):
         return float(match.group())
     else:
         return -1
-
-def parse_uptime(time):
-    time_dict = re.match(r'((?P<weeks>\d+)w)?((?P<days>\d+)d)?((?P<hours>\d+)h)?((?P<minutes>\d+)m)?((?P<seconds>\d+)s)?', time).groupdict()
-    return timedelta(**{key: int(value) for key, value in time_dict.items() if value}).total_seconds()
-
 
 class FSHelper:
     ''' File System ops helper
@@ -222,3 +217,41 @@ class UniquePartialMatchList(list):
                 either "equals to element" or "contained by exactly one element"
         '''
         return True if self.find(partialMatch) else False
+
+
+class RepeatableTimer:
+    def __init__(self, interval, func, args=[], kwargs={}, process_name = None, repeatable = True, restartable = False):
+        self.process_name = process_name
+        self.interval = interval
+        self.restartable = restartable
+        
+        self.func = func
+        self.args = args
+        self.kwargs = kwargs
+        
+        self.finished = Event()
+        self.run_once = Event()
+        if not repeatable:
+            self.run_once.set()            
+        self.process = Process(name = self.process_name, target=self._execute)
+
+    def start(self):
+        if self.restartable:
+            self.finished.clear()
+            self.process = Process(name = self.process_name, target=self._execute, daemon=True)
+        self.process.start()
+
+    def stop(self):
+        self.finished.set()
+        if self.process.is_alive:
+            self.process.join()
+
+    def _execute(self):
+        while True:
+            self.func(*self.args, **self.kwargs)
+            if self.finished.is_set() or self.run_once.is_set():
+                break
+            self.finished.wait(self.interval)     
+
+
+

@@ -11,10 +11,8 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
-import re
+from mktxp.cli.output.base_out import BaseOutputProcessor
 from mktxp.collectors.base_collector import BaseCollector
-from mktxp.router_metric import RouterMetric
-
 
 class WLANCollector(BaseCollector):
     ''' Wireless Metrics collector
@@ -51,42 +49,29 @@ class WLANCollector(BaseCollector):
             if not registration_records:
                 return range(0)
 
-            dhcp_lease_labels = ['mac_address', 'host_name', 'comment']
+            dhcp_lease_labels = ['mac_address', 'address', 'host_name', 'comment']
             dhcp_lease_records = router_metric.dhcp_lease_records(dhcp_lease_labels)
   
             for registration_record in registration_records:
-                try:
-                    dhcp_lease_record = next((dhcp_lease_record for dhcp_lease_record in dhcp_lease_records if dhcp_lease_record['mac_address']==registration_record['mac_address']))
-                    registration_record['name'] = dhcp_lease_record.get('comment', dhcp_lease_record.get('host_name', dhcp_lease_record.get('mac_address')))
-                except StopIteration:
-                    registration_record['name'] = registration_record['mac_address']            
+                BaseOutputProcessor.augment_record(router_metric, registration_record, dhcp_lease_records)                
 
-                # split out tx/rx bytes
-                registration_record['tx_bytes'] = registration_record['bytes'].split(',')[0]
-                registration_record['rx_bytes'] = registration_record['bytes'].split(',')[1]
-
-                # average signal strength
-                registration_record['signal_strength'] = re.search(r'-\d+', registration_record['signal_strength']).group()
-
-                del registration_record['bytes']
-
-            tx_byte_metrics = BaseCollector.counter_collector('wlan_clients_tx_bytes', 'Number of sent packet bytes', registration_records, 'tx_bytes', ['name'])
+            tx_byte_metrics = BaseCollector.counter_collector('wlan_clients_tx_bytes', 'Number of sent packet bytes', registration_records, 'tx_bytes', ['dhcp_name'])
             yield tx_byte_metrics
 
-            rx_byte_metrics = BaseCollector.counter_collector('wlan_clients_rx_bytes', 'Number of received packet bytes', registration_records, 'rx_bytes', ['name'])
+            rx_byte_metrics = BaseCollector.counter_collector('wlan_clients_rx_bytes', 'Number of received packet bytes', registration_records, 'rx_bytes', ['dhcp_name'])
             yield rx_byte_metrics
 
-            signal_strength_metrics = BaseCollector.gauge_collector('wlan_clients_signal_strength', 'Average strength of the client signal recevied by AP', registration_records, 'signal_strength', ['name'])
+            signal_strength_metrics = BaseCollector.gauge_collector('wlan_clients_signal_strength', 'Average strength of the client signal recevied by AP', registration_records, 'signal_strength', ['dhcp_name'])
             yield signal_strength_metrics
 
-            signal_to_noise_metrics = BaseCollector.gauge_collector('wlan_clients_signal_to_noise', 'Client devices signal to noise ratio', registration_records, 'signal_to_noise', ['name'])
+            signal_to_noise_metrics = BaseCollector.gauge_collector('wlan_clients_signal_to_noise', 'Client devices signal to noise ratio', registration_records, 'signal_to_noise', ['dhcp_name'])
             yield signal_to_noise_metrics
 
-            tx_ccq_metrics = BaseCollector.gauge_collector('wlan_clients_tx_ccq', 'Client Connection Quality (CCQ) for transmit', registration_records, 'tx_ccq', ['name'])
+            tx_ccq_metrics = BaseCollector.gauge_collector('wlan_clients_tx_ccq', 'Client Connection Quality (CCQ) for transmit', registration_records, 'tx_ccq', ['dhcp_name'])
             yield tx_ccq_metrics
 
             registration_metrics = BaseCollector.info_collector('wlan_clients_devices', 'Client devices info', 
-                                    registration_records, ['name', 'rx_signal', 'ssid', 'tx_rate', 'rx_rate', 'interface', 'mac_address', 'uptime'])
+                                    registration_records, ['dhcp_name', 'dhcp_address', 'rx_signal', 'ssid', 'tx_rate', 'rx_rate', 'interface', 'mac_address', 'uptime'])
             yield registration_metrics
 
 

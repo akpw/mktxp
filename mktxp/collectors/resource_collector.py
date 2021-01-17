@@ -11,11 +11,8 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
-import re
-from mktxp.utils.utils import parse_uptime
 from mktxp.collectors.base_collector import BaseCollector
-from mktxp.router_metric import RouterMetric
-
+from mktxp.cli.output.base_out import BaseOutputProcessor
 
 class SystemResourceCollector(BaseCollector):
     ''' System Resource Metrics collector
@@ -67,6 +64,6 @@ class SystemResourceCollector(BaseCollector):
     @staticmethod
     def _translated_values(translated_field, value):
         return {
-                'uptime': lambda value: parse_uptime(value)
+                'uptime': lambda value: BaseOutputProcessor.parse_timedelta_seconds(value)
                 }[translated_field](value)
 

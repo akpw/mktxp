@@ -59,11 +59,11 @@ class RouterMetric:
             print(f'Error getting system resource info from router{self.router_name}@{self.router_entry.hostname}: {exc}')
             return None
 
-    def dhcp_lease_records(self, dhcp_lease_labels = []):
+    def dhcp_lease_records(self, dhcp_lease_labels = [], add_router_id = True):
         try:
             #dhcp_lease_records = self.api_connection.router_api().get_resource('/ip/dhcp-server/lease').get(status='bound')
             dhcp_lease_records = self.api_connection.router_api().get_resource('/ip/dhcp-server/lease').call('print', {'active':''})
-            return self._trimmed_records(dhcp_lease_records, dhcp_lease_labels)
+            return self._trimmed_records(dhcp_lease_records, dhcp_lease_labels, add_router_id)
         except Exception as exc:
             print(f'Error getting dhcp info from router{self.router_name}@{self.router_entry.hostname}: {exc}')
             return None
@@ -89,7 +89,8 @@ class RouterMetric:
                 for interface_monitor_record in interface_monitor_records:
                     for interface_name in interface_names:
                         if interface_name[1] and interface_name[0] == interface_monitor_record['name']:
-                            interface_monitor_record['name'] = f"{interface_monitor_record['name']} ({interface_name[1]})"
+                            interface_monitor_record['name'] = interface_name[1] if self.router_entry.use_comments_over_names else \
+                                                                                 f"{interface_name[0]} ({interface_name[1]})"
             return self._trimmed_records(interface_monitor_records, interface_monitor_labels)
         except Exception as exc:
             print(f'Error getting {kind} interface monitor info from router{self.router_name}@{self.router_entry.hostname}: {exc}')
@@ -119,10 +120,10 @@ class RouterMetric:
             print(f'Error getting routes info from router{self.router_name}@{self.router_entry.hostname}: {exc}')
             return None
             
-    def wireless_registration_table_records(self, registration_table_labels = []):
+    def wireless_registration_table_records(self, registration_table_labels = [], add_router_id = True):
         try:
             registration_table_records = self.api_connection.router_api().get_resource('/interface/wireless/registration-table').get()
-            return self._trimmed_records(registration_table_records, registration_table_labels)
+            return self._trimmed_records(registration_table_records, registration_table_labels, add_router_id)
         except Exception as exc:
             print(f'Error getting wireless registration table info from router{self.router_name}@{self.router_entry.hostname}: {exc}')
             return None
@@ -135,16 +136,16 @@ class RouterMetric:
             print(f'Error getting caps-man remote caps info from router{self.router_name}@{self.router_entry.hostname}: {exc}')
             return None
 
-    def capsman_registration_table_records(self, registration_table_labels = []):
+    def capsman_registration_table_records(self, registration_table_labels = [], add_router_id = True):
         try:
             registration_table_records = self.api_connection.router_api().get_resource('/caps-man/registration-table').get()
-            return self._trimmed_records(registration_table_records, registration_table_labels)
+            return self._trimmed_records(registration_table_records, registration_table_labels, add_router_id)
         except Exception as exc:
             print(f'Error getting caps-man registration table info from router{self.router_name}@{self.router_entry.hostname}: {exc}')
             return None
 
     # Helpers
-    def _trimmed_records(self, router_records, metric_labels):
+    def _trimmed_records(self, router_records, metric_labels, add_router_id = True):
         if len(metric_labels) == 0 and len(router_records) > 0:
             metric_labels = router_records[0].keys()
         metric_labels = set(metric_labels)      
@@ -153,8 +154,9 @@ class RouterMetric:
         dash2_ = lambda x : x.replace('-', '_')
         for router_record in router_records:
             translated_record = {dash2_(key): value for (key, value) in router_record.items() if dash2_(key) in metric_labels}
-            for key, value in self.router_id.items():
-                translated_record[key] = value
+            if add_router_id:
+                for key, value in self.router_id.items():
+                    translated_record[key] = value
             labeled_records.append(translated_record)
         return labeled_records
 

@@ -14,12 +14,11 @@
 
 import sys
 import subprocess
-import pkg_resources
 import mktxp.cli.checks.chk_pv
 from mktxp.utils.utils import run_cmd
 from mktxp.cli.options import MKTXPOptionsParser, MKTXPCommands
 from mktxp.cli.config.config import config_handler, ConfigEntry
-from mktxp.basep import MKTXPProcessor
+from mktxp.basep import MKTXPProcessor, MKTXPCLIProcessor
 
 class MKTXPDispatcher:
     ''' Base MKTXP Commands Dispatcher
@@ -31,10 +30,7 @@ class MKTXPDispatcher:
     def dispatch(self):
         args = self.option_parser.parse_options()
 
-        if args['sub_cmd'] == MKTXPCommands.VERSION:
-            self.print_version()
-
-        elif args['sub_cmd'] == MKTXPCommands.INFO:
+        if args['sub_cmd'] == MKTXPCommands.INFO:
             self.print_info()
 
         elif args['sub_cmd'] == MKTXPCommands.SHOW:
@@ -49,8 +45,11 @@ class MKTXPDispatcher:
         elif args['sub_cmd'] == MKTXPCommands.DELETE:
             self.delete_entry(args)
 
-        elif args['sub_cmd'] == MKTXPCommands.START:
+        elif args['sub_cmd'] == MKTXPCommands.EXPORT:
             self.start_export(args)
+
+        elif args['sub_cmd'] == MKTXPCommands.PRINT:
+            self.print(args)
 
         else:
             # nothing to dispatch
@@ -59,17 +58,10 @@ class MKTXPDispatcher:
         return True
 
     # Dispatched methods
-    def print_version(self):
-        ''' Prints MKTXP version info
-        '''
-        version = pkg_resources.require("mktxp")[0].version
-        print(f'Mikrotik RouterOS Prometheus Exporter version {version}')
-
     def print_info(self):
         ''' Prints MKTXP general info
         '''
         print(f'{self.option_parser.script_name}: {self.option_parser.description}')
-
 
     def show_entries(self, args):
         if args['config']:
@@ -100,13 +92,26 @@ class MKTXPDispatcher:
         editor = args['editor']
         if not editor:
             print(f'No editor to edit the following file with: {config_handler.usr_conf_data_path}')
-        subprocess.check_call([editor, config_handler.usr_conf_data_path])
+        if args['internal']:
+            subprocess.check_call([editor, config_handler.mktxp_conf_path])
+        else:
+            subprocess.check_call([editor, config_handler.usr_conf_data_path])
 
     def delete_entry(self, args):
         config_handler.unregister_entry(entry_name = args['entry_name'])
         
     def start_export(self, args):
         MKTXPProcessor.start()
+
+    def print(self, args):
+        if not (args['wifi_clients'] or args['capsman_clients']):
+            print("Select metric option(s) to print out, or run 'mktxp print' -h to find out more")
+
+        if args['wifi_clients']:
+            MKTXPCLIProcessor.wifi_clients(args['entry_name'])
+
+        if args['capsman_clients']:
+            MKTXPCLIProcessor.capsman_clients(args['entry_name'])
 
 
 def main():
