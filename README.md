@@ -197,7 +197,7 @@ systemctl status mktxp
 
 ## Description of CLI Commands
 ### mktxp commands
-       . action commands:
+       . MKTXP commands:
         .. info     Shows base MKTXP info
         .. edit     Open MKTXP configuration file in your editor of choice        
         .. print    Displays selected metrics on the command line
