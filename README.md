@@ -139,7 +139,7 @@ and simply add:
 
 ```
 
-At that point, we should be are ready for the main `mktxp export` command that will get all router(s) metrics as configured above and serve them to Prometheus via a http server on the default port 49090. \
+At that point, we should be all ready for running the main `mktxp export` command that will be gathering router(s) metrics as configured above and serving them to Prometheus via a http server on the default port 49090. \
 ````
 ❯ mktxp export
 Connecting to router MKT-GT@10.**.*.**
