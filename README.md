@@ -9,9 +9,9 @@
 MKTXP is a Prometheus Exporter for Mikrotik RouterOS devices.\
 It enables gathering metrics across multiple routers, all easily configurable via built-in CLI interface.
 
-Comes with a dedicated [Grafana dashboard](https://grafana.com/grafana/dashboards/13679)
+MKTXP comes with a dedicated [Grafana dashboard](https://grafana.com/grafana/dashboards/13679)
 
-<img src="https://akpw-s3.s3.eu-central-1.amazonaws.com/mktxp_black.png" width="550" height="620">
+<img src="https://akpw-s3.s3.eu-central-1.amazonaws.com/mktxp_black.png" width="530" height="620">
 
 
 #### Requirements:
@@ -40,8 +40,7 @@ mktxp edit
 
 ```
 
-This opens the file in your default system editor. 
-
+This opens the file in your default system editor. \
 In case you prefer a different editor, just run the ```edit``` command with its optional `-ed` parameter e.g.:
 ```
 mktxp edit -ed nano
@@ -80,21 +79,24 @@ The configuration file comes with a sample configuration, making it easy to copy
 ```
 
 ## Mikrotik Device Config
-For the purpose of device monitoring, it's best to create a dedicated RouterOS device user with minimal required permissions. MKTXP just needs ```API``` and ```Read```, so at that point you can go to your router and type something like:
+For the purpose of device monitoring, it's best to create a dedicated RouterOS device user with minimal required permissions. \
+MKTXP only needs ```API``` and ```Read```, so at that point you can go to your router and type:
 ```
 /user group add name=mktxp_group policy=api,read
 /user add name=mktxp_user group=mktxp_group password=mktxp_user_password
 ```
-That's all it takes! Assuming you use the user info at the above configurtation file, at that point you already should be able to check your success with ```mktxp print``` command.
+That's all it takes! \
+Now put these user credentials in the above configurtation file, and at that point should already be able to check your success with the ```mktxp print``` command.
 
 
 ## Exporting to Prometheus
-For exporting you router metrics to Prometheus, you need to connect MKTXP to it. To do that, open Prometheus config file: 
+For exporting your router metrics to Prometheus, you need to connect MKTXP to it. \
+To do that, let's edit Prometheus config file: 
 ```
 nano /etc/prometheus/prometheus.yml
 ```
 
-and simply add:
+Now simply add:
 
 ```
   - job_name: 'mktxp'
@@ -103,21 +105,21 @@ and simply add:
 
 ```
 
-At that point, you should be are ready to go for running the `mktxp export` command that will get all router(s) metrics as configured above and serve them via http server on default port 49090. In case prefer to use a different port, you can change it (as well as other mktxp parameters) via running ```mktxp edit -i``` that opens internal mktxp settings file.
+At that point, we should be are ready for the `mktxp export` command that will get all router(s) metrics as configured above and serve them via a http server on default port 49090. In case prefer to use a different port, you can change it (along with other internal mktxp parameters) via ```mktxp edit -i```.
 
 ## Grafana dashboard
-Now with all of your metrics in Prometheus, it's easy to visualise them with this [Grafana dashboard](https://grafana.com/grafana/dashboards/13679)
+Now with all of your devices metrics safely in Prometheus, it's easy to visualise them with this [Grafana dashboard](https://grafana.com/grafana/dashboards/13679)
 
 
 ## Setting up MKTXP to run as a Linux Service
-In case you install MKTXP on a Linux system and want to run it with system boot, just run
+If you've installed MKTXP on a Linux system, you can run it with system boot via adding a service:
 
 ```
 nano /etc/systemd/system/mktxp.service
 
 ```
 
-and then copy and paste the following:
+Now copy and paste the following:
 
 ```
 [Unit]
@@ -130,6 +132,19 @@ ExecStart=mktxp export # if mktxp is not at your $PATH, you might need to provid
 [Install]
 WantedBy=default.target
 
+```
+
+Let's start the service and check its' status:
+```
+sudo systemctl daemon-reload
+sudo systemctl start mktxp
+sudo systemctl enable mktxp
+
+systemctl status mktxp
+● mktxp.service - MKTXP Mikrotik Exporter to Prometheus
+     Loaded: loaded (/etc/systemd/system/mktxp.service; disabled; vendor preset: enabled)
+     Active: active (running) since Sun 2021-01-24 09:16:44 CET; 2h 44min ago
+     ...
 ```
 
 
