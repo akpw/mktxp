@@ -86,17 +86,47 @@ MKTXP only needs ```API``` and ```Read```, so at that point you can go to your r
 /user add name=mktxp_user group=mktxp_group password=mktxp_user_password
 ```
 That's all it takes! \
-Now put these user credentials in the above configurtation file, and at that point should already be able to check your success with the ```mktxp print``` command.
+Now put these user credentials in the above configurtation file, and at that point should already be able to check your success. \
+Since MKTXP can print selected metrics directly on the command line, in this example let's check on some of my smarthome CAPsMAN clients:
+```
+ ~> mktxp print -en MKT-GT -cc
+Connecting to router MKT-GT@10.70.0.1
+2021-01-24 12:04:29 Connection to router MKT-GT@10.70.0.1 has been established
+
+| dhcp_name            | dhcp_address   | mac_address       |   rx_signal | interface   | ssid   | tx_rate   | rx_rate   | uptime   |
+|----------------------|----------------|-------------------|-------------|-------------|--------|-----------|-----------|----------|
+| Woox Runner          | 10.**.*.**     | 80:*************D |         -64 | LR-2G-1-1   | AKP    | 72 Mbps   | 54 Mbps   | 3 days   |
+| Woox Office Lamp     | 10.**.*.**     | 80:*************F |         -59 | LR-2G-1-1   | AKP    | 72 Mbps   | 54 Mbps   | 3 days   |
+| Harmony Hub          | 10.**.*.**     | C8:*************5 |         -46 | LR-2G-1-1   | AKP    | 72 Mbps   | 72 Mbps   | 3 days   |
+| Woox Office Hub      | 10.**.*.**     | DC:*************7 |         -44 | LR-2G-1-1   | AKP    | 72 Mbps   | 54 Mbps   | 3 days   |
+| Woox Ext Hub         | 10.**.*.**     | DC:*************E |         -44 | LR-2G-1-1   | AKP    | 72 Mbps   | 54 Mbps   | 3 days   |
+| Amazon Echo          | 10.**.*.**     | CC:*************4 |         -44 | LR-2G-1-1   | AKP    | 72 Mbps   | 72 Mbps   | a day    |
+| Woox Living Room Hub | 10.**.*.**     | DC:*************0 |         -43 | LR-2G-1-1   | AKP    | 72 Mbps   | 54 Mbps   | 3 days   |
+| JBL View             | 10.**.*.**     | 00:*************D |         -28 | LR-2G-1-1   | AKP    | 144 Mbps  | 117 Mbps  | 7 hours  |
+|                      |                |                   |             |             |        |           |           |          |
+| MBP15                | 10.**.*.**     | 78:*************E |         -53 | GT-5G-1     | AKP5G  | 877 Mbps  | 877 Mbps  | 3 days   |
+|                      |                |                   |             |             |        |           |           |          |
+| Woox Toaster         | 10.**.*.**     | 68:*************B |         -70 | KT-2G-1-1   | AKP    | 72 Mbps   | 54 Mbps   | 3 days   |
+| Woox Kettle          | 10.**.*.**     | B4:*************5 |         -65 | KT-2G-1-1   | AKP    | 65 Mbps   | 54 Mbps   | 2 days   |
+| Woburn White         | 10.**.*.**     | 54:*************6 |         -59 | KT-2G-1-1   | AKP    | 72 Mbps   | 72 Mbps   | 9 hours  |
+| Siemens Washer       | 10.**.*.**     | 68:*************1 |         -57 | KT-2G-1-1   | AKP    | 72 Mbps   | 72 Mbps   | 2 days   |
+| Woburn Black         | 10.**.*.**     | 54:*************8 |         -57 | KT-2G-1-1   | AKP    | 72 Mbps   | 72 Mbps   | 9 hours  |
+| Google Nest Display  | 10.**.*.**     | 1C:*************A |         -49 | KT-2G-1-1   | AKP    | 52 Mbps   | 43 Mbps   | 8 hours  |
+-----------------------  --
+Connected Wifi Devices:  15
+-----------------------  --
+```
+Hmmm, that toaster looks like it'd use a better signal.. But before going to fixing that one, let's get back on track and proceed to the actual Prometheus export.
 
 
 ## Exporting to Prometheus
-For exporting your router metrics to Prometheus, you need to connect MKTXP to it. \
+For exporting your routers' metrics to an existing Prometheus installation, you basically just need to connect MKTXP to it. \
 To do that, let's edit Prometheus config file: 
 ```
 nano /etc/prometheus/prometheus.yml
 ```
 
-Now simply add:
+and simply add:
 
 ```
   - job_name: 'mktxp'
