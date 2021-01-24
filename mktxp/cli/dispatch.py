@@ -36,20 +36,14 @@ class MKTXPDispatcher:
         elif args['sub_cmd'] == MKTXPCommands.SHOW:
             self.show_entries(args)
 
-        elif args['sub_cmd'] == MKTXPCommands.ADD:
-            self.add_entry(args)
-
-        elif args['sub_cmd'] == MKTXPCommands.EDIT:
-            self.edit_entry(args)
-
-        elif args['sub_cmd'] == MKTXPCommands.DELETE:
-            self.delete_entry(args)
-
         elif args['sub_cmd'] == MKTXPCommands.EXPORT:
             self.start_export(args)
 
         elif args['sub_cmd'] == MKTXPCommands.PRINT:
             self.print(args)
+
+        elif args['sub_cmd'] == MKTXPCommands.EDIT:
+            self.edit_entry(args)
 
         else:
             # nothing to dispatch
@@ -84,10 +78,6 @@ class MKTXPDispatcher:
                         print(f'    {field}: {getattr(entry, field)}')
                 print('\n')
 
-    def add_entry(self, args):
-        entry_args = {key: value for key, value in args.items() if key not in set(['sub_cmd', 'entry_name'])}
-        config_handler.register_entry(entry_name = args['entry_name'], entry_args = entry_args)
-
     def edit_entry(self, args):        
         editor = args['editor']
         if not editor:
@@ -96,10 +86,7 @@ class MKTXPDispatcher:
             subprocess.check_call([editor, config_handler.mktxp_conf_path])
         else:
             subprocess.check_call([editor, config_handler.usr_conf_data_path])
-
-    def delete_entry(self, args):
-        config_handler.unregister_entry(entry_name = args['entry_name'])
-        
+       
     def start_export(self, args):
         MKTXPProcessor.start()
 

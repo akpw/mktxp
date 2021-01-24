@@ -26,6 +26,18 @@ class RouterMetric:
             MKTXPConfigKeys.ROUTERBOARD_NAME: self.router_name,
             MKTXPConfigKeys.ROUTERBOARD_ADDRESS: self.router_entry.hostname
             }
+        self.time_spent =  { 'IdentityCollector': 0,
+                            'SystemResourceCollector': 0,
+                            'HealthCollector': 0,
+                            'DHCPCollector': 0,
+                            'PoolCollector': 0,
+                            'InterfaceCollector': 0,
+                            'FirewallCollector': 0,
+                            'MonitorCollector': 0,
+                            'RouteCollector': 0,
+                            'WLANCollector': 0,
+                            'CapsmanCollector': 0
+                            }            
 
     def identity_records(self, identity_labels = []):
         try:
@@ -79,7 +91,7 @@ class RouterMetric:
     def interface_monitor_records(self, interface_monitor_labels = [], kind = 'ethernet', include_comments = False):
         try:
             interfaces = self.api_connection.router_api().get_resource(f'/interface/{kind}').get()
-            interface_names = [(interface['name'], interface.get('comment')) for interface in interfaces]
+            interface_names = [(interface['name'], interface.get('comment'), interface.get('running')) for interface in interfaces]
 
             interface_monitor = lambda int_num : self.api_connection.router_api().get_resource(f'/interface/{kind}').call('monitor', {'once':'', 'numbers':f'{int_num}'})
             interface_monitor_records = [interface_monitor(int_num)[0] for int_num in range(len(interface_names))]
@@ -144,8 +156,33 @@ class RouterMetric:
             print(f'Error getting caps-man registration table info from router{self.router_name}@{self.router_entry.hostname}: {exc}')
             return None
 
+    def firewall_records(self, firewall_labels = [], raw = False, matching_only = True):
+        try:
+            filter_path = '/ip/firewall/filter' if not raw else '/ip/firewall/raw'
+            firewall_records = self.api_connection.router_api().get_resource(filter_path).call('print', {'stats':'', 'all':''})
+            if matching_only:
+                firewall_records = [record for record in firewall_records if int(record.get('bytes', '0')) > 0]
+            # translation rules
+            translation_table = {}
+#            if 'id' in firewall_labels:
+#                translation_table['id'] = lambda id: str(int(id[1:], 16) - 1)
+            if 'comment' in firewall_labels:
+                translation_table['comment'] = lambda c: c if c else ''
+            return self._trimmed_records(firewall_records, firewall_labels, translation_table = translation_table)
+        except Exception as exc:
+            print(f'Error getting firewall filters info from router{self.router_name}@{self.router_entry.hostname}: {exc}')
+            return None
+
+    def mktxp_records(self):
+        mktxp_records = []
+        for key in self.time_spent.keys():
+            mktxp_records.append({'name': key, 'duration': self.time_spent[key]})
+        # translation rules            
+        translation_table = {'duration': lambda d: d*1000}
+        return self._trimmed_records(mktxp_records, translation_table = translation_table)
+
     # Helpers
-    def _trimmed_records(self, router_records, metric_labels, add_router_id = True):
+    def _trimmed_records(self, router_records, metric_labels = [], add_router_id = True, translation_table = {}):
         if len(metric_labels) == 0 and len(router_records) > 0:
             metric_labels = router_records[0].keys()
         metric_labels = set(metric_labels)      
@@ -157,9 +194,8 @@ class RouterMetric:
             if add_router_id:
                 for key, value in self.router_id.items():
                     translated_record[key] = value
+            # translate fields if needed
+            for key, func in translation_table.items():
+                translated_record[key] = func(translated_record.get(key))
             labeled_records.append(translated_record)
         return labeled_records
-
-
-
-

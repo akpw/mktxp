@@ -14,6 +14,7 @@
 from mktxp.cli.config.config import MKTXPConfigKeys
 from mktxp.collectors.base_collector import BaseCollector
 
+
 class DHCPCollector(BaseCollector):
     ''' DHCP Metrics collector
     '''    
@@ -21,24 +22,23 @@ class DHCPCollector(BaseCollector):
     def collect(router_metric):
         dhcp_lease_labels = ['active_address', 'mac_address', 'host_name', 'comment', 'server', 'expires_after']
         dhcp_lease_records = router_metric.dhcp_lease_records(dhcp_lease_labels)
-        if not dhcp_lease_records:
-            return range(0)
+        if dhcp_lease_records:
+            # calculate number of leases per DHCP server
+            dhcp_lease_servers = {}
+            for dhcp_lease_record in dhcp_lease_records:
+                dhcp_lease_servers[dhcp_lease_record['server']] = dhcp_lease_servers.get(dhcp_lease_record['server'], 0) + 1
 
-        # calculate number of leases per DHCP server
-        dhcp_lease_servers = {}
-        for dhcp_lease_record in dhcp_lease_records:
-            dhcp_lease_servers[dhcp_lease_record['server']] = dhcp_lease_servers.get(dhcp_lease_record['server'], 0) + 1
+            # compile leases-per-server records
+            dhcp_lease_servers_records = [{ MKTXPConfigKeys.ROUTERBOARD_NAME: router_metric.router_id[MKTXPConfigKeys.ROUTERBOARD_NAME],
+                                            MKTXPConfigKeys.ROUTERBOARD_ADDRESS: router_metric.router_id[MKTXPConfigKeys.ROUTERBOARD_ADDRESS],
+                                            'server': key, 'count': value} for key, value in dhcp_lease_servers.items()]
+            
+            # yield lease-per-server metrics
+            dhcp_lease_server_metrics = BaseCollector.gauge_collector('dhcp_lease_active_count', 'Number of active leases per DHCP server', dhcp_lease_servers_records, 'count', ['server'])
+            yield dhcp_lease_server_metrics
 
-        # compile leases-per-server records
-        dhcp_lease_servers_records = [{ MKTXPConfigKeys.ROUTERBOARD_NAME: router_metric.router_id[MKTXPConfigKeys.ROUTERBOARD_NAME],
-                                        MKTXPConfigKeys.ROUTERBOARD_ADDRESS: router_metric.router_id[MKTXPConfigKeys.ROUTERBOARD_ADDRESS],
-                                        'server': key, 'count': value} for key, value in dhcp_lease_servers.items()]
-        
-        # yield lease-per-server metrics
-        dhcp_lease_server_metrics = BaseCollector.gauge_collector('dhcp_lease_active_count', 'Number of active leases per DHCP server', dhcp_lease_servers_records, 'count', ['server'])
-        yield dhcp_lease_server_metrics
-
-        # active lease metrics
-        if router_metric.router_entry.dhcp_lease:
-            dhcp_lease_metrics = BaseCollector.info_collector('dhcp_lease', 'DHCP Active Leases', dhcp_lease_records, dhcp_lease_labels)
-            yield dhcp_lease_metrics
+            # active lease metrics
+            if router_metric.router_entry.dhcp_lease:
+                dhcp_lease_metrics = BaseCollector.info_collector('dhcp_lease', 'DHCP Active Leases', dhcp_lease_records, dhcp_lease_labels)
+                yield dhcp_lease_metrics
+            

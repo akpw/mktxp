@@ -40,8 +40,9 @@ class BaseCollector:
         return collector
 
     @staticmethod
-    def gauge_collector(name, decription, router_records, metric_key, metric_labels=[]):
-        BaseCollector._add_id_labels(metric_labels)
+    def gauge_collector(name, decription, router_records, metric_key, metric_labels=[], add_id_labels = True):
+        if add_id_labels:
+            BaseCollector._add_id_labels(metric_labels)
         collector = GaugeMetricFamily(f'mktxp_{name}', decription, labels=metric_labels)
 
         for router_record in router_records:       

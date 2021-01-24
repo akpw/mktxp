@@ -40,6 +40,7 @@ class MKTXPConfigKeys:
     FE_DHCP_LEASE_KEY = 'dhcp_lease'    
     FE_DHCP_POOL_KEY = 'pool'    
     FE_INTERFACE_KEY = 'interface'
+    FE_FIREWALL_KEY = 'firewall'
     FE_MONITOR_KEY = 'monitor'
     FE_ROUTE_KEY = 'route'
     FE_WIRELESS_KEY = 'wireless'
@@ -75,7 +76,7 @@ class MKTXPConfigKeys:
     DEFAULT_MKTXP_BANDWIDTH_TEST_INTERVAL = 420
 
     BOOLEAN_KEYS = (ENABLED_KEY, SSL_KEY, NO_SSL_CERTIFICATE, SSL_CERTIFICATE_VERIFY, 
-                      FE_DHCP_KEY, FE_DHCP_LEASE_KEY, FE_DHCP_POOL_KEY, FE_INTERFACE_KEY, 
+                      FE_DHCP_KEY, FE_DHCP_LEASE_KEY, FE_DHCP_POOL_KEY, FE_INTERFACE_KEY, FE_FIREWALL_KEY,
                       FE_MONITOR_KEY, FE_ROUTE_KEY, MKTXP_USE_COMMENTS_OVER_NAMES,
                       FE_WIRELESS_KEY, FE_WIRELESS_CLIENTS_KEY, FE_CAPSMAN_KEY, FE_CAPSMAN_CLIENTS_KEY)
     
@@ -91,7 +92,7 @@ class ConfigEntry:
                          MKTXPConfigKeys.USER_KEY, MKTXPConfigKeys.PASSWD_KEY, 
                          MKTXPConfigKeys.SSL_KEY, MKTXPConfigKeys.NO_SSL_CERTIFICATE, MKTXPConfigKeys.SSL_CERTIFICATE_VERIFY,
                          
-                         MKTXPConfigKeys.FE_DHCP_KEY, MKTXPConfigKeys.FE_DHCP_LEASE_KEY, MKTXPConfigKeys.FE_DHCP_POOL_KEY, MKTXPConfigKeys.FE_INTERFACE_KEY, 
+                         MKTXPConfigKeys.FE_DHCP_KEY, MKTXPConfigKeys.FE_DHCP_LEASE_KEY, MKTXPConfigKeys.FE_DHCP_POOL_KEY, MKTXPConfigKeys.FE_INTERFACE_KEY, MKTXPConfigKeys.FE_FIREWALL_KEY,
                          MKTXPConfigKeys.FE_MONITOR_KEY, MKTXPConfigKeys.FE_ROUTE_KEY, MKTXPConfigKeys.FE_WIRELESS_KEY, MKTXPConfigKeys.FE_WIRELESS_CLIENTS_KEY,
                          MKTXPConfigKeys.FE_CAPSMAN_KEY, MKTXPConfigKeys.FE_CAPSMAN_CLIENTS_KEY, MKTXPConfigKeys.MKTXP_USE_COMMENTS_OVER_NAMES
                          ])
@@ -246,9 +247,9 @@ class MKTXPConfigHandler:
             entry_reader[MKTXPConfigKeys.PORT_KEY] = self._default_value_for_key(MKTXPConfigKeys.SSL_KEY, entry_reader[MKTXPConfigKeys.SSL_KEY])
             write_needed = True # read from disk next time                
 
-            if write_needed:
-                self.config[entry_name] = entry_reader
-                self.config.write()
+        if write_needed:
+            self.config[entry_name] = entry_reader
+            self.config.write()
 
         return entry_reader
 
@@ -263,10 +264,10 @@ class MKTXPConfigHandler:
                 _entry_reader[key] = self._default_value_for_key(key)
                 write_needed = True # read from disk next time                
             
-            if write_needed:
-                self._config[entry_name] = _entry_reader
-                self._config.write()
-                
+        if write_needed:
+            self._config[entry_name] = _entry_reader
+            self._config.write()
+            
         return _entry_reader
 
     def _default_value_for_key(self, key, value = None):

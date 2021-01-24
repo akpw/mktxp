@@ -24,8 +24,6 @@ class MKTXPCommands:
     EXPORT = 'export'
     PRINT = 'print'
     SHOW = 'show'
-    ADD = 'add'
-    DELETE = 'delete' 
 
     @classmethod
     def commands_meta(cls):
@@ -35,8 +33,6 @@ class MKTXPCommands:
                         f'{cls.EXPORT}, ',
                         f'{cls.PRINT}, ',
                         f'{cls.SHOW}, ',
-                        f'{cls.ADD}, ',
-                        f'{cls.DELETE}',
                         '}'))
 
 class MKTXPOptionsParser:
@@ -102,67 +98,6 @@ Selected metrics info can be printed on the command line. For more information, 
                                         help = "Shows MKTXP config files paths",
                                         action = 'store_true')
 
-        # Add command
-        add_parser = subparsers.add_parser(MKTXPCommands.ADD,
-                                        description = 'Adds a new MKTXP router entry',
-                                        formatter_class=MKTXPHelpFormatter)
-        required_args_group = add_parser.add_argument_group('Required Arguments')
-        self._add_entry_name(required_args_group, registered_only = False, help = "Config entry name")
-        required_args_group.add_argument('-host', '--hostname', dest='hostname',
-                help = "IP address of RouterOS device to export metrics from",
-                type = str,
-                required=True)
-        required_args_group.add_argument('-usr', '--username', dest='username',
-                help = "username",
-                type = str,
-                required=True)
-        required_args_group.add_argument('-pwd', '--password', dest='password',
-                help = "password",
-                type = str,
-                required=True)
-
-        optional_args_group = add_parser.add_argument_group('Optional Arguments')
-        optional_args_group.add_argument('-e', dest='enabled',
-                help = "Enables entry for metrics processing",
-                action = 'store_false')
-
-        optional_args_group.add_argument('-port', dest='port',
-                help = "port",
-                default = MKTXPConfigKeys.DEFAULT_API_PORT,
-                type = int)
-
-        optional_args_group.add_argument('-ssl', '--use-ssl', dest='use_ssl',
-                help = "Connect via RouterOS api-ssl service",
-                action = 'store_true')
-        optional_args_group.add_argument('-no-ssl-cert', '--no-ssl-certificate', dest='no_ssl_certificate',
-                help = "Connect with configured RouterOS SSL ceritficate",
-                action = 'store_true')
-
-        optional_args_group.add_argument('-dhcp', '--export_dhcp', dest='dhcp',
-                help = "Export DHCP metrics",
-                action = 'store_true')
-        optional_args_group.add_argument('-dhcp_lease', '--export_dhcp_lease', dest='dhcp_lease',
-                help = "Export DHCP Lease metrics",
-                action = 'store_true')
-        optional_args_group.add_argument('-pool', '--export_pool', dest='pool',
-                help = "Export IP Pool metrics",
-                action = 'store_true')
-        optional_args_group.add_argument('-interface', '--export_interface', dest='interface',
-                help = "Export Interface metrics",
-                action = 'store_true')
-        optional_args_group.add_argument('-monitor', '--export_monitor', dest='monitor',
-                help = "Export Interface Monitor metrics",
-                action = 'store_true')
-        optional_args_group.add_argument('-route', '--export_route', dest='route',
-                help = "Export IP Route metrics",
-                action = 'store_true')
-        optional_args_group.add_argument('-wireless', '--export_wireless', dest='wireless',
-                help = "Export Wireless metrics",
-                action = 'store_true')
-        optional_args_group.add_argument('-capsman', '--export_capsman', dest='capsman',
-                help = "Export CAPsMAN metrics",
-                action = 'store_true')
-
         # Edit command
         edit_parser = subparsers.add_parser(MKTXPCommands.EDIT,
                                         description = 'Edits an existing MKTXP router entry',
@@ -176,21 +111,14 @@ Selected metrics info can be printed on the command line. For more information, 
                 help = f"Edit MKTXP internal configuration (advanced)",
                 action = 'store_true')        
 
-        # Delete command
-        delete_parser = subparsers.add_parser(MKTXPCommands.DELETE,
-                                        description = 'Deletes an existing MKTXP router entry',
-                                        formatter_class=MKTXPHelpFormatter)
-        required_args_group = delete_parser.add_argument_group('Required Arguments')
-        self._add_entry_name(required_args_group, registered_only = True, help = "Name of entry to delete")
-
-        # Start command
-        start_parser = subparsers.add_parser(MKTXPCommands.EXPORT,
+        # Export command
+        export_parser = subparsers.add_parser(MKTXPCommands.EXPORT,
                                         description = 'Starts exporting Miktorik Router Metrics to Prometheus',
                                         formatter_class=MKTXPHelpFormatter)
 
         # Print command
         print_parser = subparsers.add_parser(MKTXPCommands.PRINT,
-                                        description = 'Displays seleted metrics on the command line',
+                                        description = 'Displays selected metrics on the command line',
                                         formatter_class=MKTXPHelpFormatter)
         required_args_group = print_parser.add_argument_group('Required Arguments')
         self._add_entry_name(required_args_group, registered_only = True, help = "Name of config RouterOS entry")
@@ -212,17 +140,12 @@ Selected metrics info can be printed on the command line. For more information, 
         # check if there is a cmd to execute
         self._check_cmd_args(args, parser)
 
-        if args['sub_cmd'] in (MKTXPCommands.DELETE, MKTXPCommands.SHOW, MKTXPCommands.PRINT):
+        if args['sub_cmd'] in (MKTXPCommands.SHOW, MKTXPCommands.PRINT):
             # Registered Entry name could be a partial match, need to expand
             if args['entry_name']:
                 args['entry_name'] = UniquePartialMatchList(config_handler.registered_entries()).find(args['entry_name'])
 
-        if args['sub_cmd'] == MKTXPCommands.ADD:
-            if args['entry_name'] in (config_handler.registered_entries()):
-                print(f"{args['entry_name']}: entry name already exists")
-                parser.exit()
-
-        elif args['sub_cmd'] == MKTXPCommands.PRINT:
+        if args['sub_cmd'] == MKTXPCommands.PRINT:
             if not config_handler.entry(args['entry_name']).enabled:
                 print(f"Can not print metrics for disabled RouterOS entry: {args['entry_name']}\nRun 'mktxp edit' to review and enable it in the configuration file first")
                 parser.exit()

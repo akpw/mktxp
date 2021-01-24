@@ -19,25 +19,22 @@ class PoolCollector(BaseCollector):
     '''    
     @staticmethod
     def collect(router_metric):
-
         # initialize all pool counts, including those currently not used
         pool_records = router_metric.pool_records(['name'])
-        if not pool_records:
-            return range(0)
+        if pool_records:
+            pool_used_labels = ['pool']
+            pool_used_counts = {pool_record['name']: 0 for pool_record in pool_records}
 
-        pool_used_labels = ['pool']
-        pool_used_counts = {pool_record['name']: 0 for pool_record in pool_records}
+            # for pools in usage, calculate the current numbers
+            pool_used_records = router_metric.pool_used_records(pool_used_labels)
+            for pool_used_record in pool_used_records:
+                pool_used_counts[pool_used_record['pool']] = pool_used_counts.get(pool_used_record['pool'], 0) + 1
 
-        # for pools in usage, calculate the current numbers
-        pool_used_records = router_metric.pool_used_records(pool_used_labels)
-        for pool_used_record in pool_used_records:
-            pool_used_counts[pool_used_record['pool']] = pool_used_counts.get(pool_used_record['pool'], 0) + 1
-
-       # compile used-per-pool records
-        used_per_pool_records = [{ MKTXPConfigKeys.ROUTERBOARD_NAME: router_metric.router_id[MKTXPConfigKeys.ROUTERBOARD_NAME],
-                                   MKTXPConfigKeys.ROUTERBOARD_ADDRESS: router_metric.router_id[MKTXPConfigKeys.ROUTERBOARD_ADDRESS],
-                                   'pool': key, 'count': value} for key, value in pool_used_counts.items()]
-        
-        # yield used-per-pool metrics
-        used_per_pool_metrics = BaseCollector.gauge_collector('ip_pool_used', 'Number of used addresses per IP pool', used_per_pool_records, 'count', ['pool'])
-        yield used_per_pool_metrics
+           # compile used-per-pool records
+            used_per_pool_records = [{ MKTXPConfigKeys.ROUTERBOARD_NAME: router_metric.router_id[MKTXPConfigKeys.ROUTERBOARD_NAME],
+                                       MKTXPConfigKeys.ROUTERBOARD_ADDRESS: router_metric.router_id[MKTXPConfigKeys.ROUTERBOARD_ADDRESS],
+                                       'pool': key, 'count': value} for key, value in pool_used_counts.items()]
+            
+            # yield used-per-pool metrics
+            used_per_pool_metrics = BaseCollector.gauge_collector('ip_pool_used', 'Number of used addresses per IP pool', used_per_pool_records, 'count', ['pool'])
+            yield used_per_pool_metrics

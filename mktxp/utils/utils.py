@@ -13,6 +13,7 @@
 
 import os, sys, shlex, tempfile, shutil, re
 import subprocess, hashlib
+from timeit import default_timer
 from collections.abc import Iterable
 from contextlib import contextmanager
 from multiprocessing import Process, Event
@@ -34,6 +35,15 @@ def temp_dir(quiet = True):
         except OSError as e:
             if not quiet:
                 print ('Error while removing a tmp dir: {}'.format(e.args[0]))
+
+class Benchmark:
+    def __enter__(self):
+        self.start = default_timer()
+        return self
+
+    def __exit__(self, *args):
+        self.time = default_timer() - self.start
+
 
 class CmdProcessingError(Exception):
     pass
@@ -252,6 +262,4 @@ class RepeatableTimer:
             if self.finished.is_set() or self.run_once.is_set():
                 break
             self.finished.wait(self.interval)     
-
-
 

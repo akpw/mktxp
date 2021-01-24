@@ -19,10 +19,8 @@ class IdentityCollector(BaseCollector):
     @staticmethod
     def collect(router_metric):
         identity_labels = ['name']
-        identity_records = router_metric.identity_records(identity_labels)
-        if not identity_records:
-            return range(0)
-
-        identity_metrics = BaseCollector.info_collector('system_identity', 'System identity', identity_records, identity_labels)
-        yield identity_metrics
+        identity_records = router_metric.identity_records(identity_labels)        
+        if identity_records:
+            identity_metrics = BaseCollector.info_collector('system_identity', 'System identity', identity_records, identity_labels)
+            yield identity_metrics
 

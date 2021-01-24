@@ -21,28 +21,25 @@ class MonitorCollector(BaseCollector):
     def collect(router_metric):
         monitor_labels = ('status', 'rate', 'full_duplex', 'name')
         monitor_records = router_metric.interface_monitor_records(monitor_labels, include_comments = True)
-        if not monitor_records:
-            return range(0)
+        if monitor_records:
+            # translate records to appropriate values
+            for monitor_record in monitor_records:
+                for monitor_label in monitor_labels:
+                    value = monitor_record.get(monitor_label, None)    
+                    if value:            
+                        monitor_record[monitor_label] = MonitorCollector._translated_values(monitor_label, value)
 
-        # translate records to appropriate values
-        for monitor_record in monitor_records:
-            for monitor_label in monitor_labels:
-                value = monitor_record.get(monitor_label, None)    
-                if value:            
-                    monitor_record[monitor_label] = MonitorCollector._translated_values(monitor_label, value)
+            monitor_status_metrics = BaseCollector.gauge_collector('interface_status', 'Current interface link status', monitor_records, 'status', ['name'])
+            yield monitor_status_metrics
 
-        monitor_status_metrics = BaseCollector.gauge_collector('interface_status', 'Current interface link status', monitor_records, 'status', ['name'])
-        yield monitor_status_metrics
+            # limit records according to the relevant metrics
+            rate_records = [monitor_record for monitor_record in monitor_records if monitor_record.get('rate', None)]
+            monitor_rates_metrics = BaseCollector.gauge_collector('interface_rate', 'Actual interface connection data rate', rate_records, 'rate', ['name'])
+            yield monitor_rates_metrics
 
-        # limit records according to the relevant metrics
-        rate_records = [monitor_record for monitor_record in monitor_records if monitor_record.get('rate', None)]
-        monitor_rates_metrics = BaseCollector.gauge_collector('interface_rate', 'Actual interface connection data rate', rate_records, 'rate', ['name'])
-        yield monitor_rates_metrics
-
-        full_duplex_records = [monitor_record for monitor_record in monitor_records if monitor_record.get('full_duplex', None)]
-        monitor_rates_metrics = BaseCollector.gauge_collector('interface_full_duplex', 'Full duplex data transmission', full_duplex_records, 'full_duplex', ['name'])
-        yield monitor_rates_metrics
-
+            full_duplex_records = [monitor_record for monitor_record in monitor_records if monitor_record.get('full_duplex', None)]
+            monitor_rates_metrics = BaseCollector.gauge_collector('interface_full_duplex', 'Full duplex data transmission', full_duplex_records, 'full_duplex', ['name'])
+            yield monitor_rates_metrics
 
     # Helpers
     @staticmethod

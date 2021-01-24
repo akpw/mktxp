@@ -13,19 +13,17 @@
 
 from mktxp.collectors.base_collector import BaseCollector
 
+
 class HealthCollector(BaseCollector):
     ''' System Health Metrics collector
     '''    
     @staticmethod
     def collect(router_metric):
         health_labels = ['voltage', 'temperature']
-        health_records = router_metric.health_records(health_labels)
-        if not health_records:
-            return range(0)
+        health_records = router_metric.health_records(health_labels)        
+        if health_records:
+            voltage_metrics = BaseCollector.gauge_collector('system_routerboard_voltage', 'Supplied routerboard voltage', health_records, 'voltage')
+            yield voltage_metrics
 
-        voltage_metrics = BaseCollector.gauge_collector('system_routerboard_voltage', 'Supplied routerboard voltage', health_records, 'voltage')
-        yield voltage_metrics
-
-        temperature_metrics = BaseCollector.gauge_collector('system_routerboard_temperature', ' Routerboard current temperature', health_records, 'temperature')
-        yield temperature_metrics
-
+            temperature_metrics = BaseCollector.gauge_collector('system_routerboard_temperature', ' Routerboard current temperature', health_records, 'temperature')
+            yield temperature_metrics

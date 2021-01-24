@@ -97,5 +97,3 @@ class BaseOutputProcessor:
             config_handler.re_compiled['interface_rate_rgx'] = interface_rate_rgx
         rate = lambda interface_rate: 1000 if interface_rate.find('Mbps') < 0 else 1
         return(int(float(interface_rate_rgx.sub('', interface_rate)) * rate(interface_rate)))
-
-

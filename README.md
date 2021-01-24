@@ -16,11 +16,14 @@ Comes with a dedicated [Grafana dashboard](https://grafana.com/grafana/dashboard
 #### Requirements:
 - [Python 3.6.x](https://www.python.org/downloads/release/python-360/) or later
 
-
-- OSs:
+- Supported OSs:
     * Linux
     * Mac OSX
-    * Windows: TBD / maybe
+
+- Mikrotik RouterOS device(s)
+
+- Optional: [Prometheus](https://prometheus.io/docs/prometheus/latest/installation/), [Grafana](https://grafana.com/docs/grafana/latest/installation/)
+
 
 #### Install:
 - from [PyPI](https://pypi.org/project/mktxp/): `$ pip install mktxp`
@@ -28,24 +31,120 @@ Comes with a dedicated [Grafana dashboard](https://grafana.com/grafana/dashboard
 
 
 ## Getting started
-    Usage: $ mktxp [-h]
-    	{info, version, show, add, edit, delete, start}
-Commands:
-  {info, version, show, add, edit, delete, start}
+After installing MKTXP, you need to edit its main configuration file. The easiest way to do it is to run:
+```
+mktxp edit
 
-        $ mktxp {command} -h  #run this for detailed help on individual commands
+```
+
+This open the file in your default system editor. In case you'd prefer to use a different editor, just run the edit command with its optional `-ed` parameter e.g.:
+```
+mktxp edit -ed nano
+
+```
+
+The configuration file comes with a sample configuration, to make it easy for you to copy / edit parameters as needed.
+
+```
+[Sample-Router]
+    enabled = False         # turns metrics collection for this RouterOS device on / off
+    
+    hostname = localhost    # RouterOS IP address
+    port = 8728             # RouterOS IP Port
+    
+    username = username     # RouterOS user, needs to have 'read' and 'api' permissions
+    password = password
+    
+    use_ssl = False                 # enables connection via API-SSL servis
+    no_ssl_certificate = False      # enables API_SSL connect without router SSL certificate
+    ssl_certificate_verify = False  # turns SSL certificate verification on / off   
+
+    dhcp = True
+    dhcp_lease = True
+    pool = True
+    interface = True
+    firewall = True
+    monitor = True
+    route = True
+    wireless = True
+    wireless_clients = True
+    capsman = True
+    capsman_clients = True
+
+    use_comments_over_names = False  # when available, use comments instead of interfaces names 
+```
+
+## Mikrotik Device Config
+For the purpose of device monitoring, it's best to create a dedicated RouterOS device user with minimal required permissions. MKTXP just needs ```API``` and ```Read```, so at that point you can go to your router and type something like:
+```
+/user group add name=mktxp_group policy=api,read
+/user add name=mktxp_user group=mktxp_group password=mktxp_user_password
+```
+That's all it takes! Assuming you use the user info at the above configurtation file, at that point you already should be able to check your success with ```mktxp print``` command.
+
+
+## Exporting to Prometheus
+For exporting you router metrics to Prometheus, you need to connect MKTXP to it. To do that, open Prometheus config file: 
+```
+nano /etc/prometheus/prometheus.yml
+```
+
+and simply add:
+
+```
+  - job_name: 'mktxp'
+    static_configs:
+      - targets: ['mktxp_machine_IP:49090']
+
+```
+
+At that point, you should be are ready to go for running the `mktxp export` command that will get all router(s) metrics as configured above and serve them via http server on default port 49090. In case prefer to use a different port, you can change it (as well as other mktxp parameters) via running ```mktxp edit -i``` that opens internal mktxp settings file.
+
+## Grafana dashboard
+Now with all of your metrics in Prometheus, it's easy to visualise them with this [Grafana dashboard](https://grafana.com/grafana/dashboards/13679)
+
+
+## Setting up MKTXP to run as a Linux Service
+In case you install MKTXP on a Linux system and want to run it with system boot, just run
+
+```
+nano /etc/systemd/system/mktxp.service
+
+```
+
+and then copy and paste the following:
+
+```
+[Unit]
+Description=MKTXP Exporter
+
+[Service]
+User=user # the user under which mktxp was installed
+ExecStart=mktxp export # if mktxp is not at your $PATH, you might need to provide a full path
+
+[Install]
+WantedBy=default.target
+
+```
 
 
 ## Full description of CLI Commands
 ### mktxp
       . action commands:
-        .. export   Starts collecting metrics for all enabled RouterOS configuration entries
-        .. print    Displays seleted metrics on the command line
         .. info     Shows base MKTXP info
         .. edit     Open MKTXP configuration file in your editor of choice        
-        .. add      Adds MKTXP RouterOS configuration entry from the command line
+        .. export   Starts collecting metrics for all enabled RouterOS configuration entries
+        .. print    Displays seleted metrics on the command line
         .. show   	Shows MKTXP configuration entries on the command line
-        .. delete   Deletes a MKTXP RouterOS configuration entry from the command line
+
+
+Usage: $ mktxp [-h]
+        {info, edit, export, print, show }
+Commands:
+  {info, edit, export, print, show }
+
+        $ mktxp {command} -h  #run this for detailed help on individual commands
+
 
 
 ## Installing Development version
