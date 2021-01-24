@@ -120,7 +120,7 @@ Connected Wifi Devices:  15
 -----------------------  --
 ```
 Hmmm, that toaster could probably use a better signal... :) \
-But for now let's get back on track and proceed with the business of exporting RouterOS metrics to Prometheus.
+But let's get back on track and proceed with the business of exporting RouterOS metrics to Prometheus.
 
 
 ## Exporting to Prometheus
