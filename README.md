@@ -157,7 +157,8 @@ Now with your RouterOS metrics being exported to Prometheus, it's easy to visual
 
 
 ## Setting up MKTXP to run as a Linux Service
-If you've installed MKTXP on a Linux system, you can run it with system boot via adding a service.
+If you've installed MKTXP on a Linux system, you can run it with system boot via adding a service. \
+Let's start with:
 
 
 ```
@@ -180,7 +181,7 @@ WantedBy=default.target
 
 ```
 
-Let's start the service and check on its' status:
+Let's save and then start the service as well as check on its' status:
 ```
 sudo systemctl daemon-reload
 sudo systemctl start mktxp
