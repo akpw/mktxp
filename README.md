@@ -8,6 +8,7 @@
 ## Description
 Prometheus Exporter for Mikrotik RouterOS. 
 MKTXP enables gathering metrics across multiple RouterOS devices, all easily configurable via built-in CLI interface.
+
 Comes with a dedicated [Grafana dashboard](https://grafana.com/grafana/dashboards/13679)
 
 <img src="https://akpw-s3.s3.eu-central-1.amazonaws.com/mktxp_black.png" width="550" height="620">
@@ -39,7 +40,9 @@ mktxp edit
 
 ```
 
-This opens the file in your default system editor. In case you prefer a different editor, just run the ```edit``` command with its optional `-ed` parameter e.g.:
+This opens the file in your default system editor. 
+
+In case you prefer a different editor, just run the ```edit``` command with its optional `-ed` parameter e.g.:
 ```
 mktxp edit -ed nano
 
