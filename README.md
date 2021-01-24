@@ -124,7 +124,7 @@ But let's get back on track and proceed with the business of exporting RouterOS 
 
 
 ## Exporting to Prometheus
-For getting your routers' metrics into an existing Prometheus installation, we just need to connect MKTXP to it. \
+For getting your routers' metrics into an existing Prometheus installation, we basically just need to connect MKTXP to it. \
 Let's do just that via editing the Prometheus config file: 
 ```
 nano /etc/prometheus/prometheus.yml
