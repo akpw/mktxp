@@ -93,7 +93,7 @@ Now let's put some Mikrotik device address / user credentials in the above MKTXP
 For example, let's go take a look at some of my smart home CAPsMAN clients:
 ```
  ~> mktxp print -en MKT-GT -cc
-Connecting to router MKT-GT@10.70.0.1
+Connecting to router MKT-GT@10.**.*.**
 2021-01-24 12:04:29 Connection to router MKT-GT@10.70.0.1 has been established
 
 | dhcp_name            | dhcp_address   | mac_address       |   rx_signal | interface   | ssid   | tx_rate   | rx_rate   | uptime   |
@@ -142,12 +142,10 @@ and simply add:
 At that point, we should be are ready for the main `mktxp export` command that will get all router(s) metrics as configured above and serve them to Prometheus via a http server on the default port 49090. \
 ````
 ❯ mktxp export
-Connecting to router MKT-GT@10.70.0.1
-2021-01-24 14:16:22 Connection to router MKT-GT@10.70.0.1 has been established
-Connecting to router MKT-LR@10.70.0.18
-2021-01-24 14:16:23 Connection to router MKT-LR@10.70.0.18 has been established
-Connecting to router MKT-FL@10.70.0.19
-2021-01-24 14:16:23 Connection to router MKT-FL@10.70.0.19 has been established
+Connecting to router MKT-GT@10.**.*.**
+2021-01-24 14:16:22 Connection to router MKT-GT@10.**.*.** has been established
+Connecting to router MKT-LR@10.**.*.**
+2021-01-24 14:16:23 Connection to router MKT-LR@10.**.*.** has been established
 2021-01-24 14:16:23 Running HTTP metrics server on port 49090
 ````
 
