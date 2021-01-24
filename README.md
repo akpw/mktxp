@@ -30,14 +30,14 @@ For effortless visualization of the RouterOS metrics exported to Prometheus, MKT
 
 
 ## Install:
-- from [PyPI](https://pypi.org/project/mktxp/): `$ pip install mktxp`
-- latest from source repository: `$ pip install git+https://github.com/akpw/mktxp`
+- from [PyPI](https://pypi.org/project/mktxp/): `❯ pip install mktxp`
+- latest from source repository: `❯ pip install git+https://github.com/akpw/mktxp`
 
 
 ## Getting started
 After installing MKTXP, you need to edit its main configuration file. The easiest way to do it is via running:
 ```
-mktxp edit
+❯ mktxp edit
 
 ```
 
@@ -45,7 +45,7 @@ This opens the config file in your default system editor. \
 In case you prefer a different editor, just run the ```edit``` command with its optional `-ed` parameter. \
 For example, to explicitly open the MKTXP config in nano:
 ```
-mktxp edit -ed nano
+❯ mktxp edit -ed nano
 
 ```
 
@@ -127,7 +127,7 @@ But let's get back on track and proceed with the business of exporting RouterOS 
 For getting your routers' metrics into an existing Prometheus installation, we basically just need to connect MKTXP to it. \
 Let's do just that via editing the Prometheus config file: 
 ```
-nano /etc/prometheus/prometheus.yml
+❯ nano /etc/prometheus/prometheus.yml
 ```
 
 and simply add:
@@ -162,7 +162,7 @@ Let's start with:
 
 
 ```
-nano /etc/systemd/system/mktxp.service
+❯ nano /etc/systemd/system/mktxp.service
 
 ```
 
@@ -183,11 +183,11 @@ WantedBy=default.target
 
 Let's save and then start the service as well as check on its' status:
 ```
-sudo systemctl daemon-reload
-sudo systemctl start mktxp
-sudo systemctl enable mktxp
+❯ sudo systemctl daemon-reload
+❯ sudo systemctl start mktxp
+❯ sudo systemctl enable mktxp
 
-systemctl status mktxp
+❯ systemctl status mktxp
 ● mktxp.service - MKTXP Mikrotik Exporter to Prometheus
      Loaded: loaded (/etc/systemd/system/mktxp.service; disabled; vendor preset: enabled)
      Active: active (running) since Sun 2021-01-24 09:16:44 CET; 2h 44min ago
@@ -205,14 +205,14 @@ systemctl status mktxp
         .. show   	Shows MKTXP configuration entries on the command line
 
 ````
-mktxp -h
+❯ mktxp -h
 usage: MKTXP [-h] {info, edit, export, print, show, } ...
 
 ````
 To learn more about individual commands, just run it with ```-h```:
 For example, to learn everything about ````mktxp show````:
 ````
-mktxp show -h
+❯ mktxp show -h
 usage: MKTXP show [-h]
                   [-en ['Sample-Router']]
                   [-cfg]
