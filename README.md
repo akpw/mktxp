@@ -10,19 +10,21 @@ Prometheus Exporter for Mikrotik RouterOS.
 MKTXP enables gathering metrics across multiple RouterOS devices, all easily configurable via built-in CLI interface.
 Comes with a dedicated [Grafana dashboard](https://grafana.com/grafana/dashboards/13679)
 
-<img src="https://akpw-s3.s3.eu-central-1.amazonaws.com/mktxp_black.png" width="530" height="620">
+<img src="https://akpw-s3.s3.eu-central-1.amazonaws.com/mktxp_black.png" width="550" height="620">
 
 
 #### Requirements:
 - [Python 3.6.x](https://www.python.org/downloads/release/python-360/) or later
 
 - Supported OSs:
-    * Linux
-    * Mac OSX
+   * Linux
+   * Mac OSX
 
 - Mikrotik RouterOS device(s)
 
-- Optional: [Prometheus](https://prometheus.io/docs/prometheus/latest/installation/), [Grafana](https://grafana.com/docs/grafana/latest/installation/)
+- Optional: 
+   * [Prometheus](https://prometheus.io/docs/prometheus/latest/installation/)
+   * [Grafana](https://grafana.com/docs/grafana/latest/installation/)
 
 
 #### Install:
@@ -31,19 +33,19 @@ Comes with a dedicated [Grafana dashboard](https://grafana.com/grafana/dashboard
 
 
 ## Getting started
-After installing MKTXP, you need to edit its main configuration file. The easiest way to do it is to run:
+After installing MKTXP, you need to edit its main configuration file. The easiest way to do it is via:
 ```
 mktxp edit
 
 ```
 
-This open the file in your default system editor. In case you'd prefer to use a different editor, just run the edit command with its optional `-ed` parameter e.g.:
+This opens the file in your default system editor. In case you prefer a different editor, just run the ```edit``` command with its optional `-ed` parameter e.g.:
 ```
 mktxp edit -ed nano
 
 ```
 
-The configuration file comes with a sample configuration, to make it easy for you to copy / edit parameters as needed.
+The configuration file comes with a sample configuration, making it easy to copy / edit parameters as needed:
 
 ```
 [Sample-Router]
@@ -59,19 +61,19 @@ The configuration file comes with a sample configuration, to make it easy for yo
     no_ssl_certificate = False      # enables API_SSL connect without router SSL certificate
     ssl_certificate_verify = False  # turns SSL certificate verification on / off   
 
-    dhcp = True
-    dhcp_lease = True
-    pool = True
-    interface = True
-    firewall = True
-    monitor = True
-    route = True
-    wireless = True
-    wireless_clients = True
-    capsman = True
-    capsman_clients = True
+    dhcp = True                     # DHCP general metrics
+    dhcp_lease = True               # DHCP lease metrics
+    pool = True                     # Pool metrics
+    interface = True                # Interfaces traffic metrics
+    firewall = True                 # Firewall rules traffic metrics
+    monitor = True                  # Interface monitor metrics
+    route = True                    # Routes metrics
+    wireless = True                 # WLAN general metrics
+    wireless_clients = True         # WLAN clients metrics
+    capsman = True                  # CAPsMAN general metrics
+    capsman_clients = True          # CAPsMAN clients metrics
 
-    use_comments_over_names = False  # when available, use comments instead of interfaces names 
+    use_comments_over_names = False  # when available, forces using comments over the interfaces names 
 ```
 
 ## Mikrotik Device Config
