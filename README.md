@@ -29,7 +29,7 @@ For effortless visualization of the RouterOS metrics exported to Prometheus, MKT
    * [Grafana](https://grafana.com/docs/grafana/latest/installation/)
 
 
-#### Install:
+### Install:
 - from [PyPI](https://pypi.org/project/mktxp/): `$ pip install mktxp`
 - latest from source repository: `$ pip install git+https://github.com/akpw/mktxp`
 
