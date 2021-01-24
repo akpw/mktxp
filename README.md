@@ -140,7 +140,7 @@ and simply add:
 ```
 
 At that point, we should be are ready for the main `mktxp export` command that will get all router(s) metrics as configured above and serve them to Prometheus via a http server on the default MKTXP port 49090. \
-In case a different port is preffered, it can be changed via the ```mktxp edit -i``` command.
+In case a different port is preffered, it can be set as needed via the ```mktxp edit -i``` command. That will open an internal MKTXP configuration file with some more implementation-related parameters.
 
 ## Grafana dashboard
 Now with your RouterOS devices configured metrics being exported to Prometheus, it's easy to visualize them with this [Grafana dashboard](https://grafana.com/grafana/dashboards/13679)
