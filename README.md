@@ -153,7 +153,7 @@ In case a different port is preffered, it can be set as needed via running the `
 That will open an internal MKTXP configuration file with some more implementation-related parameters.
 
 ## Grafana dashboard
-Now with your RouterOS devices configured metrics being exported to Prometheus, it's easy to visualize them with this [Grafana dashboard](https://grafana.com/grafana/dashboards/13679)
+Now with your RouterOS metrics being exported to Prometheus, it's easy to visualize them with this [Grafana dashboard](https://grafana.com/grafana/dashboards/13679)
 
 
 ## Setting up MKTXP to run as a Linux Service
