@@ -88,10 +88,10 @@ MKTXP only needs ```API``` and ```Read```, so at that point you can go to your r
 /user add name=mktxp_user group=mktxp_group password=mktxp_user_password
 ```
 
-## Mikrotik Device Config
+## A check on reality
 Now let's put these user credentials in the above configuration file, and at that point we should already be able to check our success. \
 Since MKTXP can print selected metrics directly on the command line, it's easy to check on things even before connecting to Prometheus or Grafana. \
-For example, let's go check on some of my smart home WiFi appliances:
+For example, let's go take a look at some of my smart home CAPsMAN clients:
 ```
  ~> mktxp print -en MKT-GT -cc
 Connecting to router MKT-GT@10.70.0.1
@@ -120,13 +120,13 @@ Connecting to router MKT-GT@10.70.0.1
 Connected Wifi Devices:  15
 -----------------------  --
 ```
-Hmmm, that toaster could probably use a better signal... \
-But let's get back on track and proceed to the business of exporting metrics to Prometheus.
+Hmmm, that toaster could probably use a better signal... :) \
+But for now let's get back on track and proceed with the business of exporting RouterOS metrics to Prometheus.
 
 
 ## Exporting to Prometheus
-For getting your routers' metrics into an existing Prometheus installation, we first need to connect MKTXP to it. \
-To do that, let's edit Prometheus config file: 
+For getting your routers' metrics into an existing Prometheus installation, we just need to connect MKTXP to it. \
+Let's do just that via editing the Prometheus config file: 
 ```
 nano /etc/prometheus/prometheus.yml
 ```
