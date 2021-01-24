@@ -116,7 +116,8 @@ Connecting to router MKT-GT@10.70.0.1
 Connected Wifi Devices:  15
 -----------------------  --
 ```
-Hmmm, that toaster looks like it'd use a better signal.. But before going to fixing that one, let's get back on track and proceed to the actual Prometheus export.
+Hmmm, that toaster looks like it'd use a better signal.. \
+But before going to fixing that one, let's get back on track and proceed to exporting metrics to Prometheus.
 
 
 ## Exporting to Prometheus
