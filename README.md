@@ -41,7 +41,7 @@ mktxp edit
 
 ```
 
-This opens the file in your default system editor. \
+This opens the config file in your default system editor. \
 In case you prefer a different editor, just run the ```edit``` command with its optional `-ed` parameter. \
 For example, to explicitly open the MKTXP config in nano:
 ```
