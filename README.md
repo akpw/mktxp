@@ -10,7 +10,7 @@ MKTXP is a Prometheus Exporter for Mikrotik RouterOS devices.\
 It gathers  rich set of metrics across multiple routers, all easily configurable via built-in CLI interface. \
 Apart from exporting to Prometheus, MKTXP can also print some of the metrics directly on the command line (see a [WiFi Clients example](https://github.com/akpw/mktxp/blob/main/README.md#mikrotik-device-config) below).
 
-For effortless visualisation of the RouterOS metrics exported to Prometheus, MKTXP comes with a dedicated [Grafana dashboard](https://grafana.com/grafana/dashboards/13679)
+For effortless visualization of the RouterOS metrics exported to Prometheus, MKTXP comes with a dedicated [Grafana dashboard](https://grafana.com/grafana/dashboards/13679)
 
 <img src="https://akpw-s3.s3.eu-central-1.amazonaws.com/mktxp_black.png" width="530" height="620">
 
@@ -87,8 +87,10 @@ MKTXP only needs ```API``` and ```Read```, so at that point you can go to your r
 /user group add name=mktxp_group policy=api,read
 /user add name=mktxp_user group=mktxp_group password=mktxp_user_password
 ```
-Now put these user credentials in the above configurtation file, and at that point should already be able to check your success. \
-Since MKTXP can print selected metrics directly on the command line, we can check on things even without connection to Prometheus or Grafana. \
+
+## Mikrotik Device Config
+Now let's put these user credentials in the above configuration file, and at that point we should already be able to check our success. \
+Since MKTXP can print selected metrics directly on the command line, it's easy to check on things even before connecting to Prometheus or Grafana. \
 For example, let's go check on some of my smart home WiFi appliances:
 ```
  ~> mktxp print -en MKT-GT -cc
@@ -142,7 +144,7 @@ At that point, we should be are ready for the main `mktxp export` command that w
 In case a different port is preffered, it can be changed via the ```mktxp edit -i``` command.
 
 ## Grafana dashboard
-Now with your RouterOS devices configured metrics being exported to Prometheus, it's easy to visualise them with this [Grafana dashboard](https://grafana.com/grafana/dashboards/13679)
+Now with your RouterOS devices configured metrics being exported to Prometheus, it's easy to visualize them with this [Grafana dashboard](https://grafana.com/grafana/dashboards/13679)
 
 
 ## Setting up MKTXP to run as a Linux Service
@@ -189,7 +191,7 @@ systemctl status mktxp
        . action commands:
         .. info     Shows base MKTXP info
         .. edit     Open MKTXP configuration file in your editor of choice        
-        .. print    Displays seleted metrics on the command line
+        .. print    Displays selected metrics on the command line
         .. export   Starts collecting metrics for all enabled RouterOS configuration entries
         .. show   	Shows MKTXP configuration entries on the command line
 
