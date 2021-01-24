@@ -6,8 +6,8 @@
 
 
 ## Description
-Prometheus Exporter for Mikrotik RouterOS. 
-MKTXP enables gathering metrics across multiple RouterOS devices, all easily configurable via built-in CLI interface.
+MKTXP is a Prometheus Exporter for Mikrotik RouterOS devices. \n
+It enables gathering metrics across multiple routers, all easily configurable via built-in CLI interface.
 
 Comes with a dedicated [Grafana dashboard](https://grafana.com/grafana/dashboards/13679)
 
