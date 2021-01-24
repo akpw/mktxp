@@ -12,7 +12,7 @@ Apart from exporting to Prometheus, MKTXP can also print some of the metrics dir
 
 For effortless visualization of the RouterOS metrics exported to Prometheus, MKTXP comes with a dedicated [Grafana dashboard](https://grafana.com/grafana/dashboards/13679)
 
-<img src="https://akpw-s3.s3.eu-central-1.amazonaws.com/mktxp_black.png" width="520" height="620">
+<img src="https://akpw-s3.s3.eu-central-1.amazonaws.com/mktxp_black.png" width="500" height="620">
 
 
 #### Requirements:
