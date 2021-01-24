@@ -196,8 +196,7 @@ systemctl status mktxp
 
 
 ## Description of CLI Commands
-### mktxp
-     Usage: $ mktxp [-h]
+### mktxp commands
        . action commands:
         .. info     Shows base MKTXP info
         .. edit     Open MKTXP configuration file in your editor of choice        
@@ -205,9 +204,25 @@ systemctl status mktxp
         .. export   Starts collecting metrics for all enabled RouterOS configuration entries
         .. show   	Shows MKTXP configuration entries on the command line
 
-Commands: {info, edit, export, print, show }
-    $ mktxp {command} -h  #run this for detailed help on individual commands
+````
+mktxp -h
+usage: MKTXP [-h] {info, edit, export, print, show, } ...
 
+````
+To learn more about individual commands, just run it with ```-h```:
+For example, to learn everything about ````mktxp show````:
+````
+mktxp show -h
+usage: MKTXP show [-h]
+                  [-en ['Sample-Router']]
+                  [-cfg]
+Displays MKTXP config router entries
+optional arguments:
+  -h, --help            show this help message and exit
+  -en, --entry-name ['Sample-Router']
+                        Config entry name
+  -cfg, --config        Shows MKTXP config files paths
+````  
 
 ## Installing Development version
 - Clone the repo, then run: `$ python setup.py develop`
