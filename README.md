@@ -94,7 +94,7 @@ For example, let's go take a look at some of my smart home CAPsMAN clients:
 ```
  ~> mktxp print -en MKT-GT -cc
 Connecting to router MKT-GT@10.**.*.**
-2021-01-24 12:04:29 Connection to router MKT-GT@10.70.0.1 has been established
+2021-01-24 12:04:29 Connection to router MKT-GT@10.**.*.** has been established
 
 | dhcp_name            | dhcp_address   | mac_address       |   rx_signal | interface   | ssid   | tx_rate   | rx_rate   | uptime   |
 |----------------------|----------------|-------------------|-------------|-------------|--------|-----------|-----------|----------|
