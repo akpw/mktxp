@@ -89,8 +89,7 @@ MKTXP only needs ```API``` and ```Read```, so at that point you can go to your r
 ```
 
 ## A check on reality
-Now let's put a Mikrotik device address / user credentials in the above MKTXP configuration file, and at that point we should already be able to check our success so far. \
-Since MKTXP can print selected metrics directly on the command line, it's easy to check on things even before connecting to Prometheus or Grafana. \
+Now let's put a Mikrotik device address / user credentials in the above MKTXP configuration file, and at that point we should already be able to check our progress so far. Since MKTXP can print selected metrics directly on the command line, it's easy to check on things even before connecting MKTXP to Prometheus or Grafana. \
 For example, let's go take a look at some of my smart home CAPsMAN clients:
 ```
  ~> mktxp print -en MKT-GT -cc
