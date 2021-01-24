@@ -10,7 +10,7 @@ Prometheus Exporter for Mikrotik RouterOS.
 MKTXP enables gathering metrics across multiple RouterOS devices, all easily configurable via built-in CLI interface.
 Comes with a dedicated [Grafana dashboard](https://grafana.com/grafana/dashboards/13679)
 
-<img src="http://www.akpdev.com/images/mktxp_b_t.png" width="530" height="620">
+<img src="https://akpw-s3.s3.eu-central-1.amazonaws.com/mktxp_black.png" width="530" height="620">
 
 
 #### Requirements:
