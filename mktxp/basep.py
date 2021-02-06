@@ -11,24 +11,27 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
+
 from http.server import HTTPServer
 from datetime import datetime
 from prometheus_client.core import REGISTRY
 from prometheus_client import MetricsHandler, start_http_server
 from mktxp.cli.config.config import config_handler
 from mktxp.collectors_handler import CollectorsHandler
-from mktxp.metrics_handler import RouterMetricsHandler
+from mktxp.router_entries_handler import RouterEntriesHandler
 
 from mktxp.cli.output.capsman_out import CapsmanOutput
 from mktxp.cli.output.wifi_out import WirelessOutput
+from mktxp.cli.output.dhcp_out import DHCPOutput
+
 
 class MKTXPProcessor:
     ''' Base Export Processing
     '''    
     @staticmethod
     def start():
-        router_metrics_handler = RouterMetricsHandler()
-        REGISTRY.register(CollectorsHandler(router_metrics_handler))
+        router_entries_handler = RouterEntriesHandler()
+        REGISTRY.register(CollectorsHandler(router_entries_handler))
         MKTXPProcessor.run(port=config_handler._entry().port)
 
     @staticmethod
@@ -45,13 +48,18 @@ class MKTXPCLIProcessor:
     '''    
     @staticmethod
     def capsman_clients(entry_name):
-        router_metric = RouterMetricsHandler.router_metric(entry_name)
-        if router_metric:
-            CapsmanOutput.clients_summary(router_metric)
+        router_entry = RouterEntriesHandler.router_entry(entry_name)
+        if router_entry:
+            CapsmanOutput.clients_summary(router_entry)
         
     @staticmethod
     def wifi_clients(entry_name):
-        router_metric = RouterMetricsHandler.router_metric(entry_name)
-        if router_metric:
-            WirelessOutput.clients_summary(router_metric)
+        router_entry = RouterEntriesHandler.router_entry(entry_name)
+        if router_entry:
+            WirelessOutput.clients_summary(router_entry)
         
+    @staticmethod
+    def dhcp_clients(entry_name):
+        router_entry = RouterEntriesHandler.router_entry(entry_name)
+        if router_entry:
+            DHCPOutput.clients_summary(router_entry)

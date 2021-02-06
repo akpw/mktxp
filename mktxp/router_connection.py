@@ -11,11 +11,13 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
+
 import ssl
 import socket
 from datetime import datetime
 from routeros_api import RouterOsApiPool
 from mktxp.cli.config.config import config_handler
+
 
 class RouterAPIConnectionError(Exception):
     pass
@@ -24,24 +26,24 @@ class RouterAPIConnectionError(Exception):
 class RouterAPIConnection:
     ''' Base wrapper interface for the routeros_api library
     '''            
-    def __init__(self, router_name, router_entry):
+    def __init__(self, router_name, config_entry):
         self.router_name = router_name
-        self.router_entry = router_entry
+        self.config_entry = config_entry
         self.last_failure_timestamp = self.successive_failure_count = 0
         
         ctx = None
-        if self.router_entry.use_ssl and self.router_entry.no_ssl_certificate:
+        if self.config_entry.use_ssl and self.config_entry.no_ssl_certificate:
             ctx = ssl.create_default_context()
             ctx.set_ciphers('ADH:@SECLEVEL=0')       
 
         self.connection = RouterOsApiPool(
-                host = self.router_entry.hostname,
-                username = self.router_entry.username,
-                password = self.router_entry.password,
-                port = self.router_entry.port,
+                host = self.config_entry.hostname,
+                username = self.config_entry.username,
+                password = self.config_entry.password,
+                port = self.config_entry.port,
                 plaintext_login = True,
-                use_ssl = self.router_entry.use_ssl,
-                ssl_verify = self.router_entry.ssl_certificate_verify,
+                use_ssl = self.config_entry.use_ssl,
+                ssl_verify = self.config_entry.ssl_certificate_verify,
                 ssl_context = ctx)
         
         self.connection.socket_timeout = config_handler._entry().socket_timeout
@@ -62,7 +64,7 @@ class RouterAPIConnection:
         if self.is_connected() or self._in_connect_timeout(connect_time.timestamp()):
             return
         try:
-            print(f'Connecting to router {self.router_name}@{self.router_entry.hostname}')
+            print(f'Connecting to router {self.router_name}@{self.config_entry.hostname}')
             self.api = self.connection.get_api()
             self._set_connect_state(success = True, connect_time = connect_time)
         except (socket.error, socket.timeout, Exception) as exc:
@@ -78,11 +80,11 @@ class RouterAPIConnection:
         connect_delay = self._connect_delay()
         if (connect_timestamp - self.last_failure_timestamp) < connect_delay:
             if not quiet: 
-                print(f'{self.router_name}@{self.router_entry.hostname}: in connect timeout, {int(connect_delay - (connect_timestamp - self.last_failure_timestamp))}secs remaining')
+                print(f'{self.router_name}@{self.config_entry.hostname}: in connect timeout, {int(connect_delay - (connect_timestamp - self.last_failure_timestamp))}secs remaining')
                 print(f'Successive failure count: {self.successive_failure_count}')
             return True
         if not quiet: 
-            print(f'{self.router_name}@{self.router_entry.hostname}: OK to connect')
+            print(f'{self.router_name}@{self.config_entry.hostname}: OK to connect')
             if self.last_failure_timestamp > 0:
                 print(f'Seconds since last failure: {connect_timestamp - self.last_failure_timestamp}')
                 print(f'Prior successive failure count: {self.successive_failure_count}')
@@ -98,12 +100,12 @@ class RouterAPIConnection:
         if success:
             self.last_failure_timestamp = 0
             self.successive_failure_count = 0
-            print(f'{connect_time.strftime("%Y-%m-%d %H:%M:%S")} Connection to router {self.router_name}@{self.router_entry.hostname} has been established')
+            print(f'{connect_time.strftime("%Y-%m-%d %H:%M:%S")} Connection to router {self.router_name}@{self.config_entry.hostname} has been established')
         else:
             self.api = None
             self.successive_failure_count += 1
             self.last_failure_timestamp = connect_time.timestamp() 
-            print(f'{connect_time.strftime("%Y-%m-%d %H:%M:%S")} Connection to router {self.router_name}@{self.router_entry.hostname} has failed: {exc}')
+            print(f'{connect_time.strftime("%Y-%m-%d %H:%M:%S")} Connection to router {self.router_name}@{self.config_entry.hostname} has failed: {exc}')
 
 
 

@@ -12,15 +12,18 @@
 ## GNU General Public License for more details.
 
 
+import socket
 import speedtest
 from datetime import datetime
 from multiprocessing import Pool
 from mktxp.cli.config.config import config_handler
 from mktxp.collectors.base_collector import BaseCollector
 
+
 result_list = [{'download': 0, 'upload': 0, 'ping': 0}]
 def get_result(bandwidth_dict):
     result_list[0] = bandwidth_dict
+
 
 class BandwidthCollector(BaseCollector):
     ''' MKTXP collector
@@ -53,8 +56,21 @@ class BandwidthCollector(BaseCollector):
 
     @staticmethod
     def bandwidth_worker():
-        bandwidth_test = speedtest.Speedtest()
-        bandwidth_test.get_best_server()
-        bandwidth_test.download()
-        bandwidth_test.upload()
-        return bandwidth_test.results.dict()
+        if BandwidthCollector.inet_connected():
+            bandwidth_test = speedtest.Speedtest()
+            bandwidth_test.get_best_server()
+            bandwidth_test.download()
+            bandwidth_test.upload()
+            return bandwidth_test.results.dict()
+        else:
+            return {'download': 0, 'upload': 0, 'ping': 0}
+
+    @staticmethod
+    def inet_connected(host="8.8.8.8", port=53, timeout=3):
+        try:
+            socket.setdefaulttimeout(timeout)
+            socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))
+            return True
+        except socket.error as exc:
+            return False
+

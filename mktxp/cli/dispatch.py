@@ -12,6 +12,7 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
+
 import sys
 import subprocess
 import mktxp.cli.checks.chk_pv
@@ -19,6 +20,7 @@ from mktxp.utils.utils import run_cmd
 from mktxp.cli.options import MKTXPOptionsParser, MKTXPCommands
 from mktxp.cli.config.config import config_handler, ConfigEntry
 from mktxp.basep import MKTXPProcessor, MKTXPCLIProcessor
+
 
 class MKTXPDispatcher:
     ''' Base MKTXP Commands Dispatcher
@@ -92,13 +94,17 @@ class MKTXPDispatcher:
 
     def print(self, args):
         if not (args['wifi_clients'] or args['capsman_clients']):
-            print("Select metric option(s) to print out, or run 'mktxp print' -h to find out more")
+            print("Select metric option(s) to print out, or run 'mktxp print -h' to find out more")
 
         if args['wifi_clients']:
             MKTXPCLIProcessor.wifi_clients(args['entry_name'])
 
         if args['capsman_clients']:
             MKTXPCLIProcessor.capsman_clients(args['entry_name'])
+
+        if args['dhcp_clients']:
+            MKTXPCLIProcessor.dhcp_clients(args['entry_name'])
+
 
 
 def main():

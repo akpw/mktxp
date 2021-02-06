@@ -15,6 +15,7 @@
 from prometheus_client.core import GaugeMetricFamily, CounterMetricFamily, InfoMetricFamily
 from mktxp.cli.config.config import MKTXPConfigKeys
      
+     
 class BaseCollector:
     ''' Base Collector methods
         For use by custom collectors

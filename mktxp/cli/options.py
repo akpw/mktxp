@@ -11,6 +11,7 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
+
 import os
 import pkg_resources
 from argparse import ArgumentParser, HelpFormatter
@@ -132,6 +133,9 @@ Selected metrics info can be printed on the command line. For more information, 
                 help = "WiFi clients metrics",
                 action = 'store_true')
 
+        optional_args_group.add_argument('-dc', '--dhcp_clients', dest='dhcp_clients',
+                help = "DHCP clients metrics",
+                action = 'store_true')
 
     # Options checking
     def _check_args(self, args, parser):

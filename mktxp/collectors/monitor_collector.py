@@ -11,16 +11,19 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
+
 from mktxp.collectors.base_collector import BaseCollector
 from mktxp.cli.output.base_out import BaseOutputProcessor
+from mktxp.datasources.interface_ds import InterfaceMonitorMetricsDataSource
+
 
 class MonitorCollector(BaseCollector):
     ''' Ethernet Interface Monitor Metrics collector
     '''    
     @staticmethod
-    def collect(router_metric):
+    def collect(router_entry):
         monitor_labels = ('status', 'rate', 'full_duplex', 'name')
-        monitor_records = router_metric.interface_monitor_records(monitor_labels, include_comments = True)
+        monitor_records = InterfaceMonitorMetricsDataSource.metric_records(router_entry, metric_labels = monitor_labels, include_comments = True)   
         if monitor_records:
             # translate records to appropriate values
             for monitor_record in monitor_records:

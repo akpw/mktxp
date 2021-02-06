@@ -11,16 +11,18 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
+
 from mktxp.collectors.base_collector import BaseCollector
+from mktxp.datasources.health_ds import HealthMetricsDataSource
 
 
 class HealthCollector(BaseCollector):
     ''' System Health Metrics collector
     '''    
     @staticmethod
-    def collect(router_metric):
+    def collect(router_entry):
         health_labels = ['voltage', 'temperature']
-        health_records = router_metric.health_records(health_labels)        
+        health_records = HealthMetricsDataSource.metric_records(router_entry, metric_labels = health_labels)   
         if health_records:
             voltage_metrics = BaseCollector.gauge_collector('system_routerboard_voltage', 'Supplied routerboard voltage', health_records, 'voltage')
             yield voltage_metrics

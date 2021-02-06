@@ -11,14 +11,17 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
+
 from mktxp.collectors.base_collector import BaseCollector
+from mktxp.datasources.mktxp_ds import MKTXPMetricsDataSource
+
 
 class MKTXPCollector(BaseCollector):
     ''' System Identity Metrics collector
     '''     
     @staticmethod
-    def collect(router_metric):
-        mktxp_records = router_metric.mktxp_records()        
+    def collect(router_entry):
+        mktxp_records = MKTXPMetricsDataSource.metric_records(router_entry)
         if mktxp_records:
             mktxp_duration_metric = BaseCollector.counter_collector('collection_time', 'Total time spent collecting metrics in milliseconds', mktxp_records, 'duration', ['name'])
             yield mktxp_duration_metric

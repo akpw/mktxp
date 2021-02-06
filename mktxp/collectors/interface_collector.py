@@ -11,20 +11,23 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
+
 from mktxp.collectors.base_collector import BaseCollector
+from mktxp.datasources.interface_ds import InterfaceTrafficMetricsDataSource
+
 
 class InterfaceCollector(BaseCollector):
     ''' Router Interface Metrics collector
     '''        
     @staticmethod
-    def collect(router_metric):
+    def collect(router_entry):
         interface_traffic_labels = ['name', 'comment', 'rx_byte', 'tx_byte', 'rx_packet', 'tx_packet', 'rx_error', 'tx_error', 'rx_drop', 'tx_drop']
-        interface_traffic_records = router_metric.interface_traffic_records(interface_traffic_labels)
-        
+        interface_traffic_records = InterfaceTrafficMetricsDataSource.metric_records(router_entry, metric_labels = interface_traffic_labels)   
+
         if interface_traffic_records:
             for interface_traffic_record in interface_traffic_records:
                 if interface_traffic_record.get('comment'):
-                    interface_traffic_record['name'] = interface_traffic_record['comment'] if router_metric.router_entry.use_comments_over_names \
+                    interface_traffic_record['name'] = interface_traffic_record['comment'] if router_entry.config_entry.use_comments_over_names \
                                                                                 else f"{interface_traffic_record['name']} ({interface_traffic_record['comment']})"
 
             rx_byte_metric = BaseCollector.counter_collector('interface_rx_byte', 'Number of received bytes', interface_traffic_records, 'rx_byte', ['name'])

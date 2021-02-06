@@ -11,28 +11,31 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
+
 from mktxp.cli.config.config import MKTXPConfigKeys
 from mktxp.collectors.base_collector import BaseCollector
+from mktxp.datasources.pool_ds import PoolMetricsDataSource, PoolUsedMetricsDataSource
+
 
 class PoolCollector(BaseCollector):
     ''' IP Pool Metrics collector
     '''    
     @staticmethod
-    def collect(router_metric):
+    def collect(router_entry):
         # initialize all pool counts, including those currently not used
-        pool_records = router_metric.pool_records(['name'])
+        pool_records = PoolMetricsDataSource.metric_records(router_entry, metric_labels = ['name'])   
         if pool_records:
             pool_used_labels = ['pool']
             pool_used_counts = {pool_record['name']: 0 for pool_record in pool_records}
 
             # for pools in usage, calculate the current numbers
-            pool_used_records = router_metric.pool_used_records(pool_used_labels)
+            pool_used_records = PoolUsedMetricsDataSource.metric_records(router_entry, metric_labels = pool_used_labels)   
             for pool_used_record in pool_used_records:
                 pool_used_counts[pool_used_record['pool']] = pool_used_counts.get(pool_used_record['pool'], 0) + 1
 
            # compile used-per-pool records
-            used_per_pool_records = [{ MKTXPConfigKeys.ROUTERBOARD_NAME: router_metric.router_id[MKTXPConfigKeys.ROUTERBOARD_NAME],
-                                       MKTXPConfigKeys.ROUTERBOARD_ADDRESS: router_metric.router_id[MKTXPConfigKeys.ROUTERBOARD_ADDRESS],
+            used_per_pool_records = [{ MKTXPConfigKeys.ROUTERBOARD_NAME: router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_NAME],
+                                       MKTXPConfigKeys.ROUTERBOARD_ADDRESS: router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_ADDRESS],
                                        'pool': key, 'count': value} for key, value in pool_used_counts.items()]
             
             # yield used-per-pool metrics

@@ -21,16 +21,17 @@ from mktxp.cli.config.config import config_handler
 class BaseOutputProcessor:
     OutputCapsmanEntry = namedtuple('OutputCapsmanEntry', ['dhcp_name', 'dhcp_address', 'mac_address', 'rx_signal', 'interface', 'ssid', 'tx_rate', 'rx_rate', 'uptime'])
     OutputWiFiEntry = namedtuple('OutputWiFiEntry', ['dhcp_name', 'dhcp_address', 'mac_address', 'signal_strength', 'signal_to_noise', 'interface', 'tx_rate', 'rx_rate', 'uptime'])
+    OutputDHCPEntry = namedtuple('OutputDHCPEntry', ['host_name', 'comment', 'address', 'active_address', 'mac_address', 'server', 'expires_after'])
 
     @staticmethod
-    def augment_record(router_metric, registration_record, dhcp_lease_records):
+    def augment_record(router_entry, registration_record, dhcp_lease_records):
         try:
             dhcp_lease_record = next((dhcp_lease_record for dhcp_lease_record in dhcp_lease_records if dhcp_lease_record['mac_address']==registration_record['mac_address']))
             dhcp_name = dhcp_lease_record.get('host_name')
             dhcp_comment = dhcp_lease_record.get('comment')
 
             if dhcp_name and dhcp_comment:
-                dhcp_name = f'{dhcp_name[0:20]} ({dhcp_comment[0:20]})' if not router_metric.router_entry.use_comments_over_names else dhcp_comment
+                dhcp_name = f'{dhcp_name[0:20]} ({dhcp_comment[0:20]})' if not router_entry.config_entry.use_comments_over_names else dhcp_comment
             elif dhcp_comment:
                 dhcp_name = dhcp_comment
             else:
@@ -49,9 +50,12 @@ class BaseOutputProcessor:
             registration_record['rx_bytes'] = registration_record['bytes'].split(',')[1]
             del registration_record['bytes']
 
-        registration_record['tx_rate'] = BaseOutputProcessor.parse_rates(registration_record['tx_rate'])
-        registration_record['rx_rate'] = BaseOutputProcessor.parse_rates(registration_record['rx_rate'])
-        registration_record['uptime'] = naturaldelta(BaseOutputProcessor.parse_timedelta_seconds(registration_record['uptime']), months=True, minimum_unit='seconds', when=None)
+        if registration_record.get('tx_rate'):
+            registration_record['tx_rate'] = BaseOutputProcessor.parse_rates(registration_record['tx_rate'])
+        if registration_record.get('rx_rate'):
+            registration_record['rx_rate'] = BaseOutputProcessor.parse_rates(registration_record['rx_rate'])
+        if registration_record.get('uptime'):
+            registration_record['uptime'] = naturaldelta(BaseOutputProcessor.parse_timedelta_seconds(registration_record['uptime']), months=True, minimum_unit='seconds', when=None)
 
         if registration_record.get('signal_strength'):
             registration_record['signal_strength'] = BaseOutputProcessor.parse_signal_strength(registration_record['signal_strength'])

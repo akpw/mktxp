@@ -11,27 +11,31 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
+
 from tabulate import tabulate   
 from mktxp.cli.output.base_out import BaseOutputProcessor
+from mktxp.datasources.dhcp_ds import DHCPMetricsDataSource
+from mktxp.datasources.wireless_ds import WirelessMetricsDataSource
+
 
 class WirelessOutput:
     ''' Wireless Clients CLI Output
     '''    
     @staticmethod
-    def clients_summary(router_metric):
+    def clients_summary(router_entry):
         registration_labels = ['interface', 'mac_address', 'signal_strength', 'uptime', 'tx_rate', 'rx_rate', 'signal_to_noise']
-        registration_records = router_metric.wireless_registration_table_records(registration_labels, False)
+        registration_records = WirelessMetricsDataSource.metric_records(router_entry, metric_labels = registration_labels, add_router_id = False)
         if not registration_records:
             print('No wireless registration records')
             return 
 
         # translate / trim / augment registration records
         dhcp_lease_labels = ['host_name', 'comment', 'address', 'mac_address']
-        dhcp_lease_records = router_metric.dhcp_lease_records(dhcp_lease_labels, False)
+        dhcp_lease_records = DHCPMetricsDataSource.metric_records(router_entry, metric_labels = dhcp_lease_labels, add_router_id = False)   
 
         dhcp_rt_by_interface = {}
         for registration_record in sorted(registration_records, key = lambda rt_record: rt_record['signal_strength'], reverse=True):
-            BaseOutputProcessor.augment_record(router_metric, registration_record, dhcp_lease_records)
+            BaseOutputProcessor.augment_record(router_entry, registration_record, dhcp_lease_records)
 
             interface = registration_record['interface']
             if interface in dhcp_rt_by_interface.keys():

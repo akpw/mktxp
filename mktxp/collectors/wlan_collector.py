@@ -11,16 +11,21 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
+
 from mktxp.cli.output.base_out import BaseOutputProcessor
 from mktxp.collectors.base_collector import BaseCollector
+from mktxp.datasources.dhcp_ds import DHCPMetricsDataSource
+from mktxp.datasources.wireless_ds import WirelessMetricsDataSource
+from mktxp.datasources.interface_ds import InterfaceMonitorMetricsDataSource
+
 
 class WLANCollector(BaseCollector):
     ''' Wireless Metrics collector
     '''    
     @staticmethod
-    def collect(router_metric):
+    def collect(router_entry):
         monitor_labels = ['channel', 'noise_floor', 'overall_tx_ccq', 'registered_clients']
-        monitor_records = router_metric.interface_monitor_records(monitor_labels, 'wireless')
+        monitor_records = InterfaceMonitorMetricsDataSource.metric_records(router_entry, metric_labels = monitor_labels, kind = 'wireless')   
         if monitor_records:
             # sanitize records for relevant labels
             noise_floor_records = [monitor_record for monitor_record in monitor_records if monitor_record.get('noise_floor')]
@@ -40,15 +45,15 @@ class WLANCollector(BaseCollector):
                 yield registered_clients_metrics
 
         # the client info metrics
-        if router_metric.router_entry.wireless_clients:
+        if router_entry.config_entry.wireless_clients:
             registration_labels = ['interface', 'ssid', 'mac_address', 'tx_rate', 'rx_rate', 'uptime', 'bytes', 'signal_to_noise', 'tx_ccq', 'signal_strength']
-            registration_records = router_metric.wireless_registration_table_records(registration_labels)
+            registration_records = WirelessMetricsDataSource.metric_records(router_entry, metric_labels = registration_labels)
             if registration_records:
                 dhcp_lease_labels = ['mac_address', 'address', 'host_name', 'comment']
-                dhcp_lease_records = router_metric.dhcp_lease_records(dhcp_lease_labels)
+                dhcp_lease_records = DHCPMetricsDataSource.metric_records(router_entry, metric_labels = dhcp_lease_labels)
       
                 for registration_record in registration_records:
-                    BaseOutputProcessor.augment_record(router_metric, registration_record, dhcp_lease_records)                
+                    BaseOutputProcessor.augment_record(router_entry, registration_record, dhcp_lease_records)                
 
                 tx_byte_metrics = BaseCollector.counter_collector('wlan_clients_tx_bytes', 'Number of sent packet bytes', registration_records, 'tx_bytes', ['dhcp_name'])
                 yield tx_byte_metrics

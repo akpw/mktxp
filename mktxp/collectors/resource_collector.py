@@ -11,20 +11,23 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
+
 from mktxp.collectors.base_collector import BaseCollector
 from mktxp.cli.output.base_out import BaseOutputProcessor
+from mktxp.datasources.system_resource_ds import SystemResourceMetricsDataSource
+
 
 class SystemResourceCollector(BaseCollector):
     ''' System Resource Metrics collector
     '''        
     @staticmethod
-    def collect(router_metric):
+    def collect(router_entry):
         resource_labels = ['uptime', 'version', 'free_memory', 'total_memory', 
                            'cpu', 'cpu_count', 'cpu_frequency', 'cpu_load', 
                            'free_hdd_space', 'total_hdd_space', 
                            'architecture_name', 'board_name']
-        
-        resource_records = router_metric.system_resource_records(resource_labels)
+                                   
+        resource_records = SystemResourceMetricsDataSource.metric_records(router_entry, metric_labels = resource_labels)   
         if resource_records:
             # translate records to appropriate values
             translated_fields = ['uptime']        
