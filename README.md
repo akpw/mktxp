@@ -8,7 +8,7 @@
 ## Description
 MKTXP is a Prometheus Exporter for Mikrotik RouterOS devices.\
 It gathers a rich set of supported metrics across multiple routers, all easily configurable via built-in CLI interface. \
-Apart from exporting to Prometheus, MKTXP can also print some of the metrics directly on the command line (see a [WiFi Clients example](https://github.com/akpw/mktxp/blob/main/README.md#a-check-on-reality) below).
+Apart from exporting to Prometheus, MKTXP can also print some of the metrics directly on the command line (see an example below).
 
 For effortless visualization of the RouterOS metrics exported to Prometheus, MKTXP comes with a dedicated [Grafana dashboard](https://grafana.com/grafana/dashboards/13679):
 
