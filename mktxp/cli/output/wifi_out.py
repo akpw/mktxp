@@ -14,8 +14,8 @@
 
 from tabulate import tabulate   
 from mktxp.cli.output.base_out import BaseOutputProcessor
-from mktxp.datasources.dhcp_ds import DHCPMetricsDataSource
-from mktxp.datasources.wireless_ds import WirelessMetricsDataSource
+from mktxp.datasource.dhcp_ds import DHCPMetricsDataSource
+from mktxp.datasource.wireless_ds import WirelessMetricsDataSource
 
 
 class WirelessOutput:

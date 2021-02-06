@@ -13,10 +13,10 @@
 
 
 from mktxp.cli.output.base_out import BaseOutputProcessor
-from mktxp.collectors.base_collector import BaseCollector
-from mktxp.datasources.dhcp_ds import DHCPMetricsDataSource
-from mktxp.datasources.wireless_ds import WirelessMetricsDataSource
-from mktxp.datasources.interface_ds import InterfaceMonitorMetricsDataSource
+from mktxp.collector.base_collector import BaseCollector
+from mktxp.datasource.dhcp_ds import DHCPMetricsDataSource
+from mktxp.datasource.wireless_ds import WirelessMetricsDataSource
+from mktxp.datasource.interface_ds import InterfaceMonitorMetricsDataSource
 
 
 class WLANCollector(BaseCollector):

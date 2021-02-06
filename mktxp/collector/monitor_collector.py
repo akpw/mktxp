@@ -12,9 +12,9 @@
 ## GNU General Public License for more details.
 
 
-from mktxp.collectors.base_collector import BaseCollector
+from mktxp.collector.base_collector import BaseCollector
 from mktxp.cli.output.base_out import BaseOutputProcessor
-from mktxp.datasources.interface_ds import InterfaceMonitorMetricsDataSource
+from mktxp.datasource.interface_ds import InterfaceMonitorMetricsDataSource
 
 
 class MonitorCollector(BaseCollector):

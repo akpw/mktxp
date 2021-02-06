@@ -17,7 +17,7 @@ import speedtest
 from datetime import datetime
 from multiprocessing import Pool
 from mktxp.cli.config.config import config_handler
-from mktxp.collectors.base_collector import BaseCollector
+from mktxp.collector.base_collector import BaseCollector
 
 
 result_list = [{'download': 0, 'upload': 0, 'ping': 0}]

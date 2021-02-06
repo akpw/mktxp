@@ -12,17 +12,18 @@
 ## GNU General Public License for more details.
 
 
-from mktxp.datasources.base_ds import BaseDSProcessor
+from mktxp.datasource.base_ds import BaseDSProcessor
 
 
-class SystemResourceMetricsDataSource:
-    ''' System Resource Metrics data provider
+class RouterboardMetricsDataSource:
+    ''' Routerboard Metrics data provider
     '''             
-    @staticmethod    
+    @staticmethod
     def metric_records(router_entry, *, metric_labels = []):
         try:
-            system_resource_records = router_entry.api_connection.router_api().get_resource('/system/resource').get()
-            return BaseDSProcessor.trimmed_records(router_entry, router_records = system_resource_records, metric_labels = metric_labels)
+            routerboard_records = router_entry.api_connection.router_api().get_resource('/system/routerboard').get()
+            return BaseDSProcessor.trimmed_records(router_entry, router_records = routerboard_records, metric_labels = metric_labels)
         except Exception as exc:
-            print(f'Error getting system resource info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
+            print(f'Error getting system routerboard info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None
+

@@ -12,18 +12,18 @@
 ## GNU General Public License for more details.
 
 
-from mktxp.collectors.base_collector import BaseCollector
-from mktxp.datasources.identity_ds import IdentityMetricsDataSource
+from mktxp.collector.base_collector import BaseCollector
+from mktxp.datasource.mktxp_ds import MKTXPMetricsDataSource
 
 
-class IdentityCollector(BaseCollector):
+class MKTXPCollector(BaseCollector):
     ''' System Identity Metrics collector
     '''     
     @staticmethod
     def collect(router_entry):
-        identity_labels = ['name']
-        identity_records = IdentityMetricsDataSource.metric_records(router_entry, metric_labels = identity_labels)                
-        if identity_records:
-            identity_metrics = BaseCollector.info_collector('system_identity', 'System identity', identity_records, identity_labels)
-            yield identity_metrics
+        mktxp_records = MKTXPMetricsDataSource.metric_records(router_entry)
+        if mktxp_records:
+            mktxp_duration_metric = BaseCollector.counter_collector('collection_time', 'Total time spent collecting metrics in milliseconds', mktxp_records, 'duration', ['name'])
+            yield mktxp_duration_metric
+
 

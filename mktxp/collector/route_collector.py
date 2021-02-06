@@ -13,8 +13,8 @@
 
 
 from mktxp.cli.config.config import MKTXPConfigKeys
-from mktxp.collectors.base_collector import BaseCollector
-from mktxp.datasources.route_ds import RouteMetricsDataSource
+from mktxp.collector.base_collector import BaseCollector
+from mktxp.datasource.route_ds import RouteMetricsDataSource
 
 
 class RouteCollector(BaseCollector):

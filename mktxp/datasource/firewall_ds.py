@@ -12,7 +12,7 @@
 ## GNU General Public License for more details.
 
 
-from mktxp.datasources.base_ds import BaseDSProcessor
+from mktxp.datasource.base_ds import BaseDSProcessor
 
 
 class FirewallMetricsDataSource:

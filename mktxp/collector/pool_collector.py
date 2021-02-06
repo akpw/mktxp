@@ -13,8 +13,8 @@
 
 
 from mktxp.cli.config.config import MKTXPConfigKeys
-from mktxp.collectors.base_collector import BaseCollector
-from mktxp.datasources.pool_ds import PoolMetricsDataSource, PoolUsedMetricsDataSource
+from mktxp.collector.base_collector import BaseCollector
+from mktxp.datasource.pool_ds import PoolMetricsDataSource, PoolUsedMetricsDataSource
 
 
 class PoolCollector(BaseCollector):

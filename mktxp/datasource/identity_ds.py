@@ -12,17 +12,17 @@
 ## GNU General Public License for more details.
 
 
-from mktxp.datasources.base_ds import BaseDSProcessor
+from mktxp.datasource.base_ds import BaseDSProcessor
 
 
-class HealthMetricsDataSource:
-    ''' Health Metrics data provider
+class IdentityMetricsDataSource:
+    ''' Identity Metrics data provider
     '''             
     @staticmethod
     def metric_records(router_entry, *, metric_labels = []):
         try:
-            health_records = router_entry.api_connection.router_api().get_resource('/system/health').get()
-            return BaseDSProcessor.trimmed_records(router_entry, router_records = health_records, metric_labels = metric_labels)
+            identity_records = router_entry.api_connection.router_api().get_resource('/system/identity').get()
+            return BaseDSProcessor.trimmed_records(router_entry, router_records = identity_records, metric_labels = metric_labels)
         except Exception as exc:
-            print(f'Error getting system health info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
+            print(f'Error getting system identity info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None

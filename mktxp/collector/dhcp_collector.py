@@ -13,8 +13,8 @@
 
 
 from mktxp.cli.config.config import MKTXPConfigKeys
-from mktxp.collectors.base_collector import BaseCollector
-from mktxp.datasources.dhcp_ds import DHCPMetricsDataSource
+from mktxp.collector.base_collector import BaseCollector
+from mktxp.datasource.dhcp_ds import DHCPMetricsDataSource
 
 
 class DHCPCollector(BaseCollector):

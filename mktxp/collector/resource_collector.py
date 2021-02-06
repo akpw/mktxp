@@ -12,9 +12,9 @@
 ## GNU General Public License for more details.
 
 
-from mktxp.collectors.base_collector import BaseCollector
+from mktxp.collector.base_collector import BaseCollector
 from mktxp.cli.output.base_out import BaseOutputProcessor
-from mktxp.datasources.system_resource_ds import SystemResourceMetricsDataSource
+from mktxp.datasource.system_resource_ds import SystemResourceMetricsDataSource
 
 
 class SystemResourceCollector(BaseCollector):

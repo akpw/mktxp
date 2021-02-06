@@ -12,8 +12,8 @@
 ## GNU General Public License for more details.
 
 
-from mktxp.collectors.base_collector import BaseCollector
-from mktxp.datasources.interface_ds import InterfaceTrafficMetricsDataSource
+from mktxp.collector.base_collector import BaseCollector
+from mktxp.datasource.interface_ds import InterfaceTrafficMetricsDataSource
 
 
 class InterfaceCollector(BaseCollector):

@@ -13,19 +13,19 @@
 
 
 from timeit import default_timer
-from mktxp.collectors.dhcp_collector import DHCPCollector
-from mktxp.collectors.interface_collector import InterfaceCollector
-from mktxp.collectors.health_collector import HealthCollector
-from mktxp.collectors.identity_collector import IdentityCollector
-from mktxp.collectors.monitor_collector import MonitorCollector
-from mktxp.collectors.pool_collector import PoolCollector
-from mktxp.collectors.resource_collector import SystemResourceCollector
-from mktxp.collectors.route_collector import RouteCollector
-from mktxp.collectors.wlan_collector import WLANCollector
-from mktxp.collectors.capsman_collector import CapsmanCollector
-from mktxp.collectors.bandwidth_collector import BandwidthCollector
-from mktxp.collectors.firewall_collector import FirewallCollector
-from mktxp.collectors.mktxp_collector import MKTXPCollector
+from mktxp.collector.dhcp_collector import DHCPCollector
+from mktxp.collector.interface_collector import InterfaceCollector
+from mktxp.collector.health_collector import HealthCollector
+from mktxp.collector.identity_collector import IdentityCollector
+from mktxp.collector.monitor_collector import MonitorCollector
+from mktxp.collector.pool_collector import PoolCollector
+from mktxp.collector.resource_collector import SystemResourceCollector
+from mktxp.collector.route_collector import RouteCollector
+from mktxp.collector.wlan_collector import WLANCollector
+from mktxp.collector.capsman_collector import CapsmanCollector
+from mktxp.collector.bandwidth_collector import BandwidthCollector
+from mktxp.collector.firewall_collector import FirewallCollector
+from mktxp.collector.mktxp_collector import MKTXPCollector
 
 
 class CollectorsHandler:

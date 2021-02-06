@@ -13,8 +13,8 @@
 
 
 from mktxp.cli.config.config import MKTXPConfigKeys
-from mktxp.collectors.base_collector import BaseCollector
-from mktxp.datasources.firewall_ds import FirewallMetricsDataSource
+from mktxp.collector.base_collector import BaseCollector
+from mktxp.datasource.firewall_ds import FirewallMetricsDataSource
 
 
 class FirewallCollector(BaseCollector):

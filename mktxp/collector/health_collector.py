@@ -12,8 +12,8 @@
 ## GNU General Public License for more details.
 
 
-from mktxp.collectors.base_collector import BaseCollector
-from mktxp.datasources.health_ds import HealthMetricsDataSource
+from mktxp.collector.base_collector import BaseCollector
+from mktxp.datasource.health_ds import HealthMetricsDataSource
 
 
 class HealthCollector(BaseCollector):

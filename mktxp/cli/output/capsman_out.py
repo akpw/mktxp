@@ -14,8 +14,8 @@
 
 from tabulate import tabulate   
 from mktxp.cli.output.base_out import BaseOutputProcessor
-from mktxp.datasources.dhcp_ds import DHCPMetricsDataSource
-from mktxp.datasources.capsman_ds import CapsmanRegistrationsMetricsDataSource
+from mktxp.datasource.dhcp_ds import DHCPMetricsDataSource
+from mktxp.datasource.capsman_ds import CapsmanRegistrationsMetricsDataSource
 
 
 class CapsmanOutput:

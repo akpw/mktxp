@@ -18,7 +18,7 @@ from mktxp.cli.config.config import MKTXPConfigKeys
      
 class BaseCollector:
     ''' Base Collector methods
-        For use by custom collectors
+        For use by custom collector
     '''
     @staticmethod
     def info_collector(name, decription, router_records, metric_labels=[]):
