@@ -40,9 +40,12 @@ class DHCPOutput:
         output_table = []
         for key in dhcp_by_server.keys():
             for record in dhcp_by_server[key]:
+                record['host_name'] = BaseOutputProcessor.dhcp_name(router_entry, record, drop_comment = True)
                 output_table.append(BaseOutputProcessor.OutputDHCPEntry(**record))
                 num_records += 1
             output_table.append({})
         print()
         print(tabulate(output_table, headers = "keys",  tablefmt="github"))
         print(tabulate([{0:'DHCP Clients:', 1:num_records}], tablefmt="text"))
+
+
