@@ -12,8 +12,8 @@
 ## GNU General Public License for more details.
 
 
-from mktxp.cli.output.base_out import BaseOutputProcessor
 from mktxp.cli.config.config import MKTXPConfigKeys
+from mktxp.processor.output import BaseOutputProcessor
 from mktxp.collector.base_collector import BaseCollector
 from mktxp.datasource.dhcp_ds import DHCPMetricsDataSource
 from mktxp.datasource.capsman_ds import CapsmanCapsMetricsDataSource, CapsmanRegistrationsMetricsDataSource

@@ -11,17 +11,23 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
-import re
+import re, os
 from datetime import timedelta
 from collections import namedtuple
+from texttable import Texttable
 from humanize import naturaldelta
 from mktxp.cli.config.config import config_handler
 
 
 class BaseOutputProcessor:
     OutputCapsmanEntry = namedtuple('OutputCapsmanEntry', ['dhcp_name', 'dhcp_address', 'mac_address', 'rx_signal', 'interface', 'ssid', 'tx_rate', 'rx_rate', 'uptime'])
+    OutputCapsmanEntry.__new__.__defaults__ = ('',) * len(OutputCapsmanEntry._fields)
+
     OutputWiFiEntry = namedtuple('OutputWiFiEntry', ['dhcp_name', 'dhcp_address', 'mac_address', 'signal_strength', 'signal_to_noise', 'interface', 'tx_rate', 'rx_rate', 'uptime'])
+    OutputWiFiEntry.__new__.__defaults__ = ('',) * len(OutputWiFiEntry._fields)
+
     OutputDHCPEntry = namedtuple('OutputDHCPEntry', ['host_name', 'server', 'mac_address', 'address', 'active_address', 'expires_after'])
+    OutputDHCPEntry.__new__.__defaults__ = ('',) * len(OutputDHCPEntry._fields)
 
     @staticmethod
     def augment_record(router_entry, registration_record, dhcp_lease_records):
@@ -110,3 +116,15 @@ class BaseOutputProcessor:
             config_handler.re_compiled['interface_rate_rgx'] = interface_rate_rgx
         rate = lambda interface_rate: 1000 if interface_rate.find('Mbps') < 0 else 1
         return(int(float(interface_rate_rgx.sub('', interface_rate)) * rate(interface_rate)))
+
+    @staticmethod
+    def output_table(outputEntry = None):
+        table = Texttable(max_width = os.get_terminal_size().columns)
+        table.set_deco(Texttable.HEADER | Texttable.BORDER | Texttable.VLINES )        
+        if outputEntry:
+            table.header(outputEntry._fields)
+            table.set_cols_align(['l']+ ['c']*(len(outputEntry._fields)-1))
+        return table
+
+
+

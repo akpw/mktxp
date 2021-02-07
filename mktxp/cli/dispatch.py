@@ -13,13 +13,10 @@
 ## GNU General Public License for more details.
 
 
-import sys
 import subprocess
-import mktxp.cli.checks.chk_pv
-from mktxp.utils.utils import run_cmd
+from mktxp.cli.config.config import config_handler
 from mktxp.cli.options import MKTXPOptionsParser, MKTXPCommands
-from mktxp.cli.config.config import config_handler, ConfigEntry
-from mktxp.basep import MKTXPProcessor, MKTXPCLIProcessor
+from mktxp.processor.mktxp import MKTXPProcessor, MKTXPCLIProcessor
 
 
 class MKTXPDispatcher:
@@ -104,8 +101,7 @@ class MKTXPDispatcher:
 
         if args['dhcp_clients']:
             MKTXPCLIProcessor.dhcp_clients(args['entry_name'])
-
-
+            
 
 def main():
     MKTXPDispatcher().dispatch()

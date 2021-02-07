@@ -15,10 +15,10 @@
 from http.server import HTTPServer
 from datetime import datetime
 from prometheus_client.core import REGISTRY
-from prometheus_client import MetricsHandler, start_http_server
+from prometheus_client import MetricsHandler
 from mktxp.cli.config.config import config_handler
-from mktxp.collectors_handler import CollectorsHandler
-from mktxp.router_entries_handler import RouterEntriesHandler
+from mktxp.flow.collectors_handler import CollectorsHandler
+from mktxp.flow.router_entries_handler import RouterEntriesHandler
 
 from mktxp.cli.output.capsman_out import CapsmanOutput
 from mktxp.cli.output.wifi_out import WirelessOutput

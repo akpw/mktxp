@@ -13,7 +13,7 @@
 
 
 from mktxp.cli.config.config import config_handler, MKTXPConfigKeys
-from mktxp.router_connection import RouterAPIConnection
+from mktxp.flow.router_connection import RouterAPIConnection
 
 
 class RouterEntry:

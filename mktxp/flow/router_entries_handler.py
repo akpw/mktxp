@@ -13,7 +13,7 @@
 
 
 from mktxp.cli.config.config import config_handler
-from mktxp.router_entry import RouterEntry
+from mktxp.flow.router_entry import RouterEntry
 
 
 class RouterEntriesHandler:

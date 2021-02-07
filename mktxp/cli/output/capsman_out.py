@@ -12,8 +12,7 @@
 ## GNU General Public License for more details.
 
 
-from tabulate import tabulate   
-from mktxp.cli.output.base_out import BaseOutputProcessor
+from mktxp.processor.output import BaseOutputProcessor
 from mktxp.datasource.dhcp_ds import DHCPMetricsDataSource
 from mktxp.datasource.capsman_ds import CapsmanRegistrationsMetricsDataSource
 
@@ -43,14 +42,23 @@ class CapsmanOutput:
             else:
                 dhcp_rt_by_interface[interface] = [registration_record]         
 
-        num_records = 0
-        output_table = []
+
+        output_entry = BaseOutputProcessor.OutputCapsmanEntry
+        output_table = BaseOutputProcessor.output_table(output_entry)
+
+        output_records = 0
+        registration_records = len(registration_records)                
         for key in dhcp_rt_by_interface.keys():
             for record in dhcp_rt_by_interface[key]:
-                output_table.append(BaseOutputProcessor.OutputCapsmanEntry(**record))
-                num_records += 1
-            output_table.append({})
-        print()
-        print(tabulate(output_table, headers = "keys",  tablefmt="github"))
-        print(tabulate([{0:'Connected Wifi Devices:', 1:num_records}], tablefmt="text"))
+                output_table.add_row(output_entry(**record))
+                output_records += 1
+            if output_records < registration_records:
+                output_table.add_row(output_entry())
+                
+        print (output_table.draw())
+
+        for server in dhcp_rt_by_interface.keys():
+            print(f'{server} clients: {len(dhcp_rt_by_interface[server])}')
+        print(f'Total connected CAPsMAN clients: {output_records}', '\n')
+
 
