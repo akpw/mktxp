@@ -37,15 +37,6 @@ def temp_dir(quiet = True):
             if not quiet:
                 print ('Error while removing a tmp dir: {}'.format(e.args[0]))
 
-class Benchmark:
-    def __enter__(self):
-        self.start = default_timer()
-        return self
-
-    def __exit__(self, *args):
-        self.time = default_timer() - self.start
-
-
 class CmdProcessingError(Exception):
     pass
 
@@ -263,4 +254,13 @@ class RepeatableTimer:
             if self.finished.is_set() or self.run_once.is_set():
                 break
             self.finished.wait(self.interval)     
+
+class Benchmark:
+    def __enter__(self):
+        self.start = default_timer()
+        return self
+
+    def __exit__(self, *args):
+        self.time = default_timer() - self.start
+
 
