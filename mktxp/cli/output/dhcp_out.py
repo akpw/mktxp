@@ -35,11 +35,11 @@ class DHCPOutput:
             else:
                 dhcp_by_server[server] = [dhcp_lease_record]         
         
-        output_entry = BaseOutputProcessor.OutputDHCPEntry
-        output_table = BaseOutputProcessor.output_table(output_entry)
-
         output_records = 0
         lease_records = len(dhcp_lease_records)        
+        output_entry = BaseOutputProcessor.OutputDHCPEntry
+        output_table = BaseOutputProcessor.output_table(output_entry)
+                
         for key in dhcp_by_server.keys():
             for record in dhcp_by_server[key]:
                 record['host_name'] = BaseOutputProcessor.dhcp_name(router_entry, record, drop_comment = True)
@@ -47,7 +47,7 @@ class DHCPOutput:
                 output_records += 1
             if output_records < lease_records:
                 output_table.add_row(output_entry())
-                
+
         print (output_table.draw())
 
         for server in dhcp_by_server.keys():

@@ -42,19 +42,18 @@ class CapsmanOutput:
             else:
                 dhcp_rt_by_interface[interface] = [registration_record]         
 
-
-        output_entry = BaseOutputProcessor.OutputCapsmanEntry
-        output_table = BaseOutputProcessor.output_table(output_entry)
-
         output_records = 0
         registration_records = len(registration_records)                
+        output_entry = BaseOutputProcessor.OutputCapsmanEntry
+        output_table = BaseOutputProcessor.output_table(output_entry)
+                
         for key in dhcp_rt_by_interface.keys():
             for record in dhcp_rt_by_interface[key]:
                 output_table.add_row(output_entry(**record))
                 output_records += 1
             if output_records < registration_records:
                 output_table.add_row(output_entry())
-                
+
         print (output_table.draw())
 
         for server in dhcp_rt_by_interface.keys():

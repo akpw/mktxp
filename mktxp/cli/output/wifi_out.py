@@ -42,11 +42,11 @@ class WirelessOutput:
             else:
                 dhcp_rt_by_interface[interface] = [registration_record]         
 
-        output_entry = BaseOutputProcessor.OutputWiFiEntry
-        output_table = BaseOutputProcessor.output_table(output_entry)
-
         output_records = 0
         registration_records = len(registration_records)                
+        output_entry = BaseOutputProcessor.OutputWiFiEntry
+        output_table = BaseOutputProcessor.output_table(output_entry)
+        
         for key in dhcp_rt_by_interface.keys():
             for record in dhcp_rt_by_interface[key]:
                 output_table.add_row(output_entry(**record))
