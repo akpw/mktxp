@@ -13,7 +13,7 @@
 
 
 from mktxp.collector.base_collector import BaseCollector
-from mktxp.processor.output import BaseOutputProcessor
+from mktxp.flow.processor.output import BaseOutputProcessor
 from mktxp.datasource.system_resource_ds import SystemResourceMetricsDataSource
 
 

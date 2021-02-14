@@ -16,8 +16,10 @@ from http.server import HTTPServer
 from datetime import datetime
 from prometheus_client.core import REGISTRY
 from prometheus_client import MetricsHandler
+
 from mktxp.cli.config.config import config_handler
-from mktxp.flow.collectors_handler import CollectorsHandler
+from mktxp.flow.collector_handler import CollectorHandler
+from mktxp.flow.collector_registry import CollectorRegistry
 from mktxp.flow.router_entries_handler import RouterEntriesHandler
 
 from mktxp.cli.output.capsman_out import CapsmanOutput
@@ -25,17 +27,16 @@ from mktxp.cli.output.wifi_out import WirelessOutput
 from mktxp.cli.output.dhcp_out import DHCPOutput
 
 
-class MKTXPProcessor:
+class ExportProcessor:
     ''' Base Export Processing
     '''    
     @staticmethod
     def start():
-        router_entries_handler = RouterEntriesHandler()
-        REGISTRY.register(CollectorsHandler(router_entries_handler))
-        MKTXPProcessor.run(port=config_handler._entry().port)
+        REGISTRY.register(CollectorHandler(RouterEntriesHandler(), CollectorRegistry()))
+        ExportProcessor.run(port=config_handler.system_entry().port)
 
     @staticmethod
-    def run(server_class=HTTPServer, handler_class=MetricsHandler, port = None):
+    def run(server_class=HTTPServer, handler_class=MetricsHandler, port=None):
         server_address = ('', port)
         httpd = server_class(server_address, handler_class)
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -43,7 +44,7 @@ class MKTXPProcessor:
         httpd.serve_forever()
 
 
-class MKTXPCLIProcessor:
+class OutputProcessor:
     ''' Base CLI Processing
     '''    
     @staticmethod

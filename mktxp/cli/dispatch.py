@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!.usr/bin/env python
 # coding=utf8
 ## Copyright (c) 2020 Arseniy Kuznetsov
 ##
@@ -16,7 +16,7 @@
 import subprocess
 from mktxp.cli.config.config import config_handler
 from mktxp.cli.options import MKTXPOptionsParser, MKTXPCommands
-from mktxp.processor.mktxp import MKTXPProcessor, MKTXPCLIProcessor
+from mktxp.flow.processor.base_proc import ExportProcessor, OutputProcessor
 
 
 class MKTXPDispatcher:
@@ -60,12 +60,11 @@ class MKTXPDispatcher:
         if args['config']:
             print(f'MKTXP data config: {config_handler.usr_conf_data_path}')
             print(f'MKTXP internal config: {config_handler.mktxp_conf_path}')
-
         else:
             for entryname in config_handler.registered_entries():
                 if args['entry_name'] and entryname != args['entry_name']:
                     continue
-                entry = config_handler.entry(entryname)
+                entry = config_handler.config_entry(entryname)
                 print(f'[{entryname}]')
                 divider_fields = set(['username', 'use_ssl', 'dhcp'])
                 for field in entry._fields:
@@ -87,20 +86,20 @@ class MKTXPDispatcher:
             subprocess.check_call([editor, config_handler.usr_conf_data_path])
        
     def start_export(self, args):
-        MKTXPProcessor.start()
+        ExportProcessor.start()
 
     def print(self, args):
         if not (args['wifi_clients'] or args['capsman_clients']):
             print("Select metric option(s) to print out, or run 'mktxp print -h' to find out more")
 
         if args['wifi_clients']:
-            MKTXPCLIProcessor.wifi_clients(args['entry_name'])
+            OutputProcessor.wifi_clients(args['entry_name'])
 
         if args['capsman_clients']:
-            MKTXPCLIProcessor.capsman_clients(args['entry_name'])
+            OutputProcessor.capsman_clients(args['entry_name'])
 
         if args['dhcp_clients']:
-            MKTXPCLIProcessor.dhcp_clients(args['entry_name'])
+            OutputProcessor.dhcp_clients(args['entry_name'])
             
 
 def main():

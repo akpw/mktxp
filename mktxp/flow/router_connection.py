@@ -46,7 +46,7 @@ class RouterAPIConnection:
                 ssl_verify = self.config_entry.ssl_certificate_verify,
                 ssl_context = ctx)
         
-        self.connection.socket_timeout = config_handler._entry().socket_timeout
+        self.connection.socket_timeout = config_handler.system_entry().socket_timeout
         self.api = None
 
     def is_connected(self):
@@ -91,7 +91,7 @@ class RouterAPIConnection:
         return False
 
     def _connect_delay(self):
-        mktxp_entry = config_handler._entry()
+        mktxp_entry = config_handler.system_entry()
         connect_delay = (1 + self.successive_failure_count / mktxp_entry.delay_inc_div) * mktxp_entry.initial_delay_on_failure
         return connect_delay if connect_delay < mktxp_entry.max_delay_on_failure else mktxp_entry.max_delay_on_failure
 

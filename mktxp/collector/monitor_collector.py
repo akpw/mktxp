@@ -13,7 +13,7 @@
 
 
 from mktxp.collector.base_collector import BaseCollector
-from mktxp.processor.output import BaseOutputProcessor
+from mktxp.flow.processor.output import BaseOutputProcessor
 from mktxp.datasource.interface_ds import InterfaceMonitorMetricsDataSource
 
 
@@ -22,6 +22,9 @@ class MonitorCollector(BaseCollector):
     '''    
     @staticmethod
     def collect(router_entry):
+        if not router_entry.config_entry.monitor:
+            return
+
         monitor_labels = ('status', 'rate', 'full_duplex', 'name')
         monitor_records = InterfaceMonitorMetricsDataSource.metric_records(router_entry, metric_labels = monitor_labels, include_comments = True)   
         if monitor_records:

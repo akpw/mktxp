@@ -22,7 +22,7 @@ class RouterEntriesHandler:
     def __init__(self):
         self.router_entries = []
         for router_name in config_handler.registered_entries():
-            entry = config_handler.entry(router_name)
+            entry = config_handler.config_entry(router_name)
             if entry.enabled:
                 self.router_entries.append(RouterEntry(router_name))
 
@@ -32,7 +32,7 @@ class RouterEntriesHandler:
         for router_name in config_handler.registered_entries():
             if router_name == entry_name:
                 if enabled_only:
-                    entry = config_handler.entry(router_name)
+                    entry = config_handler.config_entry(router_name)
                     if not entry.enabled:
                         break
                 router_entry = RouterEntry(router_name)

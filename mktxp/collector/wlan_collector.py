@@ -12,7 +12,7 @@
 ## GNU General Public License for more details.
 
 
-from mktxp.processor.output import BaseOutputProcessor
+from mktxp.flow.processor.output import BaseOutputProcessor
 from mktxp.collector.base_collector import BaseCollector
 from mktxp.datasource.dhcp_ds import DHCPMetricsDataSource
 from mktxp.datasource.wireless_ds import WirelessMetricsDataSource
@@ -24,6 +24,9 @@ class WLANCollector(BaseCollector):
     '''    
     @staticmethod
     def collect(router_entry):
+        if not router_entry.config_entry.wireless:
+            return
+
         monitor_labels = ['channel', 'noise_floor', 'overall_tx_ccq', 'registered_clients']
         monitor_records = InterfaceMonitorMetricsDataSource.metric_records(router_entry, metric_labels = monitor_labels, kind = 'wireless')   
         if monitor_records:

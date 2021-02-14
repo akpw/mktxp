@@ -150,7 +150,7 @@ Selected metrics info can be printed on the command line. For more information, 
                 args['entry_name'] = UniquePartialMatchList(config_handler.registered_entries()).find(args['entry_name'])
 
         if args['sub_cmd'] == MKTXPCommands.PRINT:
-            if not config_handler.entry(args['entry_name']).enabled:
+            if not config_handler.config_entry(args['entry_name']).enabled:
                 print(f"Can not print metrics for disabled RouterOS entry: {args['entry_name']}\nRun 'mktxp edit' to review and enable it in the configuration file first")
                 parser.exit()
 

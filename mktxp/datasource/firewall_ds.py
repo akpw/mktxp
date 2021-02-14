@@ -29,7 +29,9 @@ class FirewallMetricsDataSource:
             # translation rules
             translation_table = {}
             if 'comment' in metric_labels:
-                translation_table['comment'] = lambda c: c if c else ''           
+                translation_table['comment'] = lambda value: value if value else ''           
+            if 'log' in metric_labels:
+                translation_table['log'] = lambda value: '1' if value == 'true' else '0'           
 
             return BaseDSProcessor.trimmed_records(router_entry, router_records = firewall_records, metric_labels = metric_labels, translation_table = translation_table)
         except Exception as exc:

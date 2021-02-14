@@ -13,7 +13,7 @@
 
 
 from mktxp.cli.config.config import MKTXPConfigKeys
-from mktxp.processor.output import BaseOutputProcessor
+from mktxp.flow.processor.output import BaseOutputProcessor
 from mktxp.collector.base_collector import BaseCollector
 from mktxp.datasource.dhcp_ds import DHCPMetricsDataSource
 from mktxp.datasource.capsman_ds import CapsmanCapsMetricsDataSource, CapsmanRegistrationsMetricsDataSource
@@ -24,6 +24,9 @@ class CapsmanCollector(BaseCollector):
     '''    
     @staticmethod
     def collect(router_entry):
+        if not router_entry.config_entry.capsman:
+            return
+
         remote_caps_labels = ['identity', 'version', 'base_mac', 'board', 'base_mac']
         remote_caps_records = CapsmanCapsMetricsDataSource.metric_records(router_entry, metric_labels = remote_caps_labels)
         if remote_caps_records:

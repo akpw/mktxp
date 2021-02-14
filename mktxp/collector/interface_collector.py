@@ -21,6 +21,9 @@ class InterfaceCollector(BaseCollector):
     '''        
     @staticmethod
     def collect(router_entry):
+        if not router_entry.config_entry.interface:
+            return
+            
         interface_traffic_labels = ['name', 'comment', 'rx_byte', 'tx_byte', 'rx_packet', 'tx_packet', 'rx_error', 'tx_error', 'rx_drop', 'tx_drop']
         interface_traffic_records = InterfaceTrafficMetricsDataSource.metric_records(router_entry, metric_labels = interface_traffic_labels)   
 

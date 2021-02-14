@@ -12,7 +12,7 @@
 ## GNU General Public License for more details.
 
 
-from mktxp.processor.output import BaseOutputProcessor
+from mktxp.flow.processor.output import BaseOutputProcessor
 from mktxp.datasource.dhcp_ds import DHCPMetricsDataSource
 
 

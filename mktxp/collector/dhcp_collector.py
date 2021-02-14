@@ -22,6 +22,9 @@ class DHCPCollector(BaseCollector):
     '''    
     @staticmethod
     def collect(router_entry):
+        if not router_entry.config_entry.dhcp:
+            return
+
         dhcp_lease_labels = ['active_address', 'address', 'mac_address', 'host_name', 'comment', 'server', 'expires_after']
         dhcp_lease_records = DHCPMetricsDataSource.metric_records(router_entry, metric_labels = dhcp_lease_labels)   
         if dhcp_lease_records:

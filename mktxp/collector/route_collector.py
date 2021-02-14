@@ -22,6 +22,9 @@ class RouteCollector(BaseCollector):
     '''        
     @staticmethod
     def collect(router_entry):
+        if not router_entry.config_entry.route:
+            return
+
         route_labels = ['connect', 'dynamic', 'static', 'bgp', 'ospf']
         route_records = RouteMetricsDataSource.metric_records(router_entry, metric_labels = route_labels)   
         if route_records:       

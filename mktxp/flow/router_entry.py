@@ -21,7 +21,7 @@ class RouterEntry:
     '''                 
     def __init__(self, router_name):
         self.router_name = router_name
-        self.config_entry  = config_handler.entry(router_name)
+        self.config_entry  = config_handler.config_entry(router_name)
         self.api_connection = RouterAPIConnection(router_name, self.config_entry)
         self.router_id = {
             MKTXPConfigKeys.ROUTERBOARD_NAME: self.router_name,
@@ -37,5 +37,6 @@ class RouterEntry:
                             'MonitorCollector': 0,
                             'RouteCollector': 0,
                             'WLANCollector': 0,
-                            'CapsmanCollector': 0
+                            'CapsmanCollector': 0,
+                            'MKTXPCollector': 0
                             }            
