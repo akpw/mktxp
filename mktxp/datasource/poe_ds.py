@@ -23,18 +23,20 @@ class POEMetricsDataSource:
         try:
             poe_records = router_entry.api_connection.router_api().get_resource('/interface/ethernet/poe').get()
             for int_num, poe_record in enumerate(poe_records):
-                poe_monitor_record = router_entry.api_connection.router_api().get_resource('/interface/ethernet/poe').call('monitor', {'once':'', 'numbers':f'{int_num}'})
-                if poe_monitor_record[0].get('poe_out_status'):
-                    poe_record['poe_out_status'] = poe_monitor_record[0]['poe_out_status']
+                poe_monitor_records = router_entry.api_connection.router_api().get_resource('/interface/ethernet/poe').call('monitor', {'once':'', 'numbers':f'{int_num}'})
+                poe_monitor_records = BaseDSProcessor.trimmed_records(router_entry, router_records = poe_monitor_records)
 
-                if poe_monitor_record[0].get('poe_out_voltage'):
-                    poe_record['poe_out_voltage'] = poe_monitor_record[0]['poe_out_voltage']
+                if poe_monitor_records[0].get('poe_out_status'):
+                    poe_record['poe_out_status'] = poe_monitor_records[0]['poe_out_status']
 
-                if poe_monitor_record[0].get('poe_out_current'):
-                    poe_record['poe_out_current'] = poe_monitor_record[0]['poe_out_current']
+                if poe_monitor_records[0].get('poe_out_voltage'):
+                    poe_record['poe_out_voltage'] = poe_monitor_records[0]['poe_out_voltage']
 
-                if poe_monitor_record[0].get('poe_out_power'):
-                    poe_record['poe_out_power'] = poe_monitor_record[0]['poe_out_power']
+                if poe_monitor_records[0].get('poe_out_current'):
+                    poe_record['poe_out_current'] = poe_monitor_records[0]['poe_out_current']
+
+                if poe_monitor_records[0].get('poe_out_power'):
+                    poe_record['poe_out_power'] = poe_monitor_records[0]['poe_out_power']
 
             if include_comments:
                 interfaces = router_entry.api_connection.router_api().get_resource('/interface/ethernet').get()
