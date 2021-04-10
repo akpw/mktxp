@@ -33,6 +33,9 @@ class BandwidthCollector(BaseCollector):
         self.last_call_timestamp = 0        
     
     def collect(self):
+        if not config_handler.system_entry().bandwidth:
+            return
+
         if result_list:      
             result_dict = result_list[0]
             bandwidth_records = [{'direction': key, 'bandwidth': str(result_dict[key])} for key in ('download', 'upload')]     

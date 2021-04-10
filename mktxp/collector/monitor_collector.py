@@ -25,7 +25,7 @@ class MonitorCollector(BaseCollector):
         if not router_entry.config_entry.monitor:
             return
 
-        monitor_labels = ('status', 'rate', 'full_duplex', 'name')
+        monitor_labels = ['status', 'rate', 'full_duplex', 'name']
         monitor_records = InterfaceMonitorMetricsDataSource.metric_records(router_entry, metric_labels = monitor_labels, include_comments = True)   
         if monitor_records:
             # translate records to appropriate values

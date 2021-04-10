@@ -35,6 +35,7 @@ class RouterEntry:
                             'InterfaceCollector': 0,
                             'FirewallCollector': 0,
                             'MonitorCollector': 0,
+                            'POECollector': 0,
                             'RouteCollector': 0,
                             'WLANCollector': 0,
                             'CapsmanCollector': 0,
