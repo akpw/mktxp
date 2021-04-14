@@ -2,7 +2,7 @@ FROM python:3.8-slim-buster
 MAINTAINER Guenter Bailey
 
 RUN apt-get update && \
-	apt-get install -y git && \
+	apt-get install -y git nano && \
 	rm -rf /var/lib/apt/lists/* && \
 	pip install git+https://github.com/akpw/mktxp && \
 	mkdir -p /root/mktxp
