@@ -20,6 +20,7 @@ from mktxp.collector.health_collector import HealthCollector
 from mktxp.collector.identity_collector import IdentityCollector
 from mktxp.collector.monitor_collector import MonitorCollector
 from mktxp.collector.poe_collector import POECollector
+from mktxp.collector.netwatch_collector import NetwatchCollector
 from mktxp.collector.pool_collector import PoolCollector
 from mktxp.collector.resource_collector import SystemResourceCollector
 from mktxp.collector.route_collector import RouteCollector
@@ -50,6 +51,7 @@ class CollectorRegistry:
         self.register('FirewallCollector', FirewallCollector.collect)
         self.register('MonitorCollector', MonitorCollector.collect)
         self.register('POECollector', POECollector.collect)
+        self.register('NetwatchCollector', NetwatchCollector.collect)
         self.register('RouteCollector', RouteCollector.collect)
 
         self.register('WLANCollector', WLANCollector.collect)

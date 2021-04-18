@@ -48,6 +48,7 @@ class MKTXPConfigKeys:
     FE_CAPSMAN_KEY = 'capsman'
     FE_CAPSMAN_CLIENTS_KEY = 'capsman_clients'
     FE_POE_KEY = 'poe'
+    FE_NETWATCH_KEY = 'netwatch'
 
     MKTXP_SOCKET_TIMEOUT = 'socket_timeout'    
     MKTXP_SOCKET_TIMEOUT = 'socket_timeout'   
@@ -82,7 +83,7 @@ class MKTXPConfigKeys:
     # Feature keys enabled by default
     BOOLEAN_KEYS_YES = {FE_DHCP_KEY, FE_DHCP_LEASE_KEY, FE_DHCP_POOL_KEY, FE_INTERFACE_KEY, FE_FIREWALL_KEY,
                       FE_MONITOR_KEY, FE_ROUTE_KEY, MKTXP_USE_COMMENTS_OVER_NAMES, 
-                      FE_WIRELESS_KEY, FE_WIRELESS_CLIENTS_KEY, FE_CAPSMAN_KEY, FE_CAPSMAN_CLIENTS_KEY, FE_POE_KEY}
+                      FE_WIRELESS_KEY, FE_WIRELESS_CLIENTS_KEY, FE_CAPSMAN_KEY, FE_CAPSMAN_CLIENTS_KEY, FE_POE_KEY, FE_NETWATCH_KEY}
 
     SYSTEM_BOOLEAN_KEYS_YES = (MKTXP_BANDWIDTH_KEY,)
 
@@ -100,7 +101,7 @@ class ConfigEntry:
 
                                                  MKTXPConfigKeys.FE_DHCP_KEY, MKTXPConfigKeys.FE_DHCP_LEASE_KEY, MKTXPConfigKeys.FE_DHCP_POOL_KEY, MKTXPConfigKeys.FE_INTERFACE_KEY, MKTXPConfigKeys.FE_FIREWALL_KEY,
                                                  MKTXPConfigKeys.FE_MONITOR_KEY, MKTXPConfigKeys.FE_ROUTE_KEY, MKTXPConfigKeys.FE_WIRELESS_KEY, MKTXPConfigKeys.FE_WIRELESS_CLIENTS_KEY,
-                                                 MKTXPConfigKeys.FE_CAPSMAN_KEY, MKTXPConfigKeys.FE_CAPSMAN_CLIENTS_KEY, MKTXPConfigKeys.FE_POE_KEY, MKTXPConfigKeys.MKTXP_USE_COMMENTS_OVER_NAMES
+                                                 MKTXPConfigKeys.FE_CAPSMAN_KEY, MKTXPConfigKeys.FE_CAPSMAN_CLIENTS_KEY, MKTXPConfigKeys.FE_POE_KEY, MKTXPConfigKeys.FE_NETWATCH_KEY, MKTXPConfigKeys.MKTXP_USE_COMMENTS_OVER_NAMES
                                                  ])
     MKTXPSystemEntry = namedtuple('MKTXPSystemEntry', [MKTXPConfigKeys.PORT_KEY, MKTXPConfigKeys.MKTXP_SOCKET_TIMEOUT,
                                                   MKTXPConfigKeys.MKTXP_INITIAL_DELAY, MKTXPConfigKeys.MKTXP_MAX_DELAY,
