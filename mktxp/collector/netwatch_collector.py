@@ -31,5 +31,5 @@ class NetwatchCollector(BaseCollector):
         if netwatch_records:
             yield BaseCollector.info_collector('netwatch', 'Netwatch Info Metrics', netwatch_records, netwatch_labels)
 
-            yield BaseCollector.gauge_collector('netwatch', 'Netwatch Status Metrics', netwatch_records, 'status', ['name'])
+            yield BaseCollector.gauge_collector('netwatch_status', 'Netwatch Status Metrics', netwatch_records, 'status', ['name'])
             
