@@ -31,7 +31,8 @@ class DHCPCollector(BaseCollector):
             # calculate number of leases per DHCP server
             dhcp_lease_servers = {}
             for dhcp_lease_record in dhcp_lease_records:
-                dhcp_lease_servers[dhcp_lease_record['server']] = dhcp_lease_servers.get(dhcp_lease_record['server'], 0) + 1
+                if dhcp_lease_record.get('server'):
+                    dhcp_lease_servers[dhcp_lease_record['server']] = dhcp_lease_servers.get(dhcp_lease_record['server'], 0) + 1
 
             # compile leases-per-server records
             dhcp_lease_servers_records = [{ MKTXPConfigKeys.ROUTERBOARD_NAME: router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_NAME],
