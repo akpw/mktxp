@@ -215,6 +215,8 @@ class MKTXPConfigHandler:
 
         for key in MKTXPConfigKeys.STR_KEYS:
             config_entry_reader[key] = self.config[entry_name][key]
+            if key is MKTXPConfigKeys.PASSWD_KEY and type(config_entry_reader[key]) is list:
+                config_entry_reader[key] = ','.join(config_entry_reader[key])
 
         # port
         if self.config[entry_name].get(MKTXPConfigKeys.PORT_KEY):
