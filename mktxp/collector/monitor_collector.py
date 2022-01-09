@@ -25,7 +25,7 @@ class MonitorCollector(BaseCollector):
         if not router_entry.config_entry.monitor:
             return
 
-        monitor_labels = ['status', 'rate', 'full_duplex', 'name']
+        monitor_labels = ['status', 'rate', 'full_duplex', 'name', 'sfp_temperature']
         monitor_records = InterfaceMonitorMetricsDataSource.metric_records(router_entry, metric_labels = monitor_labels, include_comments = True)   
         if monitor_records:
             # translate records to appropriate values
@@ -47,6 +47,9 @@ class MonitorCollector(BaseCollector):
             monitor_rates_metrics = BaseCollector.gauge_collector('interface_full_duplex', 'Full duplex data transmission', full_duplex_records, 'full_duplex', ['name'])
             yield monitor_rates_metrics
 
+            sfp_temperature_metrics = BaseCollector.gauge_collector('interface_sfp_temperature', 'Current SFP temperature', monitor_records, 'sfp_temperature', ['name'])
+            yield sfp_temperature_metrics
+
     # Helpers
     @staticmethod
     def _translated_values(monitor_label, value):
@@ -54,7 +57,8 @@ class MonitorCollector(BaseCollector):
                 'status': lambda value: '1' if value=='link-ok' else '0',
                 'rate': lambda value: MonitorCollector._rates(value),
                 'full_duplex': lambda value: '1' if value=='true' else '0',
-                'name': lambda value: value
+                'name': lambda value: value,
+                'sfp_temperature': lambda value: value
                 }[monitor_label](value)
 
     @staticmethod
