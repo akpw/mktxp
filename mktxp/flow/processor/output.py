@@ -54,7 +54,7 @@ class BaseOutputProcessor:
         if registration_record.get('rx_rate'):
             registration_record['rx_rate'] = BaseOutputProcessor.parse_rates(registration_record['rx_rate'])
         if registration_record.get('uptime'):
-            registration_record['uptime'] = naturaldelta(BaseOutputProcessor.parse_timedelta_seconds(registration_record['uptime']), months=True, minimum_unit='seconds', when=None)
+            registration_record['uptime'] = naturaldelta(BaseOutputProcessor.parse_timedelta_seconds(registration_record['uptime']), months=True, minimum_unit='seconds')
 
         if registration_record.get('signal_strength'):
             registration_record['signal_strength'] = BaseOutputProcessor.parse_signal_strength(registration_record['signal_strength'])
