@@ -24,7 +24,7 @@ class InterfaceCollector(BaseCollector):
         if not router_entry.config_entry.interface:
             return
             
-        interface_traffic_labels = ['name', 'comment', 'rx_byte', 'tx_byte', 'rx_packet', 'tx_packet', 'rx_error', 'tx_error', 'rx_drop', 'tx_drop']
+        interface_traffic_labels = ['name', 'comment', 'rx_byte', 'tx_byte', 'rx_packet', 'tx_packet', 'rx_error', 'tx_error', 'rx_drop', 'tx_drop', 'link_downs']
         interface_traffic_records = InterfaceTrafficMetricsDataSource.metric_records(router_entry, metric_labels = interface_traffic_labels)   
 
         if interface_traffic_records:
@@ -56,3 +56,6 @@ class InterfaceCollector(BaseCollector):
 
             tx_drop_metric = BaseCollector.counter_collector('interface_tx_drop', 'Number of transmitted packets being dropped', interface_traffic_records, 'tx_drop', ['name'])
             yield tx_drop_metric
+
+            link_downs_metric = BaseCollector.counter_collector('link_downs', 'Number of times link went down', interface_traffic_records, 'link_downs', ['name'])
+            yield link_downs_metric
