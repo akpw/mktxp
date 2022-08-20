@@ -22,7 +22,6 @@ class HealthMetricsDataSource:
     def metric_records(router_entry, *, metric_labels = []):
         try:
             health_records = router_entry.api_connection.router_api().get_resource('/system/health').get()
-
             for record in health_records:
                 if 'name' in record:
                     # Note: The API in RouterOS v7.X+ returns a response like this:
