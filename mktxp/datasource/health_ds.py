@@ -22,6 +22,16 @@ class HealthMetricsDataSource:
     def metric_records(router_entry, *, metric_labels = []):
         try:
             health_records = router_entry.api_connection.router_api().get_resource('/system/health').get()
+            for record in health_records:
+                if 'name' in record:
+                    # Note: The API in RouterOS v7.X+ returns a response like this:
+                    # [{'name': 'temperature', 'value': '33', 'type': 'C'}, ...]
+                    # To make this work for both v6 and v7 add a <name>:<value> pair in v7
+                    # Otherwise it is not possible to get the value by name (e.g. records['voltage'])
+                    name = record['name']
+                    val = record.get('value', None)
+                    record[name] = val
+
             return BaseDSProcessor.trimmed_records(router_entry, router_records = health_records, metric_labels = metric_labels)
         except Exception as exc:
             print(f'Error getting system health info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
