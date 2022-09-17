@@ -76,14 +76,14 @@ class RouterAPIConnection:
             self.connect()
         return self.api
 
-    def _in_connect_timeout(self, connect_timestamp, quiet = True):
+    def _in_connect_timeout(self, connect_timestamp):
         connect_delay = self._connect_delay()
         if (connect_timestamp - self.last_failure_timestamp) < connect_delay:
-            if not quiet: 
-                print(f'{self.router_name}@{self.config_entry.hostname}: in connect timeout, {int(connect_delay - (connect_timestamp - self.last_failure_timestamp))}secs remaining')
+            if config_handler.system_entry().verbose_mode: 
+                print(f'{self.router_name}@{self.E.hostname}: in connect timeout, {int(connect_delay - (connect_timestamp - self.last_failure_timestamp))}secs remaining')
                 print(f'Successive failure count: {self.successive_failure_count}')
             return True
-        if not quiet: 
+        if config_handler.system_entry().verbose_mode: 
             print(f'{self.router_name}@{self.config_entry.hostname}: OK to connect')
             if self.last_failure_timestamp > 0:
                 print(f'Seconds since last failure: {connect_timestamp - self.last_failure_timestamp}')

@@ -13,6 +13,7 @@
 
 
 from mktxp.datasource.base_ds import BaseDSProcessor
+from mktxp.utils.utils import parse_mkt_uptime
 
 
 class DHCPMetricsDataSource:
@@ -31,7 +32,7 @@ class DHCPMetricsDataSource:
             if 'host_name' in metric_labels:
                 translation_table['host_name'] = lambda c: c if c else ''           
             if 'expires_after' in metric_labels:
-                translation_table['expires_after'] = lambda c: c if c else ''        
+                translation_table['expires_after'] = lambda c: parse_mkt_uptime(c)        
             if 'active_address' in metric_labels:
                 translation_table['active_address'] = lambda c: c if c else ''        
 

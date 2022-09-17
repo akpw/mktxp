@@ -85,7 +85,7 @@ class BaseOutputProcessor:
             wifi_rates_rgx = re.compile(r'(\d*(?:\.\d*)?)([GgMmKk]bps?)')
             config_handler.re_compiled['wifi_rates_rgx'] = wifi_rates_rgx
         rc = wifi_rates_rgx.search(rate)
-        return f'{int(float(rc[1]))} {rc[2]}' if rc else ''
+        return f'{int(float(rc[1]))} {rc[2]}' if rc and len(rc.groups()) == 2 else rate
 
     @staticmethod
     def parse_timedelta(time):

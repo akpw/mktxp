@@ -89,18 +89,17 @@ class MKTXPDispatcher:
         ExportProcessor.start()
 
     def print(self, args):
-        if not (args['wifi_clients'] or args['capsman_clients']):
-            print("Select metric option(s) to print out, or run 'mktxp print -h' to find out more")
-
         if args['wifi_clients']:
             OutputProcessor.wifi_clients(args['entry_name'])
 
-        if args['capsman_clients']:
+        elif args['capsman_clients']:
             OutputProcessor.capsman_clients(args['entry_name'])
 
-        if args['dhcp_clients']:
+        elif args['dhcp_clients']:
             OutputProcessor.dhcp_clients(args['entry_name'])
-            
+
+        else:
+            print("Select metric option(s) to print out, or run 'mktxp print -h' to find out more")
 
 def main():
     MKTXPDispatcher().dispatch()

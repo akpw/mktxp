@@ -58,6 +58,7 @@ class MKTXPConfigKeys:
     MKTXP_INC_DIV = 'delay_inc_div'
     MKTXP_BANDWIDTH_KEY = 'bandwidth'
     MKTXP_BANDWIDTH_TEST_INTERVAL = 'bandwidth_test_interval'
+    MKTXP_VERBOSE_MODE = 'verbose_mode'
 
     # UnRegistered entries placeholder
     NO_ENTRIES_REGISTERED = 'NoEntriesRegistered'
@@ -86,7 +87,8 @@ class MKTXPConfigKeys:
                       FE_MONITOR_KEY, FE_ROUTE_KEY, MKTXP_USE_COMMENTS_OVER_NAMES, 
                       FE_WIRELESS_KEY, FE_WIRELESS_CLIENTS_KEY, FE_CAPSMAN_KEY, FE_CAPSMAN_CLIENTS_KEY, FE_POE_KEY, FE_NETWATCH_KEY}
 
-    SYSTEM_BOOLEAN_KEYS_YES = (MKTXP_BANDWIDTH_KEY,)
+    SYSTEM_BOOLEAN_KEYS_YES = {MKTXP_BANDWIDTH_KEY}
+    SYSTEM_BOOLEAN_KEYS_NO = {MKTXP_VERBOSE_MODE}
 
     STR_KEYS = (HOST_KEY, USER_KEY, PASSWD_KEY)
     MKTXP_INT_KEYS = (PORT_KEY, MKTXP_SOCKET_TIMEOUT, MKTXP_INITIAL_DELAY, MKTXP_MAX_DELAY, MKTXP_INC_DIV, MKTXP_BANDWIDTH_TEST_INTERVAL)
@@ -106,14 +108,15 @@ class ConfigEntry:
                                                  ])
     MKTXPSystemEntry = namedtuple('MKTXPSystemEntry', [MKTXPConfigKeys.PORT_KEY, MKTXPConfigKeys.MKTXP_SOCKET_TIMEOUT,
                                                   MKTXPConfigKeys.MKTXP_INITIAL_DELAY, MKTXPConfigKeys.MKTXP_MAX_DELAY,
-                                                  MKTXPConfigKeys.MKTXP_INC_DIV, MKTXPConfigKeys.MKTXP_BANDWIDTH_KEY, MKTXPConfigKeys.MKTXP_BANDWIDTH_TEST_INTERVAL])
+                                                  MKTXPConfigKeys.MKTXP_INC_DIV, MKTXPConfigKeys.MKTXP_BANDWIDTH_KEY, 
+                                                  MKTXPConfigKeys.MKTXP_VERBOSE_MODE, MKTXPConfigKeys.MKTXP_BANDWIDTH_TEST_INTERVAL])
 
 
 class OSConfig(metaclass = ABCMeta):
     ''' OS-related config
     '''
     @staticmethod
-    def os_config(quiet = False):
+    def os_config():
         ''' Factory method
         '''
         if sys.platform == 'linux':
@@ -121,8 +124,7 @@ class OSConfig(metaclass = ABCMeta):
         elif sys.platform == 'darwin':
             return OSXConfig()
         else:
-            if not quiet:
-                print(f'Non-supported platform: {sys.platform}')
+            print(f'Non-supported platform: {sys.platform}')
             return None
 
     @property
@@ -244,11 +246,11 @@ class MKTXPConfigHandler:
                 system_entry_reader[key] = self._default_value_for_key(key)
                 write_needed = True # read from disk next time                
 
-        for key in MKTXPConfigKeys.SYSTEM_BOOLEAN_KEYS_YES:
+        for key in MKTXPConfigKeys.SYSTEM_BOOLEAN_KEYS_NO.union(MKTXPConfigKeys.SYSTEM_BOOLEAN_KEYS_YES):
             if self._config[entry_name].get(key):
                 system_entry_reader[key] = self._config[entry_name].as_bool(key)
             else:
-                system_entry_reader[key] = True
+                system_entry_reader[key] = True if key in MKTXPConfigKeys.SYSTEM_BOOLEAN_KEYS_YES else False
                 write_needed = True # read from disk next time                
             
         if write_needed:

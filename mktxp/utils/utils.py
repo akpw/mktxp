@@ -18,6 +18,7 @@ from timeit import default_timer
 from collections.abc import Iterable
 from contextlib import contextmanager
 from multiprocessing import Process, Event
+from datetime import timedelta
 
 
 ''' Utilities / Helpers
@@ -68,6 +69,11 @@ def get_last_digit(str_to_search):
         return float(match.group())
     else:
         return -1
+
+def parse_mkt_uptime(time):
+    time_dict = re.match(r'((?P<weeks>\d+)w)?((?P<days>\d+)d)?((?P<hours>\d+)h)?((?P<minutes>\d+)m)?((?P<seconds>\d+)s)?', time).groupdict()
+    delta = timedelta(**{key: int(value) for key, value in time_dict.items() if value}).total_seconds() 
+    return int(delta) if delta else 0
 
 class FSHelper:
     ''' File System ops helper
