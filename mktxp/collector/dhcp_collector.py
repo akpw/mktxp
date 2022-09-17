@@ -48,7 +48,7 @@ class DHCPCollector(BaseCollector):
             # active lease metrics
             dhcp_lease_labels.remove('expires_after')
             if router_entry.config_entry.dhcp_lease:
-                dhcp_lease_metrics_gauge = BaseCollector.gauge_collector('dhcp_lease', 'DHCP Active Leases', 
+                dhcp_lease_metrics_gauge = BaseCollector.gauge_collector('dhcp_lease_info', 'DHCP Active Leases', 
                                                                         dhcp_lease_records, 'expires_after', dhcp_lease_labels)
                 yield dhcp_lease_metrics_gauge
 
