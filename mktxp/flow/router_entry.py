@@ -30,6 +30,7 @@ class RouterEntry:
         self.time_spent =  { 'IdentityCollector': 0,
                             'SystemResourceCollector': 0,
                             'HealthCollector': 0,
+                            'PublicIPAddressCollector': 0,
                             'DHCPCollector': 0,
                             'PoolCollector': 0,
                             'IPConnectionCollector': 0,
