@@ -15,6 +15,26 @@
 from prometheus_client.core import GaugeMetricFamily, CounterMetricFamily, InfoMetricFamily
 from mktxp.cli.config.config import MKTXPConfigKeys
      
+
+def get_values(record, labels, default=''):
+    """Get a set of metrics by label.
+    None values are replaced with a default value.
+    
+    >>> get_values(
+    ...     {'interface': 'cap3', 'tx_rate': '12 Mbps', 'rx_rate': '390 Mbps', 'comment': None},
+    ...     ['interface', 'tx_rate', 'rx_rate', 'comment']
+    ... )
+    {'interface': 'cap3', 'tx_rate': '12 Mbps', 'rx_rate': '390 Mbps', 'comment': ''}
+    """
+    values = {}
+    for label in labels:
+        val = record.get(label)
+        if val is None:
+            val = default
+        values[label] = val
+    
+    return values
+
      
 class BaseCollector:
     ''' Base Collector methods
@@ -28,7 +48,7 @@ class BaseCollector:
         collector = InfoMetricFamily(f'mktxp_{name}', decription)
 
         for router_record in router_records:
-            label_values = {label: router_record.get(label) if router_record.get(label) else '' for label in metric_labels}
+            label_values = get_values(router_record, metric_labels)
             collector.add_metric(metric_labels, label_values)
         return collector
 
@@ -40,7 +60,7 @@ class BaseCollector:
         collector = CounterMetricFamily(f'mktxp_{name}', decription, labels=metric_labels)
 
         for router_record in router_records:           
-            label_values = [router_record.get(label) for label in metric_labels]
+            label_values = get_values(router_record, metric_labels)
             collector.add_metric(label_values, router_record.get(metric_key, 0))
         return collector
 
@@ -53,7 +73,7 @@ class BaseCollector:
         collector = GaugeMetricFamily(f'mktxp_{name}', decription, labels=metric_labels)
 
         for router_record in router_records:       
-            label_values = [router_record.get(label) for label in metric_labels]
+            label_values = get_values(router_record, metric_labels)
             collector.add_metric(label_values, router_record.get(metric_key, 0))
         return collector
 
