@@ -19,7 +19,9 @@ class WirelessMetricsDataSource:
     ''' Wireless Metrics data provider
     '''             
     @staticmethod
-    def metric_records(router_entry, *, metric_labels = [], add_router_id = True):
+    def metric_records(router_entry, *, metric_labels = None, add_router_id = True):
+        if metric_labels is None:
+            metric_labels = []                
         try:
             registration_table_records = router_entry.api_connection.router_api().get_resource('/interface/wireless/registration-table').get()
             return BaseDSProcessor.trimmed_records(router_entry, router_records = registration_table_records, metric_labels = metric_labels, add_router_id = add_router_id)

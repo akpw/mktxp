@@ -19,7 +19,9 @@ class NetwatchMetricsDataSource:
     ''' Netwatch Metrics data provider
     '''             
     @staticmethod
-    def metric_records(router_entry, *, metric_labels = []):
+    def metric_records(router_entry, *, metric_labels = None):
+        if metric_labels is None:
+            metric_labels = []                
         try:
             netwatch_records = router_entry.api_connection.router_api().get_resource('/tool/netwatch').get(disabled='false')
             if 'name' in metric_labels:

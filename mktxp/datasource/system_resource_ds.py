@@ -19,7 +19,9 @@ class SystemResourceMetricsDataSource:
     ''' System Resource Metrics data provider
     '''             
     @staticmethod    
-    def metric_records(router_entry, *, metric_labels = []):
+    def metric_records(router_entry, *, metric_labels = None):
+        if metric_labels is None:
+            metric_labels = []                
         try:
             system_resource_records = router_entry.api_connection.router_api().get_resource('/system/resource').get()
             return BaseDSProcessor.trimmed_records(router_entry, router_records = system_resource_records, metric_labels = metric_labels)

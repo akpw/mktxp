@@ -19,7 +19,9 @@ class InterfaceTrafficMetricsDataSource:
     ''' Interface Traffic Metrics data provider
     '''             
     @staticmethod
-    def metric_records(router_entry, *, metric_labels = []):
+    def metric_records(router_entry, *, metric_labels = None):
+        if metric_labels is None:
+            metric_labels = []                
         try:
             traffic_records = router_entry.api_connection.router_api().get_resource('/interface').get(running='yes', disabled='no')
             return BaseDSProcessor.trimmed_records(router_entry, router_records = traffic_records, metric_labels = metric_labels)
@@ -32,7 +34,9 @@ class InterfaceMonitorMetricsDataSource:
     ''' Interface Monitor Metrics data provider
     '''             
     @staticmethod
-    def metric_records(router_entry, *, metric_labels = [], kind = 'ethernet', include_comments = False, running_only = True):
+    def metric_records(router_entry, *, metric_labels = None, kind = 'ethernet', include_comments = False, running_only = True):
+        if metric_labels is None:
+            metric_labels = []                
         try:
             interfaces = router_entry.api_connection.router_api().get_resource(f'/interface/{kind}').get()
             interface_names = [(interface['name'], interface.get('comment'), interface.get('running')) for interface in interfaces]

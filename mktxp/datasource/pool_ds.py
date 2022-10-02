@@ -19,7 +19,9 @@ class PoolMetricsDataSource:
     ''' Pool Metrics data provider
     '''             
     @staticmethod
-    def metric_records(router_entry, *, metric_labels = []):
+    def metric_records(router_entry, *, metric_labels = None):
+        if metric_labels is None:
+            metric_labels = []                
         try:
             pool_records = router_entry.api_connection.router_api().get_resource('/ip/pool').get()
             return BaseDSProcessor.trimmed_records(router_entry, router_records = pool_records, metric_labels = metric_labels)
@@ -32,7 +34,9 @@ class PoolUsedMetricsDataSource:
     ''' Pool/Used Metrics data provider
     '''             
     @staticmethod
-    def metric_records(router_entry, *, metric_labels = []):
+    def metric_records(router_entry, *, metric_labels = None):
+        if metric_labels is None:
+            metric_labels = []                
         try:
             pool_used_records = router_entry.api_connection.router_api().get_resource('/ip/pool/used').get()
             return BaseDSProcessor.trimmed_records(router_entry, router_records = pool_used_records, metric_labels = metric_labels)

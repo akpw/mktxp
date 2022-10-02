@@ -19,7 +19,9 @@ class FirewallMetricsDataSource:
     ''' Firewall Metrics data provider
     '''             
     @staticmethod
-    def metric_records(router_entry, *, metric_labels = [], raw = False, matching_only = True):
+    def metric_records(router_entry, *, metric_labels = None, raw = False, matching_only = True):
+        if metric_labels is None:
+            metric_labels = []                
         try:
             filter_path = '/ip/firewall/filter' if not raw else '/ip/firewall/raw'
             firewall_records = router_entry.api_connection.router_api().get_resource(filter_path).call('print', {'stats':'', 'all':''})

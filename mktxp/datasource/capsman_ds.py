@@ -19,7 +19,9 @@ class CapsmanCapsMetricsDataSource:
     ''' Caps Metrics data provider
     '''             
     @staticmethod
-    def metric_records(router_entry, *, metric_labels = []):
+    def metric_records(router_entry, *, metric_labels = None):
+        if metric_labels is None:
+            metric_labels = []                
         try:
             remote_caps_records = router_entry.api_connection.router_api().get_resource('/caps-man/remote-cap').get()
             return BaseDSProcessor.trimmed_records(router_entry, router_records = remote_caps_records, metric_labels = metric_labels)
@@ -32,7 +34,9 @@ class CapsmanRegistrationsMetricsDataSource:
     ''' Capsman Registrations Metrics data provider
     '''             
     @staticmethod
-    def metric_records(router_entry, *, metric_labels = [],  add_router_id = True):
+    def metric_records(router_entry, *, metric_labels = None,  add_router_id = True):
+        if metric_labels is None:
+            metric_labels = []                
         try:
             registration_table_records = router_entry.api_connection.router_api().get_resource('/caps-man/registration-table').get()
             return BaseDSProcessor.trimmed_records(router_entry, router_records = registration_table_records, metric_labels = metric_labels, add_router_id = add_router_id)

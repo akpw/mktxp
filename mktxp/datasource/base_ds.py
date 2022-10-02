@@ -17,7 +17,13 @@ class BaseDSProcessor:
     '''             
 
     @staticmethod
-    def trimmed_records(router_entry, *, router_records = [], metric_labels = [], add_router_id = True, translation_table = {}):
+    def trimmed_records(router_entry, *, router_records = None, metric_labels = None, add_router_id = True, translation_table = None):
+        if router_records is None:
+            router_records = []
+        if metric_labels is None:
+            metric_labels = []   
+        if translation_table is None:
+            translation_table = {}                 
         dash2_ = lambda x : x.replace('-', '_')
         if len(metric_labels) == 0 and len(router_records) > 0:
             metric_labels = [dash2_(key) for key in router_records[0].keys()]

@@ -19,7 +19,9 @@ class IdentityMetricsDataSource:
     ''' Identity Metrics data provider
     '''             
     @staticmethod
-    def metric_records(router_entry, *, metric_labels = []):
+    def metric_records(router_entry, *, metric_labels = None):
+        if metric_labels is None:
+            metric_labels = []                
         try:
             identity_records = router_entry.api_connection.router_api().get_resource('/system/identity').get()
             return BaseDSProcessor.trimmed_records(router_entry, router_records = identity_records, metric_labels = metric_labels)

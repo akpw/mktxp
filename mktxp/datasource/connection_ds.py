@@ -19,7 +19,9 @@ class IPConnectionDatasource:
     ''' IP connections data provider
     '''             
     @staticmethod
-    def metric_records(router_entry, *, metric_labels = []):
+    def metric_records(router_entry, *, metric_labels = None):
+        if metric_labels is None:
+            metric_labels = []        
         try:
             answer = router_entry.api_connection.router_api().get_binary_resource('/ip/firewall/connection/').call('print', {'count-only': b''})
             # answer looks and feels like an empty list: [], but it has a special attribute `done_message`

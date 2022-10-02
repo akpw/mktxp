@@ -20,7 +20,9 @@ class DHCPMetricsDataSource:
     ''' DHCP Metrics data provider
     '''             
     @staticmethod
-    def metric_records(router_entry, *, metric_labels = [], add_router_id = True):
+    def metric_records(router_entry, *, metric_labels = None, add_router_id = True):
+        if metric_labels is None:
+            metric_labels = []                
         try:
             #dhcp_lease_records = router_entry.api_connection.router_api().get_resource('/ip/dhcp-server/lease').get(status='bound')
             dhcp_lease_records = router_entry.api_connection.router_api().get_resource('/ip/dhcp-server/lease').call('print', {'active':''})

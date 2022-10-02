@@ -19,7 +19,9 @@ class RouterboardMetricsDataSource:
     ''' Routerboard Metrics data provider
     '''             
     @staticmethod
-    def metric_records(router_entry, *, metric_labels = []):
+    def metric_records(router_entry, *, metric_labels = None):
+        if metric_labels is None:
+            metric_labels = []                
         try:
             routerboard_records = router_entry.api_connection.router_api().get_resource('/system/routerboard').get()
             return BaseDSProcessor.trimmed_records(router_entry, router_records = routerboard_records, metric_labels = metric_labels)

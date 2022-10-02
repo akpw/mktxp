@@ -24,7 +24,7 @@ class IPConnectionCollector(BaseCollector):
         if not router_entry.config_entry.connections:
            return
            
-        connection_records = IPConnectionDatasource.metric_records(router_entry, metric_labels = [])
+        connection_records = IPConnectionDatasource.metric_records(router_entry)
         if connection_records:
 
             connection_metrics = BaseCollector.gauge_collector('ip_connections_total', 'Number of IP connections', connection_records, 'count',)
