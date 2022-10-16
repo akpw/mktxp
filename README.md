@@ -43,8 +43,6 @@ After installing MKTXP, you need to edit its main configuration file. You can do
 ❯ mktxp edit
 ```
 
-(for Docker instances, just mount your mktxp config files with `docker run -v ./mktxp:/home/mktxp/mktxp/ -it --rm ghcr.io/akpw/mktxp:latest`)
-
 This opens the config file in your default system editor. \
 In case you prefer a different editor, just run the ```edit``` command with its optional `-ed` parameter. \
 For example, to explicitly open the MKTXP config in nano:
@@ -83,6 +81,13 @@ The configuration file comes with a sample configuration, making it easy to copy
 
     use_comments_over_names = False  # when available, forces using comments over the interfaces names 
 ```
+
+
+For Docker instances, just mount your mktxp config files:
+```
+❯ docker run -v ./mktxp:/home/mktxp/mktxp/ -it --rm ghcr.io/akpw/mktxp:latest
+```
+
 
 ## Mikrotik Device Config
 For the purpose of RouterOS device monitoring, it's best to create a dedicated user with minimal required permissions. \
