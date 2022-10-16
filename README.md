@@ -33,13 +33,16 @@ For effortless visualization of the RouterOS metrics exported to Prometheus, MKT
 ## Install:
 - from [PyPI](https://pypi.org/project/mktxp/): `❯ pip install mktxp`
 - latest from source repository: `❯ pip install git+https://github.com/akpw/mktxp`
+- from [Docker](https://github.com/akpw/mktxp/pkgs/container/mktxp) : `docker pull ghcr.io/akpw/mktxp:latest`
 
 
 ## Getting started
-After installing MKTXP, you need to edit its main configuration file. The easiest way to do it is via running:
-```
-❯ mktxp edit
+After installing MKTXP, you need to edit its main configuration file. Theeasiest way to do it is via running:
 
+(for Docker, just replace `mktxp` with `docker run -v mktxp:/home/mktxp/mktxp/ -it --rm ghcr.io/akpw/mktxp:latest`)
+
+```bash
+❯ mktxp edit
 ```
 
 This opens the config file in your default system editor. \
