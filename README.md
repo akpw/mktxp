@@ -37,13 +37,13 @@ For effortless visualization of the RouterOS metrics exported to Prometheus, MKT
 
 
 ## Getting started
-After installing MKTXP, you need to edit its main configuration file. Theeasiest way to do it is via running:
-
-(for Docker, just replace `mktxp` with `docker run -v mktxp:/home/mktxp/mktxp/ -it --rm ghcr.io/akpw/mktxp:latest`)
+After installing MKTXP, you need to edit its main configuration file. The easiest way to do it is via running:
 
 ```bash
 ❯ mktxp edit
 ```
+
+(for Docker, just replace `mktxp` with `docker run -v mktxp:/home/mktxp/mktxp/ -it --rm ghcr.io/akpw/mktxp:latest`)
 
 This opens the config file in your default system editor. \
 In case you prefer a different editor, just run the ```edit``` command with its optional `-ed` parameter. \
