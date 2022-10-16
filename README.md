@@ -32,8 +32,10 @@ For effortless visualization of the RouterOS metrics exported to Prometheus, MKT
 
 ## Install:
 - from [PyPI](https://pypi.org/project/mktxp/): `❯ pip install mktxp`
+
 - latest from source repository: `❯ pip install git+https://github.com/akpw/mktxp`
-- from [Docker](https://github.com/akpw/mktxp/pkgs/container/mktxp) : `docker pull ghcr.io/akpw/mktxp:latest`
+
+- from [Docker](https://github.com/akpw/mktxp/pkgs/container/mktxp) : `❯ docker pull ghcr.io/akpw/mktxp:latest`
 
 
 ## Getting started
