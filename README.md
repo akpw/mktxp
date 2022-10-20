@@ -31,13 +31,14 @@ For effortless visualization of the RouterOS metrics exported to Prometheus, MKT
 
 
 ## Install:
+There are multiple ways to install this project, from a standalone app to [fully dockerized monitoring stack](https://github.com/akpw/mktxp-stack). 
 - from [PyPI](https://pypi.org/project/mktxp/): `❯ pip install mktxp`
 
 - latest from source repository: `❯ pip install git+https://github.com/akpw/mktxp`
 
 - from [Docker image](https://github.com/akpw/mktxp/pkgs/container/mktxp) : `❯ docker pull ghcr.io/akpw/mktxp:latest`
 
-- download a full dockerized [mktxp monitoring stack](https://github.com/akpw/mktxp-stack)
+- [MKTXP Stack](https://github.com/akpw/mktxp-stack): download a ready-to-go MKTXP monitoring stack
 
 
 ## Getting started
