@@ -90,8 +90,7 @@ Obviously, you can do the same via just opening the config file directly:
 ```
 
 #### Docker image
-For Docker instances, one way is to use a configured mktxp.conf file from a local installation. \
-Alternatively you can create a standalone one in a dedicated folder:
+For Docker instances, one way is to use a configured mktxp.conf file from a local installation. Alternatively you can create a standalone one in a dedicated folder:
 ```
 mkdir mktxp
 cd mktxp
