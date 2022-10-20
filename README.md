@@ -38,7 +38,7 @@ There are multiple ways to install this project, from a standalone app to a [ful
 
 - from [Docker image](https://github.com/akpw/mktxp/pkgs/container/mktxp) : `❯ docker pull ghcr.io/akpw/mktxp:latest`
 
-- [MKTXP Stack](https://github.com/akpw/mktxp-stack): download a ready-to-go MKTXP monitoring stack
+- with [MKTXP Stack](https://github.com/akpw/mktxp-stack): a ready-to-go MKTXP monitoring stack
 
 
 ## Getting started
@@ -103,7 +103,7 @@ Now you can mount this folder and run your docker instance with:
 ```
 
 #### MKTXP stack install
-
+[MKTXP Stack Getting Started](https://github.com/akpw/mktxp-stack#install--getting-started) provide similar instructions around editing the mktxp.conf file and, if needed, adding a dedicated API user to your Mikrotik RouterOS devices as mentioned below.
 
 ## Mikrotik Device Config
 For the purpose of RouterOS device monitoring, it's best to create a dedicated user with minimal required permissions. \
