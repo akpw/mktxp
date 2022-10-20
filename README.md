@@ -83,15 +83,15 @@ In case you prefer a different editor, run the ```edit``` command with its optio
 ```
 ❯ mktxp edit -ed nano
 ```
-Obviously, you can do the same via just open the config file directly:
+Obviously, you can do the same via just opening the config file directly:
 ```
 ❯ nano ~/mktxp/mktxp.conf
 
 ```
 
 #### Docker image
-For Docker instances, one way is to use a configered mktxp.conf file from a local installation. \
-You can also create a standalone one in a dedicated folder:
+For Docker instances, one way is to use a configured mktxp.conf file from a local installation. \
+Alternatively you can create a standalone one in a dedicated folder:
 ```
 mkdir mktxp
 cd mktxp
@@ -103,7 +103,7 @@ Now you can mount this folder and run your docker instance with:
 ```
 
 #### MKTXP stack install
-[MKTXP Stack Getting Started](https://github.com/akpw/mktxp-stack#install--getting-started) provide similar instructions around editing the mktxp.conf file and, if needed, adding a dedicated API user to your Mikrotik RouterOS devices as mentioned below.
+[MKTXP Stack Getting Started](https://github.com/akpw/mktxp-stack#install--getting-started) provides similar instructions around editing the mktxp.conf file and, if needed, adding a dedicated API user to your Mikrotik RouterOS devices as mentioned below.
 
 ## Mikrotik Device Config
 For the purpose of RouterOS device monitoring, it's best to create a dedicated user with minimal required permissions. \
