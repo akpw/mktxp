@@ -42,7 +42,7 @@ There are multiple ways to install this project, from a standalone app to a [ful
 
 
 ## Getting started
-To get started with MKXP, you need to edit its main configuration file. This essentially involves adding your Mikrotik devices ip addresses & authentication info, optionally modifying various MKTXP settings to specific needs. 
+To get started with MKTXP, you need to edit its main configuration file. This essentially involves adding your Mikrotik devices ip addresses & authentication info, optionally modifying various settings to specific needs. 
 
 The default configuration file comes with a sample configuration, making it easy to copy / edit parameters as needed:
 ```
@@ -90,14 +90,14 @@ Obviously, you can do the same via just open the config file directly:
 ```
 
 #### Docker image
-For Docker instances, the easiest is to use a configered mktxp.conf file from a local installation. \
+For Docker instances, one way is to use a configered mktxp.conf file from a local installation. \
 You can also create a standalone one in a dedicated folder:
 ```
 mkdir mktxp
 cd mktxp
 nano mktxp.conf # copy & edit sample entry(ies) from above
 ```
-Now you mount this folder and run your docker instance with:
+Now you can mount this folder and run your docker instance with:
 ```
 ❯ docker run -v ./mktxp:/home/mktxp/mktxp/ -it --rm ghcr.io/akpw/mktxp:latest
 ```
