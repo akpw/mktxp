@@ -35,26 +35,15 @@ For effortless visualization of the RouterOS metrics exported to Prometheus, MKT
 
 - latest from source repository: `❯ pip install git+https://github.com/akpw/mktxp`
 
-- from [Docker](https://github.com/akpw/mktxp/pkgs/container/mktxp) : `❯ docker pull ghcr.io/akpw/mktxp:latest`
+- from [Docker image](https://github.com/akpw/mktxp/pkgs/container/mktxp) : `❯ docker pull ghcr.io/akpw/mktxp:latest`
+
+- download a full dockerized [mktxp monitoring stack](https://github.com/akpw/mktxp-stack)
 
 
 ## Getting started
-After installing MKTXP, you need to edit its main configuration file. You can do it directly from mktxp via running:
+To get started with MKXP, you need to edit its main configuration file. This essentially involves adding your Mikrotik devices ip addresses & authentication info, optionally modifying various MKTXP settings to specific needs. 
 
-```bash
-❯ mktxp edit
-```
-
-This opens the config file in your default system editor. \
-In case you prefer a different editor, just run the ```edit``` command with its optional `-ed` parameter. \
-For example, to explicitly open the MKTXP config in nano:
-```
-❯ mktxp edit -ed nano
-
-```
-
-The configuration file comes with a sample configuration, making it easy to copy / edit parameters as needed:
-
+The default configuration file comes with a sample configuration, making it easy to copy / edit parameters as needed:
 ```
 [Sample-Router]
     enabled = False         # turns metrics collection for this RouterOS device on / off
@@ -84,11 +73,35 @@ The configuration file comes with a sample configuration, making it easy to copy
     use_comments_over_names = False  # when available, forces using comments over the interfaces names 
 ```
 
+#### Local install
+If you have a local MKTXP installation, you can edit this file with your default system editor directly from mktxp:
+```bash
+❯ mktxp edit
+```
+In case you prefer a different editor, run the ```edit``` command with its optional `-ed` parameter:
+```
+❯ mktxp edit -ed nano
+```
+Obviously, you can do the same via just open the config file directly:
+```
+❯ nano ~/mktxp/mktxp.conf
 
-For Docker instances, just mount your mktxp config files:
+```
+
+#### Docker image
+For Docker instances, the easiest is to use a configered mktxp.conf file from a local installation. \
+You can also create a standalone one in a dedicated folder:
+```
+mkdir mktxp
+cd mktxp
+nano mktxp.conf # copy & edit sample entry(ies) from above
+```
+Now you mount this folder and run your docker instance with:
 ```
 ❯ docker run -v ./mktxp:/home/mktxp/mktxp/ -it --rm ghcr.io/akpw/mktxp:latest
 ```
+
+#### MKTXP stack install
 
 
 ## Mikrotik Device Config
