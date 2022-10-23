@@ -33,11 +33,11 @@ class BaseOutputProcessor:
     @staticmethod
     def augment_record(router_entry, registration_record, dhcp_lease_records):
         try:
-            dhcp_lease_record = next((dhcp_lease_record for dhcp_lease_record in dhcp_lease_records if dhcp_lease_record['mac_address']==registration_record['mac_address']))
+            dhcp_lease_record = next((dhcp_lease_record for dhcp_lease_record in dhcp_lease_records if dhcp_lease_record.get('mac_address')==registration_record.get('mac_address')))
             dhcp_name = BaseOutputProcessor.dhcp_name(router_entry, dhcp_lease_record)
             dhcp_address = dhcp_lease_record.get('address', '')
         except StopIteration:
-            dhcp_name = registration_record['mac_address']
+            dhcp_name = registration_record.get('mac_address')
             dhcp_address = 'No DHCP Record'          
 
         registration_record['dhcp_name'] = dhcp_name
