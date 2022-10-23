@@ -16,7 +16,7 @@ from mktxp.cli.config.config import MKTXPConfigKeys
 from mktxp.flow.processor.output import BaseOutputProcessor
 from mktxp.collector.base_collector import BaseCollector
 from mktxp.datasource.dhcp_ds import DHCPMetricsDataSource
-from mktxp.datasource.capsman_ds import CapsmanCapsMetricsDataSource, CapsmanRegistrationsMetricsDataSource
+from mktxp.datasource.capsman_ds import CapsmanCapsMetricsDataSource, CapsmanRegistrationsMetricsDataSource, CapsmanInterfacesDatasource
 
 
 class CapsmanCollector(BaseCollector):
@@ -68,5 +68,11 @@ class CapsmanCollector(BaseCollector):
                 registration_metrics = BaseCollector.info_collector('capsman_clients_devices', 'Registered client devices info', 
                                         registration_records, ['dhcp_name', 'dhcp_address', 'rx_signal', 'ssid', 'tx_rate', 'rx_rate', 'interface', 'mac_address', 'uptime'])
                 yield registration_metrics
-    
+
+
+        remote_cap_interface_labels = ['name', 'configuration', 'mac_address', 'current_state', 'current_channel', 'current_registered_clients']
+        remote_cap_interface_records = CapsmanInterfacesDatasource.metric_records(router_entry, metric_labels = remote_cap_interface_labels)
+        if remote_cap_interface_records:
+            remote_caps_metrics = BaseCollector.info_collector('capsman_interfaces', 'CAPsMAN interfaces', remote_cap_interface_records, remote_cap_interface_labels)
+            yield remote_caps_metrics
 

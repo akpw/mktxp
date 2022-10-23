@@ -14,7 +14,6 @@
 
 from mktxp.datasource.base_ds import BaseDSProcessor
 
-
 class CapsmanCapsMetricsDataSource:
     ''' Caps Metrics data provider
     '''             
@@ -42,4 +41,20 @@ class CapsmanRegistrationsMetricsDataSource:
             return BaseDSProcessor.trimmed_records(router_entry, router_records = registration_table_records, metric_labels = metric_labels, add_router_id = add_router_id)
         except Exception as exc:
             print(f'Error getting caps-man registration table info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
+            return None
+
+
+class CapsmanInterfacesDatasource:
+    ''' Data provider for CAPsMaN interfaces
+    '''
+
+    @staticmethod
+    def metric_records(router_entry, *, metric_labels = None):
+        if metric_labels is None:
+            metric_labels = []                
+        try:
+            caps_interfaces = router_entry.api_connection.router_api().get_resource('/caps-man/interface').get()
+            return BaseDSProcessor.trimmed_records(router_entry, router_records = caps_interfaces, metric_labels = metric_labels)
+        except Exception as exc:
+            print(f'Error getting caps-man interfaces info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None
