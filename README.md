@@ -97,7 +97,7 @@ nano mktxp.conf # copy & edit sample entry(ies) from above
 ```
 Now you can mount this folder and run your docker instance with:
 ```
-❯ docker run -v ./mktxp:/home/mktxp/mktxp/ -it --rm ghcr.io/akpw/mktxp:latest
+❯ docker run -v "/$(pwd)/mktxp:/home/mktxp/mktxp/" -it --rm ghcr.io/akpw/mktxp:latest
 ```
 
 #### MKTXP stack install
