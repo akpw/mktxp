@@ -14,9 +14,22 @@
 
 import ssl
 import socket
+import collections
 from datetime import datetime
-from routeros_api import RouterOsApiPool
 from mktxp.cli.config.config import config_handler
+
+# Fix UTF-8 decode error
+# See: https://github.com/akpw/mktxp/issues/47
+# The RouterOS-api implicitly assumes that the API response is UTF-8 encoded.
+# But Mikrotik uses latin-1.
+# Because the upstream dependency is currently abandoned, this is a quick hack to solve the issue
+
+MIKROTIK_ENCODING = 'latin-1'
+import routeros_api.api_structure
+routeros_api.api_structure.StringField.get_python_value = lambda _, bytes:  bytes.decode(MIKROTIK_ENCODING) 
+routeros_api.api_structure.default_structure = collections.defaultdict(routeros_api.api_structure.StringField)
+
+from routeros_api import RouterOsApiPool
 
 
 class RouterAPIConnectionError(Exception):
