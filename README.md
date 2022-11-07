@@ -102,6 +102,7 @@ docker run -v "$(pwd)/mktxp:/home/mktxp/mktxp/" -p 49090:49090 -it --rm ghcr.io/
 #### MKTXP stack install
 [MKTXP Stack Getting Started](https://github.com/akpw/mktxp-stack#install--getting-started) provides similar instructions around editing the mktxp.conf file and, if needed, adding a dedicated API user to your Mikrotik RouterOS devices as mentioned below.
 
+
 ## Mikrotik Device Config
 For the purpose of RouterOS device monitoring, it's best to create a dedicated user with minimal required permissions. \
 MKTXP only needs ```API``` and ```Read```, so at that point you can go to your router's terminal and type:
