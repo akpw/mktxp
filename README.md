@@ -92,12 +92,11 @@ Obviously, you can do the same via just opening the config file directly:
 For Docker instances, one way is to use a configured mktxp.conf file from a local installation. Alternatively you can create a standalone one in a dedicated folder:
 ```
 mkdir mktxp
-cd mktxp
-nano mktxp.conf # copy & edit sample entry(ies) from above
+nano mktxp/mktxp.conf # copy & edit sample entry(ies) from above
 ```
 Now you can mount this folder and run your docker instance with:
 ```
-❯ docker run -v "/$(pwd)/mktxp:/home/mktxp/mktxp/" -it --rm ghcr.io/akpw/mktxp:latest
+docker run -v "$(pwd)/mktxp:/home/mktxp/mktxp/" -p 49090:49090 -it --rm ghcr.io/akpw/mktxp:latest
 ```
 
 #### MKTXP stack install
