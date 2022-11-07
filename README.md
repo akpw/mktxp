@@ -92,7 +92,7 @@ Obviously, you can do the same via just opening the config file directly:
 For Docker instances, one way is to use a configured mktxp.conf file from a local installation. Alternatively you can create a standalone one in a dedicated folder:
 ```
 mkdir mktxp
-nano mktxp/mktxp.conf # copy & edit sample entry(ies) from above
+nano mktxp/mktxp.conf # copy&edit sample entry(ies) from above
 ```
 Now you can mount this folder and run your docker instance with:
 ```
