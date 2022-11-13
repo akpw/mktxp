@@ -63,7 +63,7 @@ class FirewallMetricsDataSource:
     def metric_records_ipv6(router_entry, metric_labels=None, raw=False, matching_only=True):
         metric_labels = metric_labels or []
         try:
-            filter_path = '/ipv6/firewall/filter' if not raw else '/ip/firewall/raw'
+            filter_path = '/ipv6/firewall/filter' if not raw else '/ipv6/firewall/raw'
             firewall_records = FirewallMetricsDataSource._get_records(
                 router_entry,
                 filter_path,
