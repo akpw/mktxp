@@ -25,20 +25,35 @@ class FirewallCollector(BaseCollector):
         if not router_entry.config_entry.firewall:
             return
 
-        # initialize all pool counts, including those currently not used
+        # Initialize all pool counts, including those currently not used
+        # These are the same for both IPv4 and IPv6
         firewall_labels = ['chain', 'action', 'bytes', 'comment', 'log']
         
-        firewall_filter_records = FirewallMetricsDataSource.metric_records(router_entry, metric_labels = firewall_labels)   
+        # ~*~*~*~*~*~ IPv4 ~*~*~*~*~*~
+        firewall_filter_records = FirewallMetricsDataSource.metric_records_ipv4(router_entry, metric_labels = firewall_labels)   
         if firewall_filter_records:           
-            metris_records = [FirewallCollector.metric_record(router_entry, record) for record in firewall_filter_records]
-            firewall_filter_metrics = BaseCollector.counter_collector('firewall_filter', 'Total amount of bytes matched by firewall rules', metris_records, 'bytes', ['name', 'log'])
+            metrics_records = [FirewallCollector.metric_record(router_entry, record) for record in firewall_filter_records]
+            firewall_filter_metrics = BaseCollector.counter_collector('firewall_filter', 'Total amount of bytes matched by firewall rules', metrics_records, 'bytes', ['name', 'log'])
             yield firewall_filter_metrics
 
-        firewall_raw_records = FirewallMetricsDataSource.metric_records(router_entry, metric_labels = firewall_labels, raw = True)        
+        firewall_raw_records = FirewallMetricsDataSource.metric_records_ipv4(router_entry, metric_labels = firewall_labels, raw = True)        
         if firewall_raw_records:      
-            metris_records = [FirewallCollector.metric_record(router_entry, record) for record in firewall_raw_records]     
-            firewall_raw_metrics = BaseCollector.counter_collector('firewall_raw', 'Total amount of bytes matched by raw firewall rules', metris_records, 'bytes', ['name', 'log'])
+            metrics_records = [FirewallCollector.metric_record(router_entry, record) for record in firewall_raw_records]     
+            firewall_raw_metrics = BaseCollector.counter_collector('firewall_raw', 'Total amount of bytes matched by raw firewall rules', metrics_records, 'bytes', ['name', 'log'])
             yield firewall_raw_metrics
+
+        # ~*~*~*~*~*~ IPv6 ~*~*~*~*~*~
+        firewall_filter_records_ipv6 =  FirewallMetricsDataSource.metric_records_ipv6(router_entry, metric_labels = firewall_labels)
+        if firewall_filter_records_ipv6:           
+            metrics_records_ipv6 = [FirewallCollector.metric_record(router_entry, record) for record in firewall_filter_records_ipv6]
+            firewall_filter_metrics_ipv6 = BaseCollector.counter_collector('firewall_filter_ipv6', 'Total amount of bytes matched by firewall rules (IPv6)', metrics_records_ipv6, 'bytes', ['name', 'log'])
+            yield firewall_filter_metrics_ipv6
+
+        firewall_raw_records_ipv6 = FirewallMetricsDataSource.metric_records_ipv4(router_entry, metric_labels = firewall_labels, raw = True)        
+        if firewall_raw_records_ipv6:      
+            metrics_records_ipv6 = [FirewallCollector.metric_record(router_entry, record) for record in firewall_raw_records_ipv6]     
+            firewall_raw_metrics_ipv6 = BaseCollector.counter_collector('firewall_raw_ipv6', 'Total amount of bytes matched by raw firewall rules (IPv6)', metrics_records_ipv6, 'bytes', ['name', 'log'])
+            yield firewall_raw_metrics_ipv6
 
     # Helpers
     @staticmethod
