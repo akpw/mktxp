@@ -31,6 +31,7 @@ class RouterEntry:
                             'SystemResourceCollector': 0,
                             'HealthCollector': 0,
                             'PublicIPAddressCollector': 0,
+                            'IPv6NeighborCollector': 0,
                             'DHCPCollector': 0,
                             'PoolCollector': 0,
                             'IPConnectionCollector': 0,
