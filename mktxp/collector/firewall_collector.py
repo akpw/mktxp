@@ -43,6 +43,8 @@ class FirewallCollector(BaseCollector):
             yield firewall_raw_metrics
 
         # ~*~*~*~*~*~ IPv6 ~*~*~*~*~*~
+        if not router_entry.config_entry.ipv6_firewall:
+            return        
         firewall_filter_records_ipv6 =  FirewallMetricsDataSource.metric_records_ipv6(router_entry, metric_labels = firewall_labels)
         if firewall_filter_records_ipv6:           
             metrics_records_ipv6 = [FirewallCollector.metric_record(router_entry, record) for record in firewall_filter_records_ipv6]

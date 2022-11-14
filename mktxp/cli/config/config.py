@@ -42,6 +42,10 @@ class MKTXPConfigKeys:
     FE_IP_CONNECTIONS_KEY = 'connections'    
     FE_INTERFACE_KEY = 'interface'
     FE_FIREWALL_KEY = 'firewall'
+    
+    FE_IPV6_FIREWALL_KEY = 'ipv6_firewall'
+    FE_IPV6_NEIGHBOR_KEY = 'ipv6_neighbor'
+
     FE_MONITOR_KEY = 'monitor'
     FE_ROUTE_KEY = 'route'
     FE_WIRELESS_KEY = 'wireless'
@@ -50,7 +54,6 @@ class MKTXPConfigKeys:
     FE_CAPSMAN_CLIENTS_KEY = 'capsman_clients'
     FE_POE_KEY = 'poe'
     FE_PUBLIC_IP_KEY = 'public_ip'
-    FE_IPV6_NEIGHBOR_KEY = 'ipv6_neighbor'
     FE_NETWATCH_KEY = 'netwatch'
 
     MKTXP_SOCKET_TIMEOUT = 'socket_timeout'    
@@ -81,7 +84,7 @@ class MKTXPConfigKeys:
     DEFAULT_MKTXP_INC_DIV = 5
     DEFAULT_MKTXP_BANDWIDTH_TEST_INTERVAL = 420
 
-    BOOLEAN_KEYS_NO = {ENABLED_KEY, SSL_KEY, NO_SSL_CERTIFICATE, SSL_CERTIFICATE_VERIFY, FE_IPV6_NEIGHBOR_KEY}
+    BOOLEAN_KEYS_NO = {ENABLED_KEY, SSL_KEY, NO_SSL_CERTIFICATE, SSL_CERTIFICATE_VERIFY, FE_IPV6_FIREWALL_KEY, FE_IPV6_NEIGHBOR_KEY}
     
     # Feature keys enabled by default
     BOOLEAN_KEYS_YES = {FE_DHCP_KEY, FE_DHCP_LEASE_KEY, FE_DHCP_POOL_KEY, FE_IP_CONNECTIONS_KEY, FE_INTERFACE_KEY, FE_FIREWALL_KEY,
@@ -107,7 +110,7 @@ class ConfigEntry:
                                                  MKTXPConfigKeys.FE_DHCP_KEY, MKTXPConfigKeys.FE_DHCP_LEASE_KEY, MKTXPConfigKeys.FE_DHCP_POOL_KEY, MKTXPConfigKeys.FE_INTERFACE_KEY, MKTXPConfigKeys.FE_FIREWALL_KEY,
                                                  MKTXPConfigKeys.FE_MONITOR_KEY, MKTXPConfigKeys.FE_ROUTE_KEY, MKTXPConfigKeys.FE_WIRELESS_KEY, MKTXPConfigKeys.FE_WIRELESS_CLIENTS_KEY, MKTXPConfigKeys.FE_IP_CONNECTIONS_KEY,
                                                  MKTXPConfigKeys.FE_CAPSMAN_KEY, MKTXPConfigKeys.FE_CAPSMAN_CLIENTS_KEY, MKTXPConfigKeys.FE_POE_KEY, MKTXPConfigKeys.FE_NETWATCH_KEY, MKTXPConfigKeys.MKTXP_USE_COMMENTS_OVER_NAMES,
-                                                 MKTXPConfigKeys.FE_PUBLIC_IP_KEY, MKTXPConfigKeys.FE_IPV6_NEIGHBOR_KEY
+                                                 MKTXPConfigKeys.FE_PUBLIC_IP_KEY, MKTXPConfigKeys.FE_IPV6_FIREWALL_KEY, MKTXPConfigKeys.FE_IPV6_NEIGHBOR_KEY
                                                  ])
     MKTXPSystemEntry = namedtuple('MKTXPSystemEntry', [MKTXPConfigKeys.PORT_KEY, MKTXPConfigKeys.MKTXP_SOCKET_TIMEOUT,
                                                   MKTXPConfigKeys.MKTXP_INITIAL_DELAY, MKTXPConfigKeys.MKTXP_MAX_DELAY,
