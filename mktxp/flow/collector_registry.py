@@ -14,6 +14,7 @@
 
 from collections import OrderedDict
 from mktxp.collector.dhcp_collector import DHCPCollector
+from mktxp.collector.package_collector import PackageCollector
 from mktxp.collector.connection_collector import IPConnectionCollector
 from mktxp.collector.interface_collector import InterfaceCollector
 from mktxp.collector.health_collector import HealthCollector
@@ -49,6 +50,7 @@ class CollectorRegistry:
 
         self.register('IPv6NeighborCollector', IPv6NeighborCollector.collect)
 
+        self.register('PackageCollector', PackageCollector.collect)
         self.register('DHCPCollector', DHCPCollector.collect)
         self.register('IPConnectionCollector', IPConnectionCollector.collect)
         self.register('PoolCollector', PoolCollector.collect)

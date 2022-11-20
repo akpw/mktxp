@@ -28,7 +28,7 @@ class WLANCollector(BaseCollector):
             return
 
         monitor_labels = ['channel', 'noise_floor', 'overall_tx_ccq', 'registered_clients']
-        monitor_records = InterfaceMonitorMetricsDataSource.metric_records(router_entry, metric_labels = monitor_labels, kind = 'wireless')   
+        monitor_records = InterfaceMonitorMetricsDataSource.metric_records(router_entry, metric_labels = monitor_labels, kind = WirelessMetricsDataSource.wireless_package(router_entry))   
         if monitor_records:
             # sanitize records for relevant labels
             noise_floor_records = [monitor_record for monitor_record in monitor_records if monitor_record.get('noise_floor')]
@@ -76,6 +76,5 @@ class WLANCollector(BaseCollector):
                 registration_metrics = BaseCollector.info_collector('wlan_clients_devices', 'Client devices info', 
                                         registration_records, ['dhcp_name', 'dhcp_address', 'rx_signal', 'ssid', 'tx_rate', 'rx_rate', 'interface', 'mac_address', 'uptime'])
                 yield registration_metrics
-
 
 

@@ -13,21 +13,19 @@
 
 
 from mktxp.collector.base_collector import BaseCollector
-from mktxp.datasource.poe_ds import POEMetricsDataSource
+from mktxp.datasource.package_ds import PackageMetricsDataSource
 
 
-class POECollector(BaseCollector):
-    ''' POE Metrics collector
-    '''    
+class PackageCollector(BaseCollector):
+    '''Installed Packages collector'''
     @staticmethod
     def collect(router_entry):
-        if not router_entry.config_entry.poe:
+        if not router_entry.config_entry.installed_packages:
             return
 
-        poe_labels = ['name', 'poe_out', 'poe_priority', 'poe_voltage', 'poe_out_status', 'poe_out_voltage', 'poe_out_current', 'poe_out_power']
-        poe_records = POEMetricsDataSource.metric_records(router_entry, include_comments = True, metric_labels = poe_labels)  
+        package_labels = ['name', 'version', 'build_time', 'disabled']
+        package_records = PackageMetricsDataSource.metric_records(router_entry, metric_labels=package_labels)
+        if package_records:
+            package_metrics = BaseCollector.info_collector('installed_packages', 'Installed Packages', package_records, package_labels)
+            yield package_metrics
 
-        if poe_records:
-            poe_metrics = BaseCollector.info_collector('poe', 'POE Metrics', poe_records, poe_labels)
-            yield poe_metrics
-            
