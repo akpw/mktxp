@@ -1,5 +1,5 @@
 # coding=utf8
-## Copyright (c) 2020 Arseniy Kuznetsov
+## Copyright (c) 2020 Arseniy Kuznenowov
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
@@ -13,7 +13,8 @@
 
 
 from timeit import default_timer
-
+from datetime import datetime
+from mktxp.cli.config.config import config_handler
 
 class CollectorHandler:
     ''' MKTXP Collectors Handler
@@ -21,8 +22,18 @@ class CollectorHandler:
     def __init__(self, entries_handler, collector_registry):
         self.entries_handler = entries_handler
         self.collector_registry = collector_registry
+        self.last_collect_timestamp = 0       
 
     def collect(self):
+        now =  datetime.now().timestamp()  
+        diff = now - self.last_collect_timestamp    
+        if diff < config_handler.system_entry().minimal_collect_interval:
+            if config_handler.system_entry().verbose_mode:
+                print(f'An attemp to collect metrics within minimal collection interval: {diff} < {config_handler.system_entry().minimal_collect_interval}')
+                print('deferring..')
+            return
+        self.last_collect_timestamp = now
+
         yield from self.collector_registry.bandwidthCollector.collect()
 
         for router_entry in self.entries_handler.router_entries:
@@ -35,4 +46,7 @@ class CollectorHandler:
                 start = default_timer()
                 yield from collect_func(router_entry)
                 router_entry.time_spent[collector_ID] += default_timer() - start
+
+
+
 

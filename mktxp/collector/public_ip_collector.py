@@ -23,9 +23,14 @@ class PublicIPAddressCollector(BaseCollector):
         if not router_entry.config_entry.public_ip:
             return
 
-        address_labels = ['public_address', ]
+        address_labels = ['public_address', 'dns_name']
         address_records = PublicIPAddressDatasource.metric_records(router_entry, metric_labels=address_labels)
+
         if address_records:
+            for address_record in address_records:
+                if not 'dns_name' in address_record:
+                    address_record['dns_name'] = 'ddns disabled'
+                    
             address_metrics = BaseCollector.info_collector('public_ip_address', 'Public IP address', address_records, address_labels)
             yield address_metrics
 

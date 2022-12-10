@@ -32,6 +32,8 @@ from mktxp.collector.capsman_collector import CapsmanCollector
 from mktxp.collector.bandwidth_collector import BandwidthCollector
 from mktxp.collector.firewall_collector import FirewallCollector
 from mktxp.collector.mktxp_collector import MKTXPCollector
+from mktxp.collector.user_collector import UserCollector
+from mktxp.collector.queue_collector import QueueTreeCollector
 
 
 class CollectorRegistry:
@@ -64,6 +66,9 @@ class CollectorRegistry:
 
         self.register('WLANCollector', WLANCollector.collect)
         self.register('CapsmanCollector', CapsmanCollector.collect)
+
+        self.register('UserCollector', UserCollector.collect)
+        self.register('QueueTreeCollector', QueueTreeCollector.collect)
 
         self.register('MKTXPCollector', MKTXPCollector.collect)
 

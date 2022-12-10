@@ -33,7 +33,9 @@ class WirelessOutput:
         dhcp_lease_records = DHCPMetricsDataSource.metric_records(router_entry, metric_labels = dhcp_lease_labels, add_router_id = False)   
 
         dhcp_rt_by_interface = {}
-        for registration_record in sorted(registration_records, key = lambda rt_record: rt_record['signal_strength'], reverse=True):
+
+        key = lambda rt_record: rt_record['signal_strength'] if rt_record.get('signal_strength') else rt_record['interface']
+        for registration_record in sorted(registration_records, key = key, reverse=True):
             BaseOutputProcessor.augment_record(router_entry, registration_record, dhcp_lease_records)
 
             interface = registration_record['interface']

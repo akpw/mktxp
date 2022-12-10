@@ -41,15 +41,14 @@ class POEMetricsDataSource:
                     poe_record['poe_out_power'] = poe_monitor_records[0]['poe_out_power']
 
             if include_comments:
-                interfaces = router_entry.api_connection.router_api().get_resource('/interface/ethernet').get()
-                comment = lambda interface: interface['comment'] if interface.get('comment') else ''
+                interfaces = router_entry.api_connection.router_api().get_resource('/interface/ethernet').call('print', {'proplist':'name,comment'})
+                comment_fn = lambda interface: interface['comment'] if interface.get('comment') else ''
                 for poe_record in poe_records:
-                    comment = [comment(interface) for interface in interfaces if interface['name'] == poe_record['name']][0]                    
+                    comment = [comment_fn(interface) for interface in interfaces if interface['name'] == poe_record['name']][0]       
                     if comment:
                         # combines name with comment
                         poe_record['name'] = comment if router_entry.config_entry.use_comments_over_names else \
                                                                                                     f"{poe_record['name']} ({comment})"                                
-                                                                                                    
             return BaseDSProcessor.trimmed_records(router_entry, router_records = poe_records, metric_labels = metric_labels)
         except Exception as exc:
             print(f'Error getting PoE info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
