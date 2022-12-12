@@ -26,7 +26,14 @@ class WirelessMetricsDataSource:
         try:
             wireless_package = WirelessMetricsDataSource.wireless_package(router_entry)
             registration_table_records = router_entry.api_connection.router_api().get_resource(f'/interface/{wireless_package}/registration-table').get()
-            return BaseDSProcessor.trimmed_records(router_entry, router_records = registration_table_records, metric_labels = metric_labels, add_router_id = add_router_id)
+
+            # Mikrotik renamed the field 'signal_strength' to 'signal' when using wifiwave2.
+            # Rename this field back to 'signal_strength' to preserve backwards compatibility
+            for record in registration_table_records:
+                if 'signal' in record:
+                    record['signal_strength'] = record['signal']
+
+            return BaseDSProcessor.trimmed_records(router_entry, router_records = registration_table_records, metric_labels = metric_labels, add_router_id = add_router_id,)
         except Exception as exc:
             print(f'Error getting wireless registration table info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None
