@@ -102,7 +102,7 @@ docker run -v "$(pwd)/mktxp:/home/mktxp/mktxp/" -p 49090:49090 -it --rm ghcr.io/
 #### MKTXP stack install
 [MKTXP Stack Getting Started](https://github.com/akpw/mktxp-stack#install--getting-started) provides similar instructions around editing the mktxp.conf file and, if needed, adding a dedicated API user to your Mikrotik RouterOS devices as mentioned below.
 
-**NOTE:** In the case usage within a [Docker Swarm](https://docs.docker.com/engine/swarm/) is desired, please do make sure to have all settings explicitly set in both the `mktxp.conf` and `_mktxp.conf` files.  
+💡 In the case usage within a [Docker Swarm](https://docs.docker.com/engine/swarm/) is desired, please do make sure to have all settings explicitly set in both the `mktxp.conf` and `_mktxp.conf` files.  
 Not doing this may cause [issues](https://github.com/akpw/mktxp/issues/55#issuecomment-1346693843) regarding a `read-only` filesystem.
 
 ## Mikrotik Device Config
