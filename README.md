@@ -219,6 +219,63 @@ Let's save and then start the service as well as check on its' status:
 ```
 
 
+## Setting up MKTXP to run as a FreeBSD Service
+If you've installed MKTXP on a FreeBSD system, you can run it with system boot via adding a service. \
+Let's start with:
+
+
+```
+❯ nano /usr/local/etc/rc.d/mktxp
+```
+
+Now copy and paste the following:
+
+```
+#!/bin/sh
+
+# PROVIDE: mktxp
+# REQUIRE: DAEMON NETWORKING
+# BEFORE: LOGIN
+# KEYWORD: shutdown
+
+# Add the following lines to /etc/rc.conf to enable mktxp:
+# mktxp_enable="YES"
+#
+# mktxp_enable (bool):    Set to YES to enable mktxp
+#                Default: NO
+# mktxp_user (str):       mktxp daemon user
+#                Default: root
+
+. /etc/rc.subr
+
+name=mktxp
+rcvar=mktxp_enable 
+
+: ${mktxp_enable:="NO"}
+: ${mktxp_user:="root"}
+
+# daemon
+pidfile="/var/run/${name}.pid"
+command="/usr/sbin/daemon"
+mktxp_command="/usr/local/bin/mktxp export"
+procname="daemon"
+command_args=" -c -f -P ${pidfile} ${mktxp_command}"
+
+load_rc_config $name 
+run_rc_command "$1"
+```
+
+Let's save and then start the service as well as check on its' status:
+```
+❯ sudo sysrc mktxp_enable="YES"
+❯ service mktxp start
+❯ service mktxp status
+
+❯ service mktxp status
+mktxp is running as pid 36704
+```
+
+
 ## Description of CLI Commands
 ### mktxp commands
        . MKTXP commands:
