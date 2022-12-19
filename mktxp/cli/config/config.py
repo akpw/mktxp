@@ -135,6 +135,8 @@ class OSConfig(metaclass = ABCMeta):
             return LinuxConfig()
         elif sys.platform == 'darwin':
             return OSXConfig()
+        elif sys.platform.startswith('freebsd'):
+            return FreeBSDConfig()
         else:
             print(f'Non-supported platform: {sys.platform}')
             return None
@@ -143,6 +145,14 @@ class OSConfig(metaclass = ABCMeta):
     @abstractmethod
     def mktxp_user_dir_path(self):
         pass
+
+
+class FreeBSDConfig(OSConfig):
+    ''' FreeBSD-related config
+    '''
+    @property
+    def mktxp_user_dir_path(self):
+        return FSHelper.full_path('~/mktxp')
 
 
 class OSXConfig(OSConfig):

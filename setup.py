@@ -69,6 +69,7 @@ setup(
         'Intended Audience :: System Administrators',
         'Intended Audience :: Information Technology',
         'Operating System :: MacOS',
+        'Operating System :: POSIX :: BSD :: FreeBSD',
         'Operating System :: POSIX :: Linux',
         'Topic :: System',
         'Topic :: System :: Systems Administration',
