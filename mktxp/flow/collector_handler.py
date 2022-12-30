@@ -11,7 +11,7 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from timeit import default_timer
 from datetime import datetime
 from mktxp.cli.config.config import config_handler
@@ -68,13 +68,11 @@ class CollectorHandler:
                     continue
                 
                 # Publish the collection function as a future
-                future = executor.submit(self.collect_single, router_entry)
-                futures.append(future)
+                futures.append(executor.submit(self.collect_single, router_entry))
 
-        # Join all futures and collect their results
-        for future in futures:
-            results = future.result()
-            yield from results
+            for future in as_completed(futures):
+                yield from future.result()
+
 
     def collect(self):
         now = datetime.now().timestamp()

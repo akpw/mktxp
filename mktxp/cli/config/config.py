@@ -247,13 +247,14 @@ class MKTXPConfigHandler:
 
     def _config_entry_reader(self, entry_name):
         config_entry_reader = {}
-        write_needed = False
+        new_keys = []
+
         for key in MKTXPConfigKeys.BOOLEAN_KEYS_NO.union(MKTXPConfigKeys.BOOLEAN_KEYS_YES):
             if self.config[entry_name].get(key):
                 config_entry_reader[key] = self.config[entry_name].as_bool(key)
             else:
                 config_entry_reader[key] = True if key in MKTXPConfigKeys.BOOLEAN_KEYS_YES else False
-                write_needed = True  # read from disk next time
+                new_keys.append(key) # read from disk next time
 
         for key in MKTXPConfigKeys.STR_KEYS:
             config_entry_reader[key] = self.config[entry_name][key]
@@ -267,25 +268,31 @@ class MKTXPConfigHandler:
         else:
             config_entry_reader[MKTXPConfigKeys.PORT_KEY] = self._default_value_for_key(
                 MKTXPConfigKeys.SSL_KEY, config_entry_reader[MKTXPConfigKeys.SSL_KEY])
-            write_needed = True  # read from disk next time
-
-        if write_needed:
+            new_keys.append(MKTXPConfigKeys.PORT_KEY) # read from disk next time
+        
+        if new_keys:
             self.config[entry_name] = config_entry_reader
-            self.config.write()
+            try:
+                self.config.write()
+                if self._config[MKTXPConfigKeys.MKTXP_CONFIG_ENTRY_NAME].as_bool(MKTXPConfigKeys.MKTXP_VERBOSE_MODE):
+                    print(f'Updated router entry {entry_name} with new feature keys {new_keys}')                    
+            except Exception as exc:
+                print(f'Error updating router entry {entry_name} with new feature keys {new_keys}: {exc}')
+                print('Please update mktxp.conf to its latest version manually')
 
         return config_entry_reader
 
     def _system_entry_reader(self):
         system_entry_reader = {}
         entry_name = MKTXPConfigKeys.MKTXP_CONFIG_ENTRY_NAME
-        write_needed = False
+        new_keys = []
 
         for key in MKTXPConfigKeys.MKTXP_INT_KEYS:
             if self._config[entry_name].get(key):
                 system_entry_reader[key] = self._config[entry_name].as_int(key)
             else:
                 system_entry_reader[key] = self._default_value_for_key(key)
-                write_needed = True  # read from disk next time
+                new_keys.append(key) # read from disk next time
 
         for key in MKTXPConfigKeys.SYSTEM_BOOLEAN_KEYS_NO.union(MKTXPConfigKeys.SYSTEM_BOOLEAN_KEYS_YES):
             if self._config[entry_name].get(key):
@@ -293,11 +300,17 @@ class MKTXPConfigHandler:
                     key)
             else:
                 system_entry_reader[key] = True if key in MKTXPConfigKeys.SYSTEM_BOOLEAN_KEYS_YES else False
-                write_needed = True  # read from disk next time
+                new_keys.append(key) # read from disk next time
 
-        if write_needed:
+        if new_keys:
             self._config[entry_name] = system_entry_reader
-            self._config.write()
+            try:
+                self._config.write()
+                if self._config[entry_name].as_bool(MKTXPConfigKeys.MKTXP_VERBOSE_MODE):
+                    print(f'Updated system entry {entry_name} with new system keys {new_keys}')    
+            except Exception as exc:
+                print(f'Error updating system entry {entry_name} with new system keys {new_keys}: {exc}')
+                print('Please update _mktxp.conf to its latest version manually')
 
         return system_entry_reader
 
