@@ -73,6 +73,8 @@ class MKTXPConfigKeys:
     MKTXP_MIN_COLLECT_INTERVAL = 'minimal_collect_interval'
     MKTXP_FETCH_IN_PARALLEL = 'fetch_routers_in_parallel'
     MKTXP_MAX_WORKER_THREADS = 'max_worker_threads'
+    MKTXP_MAX_SCRAPE_DURATION = 'max_scrape_duration'
+    MKTXP_TOTAL_MAX_SCRAPE_DURATION = 'total_max_scrape_duration'
 
     # UnRegistered entries placeholder
     NO_ENTRIES_REGISTERED = 'NoEntriesRegistered'
@@ -95,6 +97,8 @@ class MKTXPConfigKeys:
     DEFAULT_MKTXP_MIN_COLLECT_INTERVAL = 5
     DEFAULT_MKTXP_FETCH_IN_PARALLEL = False
     DEFAULT_MKTXP_MAX_WORKER_THREADS = 5
+    DEFAULT_MKTXP_MAX_SCRAPE_DURATION = 10
+    DEFAULT_MKTXP_TOTAL_MAX_SCRAPE_DURATION = 30
 
 
     BOOLEAN_KEYS_NO = {ENABLED_KEY, SSL_KEY, NO_SSL_CERTIFICATE,
@@ -112,7 +116,7 @@ class MKTXPConfigKeys:
     STR_KEYS = (HOST_KEY, USER_KEY, PASSWD_KEY)
     MKTXP_INT_KEYS = (PORT_KEY, MKTXP_SOCKET_TIMEOUT, MKTXP_INITIAL_DELAY, MKTXP_MAX_DELAY,
                       MKTXP_INC_DIV, MKTXP_BANDWIDTH_TEST_INTERVAL, MKTXP_MIN_COLLECT_INTERVAL,
-                      MKTXP_MAX_WORKER_THREADS,)
+                      MKTXP_MAX_WORKER_THREADS, MKTXP_MAX_SCRAPE_DURATION, MKTXP_TOTAL_MAX_SCRAPE_DURATION)
 
     # MKTXP config entry nane
     MKTXP_CONFIG_ENTRY_NAME = 'MKTXP'
@@ -133,7 +137,8 @@ class ConfigEntry:
                                                        MKTXPConfigKeys.MKTXP_INC_DIV, MKTXPConfigKeys.MKTXP_BANDWIDTH_KEY,
                                                        MKTXPConfigKeys.MKTXP_VERBOSE_MODE, MKTXPConfigKeys.MKTXP_BANDWIDTH_TEST_INTERVAL,
                                                        MKTXPConfigKeys.MKTXP_MIN_COLLECT_INTERVAL, MKTXPConfigKeys.MKTXP_FETCH_IN_PARALLEL,
-                                                       MKTXPConfigKeys.MKTXP_MAX_WORKER_THREADS])
+                                                       MKTXPConfigKeys.MKTXP_MAX_WORKER_THREADS, MKTXPConfigKeys.MKTXP_MAX_SCRAPE_DURATION, 
+                                                       MKTXPConfigKeys.MKTXP_TOTAL_MAX_SCRAPE_DURATION])
 
 
 class OSConfig(metaclass=ABCMeta):
@@ -326,6 +331,8 @@ class MKTXPConfigHandler:
             MKTXPConfigKeys.MKTXP_MIN_COLLECT_INTERVAL: lambda value: MKTXPConfigKeys.DEFAULT_MKTXP_MIN_COLLECT_INTERVAL,
             MKTXPConfigKeys.MKTXP_FETCH_IN_PARALLEL: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_FETCH_IN_PARALLEL,
             MKTXPConfigKeys.MKTXP_MAX_WORKER_THREADS: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_MAX_WORKER_THREADS,
+            MKTXPConfigKeys.MKTXP_MAX_SCRAPE_DURATION: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_MAX_SCRAPE_DURATION,
+            MKTXPConfigKeys.MKTXP_TOTAL_MAX_SCRAPE_DURATION: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_TOTAL_MAX_SCRAPE_DURATION,
         }[key](value)
 
 
