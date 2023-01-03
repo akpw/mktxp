@@ -45,6 +45,7 @@ class RouterEntry:
                             'WLANCollector': 0,
                             'CapsmanCollector': 0,
                             'QueueTreeCollector': 0,
+                            'QueueSimpleCollector': 0,                            
                             'UserCollector': 0,                            
                             'MKTXPCollector': 0
                             }            

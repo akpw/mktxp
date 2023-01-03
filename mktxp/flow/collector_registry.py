@@ -34,6 +34,7 @@ from mktxp.collector.firewall_collector import FirewallCollector
 from mktxp.collector.mktxp_collector import MKTXPCollector
 from mktxp.collector.user_collector import UserCollector
 from mktxp.collector.queue_collector import QueueTreeCollector
+from mktxp.collector.queue_collector import QueueSimpleCollector
 
 
 class CollectorRegistry:
@@ -69,6 +70,7 @@ class CollectorRegistry:
 
         self.register('UserCollector', UserCollector.collect)
         self.register('QueueTreeCollector', QueueTreeCollector.collect)
+        self.register('QueueSimpleCollector', QueueSimpleCollector.collect)
 
         self.register('MKTXPCollector', MKTXPCollector.collect)
 
