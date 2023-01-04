@@ -186,12 +186,27 @@ class LinuxConfig(OSConfig):
     @property
     def mktxp_user_dir_path(self):
         return FSHelper.full_path('~/mktxp')
-        # return FSHelper.full_path('/etc/mktxp')
+
+
+class CustomConfig(OSConfig):
+    ''' Custom config
+    '''
+    def __init__(self, path):
+        self._user_dir_path = path
+
+    @property
+    def mktxp_user_dir_path(self):
+        return FSHelper.full_path(self._user_dir_path)
 
 
 class MKTXPConfigHandler:
+    # two-phase init
     def __init__(self):
-        self.os_config = OSConfig.os_config()
+        pass
+
+    # two-phase init, to enable custom config
+    def __call__(self, os_config = None):
+        self.os_config = os_config if os_config else OSConfig.os_config()
         if not self.os_config:
             sys.exit(1)
 

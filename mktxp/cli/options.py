@@ -15,7 +15,7 @@
 import os
 import pkg_resources
 from argparse import ArgumentParser, HelpFormatter
-from mktxp.cli.config.config import config_handler, MKTXPConfigKeys
+from mktxp.cli.config.config import config_handler, MKTXPConfigKeys, CustomConfig
 from mktxp.utils.utils import FSHelper, UniquePartialMatchList, run_cmd
 
 
@@ -62,22 +62,31 @@ Selected metrics info can be printed on the command line. For more information, 
     def parse_options(self):
         ''' General Options parsing workflow
         '''
-        parser = ArgumentParser(prog = self._script_name,
+
+        global_options_parser = ArgumentParser(add_help=False)
+        self.parse_global_options(global_options_parser)
+        namespace, _ = global_options_parser.parse_known_args()    
+        if namespace.dir:
+            config_handler(CustomConfig(namespace.dir))
+        else:
+            config_handler()
+
+        commands_parser = ArgumentParser(prog = self._script_name,
                                 description = 'Prometheus Exporter for Mikrotik RouterOS',
-                                formatter_class=MKTXPHelpFormatter)
+                                formatter_class=MKTXPHelpFormatter, parents=[global_options_parser])
+        self.parse_commands(commands_parser)
+        args = vars(commands_parser.parse_args())
 
-        self.parse_global_options(parser)
-        self.parse_commands(parser)
-        args = vars(parser.parse_args())
-
-        self._check_args(args, parser)
+        self._check_args(args, commands_parser)
 
         return args
 
     def parse_global_options(self, parser):
         ''' Parses global options
         '''
-        pass
+        parser.add_argument('--dir', dest = 'dir', 
+                    type = lambda d: self._is_valid_dir_path(parser, d),
+                    help = 'MKTXP config files directory (optional)')
 
     def parse_commands(self, parser):
         ''' Commands parsing
