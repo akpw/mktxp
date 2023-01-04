@@ -21,7 +21,7 @@ class HealthCollector(BaseCollector):
     '''    
     @staticmethod
     def collect(router_entry):
-        health_labels = ['voltage', 'temperature', 'cpu_temperature', 'fan1_speed', 'fan2_speed']
+        health_labels = ['voltage', 'temperature', 'cpu_temperature', 'fan1_speed', 'fan2_speed', 'power_consumption']
         health_records = HealthMetricsDataSource.metric_records(router_entry, metric_labels = health_labels)   
         if health_records:
             for record in health_records:
@@ -45,3 +45,7 @@ class HealthCollector(BaseCollector):
                 if 'fan2_speed' in record:
                     fan_two_speed_metrics = BaseCollector.gauge_collector('system_fan_two_speed', 'System fan 2 current speed', [record, ], 'fan2_speed')
                     yield fan_two_speed_metrics
+
+                if 'power_consumption' in record:
+                    power_consumption_metrics = BaseCollector.gauge_collector('system_power_consumption', 'System Power Consumption', [record, ], 'power_consumption')
+                    yield power_consumption_metrics
