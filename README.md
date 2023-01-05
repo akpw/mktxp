@@ -58,19 +58,31 @@ The default configuration file comes with a sample configuration, making it easy
     no_ssl_certificate = False      # enables API_SSL connect without router SSL certificate
     ssl_certificate_verify = False  # turns SSL certificate verification on / off   
 
+    installed_packages = True       # Installed packages
     dhcp = True                     # DHCP general metrics
     dhcp_lease = True               # DHCP lease metrics
+    connections = True              # IP connections metrics
     pool = True                     # Pool metrics
     interface = True                # Interfaces traffic metrics
-    firewall = True                 # Firewall rules matching traffic metrics
+    
+    firewall = True                 # IPv4 Firewall rules traffic metrics
+    ipv6_firewall = False           # IPv6 Firewall rules traffic metrics
+    ipv6_neighbor = False           # Reachable IPv6 Neighbors
+
+    poe = True                      # POE metrics
     monitor = True                  # Interface monitor metrics
+    netwatch = True                 # Netwatch metrics
+    public_ip = True                # Public IP metrics
     route = True                    # Routes metrics
     wireless = True                 # WLAN general metrics
     wireless_clients = True         # WLAN clients metrics
     capsman = True                  # CAPsMAN general metrics
-    capsman_clients = True          # CAPsMAN clients metrics
+    capsman_clients = True          # CAPsMAN clients metrics    
 
-    use_comments_over_names = False  # when available, forces using comments over the interfaces names 
+    user = True                     # Active Users metrics
+    queue = True                    # Queues metrics
+
+    use_comments_over_names = True  # when available, forces using comments over the interfaces names 
 ```
 
 #### Local install
@@ -173,8 +185,35 @@ Connecting to router MKT-LR@10.**.*.**
 2021-01-24 14:16:23 Running HTTP metrics server on port 49090
 ````
 
-In case a different port is preffered, it can be set as needed via running the ```mktxp edit -i``` command. \
-That will open an internal MKTXP configuration file with some more implementation-related parameters.
+## MKTXP system configuration
+In case you need more control on how MKTXP is run, it can be done via editing the `_mktxp.conf` file. This allows things like changing the port and other impl-related parameters, enable parallel router fetching and configurable scrapes timeouts, etc. 
+As before, for local installation the editing can be done directly from mktxp:
+```
+mktxp edit -i
+```
+
+```
+[MKTXP]
+    port = 49090                    
+    socket_timeout = 2
+    
+    initial_delay_on_failure = 120
+    max_delay_on_failure = 900
+    delay_inc_div = 5
+
+    bandwidth = True                # Turns metrics bandwidth metrics collection on / off    
+    bandwidth_test_interval = 420   # Interval for colllecting bandwidth metrics
+    minimal_collect_interval = 5    # Minimal metric collection interval
+
+    verbose_mode = False            # Set it on for troubleshooting
+
+    fetch_routers_in_parallel = False   # Set to True if you want to fetch multiple routers parallel
+    max_worker_threads = 5              # Max number of worker threads that can fetch routers. Meaningless if fetch_routers_in_parallel is set to False
+    
+    max_scrape_duration = 10            # Max duration of individual routers' metrics collection 
+    total_max_scrape_duration = 30      # Max overall duration of all metrics collection 
+```    
+
 
 ## Grafana dashboard
 Now with your RouterOS metrics being exported to Prometheus, it's easy to visualize them with this [Grafana dashboard](https://grafana.com/grafana/dashboards/13679)
@@ -287,8 +326,7 @@ mktxp is running as pid 36704
 
 ````
 ❯ mktxp -h
-usage: MKTXP [-h] {info, edit, export, print, show, } ...
-
+usage: MKTXP [-h] [--dir DIR] {info, edit, export, print, show, } ...
 ````
 To learn more about individual commands, just run it with ```-h```:
 For example, to learn everything about ````mktxp show````:
