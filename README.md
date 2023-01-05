@@ -19,14 +19,16 @@ For effortless visualization of the RouterOS metrics exported to Prometheus, MKT
 - [Python 3.6.x](https://www.python.org/downloads/release/python-360/) or later
 
 - Supported OSs:
-   * Linux
+   * Linux   
    * Mac OSX
+   * FreeBSD
 
 - Mikrotik RouterOS device(s)
 
 - Optional: 
    * [Prometheus](https://prometheus.io/docs/prometheus/latest/installation/)
    * [Grafana](https://grafana.com/docs/grafana/latest/installation/)
+   * [Docker](https://docs.docker.com/) / [Docker Compose](https://docs.docker.com/compose/)
 
 
 ## Install:
@@ -100,7 +102,7 @@ Obviously, you can do the same via just opening the config file directly:
 
 ```
 
-#### Docker image
+#### Docker image install
 For Docker instances, one way is to use a configured mktxp.conf file from a local installation. Alternatively you can create a standalone one in a dedicated folder:
 ```
 mkdir mktxp
