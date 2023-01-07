@@ -13,7 +13,10 @@ Apart from exporting to Prometheus, MKTXP can also print some of the metrics dir
 
 For effortless visualization of the RouterOS metrics exported to Prometheus, MKTXP comes with a dedicated [Grafana dashboard](https://grafana.com/grafana/dashboards/13679):
 
-<img src="https://user-images.githubusercontent.com/5028474/210763126-b8772783-6dca-4c02-a91e-13672d562a7a.png" width="32%"></img> <img src="https://user-images.githubusercontent.com/5028474/210763148-cc7cbc02-2406-4742-a610-f50ef874c683.png" width="32%"></img> <img src="https://user-images.githubusercontent.com/5028474/210763154-bfd49b22-1529-482a-86ab-e879b5093d02.png" width="32%"></img> 
+<img width="32%" alt="1" src="https://user-images.githubusercontent.com/5028474/211141785-3d71df65-28cb-45fa-bd22-70022f40f162.png"> <img width="32%" alt="2" src="https://user-images.githubusercontent.com/5028474/211141871-30b409fe-5c77-4616-9cc6-c0556432cfea.png"> <img width="32%" alt="3" src="https://user-images.githubusercontent.com/5028474/211141793-61bee869-9125-4b74-a5b4-a02f0f82cc6d.png">
+
+
+
 
 #### Requirements:
 - [Python 3.6.x](https://www.python.org/downloads/release/python-360/) or later
