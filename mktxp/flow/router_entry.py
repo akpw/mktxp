@@ -27,6 +27,7 @@ class RouterEntry:
             MKTXPConfigKeys.ROUTERBOARD_NAME: self.router_name,
             MKTXPConfigKeys.ROUTERBOARD_ADDRESS: self.config_entry.hostname
             }
+        self.wifi_package = None
         self.time_spent =  { 'IdentityCollector': 0,
                             'SystemResourceCollector': 0,
                             'HealthCollector': 0,

@@ -19,6 +19,10 @@ from mktxp.datasource.package_ds import PackageMetricsDataSource
 class WirelessMetricsDataSource:
     ''' Wireless Metrics data provider
     '''             
+    WIFIWAVE2 = 'wifiwave2'
+    WIRELESS = 'wireless'
+
+
     @staticmethod
     def metric_records(router_entry, *, metric_labels = None, add_router_id = True):
         if metric_labels is None:
@@ -41,4 +45,7 @@ class WirelessMetricsDataSource:
 
     @staticmethod
     def wireless_package(router_entry):
-        return 'wifiwave2' if PackageMetricsDataSource.is_package_installed(router_entry, package_name = 'wifiwave2') else 'wireless'
+        if not router_entry.wifi_package:
+            ww2_installed = PackageMetricsDataSource.is_package_installed(router_entry, package_name = WirelessMetricsDataSource.WIFIWAVE2)
+            router_entry.wifi_package = WirelessMetricsDataSource.WIFIWAVE2 if ww2_installed else WirelessMetricsDataSource.WIRELESS
+        return router_entry.wifi_package

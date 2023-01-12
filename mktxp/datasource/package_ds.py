@@ -31,7 +31,7 @@ class PackageMetricsDataSource:
 
 
     @staticmethod
-    def is_package_installed (router_entry, package_name = ''):
+    def is_package_installed (router_entry, package_name = None):
         if package_name:
             try:
                 package_records = router_entry.api_connection.router_api().get_resource('/system/package').get()
