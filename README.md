@@ -86,6 +86,8 @@ The default configuration file comes with a sample configuration, making it easy
 
     user = True                     # Active Users metrics
     queue = True                    # Queues metrics
+    remote_dhcp_entry = None        # Alternative mktxp entry for DHCP info resolution (capsman/wireless)
+
 
     use_comments_over_names = True  # when available, forces using comments over the interfaces names 
 ```
