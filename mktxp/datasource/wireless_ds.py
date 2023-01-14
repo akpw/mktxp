@@ -22,7 +22,6 @@ class WirelessMetricsDataSource:
     WIFIWAVE2 = 'wifiwave2'
     WIRELESS = 'wireless'
 
-
     @staticmethod
     def metric_records(router_entry, *, metric_labels = None, add_router_id = True):
         if metric_labels is None:
@@ -31,8 +30,7 @@ class WirelessMetricsDataSource:
             wireless_package = WirelessMetricsDataSource.wireless_package(router_entry)
             registration_table_records = router_entry.api_connection.router_api().get_resource(f'/interface/{wireless_package}/registration-table').get()
 
-            # Mikrotik renamed the field 'signal_strength' to 'signal' when using wifiwave2.
-            # Rename this field back to 'signal_strength' to preserve backwards compatibility
+            # With wifiwave2, Mikrotik renamed the field 'signal_strength' to 'signal' 
             for record in registration_table_records:
                 if 'signal' in record:
                     record['signal_strength'] = record['signal']
@@ -49,3 +47,15 @@ class WirelessMetricsDataSource:
             ww2_installed = PackageMetricsDataSource.is_package_installed(router_entry, package_name = WirelessMetricsDataSource.WIFIWAVE2)
             router_entry.wifi_package = WirelessMetricsDataSource.WIFIWAVE2 if ww2_installed else WirelessMetricsDataSource.WIRELESS
         return router_entry.wifi_package
+
+    @staticmethod
+    def wifiwave2_installed(router_entry):
+        return WirelessMetricsDataSource.wireless_package(router_entry) == WirelessMetricsDataSource.WIFIWAVE2
+
+    @staticmethod
+    def dhcp_entry(router_entry):
+        if router_entry.dhcp_entry:
+            return router_entry.dhcp_entry
+        return router_entry
+
+

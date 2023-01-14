@@ -18,6 +18,8 @@ from collections import namedtuple
 from texttable import Texttable
 from humanize import naturaldelta
 from mktxp.cli.config.config import config_handler
+from mktxp.datasource.wireless_ds import WirelessMetricsDataSource
+from math import floor, log
 
 
 class BaseOutputProcessor:
@@ -27,18 +29,23 @@ class BaseOutputProcessor:
     OutputWiFiEntry = namedtuple('OutputWiFiEntry', ['dhcp_name', 'dhcp_address', 'mac_address', 'signal_strength', 'signal_to_noise', 'interface', 'tx_rate', 'rx_rate', 'uptime'])
     OutputWiFiEntry.__new__.__defaults__ = ('',) * len(OutputWiFiEntry._fields)
 
+    OutputWiFiWave2Entry = namedtuple('OutputWiFiWave2Entry', ['dhcp_name', 'dhcp_address', 'mac_address', 'signal_strength', 'interface', 'tx_rate', 'rx_rate', 'uptime'])
+    OutputWiFiWave2Entry.__new__.__defaults__ = ('',) * len(OutputWiFiWave2Entry._fields)
+
     OutputDHCPEntry = namedtuple('OutputDHCPEntry', ['host_name', 'server', 'mac_address', 'address', 'active_address', 'expires_after'])
     OutputDHCPEntry.__new__.__defaults__ = ('',) * len(OutputDHCPEntry._fields)
 
     @staticmethod
     def augment_record(router_entry, registration_record, dhcp_lease_records):
-        try:
-            dhcp_lease_record = next((dhcp_lease_record for dhcp_lease_record in dhcp_lease_records if dhcp_lease_record.get('mac_address')==registration_record.get('mac_address')))
-            dhcp_name = BaseOutputProcessor.dhcp_name(router_entry, dhcp_lease_record)
-            dhcp_address = dhcp_lease_record.get('address', '')
-        except StopIteration:
-            dhcp_name = registration_record.get('mac_address')
-            dhcp_address = 'No DHCP Record'          
+        dhcp_name = registration_record.get('mac_address')
+        dhcp_address = 'No DHCP Record'              
+        if dhcp_lease_records:
+            try:
+                dhcp_lease_record = next((dhcp_lease_record for dhcp_lease_record in dhcp_lease_records if dhcp_lease_record.get('mac_address')==registration_record.get('mac_address')))
+                dhcp_name = BaseOutputProcessor.dhcp_name(router_entry, dhcp_lease_record)
+                dhcp_address = dhcp_lease_record.get('address', '')
+            except StopIteration:
+                pass
 
         registration_record['dhcp_name'] = dhcp_name
         registration_record['dhcp_address'] = dhcp_address
@@ -49,10 +56,13 @@ class BaseOutputProcessor:
             registration_record['rx_bytes'] = registration_record['bytes'].split(',')[1]
             del registration_record['bytes']
 
+        ww2_installed = WirelessMetricsDataSource.wifiwave2_installed(router_entry)
         if registration_record.get('tx_rate'):
-            registration_record['tx_rate'] = BaseOutputProcessor.parse_rates(registration_record['tx_rate'])
+            registration_record['tx_rate'] = BaseOutputProcessor.parse_bitrates(registration_record['tx_rate']) \
+                                                if ww2_installed else BaseOutputProcessor.parse_rates(registration_record['tx_rate'])
         if registration_record.get('rx_rate'):
-            registration_record['rx_rate'] = BaseOutputProcessor.parse_rates(registration_record['rx_rate'])
+            registration_record['rx_rate'] = BaseOutputProcessor.parse_bitrates(registration_record['rx_rate']) \
+                                                if ww2_installed else BaseOutputProcessor.parse_rates(registration_record['rx_rate'])
         if registration_record.get('uptime'):
             registration_record['uptime'] = naturaldelta(BaseOutputProcessor.parse_timedelta_seconds(registration_record['uptime']), months=True, minimum_unit='seconds')
 
@@ -86,6 +96,12 @@ class BaseOutputProcessor:
             config_handler.re_compiled['wifi_rates_rgx'] = wifi_rates_rgx
         rc = wifi_rates_rgx.search(rate)
         return f'{int(float(rc[1]))} {rc[2]}' if rc and len(rc.groups()) == 2 else rate
+
+    @staticmethod
+    def parse_bitrates(rate):
+        rate = int(rate)
+        power = floor(log(rate, 1000))
+        return f"{int(rate / 1000 ** power)} {['bps', 'Kbps', 'Mbps', 'Gbps'][int(power)]}"
 
     @staticmethod
     def parse_timedelta(time):
@@ -126,6 +142,3 @@ class BaseOutputProcessor:
             table.header(outputEntry._fields)
             table.set_cols_align(['l']+ ['c']*(len(outputEntry._fields)-1))
         return table
-
-
-

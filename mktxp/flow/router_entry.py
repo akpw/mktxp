@@ -27,7 +27,10 @@ class RouterEntry:
             MKTXPConfigKeys.ROUTERBOARD_NAME: self.router_name,
             MKTXPConfigKeys.ROUTERBOARD_ADDRESS: self.config_entry.hostname
             }
+        
         self.wifi_package = None
+        self.dhcp_entry = None
+
         self.time_spent =  { 'IdentityCollector': 0,
                             'SystemResourceCollector': 0,
                             'HealthCollector': 0,
@@ -49,4 +52,18 @@ class RouterEntry:
                             'QueueSimpleCollector': 0,                            
                             'UserCollector': 0,                            
                             'MKTXPCollector': 0
-                            }            
+                            }                
+
+    def is_connected(self):
+        connected = True
+        if not self.api_connection.is_connected():
+            connected = False                        
+            # let's get connected now
+            self.api_connection.connect()
+            if self.dhcp_entry:
+                self.dhcp_entry.api_connection.connect()
+
+        return connected
+
+
+

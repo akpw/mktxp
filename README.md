@@ -331,7 +331,7 @@ mktxp is running as pid 36704
 
 ````
 ❯ mktxp -h
-usage: MKTXP [-h] [--dir DIR] {info, edit, export, print, show, } ...
+usage: MKTXP [-h] [--cfg-dir CFG_DIR] {info, edit, export, print, show, } ...
 ````
 To learn more about individual commands, just run it with ```-h```:
 For example, to learn everything about ````mktxp show````:

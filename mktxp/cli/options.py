@@ -66,8 +66,8 @@ Selected metrics info can be printed on the command line. For more information, 
         global_options_parser = ArgumentParser(add_help=False)
         self.parse_global_options(global_options_parser)
         namespace, _ = global_options_parser.parse_known_args()    
-        if namespace.dir:
-            config_handler(CustomConfig(namespace.dir))
+        if namespace.cfg_dir:
+            config_handler(CustomConfig(namespace.cfg_dir))
         else:
             config_handler()
 
@@ -84,7 +84,7 @@ Selected metrics info can be printed on the command line. For more information, 
     def parse_global_options(self, parser):
         ''' Parses global options
         '''
-        parser.add_argument('--dir', dest = 'dir', 
+        parser.add_argument('--cfg-dir', dest = 'cfg_dir', 
                     type = lambda d: self._is_valid_dir_path(parser, d),
                     help = 'MKTXP config files directory (optional)')
 

@@ -22,19 +22,22 @@ class RouterEntriesHandler:
     def __init__(self):
         self.router_entries = []
         for router_name in config_handler.registered_entries():
-            entry = config_handler.config_entry(router_name)
-            if entry.enabled:
-                self.router_entries.append(RouterEntry(router_name))
+            router_entry = RouterEntriesHandler.router_entry(router_name, enabled_only = True)
+            if router_entry:                
+                self.router_entries.append(router_entry)
 
     @staticmethod
     def router_entry(entry_name, enabled_only = False):
         router_entry = None
+        
         for router_name in config_handler.registered_entries():
             if router_name == entry_name:
-                if enabled_only:
-                    entry = config_handler.config_entry(router_name)
-                    if not entry.enabled:
+                config_entry = config_handler.config_entry(router_name)
+                if enabled_only and not config_entry.enabled:
                         break
+                        
                 router_entry = RouterEntry(router_name)
+                router_entry.dhcp_entry = RouterEntriesHandler.router_entry(config_entry.remote_dhcp_entry)
                 break
+        
         return router_entry

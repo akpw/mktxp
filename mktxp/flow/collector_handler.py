@@ -35,9 +35,8 @@ class CollectorHandler:
         Thus, the total runtime of this function scales linearly with the number of registered routers.
         """
         for router_entry in self.entries_handler.router_entries:
-            if not router_entry.api_connection.is_connected():
+            if not router_entry.is_connected():
                 # let's pick up on things in the next run
-                router_entry.api_connection.connect()
                 continue
 
             for collector_ID, collect_func in self.collector_registry.registered_collectors.items():
@@ -88,9 +87,8 @@ class CollectorHandler:
                     print(f'Hit overall timeout while scraping router entry: {router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_NAME]}')
                     break
 
-                if not router_entry.api_connection.is_connected():
+                if not router_entry.is_connected():
                     # let's pick up on things in the next run
-                    router_entry.api_connection.connect()
                     continue
                 
                 # Duration of individual scrapes

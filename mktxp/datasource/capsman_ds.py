@@ -19,14 +19,14 @@ from mktxp.datasource.wireless_ds import WirelessMetricsDataSource
 class CapsmanInfo:
     @staticmethod
     def capsman_path(router_entry):
-        if WirelessMetricsDataSource.wireless_package(router_entry) == WirelessMetricsDataSource.WIFIWAVE2:
+        if WirelessMetricsDataSource.wifiwave2_installed(router_entry):
             return '/interface/wifiwave2/capsman'
         else:
             return '/caps-man'
 
     @staticmethod
     def registration_table_path(router_entry):
-        if WirelessMetricsDataSource.wireless_package(router_entry) == WirelessMetricsDataSource.WIFIWAVE2:
+        if WirelessMetricsDataSource.wifiwave2_installed(router_entry):
             return '/interface/wifiwave2/registration-table'
         else:
             return '/caps-man/registration-table'
@@ -57,6 +57,12 @@ class CapsmanRegistrationsMetricsDataSource:
         try:
             registration_table_path = CapsmanInfo.registration_table_path(router_entry)
             registration_table_records = router_entry.api_connection.router_api().get_resource(f'{registration_table_path}').get()
+            
+            # With wifiwave2, Mikrotik renamed the field 'rx_signal' to 'signal' 
+            for record in registration_table_records:
+                if 'signal' in record:
+                    record['rx_signal'] = record['signal']
+
             return BaseDSProcessor.trimmed_records(router_entry, router_records = registration_table_records, metric_labels = metric_labels, add_router_id = add_router_id)
         except Exception as exc:
             print(f'Error getting CAPsMAN registration table info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
