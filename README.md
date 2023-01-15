@@ -7,7 +7,7 @@
 
 ## Description
 MKTXP is a Prometheus Exporter for Mikrotik RouterOS devices.\
-It gathers and exports a rich set of metrics across multiple routers, all easily configurable via built-in CLI interface. 
+It gathers and exports a rich set of metrics and configurable data transformations across multiple routers, all easily configurable via built-in CLI interface. 
 
 Apart from exporting to Prometheus, MKTXP can also print some of the metrics directly on the command line (see an example below).
 
@@ -86,8 +86,8 @@ The default configuration file comes with a sample configuration, making it easy
 
     user = True                     # Active Users metrics
     queue = True                    # Queues metrics
-    remote_dhcp_entry = None        # Alternative mktxp entry for DHCP info resolution (capsman/wireless)
-
+    
+    remote_dhcp_entry = None        # An MKTXP entry for remote DHCP info resolution (capsman/wireless)
 
     use_comments_over_names = True  # when available, forces using comments over the interfaces names 
 ```
@@ -215,10 +215,9 @@ mktxp edit -i
     verbose_mode = False            # Set it on for troubleshooting
 
     fetch_routers_in_parallel = False   # Set to True if you want to fetch multiple routers parallel
-    max_worker_threads = 5              # Max number of worker threads that can fetch routers. Meaningless if fetch_routers_in_parallel is set to False
-    
-    max_scrape_duration = 10            # Max duration of individual routers' metrics collection 
-    total_max_scrape_duration = 30      # Max overall duration of all metrics collection 
+    max_worker_threads = 5              # Max number of worker threads that can fetch routers (parallel fetch only)
+    max_scrape_duration = 10            # Max duration of individual routers' metrics collection (parallel fetch only)
+    total_max_scrape_duration = 30      # Max overall duration of all metrics collection (parallel fetch only)
 ```    
 
 
