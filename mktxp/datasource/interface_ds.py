@@ -38,24 +38,28 @@ class InterfaceMonitorMetricsDataSource:
         if metric_labels is None:
             metric_labels = []                
         try:
-            interfaces = router_entry.api_connection.router_api().get_resource(f'/interface/{kind}').get()
-            interface_names = [(interface['name'], interface.get('comment'), interface.get('running')) for interface in interfaces]
+            interfaces = router_entry.api_connection.router_api().get_resource(f'/interface/{kind}').call('print', {'proplist':'name,comment,running'})
 
             interface_monitor_records = []
-            for int_num, interface_name in enumerate(interface_names):
+            for int_num, interface in enumerate(interfaces):
                 interface_monitor_record = {}
-                if not running_only or interface_name[2] == 'true':
+                if not running_only or interface['running'] == 'true':
                     interface_monitor_record = router_entry.api_connection.router_api().get_resource(f'/interface/{kind}').call('monitor', {'once':'', 'numbers':f'{int_num}'})[0]
                 else:
                     # unless explicitly requested, no need to do a monitor call for not running interfaces                    
-                    interface_monitor_record = {'name': interface_name[0], 'status': 'no-link'}
+                    interface_monitor_record = {'name': interface['name'], 'status': 'no-link'}
 
-                if include_comments and interface_name[1]:
+                if include_comments and interface.get('comment'):
                     # combines names with comments
-                    interface_monitor_record['name'] = interface_name[1] if router_entry.config_entry.use_comments_over_names else \
-                                                                                                        f"{interface_name[0]} ({interface_name[1]})"                                
+                    interface_monitor_record['name'] = interface['comment'] if router_entry.config_entry.use_comments_over_names else \
+                                                                                                        f"{interface['name']} ({interface['comment']})"                                
                 interface_monitor_records.append(interface_monitor_record)
                 
+            # With wifiwave2, Mikrotik renamed the field 'registered-clients' to 'registered-peers'
+            # For backward compatibility, including both variants
+            for interface_monitor_record in interface_monitor_records:
+                if 'registered-peers' in interface_monitor_record:
+                    interface_monitor_record['registered-clients'] = interface_monitor_record['registered-peers']
             return BaseDSProcessor.trimmed_records(router_entry, router_records = interface_monitor_records, metric_labels = metric_labels)
         except Exception as exc:
             print(f'Error getting {kind} interface monitor info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')

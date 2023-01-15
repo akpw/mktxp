@@ -58,10 +58,11 @@ class CapsmanRegistrationsMetricsDataSource:
             registration_table_path = CapsmanInfo.registration_table_path(router_entry)
             registration_table_records = router_entry.api_connection.router_api().get_resource(f'{registration_table_path}').get()
             
-            # With wifiwave2, Mikrotik renamed the field 'rx_signal' to 'signal' 
+            # With wifiwave2, Mikrotik renamed the field 'rx-signal' to 'signal' 
+            # For backward compatibility, including both variants
             for record in registration_table_records:
                 if 'signal' in record:
-                    record['rx_signal'] = record['signal']
+                    record['rx-signal'] = record['signal']
 
             return BaseDSProcessor.trimmed_records(router_entry, router_records = registration_table_records, metric_labels = metric_labels, add_router_id = add_router_id)
         except Exception as exc:

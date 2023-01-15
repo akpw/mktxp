@@ -27,7 +27,7 @@ class WLANCollector(BaseCollector):
         if not router_entry.config_entry.wireless:
             return
 
-        monitor_labels = ['channel', 'noise_floor', 'overall_tx_ccq', 'registered_clients']
+        monitor_labels = ['channel', 'noise_floor', 'overall_tx_ccq', 'registered_clients', 'registered_peers']
         router_entry.wifi_package = None
         monitor_records = InterfaceMonitorMetricsDataSource.metric_records(router_entry, metric_labels = monitor_labels, kind = WirelessMetricsDataSource.wireless_package(router_entry))   
         if monitor_records:
@@ -50,7 +50,7 @@ class WLANCollector(BaseCollector):
 
         # the client info metrics
         if router_entry.config_entry.wireless_clients:
-            registration_labels = ['interface', 'ssid', 'mac_address', 'tx_rate', 'rx_rate', 'uptime', 'bytes', 'signal_to_noise', 'tx_ccq', 'signal_strength']
+            registration_labels = ['interface', 'ssid', 'mac_address', 'tx_rate', 'rx_rate', 'uptime', 'bytes', 'signal_to_noise', 'tx_ccq', 'signal_strength', 'signal']
             registration_records = WirelessMetricsDataSource.metric_records(router_entry, metric_labels = registration_labels)
             if registration_records:
                 dhcp_lease_labels = ['mac_address', 'address', 'host_name', 'comment']
@@ -58,7 +58,7 @@ class WLANCollector(BaseCollector):
                 dhcp_lease_records = DHCPMetricsDataSource.metric_records(dhcp_entry, metric_labels = dhcp_lease_labels)
       
                 for registration_record in registration_records:
-                    BaseOutputProcessor.augment_record(router_entry, registration_record, dhcp_lease_records)                
+                    BaseOutputProcessor.augment_record(router_entry, registration_record, dhcp_lease_records)
 
                 tx_byte_metrics = BaseCollector.counter_collector('wlan_clients_tx_bytes', 'Number of sent packet bytes', registration_records, 'tx_bytes', ['dhcp_name'])
                 yield tx_byte_metrics
