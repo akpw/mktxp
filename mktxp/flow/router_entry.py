@@ -54,16 +54,14 @@ class RouterEntry:
                             'MKTXPCollector': 0
                             }                
 
-    def is_connected(self):
-        connected = True
+    def is_ready(self):
+        is_ready = True
+        self.wifi_package = None 
         if not self.api_connection.is_connected():
-            connected = False                        
+            is_ready = False                        
             # let's get connected now
             self.api_connection.connect()
             if self.dhcp_entry:
                 self.dhcp_entry.api_connection.connect()
 
-        return connected
-
-
-
+        return is_ready

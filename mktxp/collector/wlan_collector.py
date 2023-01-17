@@ -28,7 +28,6 @@ class WLANCollector(BaseCollector):
             return
 
         monitor_labels = ['channel', 'noise_floor', 'overall_tx_ccq', 'registered_clients', 'registered_peers']
-        router_entry.wifi_package = None
         monitor_records = InterfaceMonitorMetricsDataSource.metric_records(router_entry, metric_labels = monitor_labels, kind = WirelessMetricsDataSource.wireless_package(router_entry))   
         if monitor_records:
             # sanitize records for relevant labels
