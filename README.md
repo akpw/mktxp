@@ -7,9 +7,9 @@
 
 ## Description
 MKTXP is a Prometheus Exporter for Mikrotik RouterOS devices.\
-It gathers and exports a rich set of metrics and configurable data transformations across multiple routers, all easily configurable via built-in CLI interface. 
+It gathers and exports a rich set of metrics across multiple routers, all easily configurable via built-in CLI interface. 
 
-Apart from exporting to Prometheus, MKTXP can also print some of the metrics directly on the command line (see an example below).
+Apart from exporting to Prometheus, MKTXP can also print selected metrics directly on the command line (see an example below).
 
 For effortless visualization of the RouterOS metrics exported to Prometheus, MKTXP comes with a dedicated [Grafana dashboard](https://grafana.com/grafana/dashboards/13679):
 
@@ -87,7 +87,7 @@ The default configuration file comes with a sample configuration, making it easy
     user = True                     # Active Users metrics
     queue = True                    # Queues metrics
     
-    remote_dhcp_entry = None        # An MKTXP entry for remote DHCP info resolution (capsman/wireless)
+    remote_dhcp_entry = None        # An MKTXP entry for remote DHCP info resolution in capsman/wireless
 
     use_comments_over_names = True  # when available, forces using comments over the interfaces names 
 ```
@@ -333,6 +333,12 @@ mktxp is running as pid 36704
 ````
 ❯ mktxp -h
 usage: MKTXP [-h] [--cfg-dir CFG_DIR] {info, edit, export, print, show, } ...
+
+Prometheus Exporter for Mikrotik RouterOS
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --cfg-dir CFG_DIR     MKTXP config files directory (optional)
 ````
 To learn more about individual commands, just run it with ```-h```:
 For example, to learn everything about ````mktxp show````:
