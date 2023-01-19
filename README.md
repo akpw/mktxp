@@ -219,7 +219,7 @@ mktxp edit -i
     max_scrape_duration = 10            # Max duration of individual routers' metrics collection (parallel fetch only)
     total_max_scrape_duration = 30      # Max overall duration of all metrics collection (parallel fetch only)
 ```    
-<sup>💡</sup> *When changing the default mktxp port for [docker-based installs](https://github.com/akpw/mktxp#docker-image-install), you'll also need to adjust the `docker run ... -p ...` command to reflect the new port*
+<sup>💡</sup> *When changing the default mktxp port for [docker image installs](https://github.com/akpw/mktxp#docker-image-install), you'll also need to adjust the `docker run ... -p ...` command to reflect the new port*
 
 ## Grafana dashboard
 Now with your RouterOS metrics being exported to Prometheus, it's easy to visualize them with this [Grafana dashboard](https://grafana.com/grafana/dashboards/13679)
