@@ -13,8 +13,6 @@
 
 
 from mktxp.flow.processor.output import BaseOutputProcessor
-from mktxp.datasource.dhcp_ds import DHCPMetricsDataSource
-from mktxp.datasource.wireless_ds import WirelessMetricsDataSource
 from mktxp.datasource.capsman_ds import CapsmanRegistrationsMetricsDataSource
 
 class CapsmanOutput:
@@ -29,13 +27,9 @@ class CapsmanOutput:
             return 
 
         # translate / trim / augment registration records
-        dhcp_lease_labels = ['host_name', 'comment', 'address', 'mac_address']
-        dhcp_entry = WirelessMetricsDataSource.dhcp_entry(router_entry)
-        dhcp_lease_records = DHCPMetricsDataSource.metric_records(dhcp_entry, metric_labels = dhcp_lease_labels, add_router_id = False)   
-
         dhcp_rt_by_interface = {}
         for registration_record in sorted(registration_records, key = lambda rt_record: rt_record['rx_signal'], reverse=True):
-            BaseOutputProcessor.augment_record(router_entry, registration_record, dhcp_lease_records)
+            BaseOutputProcessor.augment_record(router_entry, registration_record)
 
             interface = registration_record['interface']
             if interface in dhcp_rt_by_interface.keys():

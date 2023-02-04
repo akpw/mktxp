@@ -52,11 +52,3 @@ class WirelessMetricsDataSource:
     @staticmethod
     def wifiwave2_installed(router_entry):
         return WirelessMetricsDataSource.wireless_package(router_entry) == WirelessMetricsDataSource.WIFIWAVE2
-
-    @staticmethod
-    def dhcp_entry(router_entry):
-        if router_entry.dhcp_entry:
-            return router_entry.dhcp_entry
-        return router_entry
-
-

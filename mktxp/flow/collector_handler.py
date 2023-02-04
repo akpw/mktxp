@@ -1,15 +1,15 @@
 # coding=utf8
-# Copyright (c) 2020 Arseniy Kuznenowov
+## Copyright (c) 2020 Arseniy Kuznetsov
 ##
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# as published by the Free Software Foundation; either version 2
-# of the License, or (at your option) any later version.
+## This program is free software; you can redistribute it and/or
+## modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation; either version 2
+## of the License, or (at your option) any later version.
 ##
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from timeit import default_timer
@@ -43,7 +43,7 @@ class CollectorHandler:
                 start = default_timer()
                 yield from collect_func(router_entry)
                 router_entry.time_spent[collector_ID] += default_timer() - start
-
+                router_entry.is_done()
 
     def collect_router_entry_async(self, router_entry, scrape_timeout_event, total_scrape_timeout_event):
         results = []
@@ -60,6 +60,7 @@ class CollectorHandler:
             result = list(collect_func(router_entry))
             results += result
             router_entry.time_spent[collector_ID] += default_timer() - start
+            router_entry.is_done()
 
         return results
 

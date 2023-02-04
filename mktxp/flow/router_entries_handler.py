@@ -20,24 +20,34 @@ class RouterEntriesHandler:
     ''' Handles RouterOS entries defined in MKTXP config 
     '''         
     def __init__(self):
-        self.router_entries = []
-        for router_name in config_handler.registered_entries():
-            router_entry = RouterEntriesHandler.router_entry(router_name, enabled_only = True)
-            if router_entry:                
-                self.router_entries.append(router_entry)
+        self._router_entries = {}            
+        for router_name in config_handler.registered_entries():            
+            router_entry = RouterEntry(router_name)
+            if router_entry.config_entry.remote_dhcp_entry and config_handler.registered_entry(router_entry.config_entry.remote_dhcp_entry):
+                router_entry.dhcp_entry = RouterEntry(router_entry.config_entry.remote_dhcp_entry)
+            self._router_entries[router_name] = router_entry
+
+    @property
+    def router_entries(self):
+        return (entry for key, entry in  self._router_entries.items() if entry.config_entry.enabled) \
+                                                                                if self._router_entries else None   
+
+    def router_entry(self, entry_name, enabled_only = False):
+        entry = self._router_entries.get(entry_name)                                                                                
+        if entry and (entry.config_entry.enabled or not enabled_only):
+            return entry
+        return None
 
     @staticmethod
     def router_entry(entry_name, enabled_only = False):
-        router_entry = None
-        
-        for router_name in config_handler.registered_entries():
-            if router_name == entry_name:
-                config_entry = config_handler.config_entry(router_name)
-                if enabled_only and not config_entry.enabled:
-                        break
-                        
-                router_entry = RouterEntry(router_name)
-                router_entry.dhcp_entry = RouterEntriesHandler.router_entry(config_entry.remote_dhcp_entry)
-                break
-        
+        ''' A static router entry initialiser
+        '''
+        config_entry = config_handler.config_entry(entry_name)
+        if enabled_only and not config_entry.enabled:
+            return None
+
+        router_entry = RouterEntry(entry_name)
+        if config_entry.remote_dhcp_entry and config_handler.registered_entry(config_entry.remote_dhcp_entry):
+            router_entry.dhcp_entry = RouterEntry(config_entry.remote_dhcp_entry)        
+
         return router_entry

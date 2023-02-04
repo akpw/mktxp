@@ -13,6 +13,7 @@
 
 
 from collections import OrderedDict
+from mktxp.cli.config.config import CollectorKeys
 from mktxp.collector.dhcp_collector import DHCPCollector
 from mktxp.collector.package_collector import PackageCollector
 from mktxp.collector.connection_collector import IPConnectionCollector
@@ -36,7 +37,6 @@ from mktxp.collector.user_collector import UserCollector
 from mktxp.collector.queue_collector import QueueTreeCollector
 from mktxp.collector.queue_collector import QueueSimpleCollector
 
-
 class CollectorRegistry:
     ''' MKTXP Collectors Registry
     '''
@@ -46,33 +46,33 @@ class CollectorRegistry:
         # bandwidth collector is not router-entry related, so registering directly
         self.bandwidthCollector = BandwidthCollector()
 
-        self.register('IdentityCollector', IdentityCollector.collect)
-        self.register('SystemResourceCollector', SystemResourceCollector.collect)
-        self.register('HealthCollector', HealthCollector.collect)
-        self.register('PublicIPAddressCollector', PublicIPAddressCollector.collect)
+        self.register(CollectorKeys.IDENTITY_COLLECTOR, IdentityCollector.collect)
+        self.register(CollectorKeys.SYSTEM_RESOURCE_COLLECTOR, SystemResourceCollector.collect)
+        self.register(CollectorKeys.HEALTH_COLLECTOR, HealthCollector.collect)
+        self.register(CollectorKeys.PUBLIC_IP_ADDRESS_COLLECTOR, PublicIPAddressCollector.collect)
 
-        self.register('IPv6NeighborCollector', IPv6NeighborCollector.collect)
+        self.register(CollectorKeys.IPV6_NEIGHBOR_COLLECTOR, IPv6NeighborCollector.collect)
 
-        self.register('PackageCollector', PackageCollector.collect)
-        self.register('DHCPCollector', DHCPCollector.collect)
-        self.register('IPConnectionCollector', IPConnectionCollector.collect)
-        self.register('PoolCollector', PoolCollector.collect)
-        self.register('InterfaceCollector', InterfaceCollector.collect)
+        self.register(CollectorKeys.PACKAGE_COLLECTOR, PackageCollector.collect)
+        self.register(CollectorKeys.DHCP_COLLECTOR, DHCPCollector.collect)
+        self.register(CollectorKeys.IP_CONNECTION_COLLECTOR, IPConnectionCollector.collect)
+        self.register(CollectorKeys.POOL_COLLECTOR, PoolCollector.collect)
+        self.register(CollectorKeys.INTERFACE_COLLECTOR, InterfaceCollector.collect)
 
-        self.register('FirewallCollector', FirewallCollector.collect)
-        self.register('MonitorCollector', MonitorCollector.collect)
-        self.register('POECollector', POECollector.collect)
-        self.register('NetwatchCollector', NetwatchCollector.collect)
-        self.register('RouteCollector', RouteCollector.collect)
+        self.register(CollectorKeys.FIREWALL_COLLECTOR, FirewallCollector.collect)
+        self.register(CollectorKeys.MONITOR_COLLECTOR, MonitorCollector.collect)
+        self.register(CollectorKeys.POE_COLLECTOR, POECollector.collect)
+        self.register(CollectorKeys.NETWATCH_COLLECTOR, NetwatchCollector.collect)
+        self.register(CollectorKeys.ROUTE_COLLECTOR, RouteCollector.collect)
 
-        self.register('WLANCollector', WLANCollector.collect)
-        self.register('CapsmanCollector', CapsmanCollector.collect)
+        self.register(CollectorKeys.WLAN_COLLECTOR, WLANCollector.collect)
+        self.register(CollectorKeys.CAPSMAN_COLLECTOR, CapsmanCollector.collect)
 
-        self.register('UserCollector', UserCollector.collect)
-        self.register('QueueTreeCollector', QueueTreeCollector.collect)
-        self.register('QueueSimpleCollector', QueueSimpleCollector.collect)
+        self.register(CollectorKeys.USER_COLLECTOR, UserCollector.collect)
+        self.register(CollectorKeys.QUEUE_TREE_COLLECTOR, QueueTreeCollector.collect)
+        self.register(CollectorKeys.QUEUE_SIMPLE_COLLECTOR, QueueSimpleCollector.collect)
 
-        self.register('MKTXPCollector', MKTXPCollector.collect)
+        self.register(CollectorKeys.MKTXP_COLLECTOR, MKTXPCollector.collect)
 
     def register(self, collector_ID, collect_func):
         self.registered_collectors[collector_ID] = collect_func

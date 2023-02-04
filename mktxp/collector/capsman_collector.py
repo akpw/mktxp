@@ -15,7 +15,6 @@
 from mktxp.cli.config.config import MKTXPConfigKeys
 from mktxp.flow.processor.output import BaseOutputProcessor
 from mktxp.collector.base_collector import BaseCollector
-from mktxp.datasource.dhcp_ds import DHCPMetricsDataSource
 from mktxp.datasource.capsman_ds import CapsmanCapsMetricsDataSource, CapsmanRegistrationsMetricsDataSource, CapsmanInterfacesDatasource
 from mktxp.datasource.wireless_ds import WirelessMetricsDataSource
 
@@ -53,11 +52,8 @@ class CapsmanCollector(BaseCollector):
             if router_entry.config_entry.capsman_clients:
 
                 # translate / trim / augment registration records
-                dhcp_lease_labels = ['mac_address', 'address', 'host_name', 'comment']
-                dhcp_entry = WirelessMetricsDataSource.dhcp_entry(router_entry)
-                dhcp_lease_records = DHCPMetricsDataSource.metric_records(dhcp_entry, metric_labels = dhcp_lease_labels)
                 for registration_record in registration_records:
-                    BaseOutputProcessor.augment_record(router_entry, registration_record, dhcp_lease_records)
+                    BaseOutputProcessor.augment_record(router_entry, registration_record)
                     
                 tx_byte_metrics = BaseCollector.counter_collector('capsman_clients_tx_bytes', 'Number of sent packet bytes', registration_records, 'tx_bytes', ['dhcp_name'])
                 yield tx_byte_metrics

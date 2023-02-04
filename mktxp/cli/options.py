@@ -146,6 +146,11 @@ Selected metrics info can be printed on the command line. For more information, 
                 help = "DHCP clients metrics",
                 action = 'store_true')
 
+        optional_args_group.add_argument('-cn', '--conn_stats', dest='conn_stats',
+                help = "IP connections stats",
+                action = 'store_true')
+
+
     # Options checking
     def _check_args(self, args, parser):
         ''' Validation of supplied CLI arguments

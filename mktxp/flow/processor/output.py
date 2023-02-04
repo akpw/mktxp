@@ -19,6 +19,7 @@ from texttable import Texttable
 from humanize import naturaldelta
 from mktxp.cli.config.config import config_handler
 from mktxp.datasource.wireless_ds import WirelessMetricsDataSource
+from mktxp.datasource.dhcp_ds import DHCPMetricsDataSource
 from math import floor, log
 
 
@@ -35,20 +36,13 @@ class BaseOutputProcessor:
     OutputDHCPEntry = namedtuple('OutputDHCPEntry', ['host_name', 'server', 'mac_address', 'address', 'active_address', 'expires_after'])
     OutputDHCPEntry.__new__.__defaults__ = ('',) * len(OutputDHCPEntry._fields)
 
-    @staticmethod
-    def augment_record(router_entry, registration_record, dhcp_lease_records):
-        dhcp_name = registration_record.get('mac_address')
-        dhcp_address = 'No DHCP Record'              
-        if dhcp_lease_records:
-            try:
-                dhcp_lease_record = next((dhcp_lease_record for dhcp_lease_record in dhcp_lease_records if dhcp_lease_record.get('mac_address')==registration_record.get('mac_address')))
-                dhcp_name = BaseOutputProcessor.dhcp_name(router_entry, dhcp_lease_record)
-                dhcp_address = dhcp_lease_record.get('address', '')
-            except StopIteration:
-                pass
+    OutputConnStatsEntry = namedtuple('OutputConnStatsEntry', ['dhcp_name', 'src_address', 'connection_count', 'dst_addresses'])
+    OutputConnStatsEntry.__new__.__defaults__ = ('',) * len(OutputConnStatsEntry._fields)
 
-        registration_record['dhcp_name'] = dhcp_name
-        registration_record['dhcp_address'] = dhcp_address
+
+    @staticmethod
+    def augment_record(router_entry, registration_record, id_key = 'mac_address'):
+        BaseOutputProcessor.resolve_dhcp(router_entry, registration_record, id_key)
 
         # split out tx/rx bytes
         if registration_record.get('bytes'):
@@ -85,8 +79,24 @@ class BaseOutputProcessor:
 
         if drop_comment:
             del dhcp_lease_record['comment']
-        
+
         return dhcp_name
+
+    @staticmethod
+    def resolve_dhcp(router_entry, registration_record, id_key = 'mac_address', resolve_address = True):
+        if not router_entry.dhcp_records:
+            DHCPMetricsDataSource.metric_records(router_entry)
+        dhcp_name = registration_record.get(id_key)
+        dhcp_address = 'No DHCP Record'              
+
+        dhcp_lease_record = router_entry.dhcp_record(dhcp_name)
+        if dhcp_lease_record:
+            dhcp_name = BaseOutputProcessor.dhcp_name(router_entry, dhcp_lease_record)
+            dhcp_address = dhcp_lease_record.get('address', '')
+
+        registration_record['dhcp_name'] = dhcp_name
+        if resolve_address:
+            registration_record['dhcp_address'] = dhcp_address
 
     @staticmethod
     def parse_rates(rate):
