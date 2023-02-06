@@ -300,9 +300,9 @@ Let's go check on that in the dashboard, or just get the info right from the com
 Concurrent exports across multiple devices can considerably speed up things for slow network connections. This feature can be turned on and configured with the following [system options](https://github.com/akpw/mktxp/blob/main/README.md#mktxp-system-configuration):
 ```
 fetch_routers_in_parallel = False   # Set to True if you want to fetch multiple routers parallel
-    max_worker_threads = 5              # Max number of worker threads that can fetch routers (parallel fetch only)
-    max_scrape_duration = 10            # Max duration of individual routers' metrics collection (parallel fetch only)
-    total_max_scrape_duration = 30      # Max overall duration of all metrics collection (parallel fetch only)
+max_worker_threads = 5              # Max number of worker threads that can fetch routers (parallel fetch only)
+max_scrape_duration = 10            # Max duration of individual routers' metrics collection (parallel fetch only)
+total_max_scrape_duration = 30      # Max overall duration of all metrics collection (parallel fetch only)
 ```
 To keeps things within expected boundaries, the last two parameters allows for controlling both individual and overall scrape durations
 
