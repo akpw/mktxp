@@ -7,9 +7,9 @@
 
 ## Description
 MKTXP is a Prometheus Exporter for Mikrotik RouterOS devices.\
-It gathers and exports a rich set of metrics across multiple routers, all easily configurable via built-in CLI interface. 
+It gathers and exports a rich set of metrics across multiple routers, all easily configurable via built-in CLI interface. While simple to use, MKTXP comes with many [advanced features](https://github.com/akpw/mktxp#advanced-features) such as automatic IP address resolution with support for both local & remote DHCP servers, concurrent exports across multiple router devices, configurable data processing & transformations, etc.
 
-Apart from exporting to Prometheus, MKTXP can also print selected metrics directly on the command line (see an example below).
+Apart from exporting to Prometheus, MKTXP can also print selected metrics directly on the command line (see an example below). 
 
 For effortless visualization of the RouterOS metrics exported to Prometheus, MKTXP comes with a dedicated [Grafana dashboard](https://grafana.com/grafana/dashboards/13679):
 
@@ -17,8 +17,6 @@ For effortless visualization of the RouterOS metrics exported to Prometheus, MKT
 
 
 #### Requirements:
-- [Python 3.6.x](https://www.python.org/downloads/release/python-360/) or later
-
 - Supported OSs:
    * Linux   
    * Mac OSX
@@ -34,13 +32,15 @@ For effortless visualization of the RouterOS metrics exported to Prometheus, MKT
 
 ## Install:
 There are multiple ways to install this project, from a standalone app to a [fully dockerized monitoring stack](https://github.com/akpw/mktxp-stack). 
+- with [MKTXP Stack](https://github.com/akpw/mktxp-stack): a ready-to-go MKTXP monitoring stack
+
+- from [Docker image](https://github.com/akpw/mktxp/pkgs/container/mktxp) : `❯ docker pull ghcr.io/akpw/mktxp:latest`
+
 - from [PyPI](https://pypi.org/project/mktxp/): `❯ pip install mktxp`
 
 - latest from source repository: `❯ pip install git+https://github.com/akpw/mktxp`
 
-- from [Docker image](https://github.com/akpw/mktxp/pkgs/container/mktxp) : `❯ docker pull ghcr.io/akpw/mktxp:latest`
 
-- with [MKTXP Stack](https://github.com/akpw/mktxp-stack): a ready-to-go MKTXP monitoring stack
 
 
 ## Getting started
