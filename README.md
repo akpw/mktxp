@@ -400,7 +400,7 @@ fetch_routers_in_parallel = False   # Set to True if you want to fetch multiple 
     max_scrape_duration = 10            # Max duration of individual routers' metrics collection (parallel fetch only)
     total_max_scrape_duration = 30      # Max overall duration of all metrics collection (parallel fetch only)
 ```
-To keeps things within reliable boundaries, the last two parameters allows for controlling both individual and overall scrape durations
+To keeps things within expected boundaries, the last two parameters allows for controlling both individual and overall scrape durations
 
 
 ### mktxp port
