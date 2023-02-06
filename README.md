@@ -11,7 +11,7 @@ It gathers and exports a rich set of metrics across multiple routers, all easily
 
 While simple to use, MKTXP also supports [advanced features](https://github.com/akpw/mktxp#advanced-features) such as automatic IP address resolution with support for both local & remote DHCP servers, concurrent exports across multiple router devices, configurable data processing & transformations, etc.
 
-Apart from exporting to Prometheus, MKTXP can print selected metrics directly on the command line (see an example below). 
+Apart from exporting to Prometheus, MKTXP can print selected metrics directly on the command line (see examples below). 
 
 For effortless visualization of the RouterOS metrics exported to Prometheus, MKTXP comes with a dedicated [Grafana dashboard](https://grafana.com/grafana/dashboards/13679):
 
@@ -393,7 +393,7 @@ Setting this to `True` obviously enables the feature and allows to see something
 
 
 ### Parallel routers fetch
-Concurrent exports across multiple devices can considerably speed up things for slow network connections. This feature can be turned on and configured with the following `_mktxp.conf`options:
+Concurrent exports across multiple devices can considerably speed up things for slow network connections. This feature can be turned on and configured with the following [system options](https://github.com/akpw/mktxp/blob/main/README.md#mktxp-system-configuration):
 ```
 fetch_routers_in_parallel = False   # Set to True if you want to fetch multiple routers parallel
     max_worker_threads = 5              # Max number of worker threads that can fetch routers (parallel fetch only)
@@ -404,7 +404,7 @@ To keeps things within reliable boundaries, the last two parameters allows for c
 
 
 ### mktxp port
-By default, mktxp runs it's HTTP metrics endpoint on port 49090. You can change it via the following `_mktxp.conf`option:
+By default, mktxp runs it's HTTP metrics endpoint on port 49090. You can change it via the following [system option](https://github.com/akpw/mktxp/blob/main/README.md#mktxp-system-configuration):
 ```
 port = 49090 
 ```
