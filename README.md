@@ -7,9 +7,11 @@
 
 ## Description
 MKTXP is a Prometheus Exporter for Mikrotik RouterOS devices.\
-It gathers and exports a rich set of metrics across multiple routers, all easily configurable via built-in CLI interface. While simple to use, MKTXP comes with many [advanced features](https://github.com/akpw/mktxp#advanced-features) such as automatic IP address resolution with support for both local & remote DHCP servers, concurrent exports across multiple router devices, configurable data processing & transformations, etc.
+It gathers and exports a rich set of metrics across multiple routers, all easily configurable via built-in CLI interface. 
 
-Apart from exporting to Prometheus, MKTXP can also print selected metrics directly on the command line (see an example below). 
+While simple to use, MKTXP comes with many [advanced features](https://github.com/akpw/mktxp#advanced-features) such as automatic IP address resolution with support for both local & remote DHCP servers, concurrent exports across multiple router devices, configurable data processing & transformations, etc.
+
+Apart from exporting to Prometheus, MKTXP can print selected metrics directly on the command line (see an example below). 
 
 For effortless visualization of the RouterOS metrics exported to Prometheus, MKTXP comes with a dedicated [Grafana dashboard](https://grafana.com/grafana/dashboards/13679):
 
@@ -364,13 +366,31 @@ When gathering various IP address-related metrics, mktxp automatically resolves 
 ```
 remote_dhcp_entry = None        # An MKTXP entry for remote DHCP info resolution in capsman/wireless
 ```
-`MKTXP entry` in this context can be any other mktxp.conf entry, and for the sole purpose of providing DHCP info does not even need to be enabled 
+`MKTXP entry` in this context can be any other mktxp.conf entry, and for the sole purpose of providing DHCP info it does not even need to be enabled. 
 
 ### Connections stats
+With so many smart devices everywhere, one can only wonder where do they go to and what they actually do with all the information from your network environment. MKTXP let's you track that with a single option, available both from [mktxp dashboard](https://grafana.com/grafana/dashboards/13679-mikrotik-mktxp-exporter/) and the command line:
 
 ```
 connection_stats = False        # Open IP connections metrics 
 ```
+Setting this to `True` obviously enables the feature and allows to see something like that:
+
+<img width="2346" alt="conns" src="https://user-images.githubusercontent.com/5028474/217042107-bffa0a81-a6a0-4474-87d4-1597cdd80735.png">
+
+Hey, what is this simple Temp&Humidity sensor has to do with a bunch of open network connections? 12, really?
+Let's go check on that in the dashboard, or just get the info right from the commandline:
+
+```
+❯ mktxp print -en MKT-GT -cn
++-------------------+--------------+------------------+-----------------------------------------------------------------------+
+|     dhcp_name     | src_address  | connection_count |                             dst_addresses                             |
++===================+==============+==================+=======================================================================+
+| T&H Cat's Room    | 10.20.10.149 |        12        |          3.124.97.151:32100(udp), 13.38.179.104:32100(udp),           |
+|                   |              |                  |                       54.254.90.185:32100(udp)
+```
+*A quick `whois` check shows all of the external IP relate to AWS, so perhaps OK for now... but we can now remain vigilant, anyway :)*
+
 
 ### Parallel routers fetch
 
