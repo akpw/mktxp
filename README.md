@@ -9,7 +9,7 @@
 MKTXP is a Prometheus Exporter for Mikrotik RouterOS devices.\
 It gathers and exports a rich set of metrics across multiple routers, all easily configurable via built-in CLI interface. 
 
-While simple to use, MKTXP comes with many [advanced features](https://github.com/akpw/mktxp#advanced-features) such as automatic IP address resolution with support for both local & remote DHCP servers, concurrent exports across multiple router devices, configurable data processing & transformations, etc.
+While simple to use, MKTXP also supports [advanced features](https://github.com/akpw/mktxp#advanced-features) such as automatic IP address resolution with support for both local & remote DHCP servers, concurrent exports across multiple router devices, configurable data processing & transformations, etc.
 
 Apart from exporting to Prometheus, MKTXP can print selected metrics directly on the command line (see an example below). 
 
@@ -369,7 +369,7 @@ remote_dhcp_entry = None        # An MKTXP entry for remote DHCP info resolution
 `MKTXP entry` in this context can be any other mktxp.conf entry, and for the sole purpose of providing DHCP info it does not even need to be enabled. 
 
 ### Connections stats
-With many connected devices everywhere, one can only wonder where do they go to and what they actually do with all the information from your network environment. MKTXP let's you track those with a single option, available both from [mktxp dashboard](https://grafana.com/grafana/dashboards/13679-mikrotik-mktxp-exporter/) and the command line:
+With many connected devices everywhere, one can often only guess where do they go to and what they actually do with all the information from your network environment. MKTXP let's you easily track those with a single option, available both from [mktxp dashboard](https://grafana.com/grafana/dashboards/13679-mikrotik-mktxp-exporter/) and the command line:
 
 ```
 connection_stats = False        # Open IP connections metrics 
@@ -389,11 +389,11 @@ Setting this to `True` obviously enables the feature and allows to see something
 | T&H Cat's Room    | 10.20.10.149 |        12        |          3.124.97.151:32100(udp), 13.38.179.104:32100(udp),           |
 |                   |              |                  |                       54.254.90.185:32100(udp)
 ```
-*A quick `whois` check shows all of the external IPs relate to AWS, so perhaps it's legit... but let's remain vigilant, anyway :)*
+*A quick `whois` check shows all of the external IPs relate to AWS, so supposedly it's legit... but let's remain vigilant, to know better :)*
 
 
 ### Parallel routers fetch
-Concurrent exports across multiple devices can considerably speed up things for slow network connections. 
+Concurrent exports across multiple devices can considerably speed up things for slow network connections. This feature can be turned on and configured with the following `_mktxp.conf`options:
 ```
 fetch_routers_in_parallel = False   # Set to True if you want to fetch multiple routers parallel
     max_worker_threads = 5              # Max number of worker threads that can fetch routers (parallel fetch only)
@@ -404,7 +404,10 @@ To keeps things within reliable boundaries, the last two parameters allows for c
 
 
 ### mktxp port
+By default, mktxp runs it's HTTP metrics endpoint on port 49090. You can change it via the following `_mktxp.conf`option:
+```
 port = 49090 
+```
 
 ### forward compatibility
 
