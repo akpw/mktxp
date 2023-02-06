@@ -360,7 +360,7 @@ optional arguments:
 While most of the [mktxp options](https://github.com/akpw/mktxp#getting-started) are self explanatory, some might require a bit of a context.
 
 ### Remote DHCP resolution
-When gathering various IP address-related metrics, mktxp automatically does DHCP resolution whenever available. In many cases however, the exported devices does not have this information locally and instead rely on a central DHCP server. The exported metrics thus operates with IP / MAC addresses which reduces level of readability and usefulness. In case this information is needed, mktxp supports remote DHCP server calls via this option:
+When gathering various IP address-related metrics, mktxp automatically resolves IP addresses whenever DHCP info is available. In many cases however, the exported devices does not have this information locally and instead rely on central DHCP servers. Since this could reduce readibility / usefulness of the metrics, mktxp supports remote DHCP server calls via the following option:
 ```
 remote_dhcp_entry = None        # An MKTXP entry for remote DHCP info resolution in capsman/wireless
 ```
