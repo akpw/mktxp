@@ -13,9 +13,7 @@ Apart from exporting to Prometheus, MKTXP can also print selected metrics direct
 
 For effortless visualization of the RouterOS metrics exported to Prometheus, MKTXP comes with a dedicated [Grafana dashboard](https://grafana.com/grafana/dashboards/13679):
 
-<img width="32%" alt="1" src="https://user-images.githubusercontent.com/5028474/211141785-3d71df65-28cb-45fa-bd22-70022f40f162.png"> <img width="32%" alt="2" src="https://user-images.githubusercontent.com/5028474/211141871-30b409fe-5c77-4616-9cc6-c0556432cfea.png"> <img width="32%" alt="3" src="https://user-images.githubusercontent.com/5028474/211141793-61bee869-9125-4b74-a5b4-a02f0f82cc6d.png">
-
-
+<img width="32%" alt="1" src="https://user-images.githubusercontent.com/5028474/217029083-3c2f561e-853f-45a7-b9f1-d818a830daf5.png"> <img width="32%" alt="2" src="https://user-images.githubusercontent.com/5028474/217029092-2b86b41b-1f89-4383-ac48-16652e820f7e.png"> <img width="32%" alt="3" src="https://user-images.githubusercontent.com/5028474/217029096-dbf6b46c-3ed7-4c76-a57b-8cebfb3b671c.png">
 
 
 #### Requirements:
@@ -66,7 +64,10 @@ The default configuration file comes with a sample configuration, making it easy
     installed_packages = True       # Installed packages
     dhcp = True                     # DHCP general metrics
     dhcp_lease = True               # DHCP lease metrics
+
     connections = True              # IP connections metrics
+    connection_stats = False        # Open IP connections metrics 
+
     pool = True                     # Pool metrics
     interface = True                # Interfaces traffic metrics
     
@@ -87,7 +88,7 @@ The default configuration file comes with a sample configuration, making it easy
     user = True                     # Active Users metrics
     queue = True                    # Queues metrics
     
-    remote_dhcp_entry = None        # An MKTXP entry for remote DHCP info resolution in capsman/wireless
+    remote_dhcp_entry = None        # An MKTXP entry for remote DHCP info resolution (capsman/wireless)
 
     use_comments_over_names = True  # when available, forces using comments over the interfaces names 
 ```
@@ -354,6 +355,37 @@ optional arguments:
                         Config entry name
   -cfg, --config        Shows MKTXP config files paths
 ````  
+
+## Advanced features
+While most of the [mktxp options](https://github.com/akpw/mktxp#getting-started) are self explanatory, some might require a bit of a context.
+
+### Remote DHCP resolution
+When gathering various IP address-related metrics, mktxp automatically does DHCP resolution whenever available. In many cases however, the exported devices does not have this information locally and instead rely on a central DHCP server. The exported metrics thus operates with IP / MAC addresses which reduces level of readability and usefulness. In case this information is needed, mktxp supports remote DHCP server calls via this option:
+```
+remote_dhcp_entry = None        # An MKTXP entry for remote DHCP info resolution in capsman/wireless
+```
+`MKTXP entry` in this context can be any other mktxp.conf entry, and for sole the purpose of providing the DHCP info does not even need to be enabled 
+
+### Connections stats
+
+```
+connection_stats = False        # Open IP connections metrics 
+```
+
+### Parallel routers fetch
+
+```
+fetch_routers_in_parallel = False   # Set to True if you want to fetch multiple routers parallel
+    max_worker_threads = 5              # Max number of worker threads that can fetch routers (parallel fetch only)
+    max_scrape_duration = 10            # Max duration of individual routers' metrics collection (parallel fetch only)
+    total_max_scrape_duration = 30      # Max overall duration of all metrics collection (parallel fetch only)
+```
+
+### mktxp port
+port = 49090 
+
+### forward compatibility
+
 
 ## Installing Development version
 - Clone the repo, then run: `$ python setup.py develop`
