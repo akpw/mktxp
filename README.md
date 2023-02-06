@@ -293,7 +293,7 @@ Let's go check on that in the dashboard, or just get the info right from the com
 | T&H Cat's Room    | 10.20.10.149 |        12        |          3.124.97.151:32100(udp), 13.38.179.104:32100(udp),           |
 |                   |              |                  |                       54.254.90.185:32100(udp)
 ```
-*A quick `whois` check shows all of the external IPs relate to AWS, so supposedly it's legit... but let's remain vigilant, to know better :)*
+*A quick `whois` check shows all of the destination IPs relate to AWS ops, so supposedly it's legit... but let's remain vigilant, to know better :)*
 
 
 ### Parallel routers fetch
