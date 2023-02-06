@@ -409,9 +409,6 @@ By default, mktxp runs it's HTTP metrics endpoint on port 49090. You can change 
 port = 49090 
 ```
 
-### forward compatibility
-
-
 ## Installing Development version
 - Clone the repo, then run: `$ python setup.py develop`
 
