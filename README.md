@@ -364,7 +364,7 @@ When gathering various IP address-related metrics, mktxp automatically resolves 
 ```
 remote_dhcp_entry = None        # An MKTXP entry for remote DHCP info resolution in capsman/wireless
 ```
-`MKTXP entry` in this context can be any other mktxp.conf entry, and for sole the purpose of providing the DHCP info does not even need to be enabled 
+`MKTXP entry` in this context can be any other mktxp.conf entry, and for the sole purpose of providing DHCP info does not even need to be enabled 
 
 ### Connections stats
 
