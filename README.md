@@ -378,8 +378,8 @@ Setting this to `True` obviously enables the feature and allows to see something
 
 <img width="2346" alt="conns" src="https://user-images.githubusercontent.com/5028474/217042107-bffa0a81-a6a0-4474-87d4-1597cdd80735.png">
 
-Hey, what is this Temp&Humidity sensor has to do with a bunch of open network connections? 12, really?
-Let's go check on that in the dashboard, or just get the info right from the commandline:
+*Hey, what is this Temp&Humidity sensor has to do with a bunch of open network connections? 12 of them, really?*
+*Let's go check on that in the dashboard, or just get the info right from the command line:*
 
 ```
 ❯ mktxp print -en MKT-GT -cn
