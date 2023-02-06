@@ -9,18 +9,16 @@
 MKTXP is a Prometheus Exporter for Mikrotik RouterOS devices.\
 It gathers and exports a rich set of metrics across multiple routers, all easily configurable via built-in CLI interface. 
 
-Apart from exporting to Prometheus, MKTXP can also print selected metrics directly on the command line (see an example below).
+While simple to use, MKTXP supports [advanced features](https://github.com/akpw/mktxp#advanced-features) such as automatic IP address resolution with both local & remote DHCP servers, concurrent exports across multiple router devices, configurable data processing & transformations, etc.
+
+Apart from exporting to Prometheus, MKTXP can print selected metrics directly on the command line (see examples below). 
 
 For effortless visualization of the RouterOS metrics exported to Prometheus, MKTXP comes with a dedicated [Grafana dashboard](https://grafana.com/grafana/dashboards/13679):
 
-<img width="32%" alt="1" src="https://user-images.githubusercontent.com/5028474/211141785-3d71df65-28cb-45fa-bd22-70022f40f162.png"> <img width="32%" alt="2" src="https://user-images.githubusercontent.com/5028474/211141871-30b409fe-5c77-4616-9cc6-c0556432cfea.png"> <img width="32%" alt="3" src="https://user-images.githubusercontent.com/5028474/211141793-61bee869-9125-4b74-a5b4-a02f0f82cc6d.png">
-
-
+<img width="32%" alt="1" src="https://user-images.githubusercontent.com/5028474/217029083-3c2f561e-853f-45a7-b9f1-d818a830daf5.png"> <img width="32%" alt="2" src="https://user-images.githubusercontent.com/5028474/217029092-2b86b41b-1f89-4383-ac48-16652e820f7e.png"> <img width="32%" alt="3" src="https://user-images.githubusercontent.com/5028474/217029096-dbf6b46c-3ed7-4c76-a57b-8cebfb3b671c.png">
 
 
 #### Requirements:
-- [Python 3.6.x](https://www.python.org/downloads/release/python-360/) or later
-
 - Supported OSs:
    * Linux   
    * Mac OSX
@@ -35,26 +33,28 @@ For effortless visualization of the RouterOS metrics exported to Prometheus, MKT
 
 
 ## Install:
-There are multiple ways to install this project, from a standalone app to a [fully dockerized monitoring stack](https://github.com/akpw/mktxp-stack). 
+There are multiple ways to install this project, from a standalone app to a [fully dockerized monitoring stack](https://github.com/akpw/mktxp-stack). The supported options include:
+- [MKTXP Stack](https://github.com/akpw/mktxp-stack): a ready-to-go MKTXP monitoring stack
+
+- from [Docker image](https://github.com/akpw/mktxp/pkgs/container/mktxp) : `❯ docker pull ghcr.io/akpw/mktxp:latest`
+
 - from [PyPI](https://pypi.org/project/mktxp/): `❯ pip install mktxp`
 
 - latest from source repository: `❯ pip install git+https://github.com/akpw/mktxp`
 
-- from [Docker image](https://github.com/akpw/mktxp/pkgs/container/mktxp) : `❯ docker pull ghcr.io/akpw/mktxp:latest`
 
-- with [MKTXP Stack](https://github.com/akpw/mktxp-stack): a ready-to-go MKTXP monitoring stack
 
 
 ## Getting started
-To get started with MKTXP, you need to edit its main configuration file. This essentially involves adding your Mikrotik devices ip addresses & authentication info, optionally modifying various settings to specific needs. 
+To get started with MKTXP, you need to edit its main configuration file. This essentially involves filling in your Mikrotik devices IP addresses & authentication info, optionally modifying various settings to specific needs. 
 
-The default configuration file comes with a sample configuration, making it easy to copy / edit parameters as needed:
+The default configuration file comes with a sample configuration, making it easy to copy / edit parameters for your RouterOS devices as needed:
 ```
 [Sample-Router]
     enabled = False         # turns metrics collection for this RouterOS device on / off
     
     hostname = localhost    # RouterOS IP address
-    port = 8728             # RouterOS IP Port
+    port = 8728             # RouterOS API / API-SSL service port
     
     username = username     # RouterOS user, needs to have 'read' and 'api' permissions
     password = password
@@ -66,7 +66,10 @@ The default configuration file comes with a sample configuration, making it easy
     installed_packages = True       # Installed packages
     dhcp = True                     # DHCP general metrics
     dhcp_lease = True               # DHCP lease metrics
+
     connections = True              # IP connections metrics
+    connection_stats = False        # Open IP connections metrics 
+
     pool = True                     # Pool metrics
     interface = True                # Interfaces traffic metrics
     
@@ -87,13 +90,16 @@ The default configuration file comes with a sample configuration, making it easy
     user = True                     # Active Users metrics
     queue = True                    # Queues metrics
     
-    remote_dhcp_entry = None        # An MKTXP entry for remote DHCP info resolution in capsman/wireless
+    remote_dhcp_entry = None        # An MKTXP entry for remote DHCP info resolution (capsman/wireless)
 
     use_comments_over_names = True  # when available, forces using comments over the interfaces names 
 ```
 
+Most options are easy to understand at first glance, and some are described in more details [later](https://github.com/akpw/mktxp#advanced-features).
+
+
 #### Local install
-If you have a local MKTXP installation, you can edit this file with your default system editor directly from mktxp:
+If you have a local MKTXP installation, you can edit the configuration file with your default system editor directly from mktxp:
 ```bash
 ❯ mktxp edit
 ```
@@ -108,7 +114,7 @@ Obviously, you can do the same via just opening the config file directly:
 ```
 
 #### Docker image install
-For Docker instances, one way is to use a configured mktxp.conf file from a local installation. Alternatively you can create a standalone one in a dedicated folder:
+For Docker instances, one way is to use a configured `mktxp.conf` file from a local installation. Alternatively you can create a standalone one in a dedicated folder:
 ```
 mkdir mktxp
 nano mktxp/mktxp.conf # copy&edit sample entry(ies) from above
@@ -225,6 +231,91 @@ mktxp edit -i
 Now with your RouterOS metrics being exported to Prometheus, it's easy to visualize them with this [Grafana dashboard](https://grafana.com/grafana/dashboards/13679)
 
 
+## Description of CLI Commands
+### mktxp commands
+       . MKTXP commands:
+        .. info     Shows base MKTXP info
+        .. edit     Open MKTXP configuration file in your editor of choice        
+        .. print    Displays selected metrics on the command line
+        .. export   Starts collecting metrics for all enabled RouterOS configuration entries
+        .. show   	Shows MKTXP configuration entries on the command line
+
+````
+❯ mktxp -h
+usage: MKTXP [-h] [--cfg-dir CFG_DIR] {info, edit, export, print, show, } ...
+
+Prometheus Exporter for Mikrotik RouterOS
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --cfg-dir CFG_DIR     MKTXP config files directory (optional)
+````
+To learn more about individual commands, just run it with ```-h```:
+For example, to learn everything about ````mktxp show````:
+````
+❯ mktxp show -h
+usage: MKTXP show [-h]
+                  [-en ['Sample-Router']]
+                  [-cfg]
+Displays MKTXP config router entries
+optional arguments:
+  -h, --help            show this help message and exit
+  -en, --entry-name ['Sample-Router']
+                        Config entry name
+  -cfg, --config        Shows MKTXP config files paths
+````  
+
+## Advanced features
+While most of the [mktxp options](https://github.com/akpw/mktxp#getting-started) are self explanatory, some might require a bit of a context.
+
+### Remote DHCP resolution
+When gathering various IP address-related metrics, MKTXP automatically resolves IP addresses whenever DHCP info is available. In many cases however, the exported devices do not have this information locally and instead rely on central DHCP servers. To improve readibility / usefulness of the exported metrics, MKTXP supports remote DHCP server calls via the following option:
+```
+remote_dhcp_entry = None        # An MKTXP entry for remote DHCP info resolution in capsman/wireless
+```
+`MKTXP entry` in this context can be any other mktxp.conf entry, and for the sole purpose of providing DHCP info it does not even need to be enabled. 
+
+### Connections stats
+With many connected devices everywhere, one can often only guess where do they go to and what they actually do with all the information from your network environment. MKTXP let's you easily track those with a single option, with results available both from [mktxp dashboard](https://grafana.com/grafana/dashboards/13679-mikrotik-mktxp-exporter/) and the command line:
+
+```
+connection_stats = False        # Open IP connections metrics 
+```
+Setting this to `True` obviously enables the feature and allows to see something like that:
+
+<img width="2346" alt="conns" src="https://user-images.githubusercontent.com/5028474/217042107-bffa0a81-a6a0-4474-87d4-1597cdd80735.png">
+
+Hey, what is this Temp&Humidity sensor has to do with a bunch of open network connections? 12 of them, really?
+Let's go check on that in the dashboard, or just get the info right from the command line:
+
+```
+❯ mktxp print -en MKT-GT -cn
++-------------------+--------------+------------------+-----------------------------------------------------------------------+
+|     dhcp_name     | src_address  | connection_count |                             dst_addresses                             |
++===================+==============+==================+=======================================================================+
+| T&H Cat's Room    | 10.20.10.149 |        12        |          3.124.97.151:32100(udp), 13.38.179.104:32100(udp),           |
+|                   |              |                  |                       54.254.90.185:32100(udp)
+```
+*A few quick checks show all of the destination IPs relate to AWS instances, so supposedly it's legit... but let's remain vigilant, to know better :)*
+
+
+### Parallel routers fetch
+Concurrent exports across multiple devices can considerably speed up things for slow network connections. This feature can be turned on and configured with the following [system options](https://github.com/akpw/mktxp/blob/main/README.md#mktxp-system-configuration):
+```
+fetch_routers_in_parallel = False   # Set to True if you want to fetch multiple routers parallel
+max_worker_threads = 5              # Max number of worker threads that can fetch routers (parallel fetch only)
+max_scrape_duration = 10            # Max duration of individual routers' metrics collection (parallel fetch only)
+total_max_scrape_duration = 30      # Max overall duration of all metrics collection (parallel fetch only)
+```
+To keeps things within expected boundaries, the last two parameters allows for controlling both individual and overall scrape durations
+
+
+### mktxp port
+By default, mktxp runs it's HTTP metrics endpoint on port 49090. You can change it via the following [system option](https://github.com/akpw/mktxp/blob/main/README.md#mktxp-system-configuration):
+```
+port = 49090 
+```
+
 ## Setting up MKTXP to run as a Linux Service
 If you've installed MKTXP on a Linux system, you can run it with system boot via adding a service. \
 Let's start with:
@@ -319,41 +410,6 @@ Let's save and then start the service as well as check on its' status:
 ❯ service mktxp status
 mktxp is running as pid 36704
 ```
-
-
-## Description of CLI Commands
-### mktxp commands
-       . MKTXP commands:
-        .. info     Shows base MKTXP info
-        .. edit     Open MKTXP configuration file in your editor of choice        
-        .. print    Displays selected metrics on the command line
-        .. export   Starts collecting metrics for all enabled RouterOS configuration entries
-        .. show   	Shows MKTXP configuration entries on the command line
-
-````
-❯ mktxp -h
-usage: MKTXP [-h] [--cfg-dir CFG_DIR] {info, edit, export, print, show, } ...
-
-Prometheus Exporter for Mikrotik RouterOS
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --cfg-dir CFG_DIR     MKTXP config files directory (optional)
-````
-To learn more about individual commands, just run it with ```-h```:
-For example, to learn everything about ````mktxp show````:
-````
-❯ mktxp show -h
-usage: MKTXP show [-h]
-                  [-en ['Sample-Router']]
-                  [-cfg]
-Displays MKTXP config router entries
-optional arguments:
-  -h, --help            show this help message and exit
-  -en, --entry-name ['Sample-Router']
-                        Config entry name
-  -cfg, --config        Shows MKTXP config files paths
-````  
 
 ## Installing Development version
 - Clone the repo, then run: `$ python setup.py develop`
