@@ -9,7 +9,7 @@
 MKTXP is a Prometheus Exporter for Mikrotik RouterOS devices.\
 It gathers and exports a rich set of metrics across multiple routers, all easily configurable via built-in CLI interface. 
 
-While simple to use, MKTXP also supports [advanced features](https://github.com/akpw/mktxp#advanced-features) such as automatic IP address resolution with support for both local & remote DHCP servers, concurrent exports across multiple router devices, configurable data processing & transformations, etc.
+While simple to use, MKTXP supports [advanced features](https://github.com/akpw/mktxp#advanced-features) such as automatic IP address resolution with support for both local & remote DHCP servers, concurrent exports across multiple router devices, configurable data processing & transformations, etc.
 
 Apart from exporting to Prometheus, MKTXP can print selected metrics directly on the command line (see examples below). 
 
@@ -54,7 +54,7 @@ The default configuration file comes with a sample configuration, making it easy
     enabled = False         # turns metrics collection for this RouterOS device on / off
     
     hostname = localhost    # RouterOS IP address
-    port = 8728             # RouterOS IP Port
+    port = 8728             # RouterOS API / API-SSL service port
     
     username = username     # RouterOS user, needs to have 'read' and 'api' permissions
     password = password
@@ -94,9 +94,11 @@ The default configuration file comes with a sample configuration, making it easy
 
     use_comments_over_names = True  # when available, forces using comments over the interfaces names 
 ```
+With most options easy to understand at first glance, some are described in more details [later](https://github.com/akpw/mktxp#advanced-features).
+
 
 #### Local install
-If you have a local MKTXP installation, you can edit this file with your default system editor directly from mktxp:
+If you have a local MKTXP installation, you can edit the configuration file with your default system editor directly from mktxp:
 ```bash
 ❯ mktxp edit
 ```
@@ -111,7 +113,7 @@ Obviously, you can do the same via just opening the config file directly:
 ```
 
 #### Docker image install
-For Docker instances, one way is to use a configured mktxp.conf file from a local installation. Alternatively you can create a standalone one in a dedicated folder:
+For Docker instances, one way is to use a configured `mktxp.conf` file from a local installation. Alternatively you can create a standalone one in a dedicated folder:
 ```
 mkdir mktxp
 nano mktxp/mktxp.conf # copy&edit sample entry(ies) from above
