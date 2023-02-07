@@ -9,7 +9,7 @@
 MKTXP is a Prometheus Exporter for Mikrotik RouterOS devices.\
 It gathers and exports a rich set of metrics across multiple routers, all easily configurable via built-in CLI interface. 
 
-While simple to use, MKTXP supports [advanced features](https://github.com/akpw/mktxp#advanced-features) such as automatic IP address resolution with support for both local & remote DHCP servers, concurrent exports across multiple router devices, configurable data processing & transformations, etc.
+While simple to use, MKTXP supports [advanced features](https://github.com/akpw/mktxp#advanced-features) such as automatic IP address resolution with both local & remote DHCP servers, concurrent exports across multiple router devices, configurable data processing & transformations, etc.
 
 Apart from exporting to Prometheus, MKTXP can print selected metrics directly on the command line (see examples below). 
 
@@ -33,8 +33,8 @@ For effortless visualization of the RouterOS metrics exported to Prometheus, MKT
 
 
 ## Install:
-There are multiple ways to install this project, from a standalone app to a [fully dockerized monitoring stack](https://github.com/akpw/mktxp-stack). 
-- with [MKTXP Stack](https://github.com/akpw/mktxp-stack): a ready-to-go MKTXP monitoring stack
+There are multiple ways to install this project, from a standalone app to a [fully dockerized monitoring stack](https://github.com/akpw/mktxp-stack). The supported options include:
+- [MKTXP Stack](https://github.com/akpw/mktxp-stack): a ready-to-go MKTXP monitoring stack
 
 - from [Docker image](https://github.com/akpw/mktxp/pkgs/container/mktxp) : `❯ docker pull ghcr.io/akpw/mktxp:latest`
 
@@ -46,9 +46,9 @@ There are multiple ways to install this project, from a standalone app to a [ful
 
 
 ## Getting started
-To get started with MKTXP, you need to edit its main configuration file. This essentially involves adding your Mikrotik devices ip addresses & authentication info, optionally modifying various settings to specific needs. 
+To get started with MKTXP, you need to edit its main configuration file. This essentially involves filling in your Mikrotik devices IP addresses & authentication info, optionally modifying various settings to specific needs. 
 
-The default configuration file comes with a sample configuration, making it easy to copy / edit parameters as needed:
+The default configuration file comes with a sample configuration, making it easy to copy / edit parameters for your RouterOS devices as needed:
 ```
 [Sample-Router]
     enabled = False         # turns metrics collection for this RouterOS device on / off
@@ -94,7 +94,8 @@ The default configuration file comes with a sample configuration, making it easy
 
     use_comments_over_names = True  # when available, forces using comments over the interfaces names 
 ```
-With most options easy to understand at first glance, some are described in more details [later](https://github.com/akpw/mktxp#advanced-features).
+
+Most options are easy to understand at first glance, and some are described in more details [later](https://github.com/akpw/mktxp#advanced-features).
 
 
 #### Local install
@@ -268,7 +269,7 @@ optional arguments:
 While most of the [mktxp options](https://github.com/akpw/mktxp#getting-started) are self explanatory, some might require a bit of a context.
 
 ### Remote DHCP resolution
-When gathering various IP address-related metrics, mktxp automatically resolves IP addresses whenever DHCP info is available. In many cases however, the exported devices does not have this information locally and instead rely on central DHCP servers. Since this could reduce readibility / usefulness of the metrics, mktxp supports remote DHCP server calls via the following option:
+When gathering various IP address-related metrics, MKTXP automatically resolves IP addresses whenever DHCP info is available. In many cases however, the exported devices do not have this information locally and instead rely on central DHCP servers. To improve readibility / usefulness of the exported metrics, MKTXP supports remote DHCP server calls via the following option:
 ```
 remote_dhcp_entry = None        # An MKTXP entry for remote DHCP info resolution in capsman/wireless
 ```
