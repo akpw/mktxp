@@ -57,8 +57,8 @@ class FirewallCollector(BaseCollector):
     # Helpers
     @staticmethod
     def metric_record(router_entry, firewall_record):
-        name = f"| {firewall_record['chain']} | {firewall_record['action']} | {firewall_record['comment']}"
-        bytes = firewall_record['bytes']
+        name = f"| {firewall_record.get('chain', ' ')} | {firewall_record.get('action', ' ')} | {firewall_record.get('comment', ' ')}"
+        bytes = firewall_record.get('bytes', 0)
         return {MKTXPConfigKeys.ROUTERBOARD_NAME: router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_NAME],
                 MKTXPConfigKeys.ROUTERBOARD_ADDRESS: router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_ADDRESS],
                 'name': name, 'log': firewall_record['log'], 'bytes': bytes}
