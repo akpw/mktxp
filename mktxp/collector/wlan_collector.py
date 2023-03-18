@@ -54,19 +54,19 @@ class WLANCollector(BaseCollector):
                 for registration_record in registration_records:
                     BaseOutputProcessor.augment_record(router_entry, registration_record)
 
-                tx_byte_metrics = BaseCollector.counter_collector('wlan_clients_tx_bytes', 'Number of sent packet bytes', registration_records, 'tx_bytes', ['dhcp_name'])
+                tx_byte_metrics = BaseCollector.counter_collector('wlan_clients_tx_bytes', 'Number of sent packet bytes', registration_records, 'tx_bytes', ['dhcp_name', 'mac_address'])
                 yield tx_byte_metrics
 
-                rx_byte_metrics = BaseCollector.counter_collector('wlan_clients_rx_bytes', 'Number of received packet bytes', registration_records, 'rx_bytes', ['dhcp_name'])
+                rx_byte_metrics = BaseCollector.counter_collector('wlan_clients_rx_bytes', 'Number of received packet bytes', registration_records, 'rx_bytes', ['dhcp_name', 'mac_address'])
                 yield rx_byte_metrics
 
-                signal_strength_metrics = BaseCollector.gauge_collector('wlan_clients_signal_strength', 'Average strength of the client signal recevied by AP', registration_records, 'signal_strength', ['dhcp_name'])
+                signal_strength_metrics = BaseCollector.gauge_collector('wlan_clients_signal_strength', 'Average strength of the client signal recevied by AP', registration_records, 'signal_strength', ['dhcp_name', 'mac_address'])
                 yield signal_strength_metrics
 
-                signal_to_noise_metrics = BaseCollector.gauge_collector('wlan_clients_signal_to_noise', 'Client devices signal to noise ratio', registration_records, 'signal_to_noise', ['dhcp_name'])
+                signal_to_noise_metrics = BaseCollector.gauge_collector('wlan_clients_signal_to_noise', 'Client devices signal to noise ratio', registration_records, 'signal_to_noise', ['dhcp_name', 'mac_address'])
                 yield signal_to_noise_metrics
 
-                tx_ccq_metrics = BaseCollector.gauge_collector('wlan_clients_tx_ccq', 'Client Connection Quality (CCQ) for transmit', registration_records, 'tx_ccq', ['dhcp_name'])
+                tx_ccq_metrics = BaseCollector.gauge_collector('wlan_clients_tx_ccq', 'Client Connection Quality (CCQ) for transmit', registration_records, 'tx_ccq', ['dhcp_name', 'mac_address'])
                 yield tx_ccq_metrics
 
                 registration_metrics = BaseCollector.info_collector('wlan_clients_devices', 'Client devices info', 
