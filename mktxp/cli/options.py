@@ -215,7 +215,7 @@ Selected metrics info can be printed on the command line. For more information, 
     def _add_entry_name(parser, registered_only = False, required = True, help = 'MKTXP Entry name'):
         parser.add_argument('-en', '--entry-name', dest = 'entry_name',
             type = str,
-            metavar = config_handler.registered_entries() if registered_only else None,
+            metavar = list(config_handler.registered_entries()) if registered_only else None,
             required = required,
             choices = UniquePartialMatchList(config_handler.registered_entries())if registered_only else None,
             help = help)
