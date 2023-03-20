@@ -214,8 +214,8 @@ mktxp edit -i
     max_delay_on_failure = 900
     delay_inc_div = 5
 
-    bandwidth = True                # Turns metrics bandwidth metrics collection on / off    
-    bandwidth_test_interval = 420   # Interval for colllecting bandwidth metrics
+    bandwidth = False               # Turns metrics bandwidth metrics collection on / off    
+    bandwidth_test_interval = 600   # Interval for colllecting bandwidth metrics
     minimal_collect_interval = 5    # Minimal metric collection interval
 
     verbose_mode = False            # Set it on for troubleshooting
