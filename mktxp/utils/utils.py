@@ -11,8 +11,10 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
+from functools import lru_cache
 import os, sys, shlex, tempfile, shutil, re
 import subprocess, hashlib, urllib
+import time
 from timeit import default_timer
 from collections.abc import Iterable
 import xml.etree.ElementTree as ET
@@ -281,12 +283,21 @@ CHANNEL_RSS_FEED_MAPPING = {
 }
 
 
-def get_available_updates(channel):
+def get_ttl_hash(seconds=3600):
+    """Return the same value withing `seconds` time period"""
+    return round(time.time() / seconds)
+
+
+@lru_cache(maxsize=5)
+def get_available_updates(channel, ttl_hash=get_ttl_hash()):
     """Check the RSS feed for available updates for a given update channel.
-    This method fetches the RSS feed and yields all version from the parsed XML.
+    This method fetches the RSS feed and returns all version from the parsed XML.
     Version numbers are parsed into version.Version instances (part of setuptools)."""
+    del ttl_hash
     rss_feed = CHANNEL_RSS_FEED_MAPPING[channel]
 
+    print(f'Fetching available ROS releases from {rss_feed}')
+    versions = []
     with urllib.request.urlopen(rss_feed) as response:
         result = response.read()
         root = ET.fromstring(result)
@@ -299,7 +310,9 @@ def get_available_updates(channel):
                 # extract and parse the version number from title
                 version_text = re.findall(r'[\d+\.]+', title.text)[0]
                 version_number = packaging.version.parse(version_text)
-                yield version_number
+                versions.append(version_number)
+    return versions
+
 
 def parse_ros_version(string):
     """Parse the version returned from the /system/resource command.
