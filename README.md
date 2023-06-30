@@ -92,7 +92,9 @@ The default configuration file comes with a sample configuration, making it easy
     
     remote_dhcp_entry = None        # An MKTXP entry for remote DHCP info resolution (capsman/wireless)
 
-    use_comments_over_names = True  # when available, forces using comments over the interfaces names 
+    use_comments_over_names = True  # when available, forces using comments over the interfaces names
+
+    check_for_updates = False       # check for available ROS updates
 ```
 
 Most options are easy to understand at first glance, and some are described in more details [later](https://github.com/akpw/mktxp#advanced-features).
