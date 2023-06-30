@@ -109,7 +109,10 @@ class BaseOutputProcessor:
 
     @staticmethod
     def parse_bitrates(rate):
-        rate = int(rate)
+        try:
+            rate = int(rate)
+        except:
+            return BaseOutputProcessor.parse_rates(rate)
         power = floor(log(rate, 1000))
         return f"{int(rate / 1000 ** power)} {['bps', 'Kbps', 'Mbps', 'Gbps'][int(power)]}"
 
