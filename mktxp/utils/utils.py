@@ -11,14 +11,18 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
-
+from functools import lru_cache
 import os, sys, shlex, tempfile, shutil, re
-import subprocess, hashlib
+import subprocess, hashlib, urllib
+import time
 from timeit import default_timer
 from collections.abc import Iterable
+import xml.etree.ElementTree as ET
 from contextlib import contextmanager
 from multiprocessing import Process, Event
 from datetime import timedelta
+from pkg_resources import packaging
+
 
 
 ''' Utilities / Helpers
@@ -270,3 +274,76 @@ class Benchmark:
         self.time = default_timer() - self.start
 
 
+# mapping of channels to RSS feeds
+CHANNEL_RSS_FEED_MAPPING = {
+    'development': 'https://mikrotik.com/development.rss',
+    'long-term': 'https://mikrotik.com/bugfix.rss',
+    'stable': 'https://mikrotik.com/current.rss',
+    'testing': 'https://mikrotik.com/candidate.rss',
+}
+
+
+def get_ttl_hash(seconds=3600):
+    """Return the same value withing `seconds` time period"""
+    return round(time.time() / seconds)
+
+
+@lru_cache(maxsize=5)
+def get_available_updates(channel, ttl_hash=get_ttl_hash()):
+    """Check the RSS feed for available updates for a given update channel.
+    This method fetches the RSS feed and returns all version from the parsed XML.
+    Version numbers are parsed into version.Version instances (part of setuptools)."""
+    del ttl_hash
+    rss_feed = CHANNEL_RSS_FEED_MAPPING[channel]
+
+    print(f'Fetching available ROS releases from {rss_feed}')
+    versions = []
+    with urllib.request.urlopen(rss_feed) as response:
+        result = response.read()
+        root = ET.fromstring(result)
+        channel = root[0]
+
+        for child in channel:
+            # iterate over all updates
+            if child.tag == 'item':
+                title, _, _, _, _, _ = child
+                # extract and parse the version number from title
+                version_text = re.findall(r'[\d+\.]+', title.text)[0]
+                version_number = packaging.version.parse(version_text)
+                versions.append(version_number)
+    return versions
+
+
+def parse_ros_version(string):
+    """Parse the version returned from the /system/resource command.
+    Returns a tuple: (<version>, <channel>).
+
+    >>> parse_ros_version('1.2.3 (stable)')
+    1.2.3, stable
+    """
+    version, channel = re.findall(r'([\d\.]+).*?([\w]+)', string)[0]
+    return packaging.version.parse(version), channel
+
+def check_for_updates(cur_version):
+    """Try to check if there is a newer version available.
+    If anything goes wrong, it returns the same version.
+    Returns a tuple: (<current version>, <newest version>)"""
+    error = False
+    try:
+        cur_version, channel = parse_ros_version(cur_version)
+        available_versions = get_available_updates(channel)
+        newest_version = sorted(available_versions)[-1]
+    except KeyError:
+        print(f'unknown update channel {channel}')
+        error = True
+    except urllib.error.HTTPError as err:
+        print(f'update feed returned: {str(err)}')
+        error = True
+    except Exception as err:
+        print(f'could not check for updates, because: {str(err)}')
+        error = True
+
+    if error:
+        return cur_version, cur_version
+
+    return cur_version, newest_version

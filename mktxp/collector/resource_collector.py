@@ -15,6 +15,7 @@
 from mktxp.collector.base_collector import BaseCollector
 from mktxp.flow.processor.output import BaseOutputProcessor
 from mktxp.datasource.system_resource_ds import SystemResourceMetricsDataSource
+from mktxp.utils.utils import check_for_updates
 
 
 class SystemResourceCollector(BaseCollector):
@@ -60,6 +61,16 @@ class SystemResourceCollector(BaseCollector):
 
             cpu_frequency_metrics = BaseCollector.gauge_collector('system_cpu_frequency', 'Current CPU frequency', resource_records, 'cpu_frequency', ['version', 'board_name', 'cpu', 'architecture_name'])
             yield cpu_frequency_metrics
+
+            # Check for updates
+            if router_entry.config_entry.check_for_updates:
+                for record in resource_records:
+                    cur_version, newest_version = check_for_updates(record['version'])
+                    record['newest_version'] = str(newest_version)
+                    record['update_available'] = cur_version < newest_version
+
+                update_available_metrics = BaseCollector.gauge_collector('system_update_available', 'Is there a newer version available', resource_records, 'update_available', ['newest_version',])
+                yield update_available_metrics
 
 
     # Helpers
