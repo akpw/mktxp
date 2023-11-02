@@ -41,19 +41,19 @@ class KidDeviceCollector(BaseCollector):
             info_metrics = BaseCollector.info_collector('kid_control_device', 'Kid-control device Info', records, info_labels)
             yield info_metrics
 
-            bytes_down_metrics = BaseCollector.gauge_collector('kid_control_device_bytes_down', 'Kid-control device bytes down', records, 'bytes_down', ['name'])
+            bytes_down_metrics = BaseCollector.gauge_collector('kid_control_device_bytes_down', 'Kid-control device bytes down', records, 'bytes_down', ['name', 'mac_address'])
             yield bytes_down_metrics
 
-            bytes_up_metrics = BaseCollector.gauge_collector('kid_control_device_bytes_up', 'Kid-control device bytes up', records, 'bytes_up', ['name'])
+            bytes_up_metrics = BaseCollector.gauge_collector('kid_control_device_bytes_up', 'Kid-control device bytes up', records, 'bytes_up', ['name', 'mac_address'])
             yield bytes_up_metrics
 
-            rate_down_metrics = BaseCollector.gauge_collector('kid_control_device_rate_down', 'Kid-control device rate down', records, 'rate_down', ['name'])
+            rate_down_metrics = BaseCollector.gauge_collector('kid_control_device_rate_down', 'Kid-control device rate down', records, 'rate_down', ['name', 'mac_address'])
             yield rate_down_metrics
 
-            rate_up_metrics = BaseCollector.gauge_collector('kid_control_device_rate_up', 'Kid-control device rate up', records, 'rate_up', ['name'])
+            rate_up_metrics = BaseCollector.gauge_collector('kid_control_device_rate_up', 'Kid-control device rate up', records, 'rate_up', ['name', 'mac_address'])
             yield rate_up_metrics
 
-            idle_time_metrics = BaseCollector.gauge_collector('kid_control_device_idle_time', 'Kid-control device idle time', records, 'idle_time', ['name'])
+            idle_time_metrics = BaseCollector.gauge_collector('kid_control_device_idle_time', 'Kid-control device idle time', records, 'idle_time', ['name', 'mac_address'])
             yield idle_time_metrics
 
     # Helpers
