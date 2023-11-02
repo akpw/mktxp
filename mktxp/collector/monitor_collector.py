@@ -25,7 +25,7 @@ class MonitorCollector(BaseCollector):
         if not router_entry.config_entry.monitor:
             return
 
-        monitor_labels = ['status', 'rate', 'full_duplex', 'name', 'sfp_temperature']
+        monitor_labels = ['status', 'rate', 'full_duplex', 'name', 'sfp_temperature', 'sfp_wavelength', 'sfp_tx_power', 'sfp_rx_power']
         monitor_records = InterfaceMonitorMetricsDataSource.metric_records(router_entry, metric_labels = monitor_labels, include_comments = True)   
         if monitor_records:
             # translate records to appropriate values
@@ -50,6 +50,15 @@ class MonitorCollector(BaseCollector):
             sfp_temperature_metrics = BaseCollector.gauge_collector('interface_sfp_temperature', 'Current SFP temperature', monitor_records, 'sfp_temperature', ['name'])
             yield sfp_temperature_metrics
 
+            sfp_wavelength_metrics = BaseCollector.gauge_collector('interface_sfp_wavelength', 'Current SFP wavelength', monitor_records, 'sfp_wavelength', ['name'])
+            yield sfp_wavelength_metrics
+
+            sfp_tx_power_metrics = BaseCollector.gauge_collector('interface_sfp_tx_power', 'Current TX power', monitor_records, 'sfp_tx_power', ['name'])
+            yield sfp_tx_power_metrics
+
+            sfp_rx_power_metrics = BaseCollector.gauge_collector('interface_sfp_rx_power', 'Current TX power', monitor_records, 'sfp_rx_power', ['name'])
+            yield sfp_rx_power_metrics
+
     # Helpers
     @staticmethod
     def _translated_values(monitor_label, value):
@@ -58,7 +67,10 @@ class MonitorCollector(BaseCollector):
                 'rate': lambda value: MonitorCollector._rates(value),
                 'full_duplex': lambda value: '1' if value=='true' else '0',
                 'name': lambda value: value,
-                'sfp_temperature': lambda value: value
+                'sfp_temperature': lambda value: value,
+                'sfp_wavelength': lambda value: value,
+                'sfp_tx_power': lambda value: value,
+                'sfp_rx_power': lambda value: value,
                 }[monitor_label](value)
 
     @staticmethod
