@@ -80,6 +80,7 @@ class NetwatchCollector(BaseCollector):
                 'http_resp_time': lambda value: NetwatchCollector.parse_timedelta(value).microseconds/1000,
             }[label](value)
         except KeyError:
+            # default to just returning the value
             return value
 
     @staticmethod
