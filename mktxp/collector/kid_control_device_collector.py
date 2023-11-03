@@ -61,6 +61,7 @@ class KidDeviceCollector(BaseCollector):
                 'disabled': lambda value: '1' if value == 'true' else '0',
             }[monitor_label](value)
         except KeyError:
+            # default to just returning the value
             return value
 
     @staticmethod
