@@ -35,44 +35,34 @@ class MonitorCollector(BaseCollector):
                     if value:            
                         monitor_record[monitor_label] = MonitorCollector._translated_values(monitor_label, value)
 
-            monitor_status_metrics = BaseCollector.gauge_collector('interface_status', 'Current interface link status', monitor_records, 'status', ['name'])
-            yield monitor_status_metrics
+            yield BaseCollector.gauge_collector('interface_status', 'Current interface link status', monitor_records, 'status', ['name'])
 
             # limit records according to the relevant metrics
             rate_records = [monitor_record for monitor_record in monitor_records if monitor_record.get('rate', None)]
-            monitor_rates_metrics = BaseCollector.gauge_collector('interface_rate', 'Actual interface connection data rate', rate_records, 'rate', ['name'])
-            yield monitor_rates_metrics
+            yield BaseCollector.gauge_collector('interface_rate', 'Actual interface connection data rate', rate_records, 'rate', ['name'])
 
             full_duplex_records = [monitor_record for monitor_record in monitor_records if monitor_record.get('full_duplex', None)]
-            monitor_rates_metrics = BaseCollector.gauge_collector('interface_full_duplex', 'Full duplex data transmission', full_duplex_records, 'full_duplex', ['name'])
-            yield monitor_rates_metrics
+            yield BaseCollector.gauge_collector('interface_full_duplex', 'Full duplex data transmission', full_duplex_records, 'full_duplex', ['name'])
 
-            sfp_temperature_metrics = BaseCollector.gauge_collector('interface_sfp_temperature', 'Current SFP temperature', [record for record in monitor_records if record.get("sfp_module_present", False) == "1"], 'sfp_temperature', ['name'])
-            yield sfp_temperature_metrics
-
-            sfp_wavelength_metrics = BaseCollector.gauge_collector('interface_sfp_wavelength', 'Current SFP wavelength', [record for record in monitor_records if record.get("sfp_module_present", False) == "1"], 'sfp_wavelength', ['name'])
-            yield sfp_wavelength_metrics
-
-            sfp_tx_power_metrics = BaseCollector.gauge_collector('interface_sfp_tx_power', 'Current TX power', [record for record in monitor_records if record.get("sfp_module_present", False) == "1"], 'sfp_tx_power', ['name'])
-            yield sfp_tx_power_metrics
-
-            sfp_rx_power_metrics = BaseCollector.gauge_collector('interface_sfp_rx_power', 'Current TX power', [record for record in monitor_records if record.get("sfp_module_present", False) == "1"], 'sfp_rx_power', ['name'])
-            yield sfp_rx_power_metrics
+            sfp_metrics = [record for record in monitor_records if record.get("sfp_module_present", False) == "1"]
+            yield BaseCollector.gauge_collector('interface_sfp_temperature', 'Current SFP temperature', sfp_metrics, 'sfp_temperature', ['name'])
+            yield BaseCollector.gauge_collector('interface_sfp_wavelength', 'Current SFP wavelength',sfp_metrics, 'sfp_wavelength', ['name'])
+            yield BaseCollector.gauge_collector('interface_sfp_tx_power', 'Current TX power', sfp_metrics, 'sfp_tx_power', ['name'])
+            yield BaseCollector.gauge_collector('interface_sfp_rx_power', 'Current TX power', sfp_metrics, 'sfp_rx_power', ['name'])
 
     # Helpers
     @staticmethod
     def _translated_values(monitor_label, value):
-        return {
-                'status': lambda value: '1' if value=='link-ok' else '0',
-                'rate': lambda value: MonitorCollector._rates(value),
-                'full_duplex': lambda value: '1' if value=='true' else '0',
-                'name': lambda value: value,
-                'sfp_module_present': lambda value: '1' if value=='true' else '0',
-                'sfp_temperature': lambda value: value,
-                'sfp_wavelength': lambda value: value,
-                'sfp_tx_power': lambda value: value,
-                'sfp_rx_power': lambda value: value,
-                }[monitor_label](value)
+        try:
+            return {
+                    'status': lambda value: '1' if value=='link-ok' else '0',
+                    'rate': lambda value: MonitorCollector._rates(value),
+                    'full_duplex': lambda value: '1' if value=='true' else '0',
+                    'sfp_module_present': lambda value: '1' if value=='true' else '0',
+                    }[monitor_label](value)
+        except KeyError:
+            # default to just returning the value
+            return value
 
     @staticmethod
     def _rates(rate_option):
