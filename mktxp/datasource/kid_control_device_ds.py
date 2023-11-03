@@ -16,16 +16,17 @@ from mktxp.datasource.base_ds import BaseDSProcessor
 
 
 class KidDeviceMetricsDataSource:
-    ''' Kid-control device Metrics data provider
-    '''             
+    """ Kid-control device Metrics data provider
+    """
+
     @staticmethod
-    def metric_records(router_entry, *, metric_labels = None):
+    def metric_records(router_entry, *, metric_labels=None):
         if metric_labels is None:
-            metric_labels = []                
+            metric_labels = []
         try:
             device_records = router_entry.api_connection.router_api().get_resource('/ip/kid-control/device').get()
-            return BaseDSProcessor.trimmed_records(router_entry, router_records = device_records, metric_labels = metric_labels)
+            return BaseDSProcessor.trimmed_records(router_entry, router_records=device_records, metric_labels=metric_labels)
         except Exception as exc:
-            print(f'Error getting Kid-control device info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
+            print(
+                f'Error getting Kid-control device info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None
-
