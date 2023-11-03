@@ -47,21 +47,24 @@ class NetwatchCollector(BaseCollector):
             yield BaseCollector.gauge_collector('netwatch_failed_tests', 'Netwatch Failed Tests', netwatch_records, 'failed_tests', ['name', 'type'])
 
             # ICMP specific
-            yield BaseCollector.gauge_collector('netwatch_icmp_loss_count', 'Netwatch ICMP Loss Count', [record for record in netwatch_records if record.get("type", None) == "icmp"], 'loss_count', ['name', 'type'])
-            yield BaseCollector.gauge_collector('netwatch_icmp_loss_percent', 'Netwatch ICMP Loss Percent', [record for record in netwatch_records if record.get("type", None) == "icmp"], 'loss_percent', ['name', 'type'])
-            yield BaseCollector.gauge_collector('netwatch_icmp_rtt_avg_ms', 'Netwatch ICMP Round Trip Average', [record for record in netwatch_records if record.get("type", None) == "icmp"], 'rtt_avg', ['name', 'type'])
-            yield BaseCollector.gauge_collector('netwatch_icmp_rtt_min_ms', 'Netwatch ICMP Round Trip Min', [record for record in netwatch_records if record.get("type", None) == "icmp"], 'rtt_min', ['name', 'type'])
-            yield BaseCollector.gauge_collector('netwatch_icmp_rtt_max_ms', 'Netwatch ICMP Round Trip Max', [record for record in netwatch_records if record.get("type", None) == "icmp"], 'rtt_max', ['name', 'type'])
-            yield BaseCollector.gauge_collector('netwatch_icmp_rtt_jitter_ms', 'Netwatch ICMP Round Trip Jitter', [record for record in netwatch_records if record.get("type", None) == "icmp"], 'rtt_jitter', ['name', 'type'])
-            yield BaseCollector.gauge_collector('netwatch_icmp_rtt_stdev_ms', 'Netwatch ICMP Round Trip Stdev', [record for record in netwatch_records if record.get("type", None) == "icmp"], 'rtt_stdev', ['name', 'type'])
+            icmp_records = [record for record in netwatch_records if record.get("type", None) == "icmp"]
+            yield BaseCollector.gauge_collector('netwatch_icmp_loss_count', 'Netwatch ICMP Loss Count', icmp_records, 'loss_count', ['name', 'type'])
+            yield BaseCollector.gauge_collector('netwatch_icmp_loss_percent', 'Netwatch ICMP Loss Percent', icmp_records, 'loss_percent', ['name', 'type'])
+            yield BaseCollector.gauge_collector('netwatch_icmp_rtt_avg_ms', 'Netwatch ICMP Round Trip Average', icmp_records, 'rtt_avg', ['name', 'type'])
+            yield BaseCollector.gauge_collector('netwatch_icmp_rtt_min_ms', 'Netwatch ICMP Round Trip Min', icmp_records, 'rtt_min', ['name', 'type'])
+            yield BaseCollector.gauge_collector('netwatch_icmp_rtt_max_ms', 'Netwatch ICMP Round Trip Max', icmp_records, 'rtt_max', ['name', 'type'])
+            yield BaseCollector.gauge_collector('netwatch_icmp_rtt_jitter_ms', 'Netwatch ICMP Round Trip Jitter', icmp_records, 'rtt_jitter', ['name', 'type'])
+            yield BaseCollector.gauge_collector('netwatch_icmp_rtt_stdev_ms', 'Netwatch ICMP Round Trip Stdev', icmp_records, 'rtt_stdev', ['name', 'type'])
 
             # TCP specific
-            yield BaseCollector.gauge_collector('netwatch_tcp_connect_time_ms', 'Netwatch TCP Connect Time', [record for record in netwatch_records if record.get("type", None) == "tcp-conn"], 'tcp_connect_time', ['name', 'type'])
+            tcp_records = [record for record in netwatch_records if record.get("type", None) == "tcp-conn"]
+            yield BaseCollector.gauge_collector('netwatch_tcp_connect_time_ms', 'Netwatch TCP Connect Time', tcp_records, 'tcp_connect_time', ['name', 'type'])
 
             # HTTP(s) specific
-            yield BaseCollector.gauge_collector('netwatch_http_status_code', 'Netwatch HTTP status code', [record for record in netwatch_records if record.get("type", None) in ["http-get", "https-get"]], 'http_status_code', ['name', 'type'])
-            yield BaseCollector.gauge_collector('netwatch_http_resp_time', 'Netwatch HTTP status code', [record for record in netwatch_records if record.get("type", None) in ["http-get", "https-get"]], 'http_resp_time', ['name', 'type'])
-            yield BaseCollector.gauge_collector('netwatch_tcp_connect_time_ms', 'Netwatch TCP Connect Time', [record for record in netwatch_records if record.get("type", None) in ["http-get", "https-get"]], 'tcp_connect_time', ['name', 'type'])
+            http_records = [record for record in netwatch_records if record.get("type", None) in ["http-get", "https-get"]]
+            yield BaseCollector.gauge_collector('netwatch_http_status_code', 'Netwatch HTTP status code', http_records, 'http_status_code', ['name', 'type'])
+            yield BaseCollector.gauge_collector('netwatch_http_resp_time', 'Netwatch HTTP status code', http_records, 'http_resp_time', ['name', 'type'])
+            yield BaseCollector.gauge_collector('netwatch_tcp_connect_time_ms', 'Netwatch TCP Connect Time', http_records, 'tcp_connect_time', ['name', 'type'])
 
     # Helpers
     @staticmethod
