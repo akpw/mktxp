@@ -19,17 +19,19 @@ from mktxp.datasource.wireless_ds import WirelessMetricsDataSource
 class CapsmanInfo:
     @staticmethod
     def capsman_path(router_entry):
-        if WirelessMetricsDataSource.wifiwave2_installed(router_entry):
-            return '/interface/wifiwave2/capsman'
-        else:
+        if WirelessMetricsDataSource.is_legacy(router_entry):
             return '/caps-man'
+        else:
+            wireless_package = WirelessMetricsDataSource.wireless_package(router_entry)
+            return f'/interface/{wireless_package}/capsman'
 
     @staticmethod
     def registration_table_path(router_entry):
-        if WirelessMetricsDataSource.wifiwave2_installed(router_entry):
-            return '/interface/wifiwave2/registration-table'
-        else:
+        if WirelessMetricsDataSource.is_legacy(router_entry):
             return '/caps-man/registration-table'
+        else:
+            wireless_package = WirelessMetricsDataSource.wireless_package(router_entry)
+            return f'/interface/{wireless_package}/registration-table'
 
 class CapsmanCapsMetricsDataSource:
     ''' Caps Metrics data provider
@@ -76,7 +78,7 @@ class CapsmanInterfacesDatasource:
 
     @staticmethod
     def metric_records(router_entry, *, metric_labels = None):
-        if WirelessMetricsDataSource.wireless_package(router_entry) == WirelessMetricsDataSource.WIFIWAVE2:
+        if not WirelessMetricsDataSource.is_legacy(router_entry):
             return None            
         if metric_labels is None:
             metric_labels = []                
