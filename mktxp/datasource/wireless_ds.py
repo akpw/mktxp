@@ -21,6 +21,7 @@ class WirelessMetricsDataSource:
     '''             
     WIFIWAVE2 = 'wifiwave2'
     WIRELESS = 'wireless'
+    WIFI = 'wifi'
 
     @staticmethod
     def metric_records(router_entry, *, metric_labels = None, add_router_id = True):
@@ -45,10 +46,14 @@ class WirelessMetricsDataSource:
     @staticmethod
     def wireless_package(router_entry):
         if not router_entry.wifi_package:
-            ww2_installed = PackageMetricsDataSource.is_package_installed(router_entry, package_name = WirelessMetricsDataSource.WIFIWAVE2)
-            router_entry.wifi_package = WirelessMetricsDataSource.WIFIWAVE2 if ww2_installed else WirelessMetricsDataSource.WIRELESS
+            if PackageMetricsDataSource.is_package_installed(router_entry, package_name = WirelessMetricsDataSource.WIRELESS):
+              router_entry.wifi_package = WirelessMetricsDataSource.WIRELESS
+            elif PackageMetricsDataSource.is_package_installed(router_entry, package_name = WirelessMetricsDataSource.WIFIWAVE2):
+              router_entry.wifi_package = WirelessMetricsDataSource.WIFIWAVE2
+            else:
+              router_entry.wifi_package = WirelessMetricsDataSource.WIFI
         return router_entry.wifi_package
 
     @staticmethod
-    def wifiwave2_installed(router_entry):
-        return WirelessMetricsDataSource.wireless_package(router_entry) == WirelessMetricsDataSource.WIFIWAVE2
+    def is_legacy(router_entry):
+        return WirelessMetricsDataSource.wireless_package(router_entry) == WirelessMetricsDataSource.WIRELESS
