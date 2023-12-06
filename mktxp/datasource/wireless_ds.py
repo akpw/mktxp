@@ -23,6 +23,9 @@ class WirelessMetricsDataSource:
     WIRELESS = 'wireless'
     WIFI = 'wifi'
 
+    WIFI_PACKAGE = 'wifi-qcom'
+    WIFI_AC_PACKAGE = 'wifi-qcom-ac'
+
     @staticmethod
     def metric_records(router_entry, *, metric_labels = None, add_router_id = True):
         if metric_labels is None:
@@ -46,12 +49,14 @@ class WirelessMetricsDataSource:
     @staticmethod
     def wireless_package(router_entry):
         if not router_entry.wifi_package:
-            if PackageMetricsDataSource.is_package_installed(router_entry, package_name = WirelessMetricsDataSource.WIRELESS):
-              router_entry.wifi_package = WirelessMetricsDataSource.WIRELESS
+            if PackageMetricsDataSource.is_package_installed(router_entry, package_name = WirelessMetricsDataSource.WIFI_PACKAGE):
+              router_entry.wifi_package = WirelessMetricsDataSource.WIFI
+            elif PackageMetricsDataSource.is_package_installed(router_entry, package_name = WirelessMetricsDataSource.WIFI_AC_PACKAGE):
+              router_entry.wifi_package = WirelessMetricsDataSource.WIFI
             elif PackageMetricsDataSource.is_package_installed(router_entry, package_name = WirelessMetricsDataSource.WIFIWAVE2):
               router_entry.wifi_package = WirelessMetricsDataSource.WIFIWAVE2
             else:
-              router_entry.wifi_package = WirelessMetricsDataSource.WIFI
+              router_entry.wifi_package = WirelessMetricsDataSource.WIRELESS
         return router_entry.wifi_package
 
     @staticmethod

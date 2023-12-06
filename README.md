@@ -87,6 +87,8 @@ The default configuration file comes with a sample configuration, making it easy
     capsman = True                  # CAPsMAN general metrics
     capsman_clients = True          # CAPsMAN clients metrics    
 
+    kid_control_devices = False     # Kid Control metrics 
+
     user = True                     # Active Users metrics
     queue = True                    # Queues metrics
     

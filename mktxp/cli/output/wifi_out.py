@@ -43,7 +43,7 @@ class WirelessOutput:
         output_records = 0
         registration_records = len(registration_records)                
         output_entry = BaseOutputProcessor.OutputWiFiEntry \
-                        if WirelessMetricsDataSource.is_legacy(router_entry) else BaseOutputProcessor.OutputWirelessEntry
+                        if not WirelessMetricsDataSource.is_legacy(router_entry) else BaseOutputProcessor.OutputWirelessEntry
         output_table = BaseOutputProcessor.output_table(output_entry)
         
         for key in dhcp_rt_by_interface.keys():
