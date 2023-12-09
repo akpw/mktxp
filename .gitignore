@@ -130,3 +130,6 @@ dmypy.json
 
 # PyCharm IDE
 .idea/
+
+# Users config file
+mktxp/mktxp.conf

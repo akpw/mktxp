@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+  mktxp:
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile
+    ports:
+      - "49090:49090"
+    volumes:
+      - ../mktxp:/home/mktxp/mktxp/

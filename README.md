@@ -123,9 +123,9 @@ For Docker instances, one way is to use a configured `mktxp.conf` file from a lo
 mkdir mktxp
 nano mktxp/mktxp.conf # copy&edit sample entry(ies) from above
 ```
-Now you can mount this folder and run your docker instance with:
+Now you can run your stack with docker-compose with:
 ```
-docker run -v "$(pwd)/mktxp:/home/mktxp/mktxp/" -p 49090:49090 -it --rm ghcr.io/akpw/mktxp:latest
+cd docker;docker-compose up -d --build
 ```
 
 #### MKTXP stack install

@@ -1,5 +1,5 @@
 .git
 .gitignore
 .dockerignore
-Dockerfile
+docker/Dockerfile
 k8s
