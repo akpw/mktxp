@@ -50,13 +50,10 @@ class BaseOutputProcessor:
             registration_record['rx_bytes'] = registration_record['bytes'].split(',')[1]
             del registration_record['bytes']
 
-        is_legacy = WirelessMetricsDataSource.is_legacy(router_entry)
         if registration_record.get('tx_rate'):
-            registration_record['tx_rate'] = BaseOutputProcessor.parse_bitrates(registration_record['tx_rate']) \
-                                                if not is_legacy else BaseOutputProcessor.parse_rates(registration_record['tx_rate'])
+            registration_record['tx_rate'] = BaseOutputProcessor.parse_bitrates(registration_record['tx_rate'])
         if registration_record.get('rx_rate'):
-            registration_record['rx_rate'] = BaseOutputProcessor.parse_bitrates(registration_record['rx_rate']) \
-                                                if not is_legacy else BaseOutputProcessor.parse_rates(registration_record['rx_rate'])
+            registration_record['rx_rate'] = BaseOutputProcessor.parse_bitrates(registration_record['rx_rate'])
         if registration_record.get('uptime'):
             registration_record['uptime'] = naturaldelta(BaseOutputProcessor.parse_timedelta_seconds(registration_record['uptime']), months=True, minimum_unit='seconds')
 

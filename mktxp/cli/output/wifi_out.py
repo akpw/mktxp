@@ -14,7 +14,7 @@
 
 from mktxp.flow.processor.output import BaseOutputProcessor
 from mktxp.datasource.wireless_ds import WirelessMetricsDataSource
-
+from mktxp.flow.router_entry import RouterEntryWirelessType
 
 class WirelessOutput:
     ''' Wireless Clients CLI Output
@@ -42,8 +42,8 @@ class WirelessOutput:
 
         output_records = 0
         registration_records = len(registration_records)                
-        output_entry = BaseOutputProcessor.OutputWiFiEntry \
-                        if not WirelessMetricsDataSource.is_legacy(router_entry) else BaseOutputProcessor.OutputWirelessEntry
+        output_entry = BaseOutputProcessor.OutputWirelessEntry \
+                        if router_entry.wireless_type in (RouterEntryWirelessType.DUAL, RouterEntryWirelessType.WIRELESS) else BaseOutputProcessor.OutputWiFiEntry
         output_table = BaseOutputProcessor.output_table(output_entry)
         
         for key in dhcp_rt_by_interface.keys():

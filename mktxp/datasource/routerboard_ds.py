@@ -29,3 +29,25 @@ class RouterboardMetricsDataSource:
             print(f'Error getting system routerboard info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None
 
+    @staticmethod
+    def firmware_version(router_entry):
+        try:
+            version_st = router_entry.api_connection.router_api().get_resource('/system/routerboard').call('print', {'proplist':'current-firmware'})[0]
+            if version_st.get('current-firmware'):
+                return version_st['current-firmware']
+            return None
+        except Exception as exc:
+            print(f'Error getting routerboard current-firmware from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
+            return None
+
+    @staticmethod
+    def firmware_version(router_entry):
+        try:
+            version_st = router_entry.api_connection.router_api().get_resource('/system/routerboard').call('print', {'proplist':'upgrade-firmware'})[0]
+            if version_st.get('upgrade-firmware'):
+                return version_st['upgrade-firmware']
+            return None
+        except Exception as exc:
+            print(f'Error getting routerboard upgrade-firmware from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
+            return None
+

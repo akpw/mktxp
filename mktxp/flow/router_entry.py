@@ -12,10 +12,25 @@
 ## GNU General Public License for more details.
 
 
+from enum import IntEnum
 from collections import namedtuple
 from mktxp.cli.config.config import config_handler, MKTXPConfigKeys, CollectorKeys
 from mktxp.flow.router_connection import RouterAPIConnection
+from mktxp.datasource.package_ds import PackageMetricsDataSource
 
+
+class RouterEntryWirelessType(IntEnum):
+    NONE = 0
+    WIRELESS = 1
+    WIFIWAVE2 = 2
+    WIFI = 3
+    DUAL = 4
+
+class RouterEntryWirelessPackage:
+    WIFI_PACKAGE = 'wifi-qcom'
+    WIFI_AC_PACKAGE = 'wifi-qcom-ac'
+    WIFIWAVE2_PACKAGE = 'wifiwave2'
+    WIRELESS_PACKAGE = 'wireless'
 
 class RouterEntry:
     ''' RouterOS Entry
@@ -29,7 +44,6 @@ class RouterEntry:
             MKTXPConfigKeys.ROUTERBOARD_ADDRESS: self.config_entry.hostname
             }
         
-        self.wifi_package = None
         self.time_spent =  { CollectorKeys.IDENTITY_COLLECTOR: 0,
                             CollectorKeys.SYSTEM_RESOURCE_COLLECTOR: 0,
                             CollectorKeys.HEALTH_COLLECTOR: 0,
@@ -55,7 +69,24 @@ class RouterEntry:
                             }         
         self._dhcp_entry = None
         self._dhcp_records = {}
-                                    
+        self._wireless_type = RouterEntryWirelessType.NONE                                    
+
+    @property
+    def wireless_type(self):
+        router_entry = self
+        if self._wireless_type == RouterEntryWirelessType.NONE:
+            if PackageMetricsDataSource.is_package_installed(router_entry, package_name = RouterEntryWirelessPackage.WIFI_PACKAGE):
+              self._wireless_type = RouterEntryWirelessType.WIFI
+            elif PackageMetricsDataSource.is_package_installed(router_entry, package_name = RouterEntryWirelessPackage.WIFI_AC_PACKAGE):
+              self._wireless_type = RouterEntryWirelessType.WIFI
+            elif PackageMetricsDataSource.is_package_installed(router_entry, package_name = RouterEntryWirelessPackage.WIFIWAVE2_PACKAGE):
+              self._wireless_type = RouterEntryWirelessType.WIFIWAVE2
+            elif PackageMetricsDataSource.is_package_installed(router_entry, package_name = RouterEntryWirelessPackage.WIRELESS_PACKAGE):
+              self._wireless_type = RouterEntryWirelessType.DUAL
+            else:
+              self._wireless_type = RouterEntryWirelessType.WIRELESS
+        return self._wireless_type
+
     @property
     def dhcp_entry(self):
         if self._dhcp_entry:
@@ -95,7 +126,7 @@ class RouterEntry:
         return is_ready
 
     def is_done(self):
-        self.wifi_package = None 
         self._dhcp_records = {}
+        self._wireless_type = RouterEntryWirelessType.NONE
 
 DHCPCacheEntry = namedtuple('DHCPCacheEntry', ['type', 'record'])

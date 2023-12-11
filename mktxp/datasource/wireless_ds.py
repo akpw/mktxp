@@ -11,20 +11,16 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
-
 from mktxp.datasource.base_ds import BaseDSProcessor
 from mktxp.datasource.package_ds import PackageMetricsDataSource
-
+from mktxp.flow.router_entry import RouterEntryWirelessType
 
 class WirelessMetricsDataSource:
     ''' Wireless Metrics data provider
     '''             
-    WIFIWAVE2 = 'wifiwave2'
     WIRELESS = 'wireless'
+    WIFIWAVE2 = 'wifiwave2'
     WIFI = 'wifi'
-
-    WIFI_PACKAGE = 'wifi-qcom'
-    WIFI_AC_PACKAGE = 'wifi-qcom-ac'
 
     @staticmethod
     def metric_records(router_entry, *, metric_labels = None, add_router_id = True):
@@ -45,20 +41,13 @@ class WirelessMetricsDataSource:
             print(f'Error getting wireless registration table info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None
 
-
     @staticmethod
     def wireless_package(router_entry):
-        if not router_entry.wifi_package:
-            if PackageMetricsDataSource.is_package_installed(router_entry, package_name = WirelessMetricsDataSource.WIFI_PACKAGE):
-              router_entry.wifi_package = WirelessMetricsDataSource.WIFI
-            elif PackageMetricsDataSource.is_package_installed(router_entry, package_name = WirelessMetricsDataSource.WIFI_AC_PACKAGE):
-              router_entry.wifi_package = WirelessMetricsDataSource.WIFI
-            elif PackageMetricsDataSource.is_package_installed(router_entry, package_name = WirelessMetricsDataSource.WIFIWAVE2):
-              router_entry.wifi_package = WirelessMetricsDataSource.WIFIWAVE2
-            else:
-              router_entry.wifi_package = WirelessMetricsDataSource.WIRELESS
-        return router_entry.wifi_package
+        if router_entry.wireless_type in (RouterEntryWirelessType.DUAL, RouterEntryWirelessType.WIRELESS):
+            return WirelessMetricsDataSource.WIRELESS
+        elif router_entry.wireless_type == RouterEntryWirelessType.WIFIWAVE2:
+            return WirelessMetricsDataSource.WIFIWAVE2
+        else:
+            return WirelessMetricsDataSource.WIFI
 
-    @staticmethod
-    def is_legacy(router_entry):
-        return WirelessMetricsDataSource.wireless_package(router_entry) == WirelessMetricsDataSource.WIRELESS
+
