@@ -97,11 +97,11 @@ class BaseOutputProcessor:
 
     @staticmethod
     def parse_rates(rate):
-        wifi_rates_rgx = config_handler.re_compiled.get('wifi_rates_rgx')
-        if not wifi_rates_rgx:
-            wifi_rates_rgx = re.compile(r'(\d*(?:\.\d*)?)([GgMmKk]bps?)')
-            config_handler.re_compiled['wifi_rates_rgx'] = wifi_rates_rgx
-        rc = wifi_rates_rgx.search(rate)
+        rates_rgx = config_handler.re_compiled.get('rates_rgx')
+        if not rates_rgx:
+            rates_rgx = re.compile(r'(\d*(?:\.\d*)?)([GgMmKk]bps?)')
+            config_handler.re_compiled['rates_rgx'] = rates_rgx
+        rc = rates_rgx.search(rate)
         return f'{int(float(rc[1]))} {rc[2]}' if rc and len(rc.groups()) == 2 else rate
 
     @staticmethod

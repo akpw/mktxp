@@ -41,19 +41,19 @@ class KidDeviceCollector(BaseCollector):
                         record[label] = KidDeviceCollector._translated_values(label, value)
 
             yield BaseCollector.info_collector('kid_control_device', 'Kid-control device Info', records, info_labels)
-            yield BaseCollector.gauge_collector('kid_control_device_bytes_down', 'Kid-control device bytes down', records, 'bytes_down', ['name', 'mac_address'])
-            yield BaseCollector.gauge_collector('kid_control_device_bytes_up', 'Kid-control device bytes up', records, 'bytes_up', ['name', 'mac_address'])
-            yield BaseCollector.gauge_collector('kid_control_device_rate_down', 'Kid-control device rate down', records, 'rate_down', ['name', 'mac_address'])
-            yield BaseCollector.gauge_collector('kid_control_device_rate_up', 'Kid-control device rate up', records, 'rate_up', ['name', 'mac_address'])
-            yield BaseCollector.gauge_collector('kid_control_device_idle_time', 'Kid-control device idle time', records, 'idle_time', ['name', 'mac_address'])
+            yield BaseCollector.gauge_collector('kid_control_device_bytes_down', 'Number of received bytes', records, 'bytes_down', ['name', 'mac_address', 'user'])
+            yield BaseCollector.gauge_collector('kid_control_device_bytes_up', 'Number of transmitted bytes', records, 'bytes_up', ['name', 'mac_address', 'user'])
+            yield BaseCollector.gauge_collector('kid_control_device_rate_down', 'Device rate down', records, 'rate_down', ['name', 'mac_address', 'user'])
+            yield BaseCollector.gauge_collector('kid_control_device_rate_up', 'Device rate up', records, 'rate_up', ['name', 'mac_address', 'user'])
+            yield BaseCollector.gauge_collector('kid_control_device_idle_time', 'Device idle time', records, 'idle_time', ['name', 'mac_address', 'user'])
 
     # Helpers
     @staticmethod
     def _translated_values(monitor_label, value):
         try:
             return {
-                'rate_up': lambda value: KidDeviceCollector._rates(value),
-                'rate_down': lambda value: KidDeviceCollector._rates(value),
+                'rate_up': lambda value: BaseOutputProcessor.parse_rates(value),
+                'rate_down': lambda value: BaseOutputProcessor.parse_rates(value),
                 'idle_time': lambda value: BaseOutputProcessor.parse_timedelta_seconds(value),
                 'blocked': lambda value: '1' if value == 'true' else '0',
                 'limited': lambda value: '1' if value == 'true' else '0',
@@ -63,21 +63,3 @@ class KidDeviceCollector(BaseCollector):
         except KeyError:
             # default to just returning the value
             return value
-
-    @staticmethod
-    def _rates(rate_option):
-        # according mikrotik docs, an interface rate should be one of these
-        rate_value = {
-            '10Mbps': '10',
-            '100Mbps': '100',
-            '1Gbps': '1000',
-            '2.5Gbps': '2500',
-            '5Gbps': '5000',
-            '10Gbps': '10000',
-            '40Gbps': '40000'
-        }.get(rate_option, None)
-        if rate_value:
-            return rate_value
-
-        # ...or just calculate in case it's not
-        return BaseOutputProcessor.parse_interface_rate(rate_option)
