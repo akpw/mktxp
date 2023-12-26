@@ -21,7 +21,7 @@ class HealthCollector(BaseCollector):
     '''    
     @staticmethod
     def collect(router_entry):
-        health_labels = ['voltage', 'temperature', 'cpu_temperature', 'switch_temperature', 'fan1_speed', 'fan2_speed', 'power_consumption']
+        health_labels = ['voltage', 'temperature', 'phy_temperature', 'cpu_temperature', 'switch_temperature', 'fan1_speed', 'fan2_speed', 'power_consumption']
         health_records = HealthMetricsDataSource.metric_records(router_entry, metric_labels = health_labels)   
         if health_records:
             for record in health_records:
@@ -32,6 +32,9 @@ class HealthCollector(BaseCollector):
 
                 if 'temperature' in record:
                     temperature_metrics = BaseCollector.gauge_collector('system_routerboard_temperature', 'Routerboard current temperature', [record, ], 'temperature')
+                    yield temperature_metrics
+                elif 'phy_temperature' in record:
+                    temperature_metrics = BaseCollector.gauge_collector('system_routerboard_temperature', 'Routerboard current temperature', [record, ], 'phy_temperature')
                     yield temperature_metrics
 
                 if 'cpu_temperature' in record:
