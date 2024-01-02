@@ -42,7 +42,7 @@ There are multiple ways to install this project, from a standalone app to a [ful
 
 - latest from source repository: `❯ pip install git+https://github.com/akpw/mktxp`
 
-
+- with the [sample Kubernetes deployment](deploy/kubernetes/deployment.yaml)
 
 
 ## Getting started

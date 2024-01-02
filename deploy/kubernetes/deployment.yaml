@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mktxp-exporter
+spec:
+  selector:
+    matchLabels:
+      app: mktxp-exporter
+  template:
+    metadata:
+      labels:
+        app: mktxp-exporter
+    spec:
+      containers:
+      - name: mktxp-exporter
+        image: ghcr.io/akpw/mktxp:latest
+        args:
+          - --cfg-dir
+          - /mktxp_config
+          - export
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        volumeMounts:
+          - name: mktxp-credentials
+            mountPath: /mktxp_config
+        ports:
+        - containerPort: 49090
+      volumes:
+        - name: mktxp-credentials
+          secret:
+            secretName: mktxp-credentials
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mktxp-exporter
+  annotations:
+    prometheus.io/port: "49090"
+    prometheus.io/scrape: "true"
+spec:
+  selector:
+    app: mktxp-exporter
+  ports:
+  - port: 49090
+    targetPort: 49090
