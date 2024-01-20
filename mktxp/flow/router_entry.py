@@ -17,6 +17,7 @@ from collections import namedtuple
 from mktxp.cli.config.config import config_handler, MKTXPConfigKeys, CollectorKeys
 from mktxp.flow.router_connection import RouterAPIConnection
 from mktxp.datasource.package_ds import PackageMetricsDataSource
+from mktxp.datasource.system_resource_ds import SystemResourceMetricsDataSource
 
 
 class RouterEntryWirelessType(IntEnum):
@@ -75,7 +76,9 @@ class RouterEntry:
     def wireless_type(self):
         router_entry = self
         if self._wireless_type == RouterEntryWirelessType.NONE:
-            if PackageMetricsDataSource.is_package_installed(router_entry, package_name = RouterEntryWirelessPackage.WIFI_PACKAGE):
+            if SystemResourceMetricsDataSource.is_os_with_wifi_builtin(router_entry):
+              self._wireless_type = RouterEntryWirelessType.WIFI
+            elif PackageMetricsDataSource.is_package_installed(router_entry, package_name = RouterEntryWirelessPackage.WIFI_PACKAGE):
               self._wireless_type = RouterEntryWirelessType.WIFI
             elif PackageMetricsDataSource.is_package_installed(router_entry, package_name = RouterEntryWirelessPackage.WIFI_AC_PACKAGE):
               self._wireless_type = RouterEntryWirelessType.WIFI

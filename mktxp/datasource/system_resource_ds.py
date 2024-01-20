@@ -13,6 +13,7 @@
 
 
 from mktxp.datasource.base_ds import BaseDSProcessor
+from mktxp.utils.utils import is_wifi_version
 
 
 class SystemResourceMetricsDataSource:
@@ -28,3 +29,20 @@ class SystemResourceMetricsDataSource:
         except Exception as exc:
             print(f'Error getting system resource info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None
+
+    @staticmethod
+    def is_os_with_wifi_builtin(router_entry):
+        try:
+            system_resource_records = router_entry.api_connection.router_api().get_resource('/system/resource').get()
+            version = ''
+            for record in system_resource_records:
+                if record['version']:
+                    version = record['version']
+                    break
+            if not version:
+                return False
+
+            return is_wifi_version(version)
+        except Exception as exc:
+            print(f'Error getting system resource info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
+        return False
