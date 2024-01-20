@@ -34,7 +34,7 @@ class SystemResourceMetricsDataSource:
     def is_os_with_wifi_builtin(router_entry):
         try:
             system_resource_records = router_entry.api_connection.router_api().get_resource('/system/resource').get()
-            version = ''
+            version = None
             for record in system_resource_records:
                 if record['version']:
                     version = record['version']
