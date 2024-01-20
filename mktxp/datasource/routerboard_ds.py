@@ -41,7 +41,7 @@ class RouterboardMetricsDataSource:
             return None
 
     @staticmethod
-    def firmware_version(router_entry):
+    def firmware_upgrade_version(router_entry):
         try:
             version_st = router_entry.api_connection.router_api().get_resource('/system/routerboard').call('print', {'proplist':'upgrade-firmware'})[0]
             if version_st.get('upgrade-firmware'):
