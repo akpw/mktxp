@@ -13,7 +13,7 @@
 
 
 from mktxp.datasource.base_ds import BaseDSProcessor
-from mktxp.utils.utils import is_wifi_version
+from mktxp.utils.utils import builtin_wifi_capsman_version
 
 
 class SystemResourceMetricsDataSource:
@@ -31,18 +31,20 @@ class SystemResourceMetricsDataSource:
             return None
 
     @staticmethod
-    def is_os_with_wifi_builtin(router_entry):
+    def os_version(router_entry):
         try:
-            system_resource_records = router_entry.api_connection.router_api().get_resource('/system/resource').get()
-            version = None
-            for record in system_resource_records:
-                if record['version']:
-                    version = record['version']
-                    break
-            if not version:
-                return False
-
-            return is_wifi_version(version)
+            system_version_records = router_entry.api_connection.router_api().get_resource('/system/resource').call('print', {'proplist':'version'})
+            for record in system_version_records:
+                ver = record.get('version', None)
+                if ver:
+                    return ver
+                    
+            return None
         except Exception as exc:
             print(f'Error getting system resource info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
         return False
+    
+    @staticmethod
+    def has_builtin_wifi_capsman(router_entry):
+        ver = SystemResourceMetricsDataSource.os_version(router_entry)
+        return builtin_wifi_capsman_version(ver)

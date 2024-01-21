@@ -324,8 +324,8 @@ def parse_ros_version(string):
     version, channel = re.findall(r'([\d\.]+).*?([\w]+)', string)[0]
     return packaging.version.parse(version), channel
 
-def is_wifi_version(string):
-    """Try to check if the version is Wifi version of RouterOS (> 7.13).
+def builtin_wifi_capsman_version(string):
+    """Try to check if the version is Wifi version of RouterOS (>= 7.13).
     If anything goes wrong, return None.
     Returns a boolean"""
     try:
@@ -334,6 +334,7 @@ def is_wifi_version(string):
             return True
     except Exception as err:
         print(f'could not get current RouterOS version, because: {str(err)}')
+        return None
 
     return False
 

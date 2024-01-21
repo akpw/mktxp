@@ -84,7 +84,7 @@ class RouterEntry:
               self._wireless_type = RouterEntryWirelessType.WIFIWAVE2
             elif PackageMetricsDataSource.is_package_installed(router_entry, package_name = RouterEntryWirelessPackage.WIRELESS_PACKAGE):
               self._wireless_type = RouterEntryWirelessType.DUAL
-            elif SystemResourceMetricsDataSource.is_os_with_wifi_builtin(router_entry):
+            elif SystemResourceMetricsDataSource.has_builtin_wifi_capsman(router_entry):
               self._wireless_type = RouterEntryWirelessType.WIFI
             else:
               self._wireless_type = RouterEntryWirelessType.WIRELESS
