@@ -46,6 +46,7 @@ class CollectorKeys:
     QUEUE_SIMPLE_COLLECTOR = 'QueueSimpleCollector'
     KID_CONTROL_DEVICE_COLLECTOR = 'KidControlCollector'
     USER_COLLECTOR = 'UserCollector'
+    WIREGUARD_COLLECTOR = 'WireguardCollector'
     MKTXP_COLLECTOR = 'MKTXPCollector'
 
 
@@ -90,6 +91,9 @@ class MKTXPConfigKeys:
     FE_REMOTE_DHCP_ENTRY = 'remote_dhcp_entry'
 
     FE_CHECK_FOR_UPDATES = 'check_for_updates'
+
+    FE_WIREGUARD_KEY = 'wireguard'
+    FE_WIREGUARD_PEERS_KEY = 'wireguard_peers'
 
     FE_KID_CONTROL_DEVICE = 'kid_control_devices'
 
@@ -139,7 +143,8 @@ class MKTXPConfigKeys:
     BOOLEAN_KEYS_YES = {FE_DHCP_KEY, FE_PACKAGE_KEY, FE_DHCP_LEASE_KEY, FE_DHCP_POOL_KEY, FE_IP_CONNECTIONS_KEY, FE_INTERFACE_KEY, FE_FIREWALL_KEY,
                         FE_MONITOR_KEY, FE_ROUTE_KEY, MKTXP_USE_COMMENTS_OVER_NAMES,
                         FE_WIRELESS_KEY, FE_WIRELESS_CLIENTS_KEY, FE_CAPSMAN_KEY, FE_CAPSMAN_CLIENTS_KEY, FE_POE_KEY,
-                        FE_NETWATCH_KEY, FE_PUBLIC_IP_KEY, FE_USER_KEY, FE_QUEUE_KEY}
+                        FE_NETWATCH_KEY, FE_PUBLIC_IP_KEY, FE_USER_KEY, FE_QUEUE_KEY, FE_WIREGUARD_PEERS_KEY,
+                        FE_WIREGUARD_KEY}
 
     SYSTEM_BOOLEAN_KEYS_YES = set()
     SYSTEM_BOOLEAN_KEYS_NO = {MKTXP_BANDWIDTH_KEY, MKTXP_VERBOSE_MODE, MKTXP_FETCH_IN_PARALLEL}
@@ -163,6 +168,7 @@ class ConfigEntry:
                                                        MKTXPConfigKeys.FE_IP_CONNECTIONS_KEY, MKTXPConfigKeys.FE_CONNECTION_STATS_KEY, MKTXPConfigKeys.FE_CAPSMAN_KEY, MKTXPConfigKeys.FE_CAPSMAN_CLIENTS_KEY, MKTXPConfigKeys.FE_POE_KEY, MKTXPConfigKeys.FE_NETWATCH_KEY,
                                                        MKTXPConfigKeys.MKTXP_USE_COMMENTS_OVER_NAMES, MKTXPConfigKeys.FE_PUBLIC_IP_KEY, MKTXPConfigKeys.FE_IPV6_FIREWALL_KEY, MKTXPConfigKeys.FE_IPV6_NEIGHBOR_KEY,
                                                        MKTXPConfigKeys.FE_USER_KEY, MKTXPConfigKeys.FE_QUEUE_KEY, MKTXPConfigKeys.FE_REMOTE_DHCP_ENTRY, MKTXPConfigKeys.FE_CHECK_FOR_UPDATES, MKTXPConfigKeys.FE_KID_CONTROL_DEVICE,
+                                                       MKTXPConfigKeys.FE_WIREGUARD_PEERS_KEY, MKTXPConfigKeys.FE_WIREGUARD_KEY
                                                        ])
     MKTXPSystemEntry = namedtuple('MKTXPSystemEntry', [MKTXPConfigKeys.PORT_KEY, MKTXPConfigKeys.MKTXP_SOCKET_TIMEOUT,
                                                        MKTXPConfigKeys.MKTXP_INITIAL_DELAY, MKTXPConfigKeys.MKTXP_MAX_DELAY,
