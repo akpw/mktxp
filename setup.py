@@ -48,7 +48,8 @@ setup(
                         'configobj>=5.0.6',
                         'humanize>=3.2.0',
                         'texttable>=1.6.3',
-                        'speedtest-cli>=2.1.2'
+                        'speedtest-cli>=2.1.2',
+                        'pytimeparse>=1.1.8',
                         ],
 
     test_suite = 'tests.mktxp_test_suite',
