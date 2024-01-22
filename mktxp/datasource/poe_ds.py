@@ -11,21 +11,22 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
-
 from mktxp.datasource.base_ds import BaseDSProcessor
-
+from mktxp.datasource.interface_ds import InterfaceTrafficMetricsDataSource
 
 class POEMetricsDataSource:
     ''' POE Metrics data provider
     '''             
     @staticmethod
-    def metric_records(router_entry, *, include_comments = False, metric_labels = None):
+    def metric_records(router_entry, *, metric_labels = None):
         if metric_labels is None:
             metric_labels = []                
         try:
             poe_records = router_entry.api_connection.router_api().get_resource('/interface/ethernet/poe').get()
-            for int_num, poe_record in enumerate(poe_records):
-                poe_monitor_records = router_entry.api_connection.router_api().get_resource('/interface/ethernet/poe').call('monitor', {'once':'', 'numbers':f'{int_num}'})
+            
+            for poe_record in poe_records:
+                poe_monitor_records = router_entry.api_connection.router_api().get_resource('/interface/ethernet/poe').call('monitor', {'once':'', '.id':poe_record['id']})
+                
                 poe_monitor_records = BaseDSProcessor.trimmed_records(router_entry, router_records = poe_monitor_records)
 
                 if poe_monitor_records[0].get('poe_out_status'):
@@ -40,17 +41,7 @@ class POEMetricsDataSource:
                 if poe_monitor_records[0].get('poe_out_power'):
                     poe_record['poe_out_power'] = poe_monitor_records[0]['poe_out_power']
 
-            if include_comments:
-                interfaces = router_entry.api_connection.router_api().get_resource('/interface/ethernet').call('print', {'proplist':'name,comment'})
-                comment_fn = lambda interface: interface['comment'] if interface.get('comment') else ''
-                for poe_record in poe_records:
-                    comment = [comment_fn(interface) for interface in interfaces if interface['name'] == poe_record['name']][0]       
-                    if comment:
-                        # combines name with comment
-                        poe_record['name'] = comment if router_entry.config_entry.use_comments_over_names else \
-                                                                                                    f"{poe_record['name']} ({comment})"                                
             return BaseDSProcessor.trimmed_records(router_entry, router_records = poe_records, metric_labels = metric_labels)
         except Exception as exc:
             print(f'Error getting PoE info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None
-

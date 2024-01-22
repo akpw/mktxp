@@ -19,15 +19,15 @@ from mktxp.datasource.route_ds import RouteMetricsDataSource
 
 class RouteCollector(BaseCollector):
     ''' IP Route Metrics collector
-    '''        
+    '''
     @staticmethod
     def collect(router_entry):
         if not router_entry.config_entry.route:
             return
 
         route_labels = ['connect', 'dynamic', 'static', 'bgp', 'ospf']
-        route_records = RouteMetricsDataSource.metric_records(router_entry, metric_labels = route_labels)   
-        if route_records:       
+        route_records = RouteMetricsDataSource.metric_records(router_entry, metric_labels = route_labels)
+        if route_records:
             # compile total routes records
             total_routes = len(route_records)
             total_routes_records = [{ MKTXPConfigKeys.ROUTERBOARD_NAME: router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_NAME],
@@ -43,7 +43,7 @@ class RouteCollector(BaseCollector):
             for route_record in route_records:
                 for route_label in route_labels:
                     if route_record.get(route_label):
-                        routes_per_protocol[route_label] += 1 
+                        routes_per_protocol[route_label] += 1
 
             # compile route-per-protocol records
             route_per_protocol_records = [{ MKTXPConfigKeys.ROUTERBOARD_NAME: router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_NAME],
@@ -53,4 +53,3 @@ class RouteCollector(BaseCollector):
             # yield route-per-protocol metrics
             route_per_protocol_metrics = BaseCollector.gauge_collector('routes_protocol_count', 'Number of routes per protocol in RIB', route_per_protocol_records, 'count', ['protocol'])
             yield route_per_protocol_metrics
-

@@ -12,8 +12,7 @@
 ## GNU General Public License for more details.
 
 from mktxp.datasource.base_ds import BaseDSProcessor
-
-from pytimeparse import parse
+from mktxp.utils.utils import parse_mkt_uptime
 
 class WireguardMetricsDataSource:
     ''' Wireguard Metrics data provider
@@ -43,12 +42,12 @@ class WireguardPeerMetricsDataSource:
         try:
             wireguard_peer_records = router_entry.api_connection.router_api().get_resource(f'/interface/wireguard/peers').get(disabled='false')
 
-            # Parse last handshake to seconds (from format 1d1h1m23s)
-            for record in wireguard_peer_records:
-                if 'last-handshake' in record:
-                    record['last-handshake'] = parse(record['last-handshake'])
+            #translation rules
+            translation_table = {
+                'last_handshake': lambda c: parse_mkt_uptime(c) if c else 0
+            }
 
-            return BaseDSProcessor.trimmed_records(router_entry, router_records = wireguard_peer_records, metric_labels = metric_labels, add_router_id = add_router_id)
+            return BaseDSProcessor.trimmed_records(router_entry, router_records = wireguard_peer_records, metric_labels = metric_labels, add_router_id = add_router_id, translation_table=translation_table)
 
         except Exception as exc:
             print(f'Error getting wireguard peer table from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')

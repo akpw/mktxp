@@ -20,6 +20,7 @@ from humanize import naturaldelta
 from mktxp.cli.config.config import config_handler
 from mktxp.datasource.wireless_ds import WirelessMetricsDataSource
 from mktxp.datasource.dhcp_ds import DHCPMetricsDataSource
+from mktxp.utils.utils import parse_mkt_uptime
 from math import floor, log
 
 
@@ -55,7 +56,7 @@ class BaseOutputProcessor:
         if registration_record.get('rx_rate'):
             registration_record['rx_rate'] = BaseOutputProcessor.parse_bitrates(registration_record['rx_rate'])
         if registration_record.get('uptime'):
-            registration_record['uptime'] = naturaldelta(BaseOutputProcessor.parse_timedelta_seconds(registration_record['uptime']), months=True, minimum_unit='seconds')
+            registration_record['uptime'] = naturaldelta(parse_mkt_uptime(registration_record['uptime']), months=True, minimum_unit='seconds')
 
         if registration_record.get('signal_strength'):
             registration_record['signal_strength'] = BaseOutputProcessor.parse_signal_strength(registration_record['signal_strength'])
@@ -63,35 +64,21 @@ class BaseOutputProcessor:
             registration_record['rx_signal'] = BaseOutputProcessor.parse_signal_strength(registration_record['rx_signal'])
 
     @staticmethod
-    def dhcp_name(router_entry, dhcp_lease_record, drop_comment = False):
-        dhcp_name = dhcp_lease_record.get('host_name')
-        dhcp_comment = dhcp_lease_record.get('comment')
-        
-        if dhcp_name and dhcp_comment:
-            dhcp_name = f'{dhcp_name[0:20]} ({dhcp_comment[0:20]})' if not router_entry.config_entry.use_comments_over_names else dhcp_comment
-        elif dhcp_comment:
-            dhcp_name = dhcp_comment
-        else:
-            dhcp_name = dhcp_lease_record.get('mac_address') if not dhcp_name else dhcp_name        
-
-        if drop_comment:
-            del dhcp_lease_record['comment']
-
-        return dhcp_name
-
-    @staticmethod
     def resolve_dhcp(router_entry, registration_record, id_key = 'mac_address', resolve_address = True):
         if not router_entry.dhcp_records:
             DHCPMetricsDataSource.metric_records(router_entry)
         dhcp_name = registration_record.get(id_key)
         dhcp_address = 'No DHCP Record'              
+        dhcp_comment = ''
 
         dhcp_lease_record = router_entry.dhcp_record(dhcp_name)
         if dhcp_lease_record:
-            dhcp_name = BaseOutputProcessor.dhcp_name(router_entry, dhcp_lease_record)
+            dhcp_comment = dhcp_lease_record.get('comment', '')
+            dhcp_name = dhcp_lease_record['host_name']
             dhcp_address = dhcp_lease_record.get('address', '')
 
         registration_record['dhcp_name'] = dhcp_name
+        registration_record['dhcp_comment'] = dhcp_comment
         if resolve_address:
             registration_record['dhcp_address'] = dhcp_address
 
@@ -114,19 +101,6 @@ class BaseOutputProcessor:
         return f"{int(rate / 1000 ** power)} {['bps', 'Kbps', 'Mbps', 'Gbps'][int(power)]}"
 
     @staticmethod
-    def parse_timedelta(time):
-        duration_interval_rgx = config_handler.re_compiled.get('duration_interval_rgx')
-        if not duration_interval_rgx:
-            duration_interval_rgx = re.compile(r'((?P<weeks>\d+)w)?((?P<days>\d+)d)?((?P<hours>\d+)h)?((?P<minutes>\d+)m)?((?P<seconds>\d+)s)?')
-            config_handler.re_compiled['duration_interval_rgx'] = duration_interval_rgx                        
-        time_dict = duration_interval_rgx.match(time).groupdict()
-        return timedelta(**{key: int(value) for key, value in time_dict.items() if value})
-
-    @staticmethod
-    def parse_timedelta_seconds(time):
-        return BaseOutputProcessor.parse_timedelta(time).total_seconds()
-
-    @staticmethod
     def parse_signal_strength(signal_strength):
         wifi_signal_strength_rgx = config_handler.re_compiled.get('wifi_signal_strength_rgx')
         if not wifi_signal_strength_rgx:
@@ -137,6 +111,8 @@ class BaseOutputProcessor:
 
     @staticmethod
     def parse_interface_rate(interface_rate):
+        if interface_rate is None:
+            return None
         interface_rate_rgx = config_handler.re_compiled.get('interface_rate_rgx')
         if not interface_rate_rgx:
             interface_rate_rgx = re.compile(r'[^.\-\d]')

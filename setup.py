@@ -43,13 +43,12 @@ setup(
 
     keywords = 'Mikrotik RouterOS Prometheus Exporter',
 
-    install_requires = ['prometheus-client>=0.9.0', 
-                        'RouterOS-api>=0.17.0', 
+    install_requires = ['prometheus-client>=0.9.0',
+                        'RouterOS-api>=0.17.0',
                         'configobj>=5.0.6',
                         'humanize>=3.2.0',
                         'texttable>=1.6.3',
                         'speedtest-cli>=2.1.2',
-                        'pytimeparse>=1.1.8',
                         ],
 
     test_suite = 'tests.mktxp_test_suite',

@@ -67,7 +67,7 @@ class CapsmanRegistrationsMetricsDataSource:
             for registration_table_path in CapsmanInfo.registration_table_paths(router_entry):
                 registration_table_records.extend(router_entry.api_connection.router_api().get_resource(f'{registration_table_path}').get())
             
-            # With wifiwave2, Mikrotik renamed the field 'rx-signal' to 'signal' 
+            # With wifiwave2, Mikrotik renamed the field 'rx-signal' to 'signal'
             # For backward compatibility, including both variants
             for record in registration_table_records:
                 if 'signal' in record:

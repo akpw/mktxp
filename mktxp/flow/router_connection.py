@@ -26,7 +26,7 @@ from mktxp.cli.config.config import config_handler
 
 MIKROTIK_ENCODING = 'latin-1'
 import routeros_api.api_structure
-routeros_api.api_structure.StringField.get_python_value = lambda _, bytes:  bytes.decode(MIKROTIK_ENCODING) 
+routeros_api.api_structure.StringField.get_python_value = lambda _, bytes:  bytes.decode(MIKROTIK_ENCODING)
 routeros_api.api_structure.default_structure = collections.defaultdict(routeros_api.api_structure.StringField)
 
 from routeros_api import RouterOsApiPool
@@ -92,11 +92,11 @@ class RouterAPIConnection:
     def _in_connect_timeout(self, connect_timestamp):
         connect_delay = self._connect_delay()
         if (connect_timestamp - self.last_failure_timestamp) < connect_delay:
-            if config_handler.system_entry().verbose_mode: 
+            if config_handler.system_entry().verbose_mode:
                 print(f'{self.router_name}@{self.config_entry.hostname}: in connect timeout, {int(connect_delay - (connect_timestamp - self.last_failure_timestamp))}secs remaining')
                 print(f'Successive failure count: {self.successive_failure_count}')
             return True
-        if config_handler.system_entry().verbose_mode: 
+        if config_handler.system_entry().verbose_mode:
             print(f'{self.router_name}@{self.config_entry.hostname}: OK to connect')
             if self.last_failure_timestamp > 0:
                 print(f'Seconds since last failure: {connect_timestamp - self.last_failure_timestamp}')
@@ -117,7 +117,7 @@ class RouterAPIConnection:
         else:
             self.api = None
             self.successive_failure_count += 1
-            self.last_failure_timestamp = connect_time.timestamp() 
+            self.last_failure_timestamp = connect_time.timestamp()
             print(f'{connect_time.strftime("%Y-%m-%d %H:%M:%S")} Connection to router {self.router_name}@{self.config_entry.hostname} has failed: {exc}')
 
 

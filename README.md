@@ -7,11 +7,11 @@
 
 ## Description
 MKTXP is a Prometheus Exporter for Mikrotik RouterOS devices.\
-It gathers and exports a rich set of metrics across multiple routers, all easily configurable via built-in CLI interface. 
+It gathers and exports a rich set of metrics across multiple routers, all easily configurable via built-in CLI interface.
 
 While simple to use, MKTXP supports [advanced features](https://github.com/akpw/mktxp#advanced-features) such as automatic IP address resolution with both local & remote DHCP servers, concurrent exports across multiple router devices, configurable data processing & transformations, etc.
 
-Apart from exporting to Prometheus, MKTXP can print selected metrics directly on the command line (see examples below). 
+Apart from exporting to Prometheus, MKTXP can print selected metrics directly on the command line (see examples below).
 
 For effortless visualization of the RouterOS metrics exported to Prometheus, MKTXP comes with a dedicated [Grafana dashboard](https://grafana.com/grafana/dashboards/13679):
 
@@ -26,7 +26,7 @@ For effortless visualization of the RouterOS metrics exported to Prometheus, MKT
 
 - Mikrotik RouterOS device(s)
 
-- Optional: 
+- Optional:
    * [Prometheus](https://prometheus.io/docs/prometheus/latest/installation/)
    * [Grafana](https://grafana.com/docs/grafana/latest/installation/)
    * [Docker](https://docs.docker.com/) / [Docker Compose](https://docs.docker.com/compose/)
@@ -46,7 +46,7 @@ There are multiple ways to install this project, from a standalone app to a [ful
 
 
 ## Getting started
-To get started with MKTXP, you need to edit its main configuration file. This essentially involves filling in your Mikrotik devices IP addresses & authentication info, optionally modifying various settings to specific needs. 
+To get started with MKTXP, you need to edit its main configuration file. This essentially involves filling in your Mikrotik devices IP addresses & authentication info, optionally modifying various settings to specific needs.
 
 The default configuration file comes with a sample configuration, making it easy to copy / edit parameters for your RouterOS devices as needed:
 ```
@@ -68,7 +68,7 @@ The default configuration file comes with a sample configuration, making it easy
     dhcp_lease = True               # DHCP lease metrics
 
     connections = True              # IP connections metrics
-    connection_stats = False        # Open IP connections metrics 
+    connection_stats = False        # Open IP connections metrics
 
     pool = True                     # Pool metrics
     interface = True                # Interfaces traffic metrics
@@ -87,7 +87,7 @@ The default configuration file comes with a sample configuration, making it easy
     capsman = True                  # CAPsMAN general metrics
     capsman_clients = True          # CAPsMAN clients metrics    
 
-    kid_control_devices = False     # Kid Control metrics 
+    kid_control_devices = False     # Kid Control metrics
 
     user = True                     # Active Users metrics
     queue = True                    # Queues metrics
@@ -178,7 +178,7 @@ But let's get back on track and proceed with the business of exporting RouterOS 
 
 ## Exporting to Prometheus
 For getting your routers' metrics into an existing Prometheus installation, we basically just need to connect MKTXP to it. \
-Let's do just that via editing the Prometheus config file: 
+Let's do just that via editing the Prometheus config file:
 ```
 ❯ nano /etc/prometheus/prometheus.yml
 ```
@@ -203,7 +203,7 @@ Connecting to router MKT-LR@10.**.*.**
 ````
 
 ## MKTXP system configuration
-In case you need more control on how MKTXP is run, it can be done via editing the `_mktxp.conf` file. This allows things like changing the port <sup>💡</sup> and other impl-related parameters, enable parallel router fetching and configurable scrapes timeouts, etc. 
+In case you need more control on how MKTXP is run, it can be done via editing the `_mktxp.conf` file. This allows things like changing the port <sup>💡</sup> and other impl-related parameters, enable parallel router fetching and configurable scrapes timeouts, etc.
 As before, for local installation the editing can be done directly from mktxp:
 ```
 mktxp edit -i
@@ -277,13 +277,13 @@ When gathering various IP address-related metrics, MKTXP automatically resolves 
 ```
 remote_dhcp_entry = None        # An MKTXP entry for remote DHCP info resolution in capsman/wireless
 ```
-`MKTXP entry` in this context can be any other mktxp.conf entry, and for the sole purpose of providing DHCP info it does not even need to be enabled. 
+`MKTXP entry` in this context can be any other mktxp.conf entry, and for the sole purpose of providing DHCP info it does not even need to be enabled.
 
 ### Connections stats
 With many connected devices everywhere, one can often only guess where do they go to and what they actually do with all the information from your network environment. MKTXP let's you easily track those with a single option, with results available both from [mktxp dashboard](https://grafana.com/grafana/dashboards/13679-mikrotik-mktxp-exporter/) and the command line:
 
 ```
-connection_stats = False        # Open IP connections metrics 
+connection_stats = False        # Open IP connections metrics
 ```
 Setting this to `True` obviously enables the feature and allows to see something like that:
 
@@ -317,7 +317,7 @@ To keeps things within expected boundaries, the last two parameters allows for c
 ### mktxp port
 By default, mktxp runs it's HTTP metrics endpoint on port 49090. You can change it via the following [system option](https://github.com/akpw/mktxp/blob/main/README.md#mktxp-system-configuration):
 ```
-port = 49090 
+port = 49090
 ```
 
 ## Setting up MKTXP to run as a Linux Service
@@ -389,7 +389,7 @@ Now copy and paste the following:
 . /etc/rc.subr
 
 name=mktxp
-rcvar=mktxp_enable 
+rcvar=mktxp_enable
 
 : ${mktxp_enable:="NO"}
 : ${mktxp_user:="root"}
@@ -401,7 +401,7 @@ mktxp_command="/usr/local/bin/mktxp export"
 procname="daemon"
 command_args=" -c -f -P ${pidfile} ${mktxp_command}"
 
-load_rc_config $name 
+load_rc_config $name
 run_rc_command "$1"
 ```
 

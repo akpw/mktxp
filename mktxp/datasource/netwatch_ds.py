@@ -11,9 +11,10 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
-
 from mktxp.datasource.base_ds import BaseDSProcessor
+from mktxp.utils.utils import parse_mkt_timediff
 
+from datetime import datetime, timezone
 
 class NetwatchMetricsDataSource:
     ''' Netwatch Metrics data provider
@@ -28,16 +29,24 @@ class NetwatchMetricsDataSource:
 
                 for netwatch_record in netwatch_records:
                     comment = netwatch_record.get('comment')
-                    host = netwatch_record.get('host')        
+                    host = netwatch_record.get('host')
                     if comment:
                         netwatch_record['name'] = f'{host} ({comment[0:20]})' if not router_entry.config_entry.use_comments_over_names else comment
                     else:
                         netwatch_record['name'] = host
                                             
             # translation rules
-            translation_table = {}
-            if 'status' in metric_labels:
-                translation_table['status'] = lambda value: '1' if value == 'up' else '0'      
+            translation_table = {
+                'status': lambda value: 1 if value == 'up' else 0,
+                'since': lambda value: datetime.fromisoformat(value).replace(tzinfo=timezone.utc).timestamp() * 1000 if value else 0,
+                'rtt_avg': lambda value: parse_mkt_timediff(value) if value else None,
+                'rtt_jitter': lambda value: parse_mkt_timediff(value) if value else None,
+                'rtt_max': lambda value: parse_mkt_timediff(value) if value else None,
+                'rtt_min': lambda value: parse_mkt_timediff(value) if value else None,
+                'rtt_stdev': lambda value: parse_mkt_timediff(value) if value else None,
+                'http_resp_time': lambda value: parse_mkt_timediff(value) if value else None,
+                'tcp_connect_time': lambda value: parse_mkt_timediff(value) if value else None,
+            }
 
             return BaseDSProcessor.trimmed_records(router_entry, router_records = netwatch_records, translation_table = translation_table, metric_labels = metric_labels)
         except Exception as exc:

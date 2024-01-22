@@ -14,6 +14,7 @@
 
 from mktxp.collector.base_collector import BaseCollector
 from mktxp.datasource.wireguard_ds import WireguardMetricsDataSource, WireguardPeerMetricsDataSource
+from mktxp.flow.processor.output import BaseOutputProcessor
 
 
 class WireguardCollector(BaseCollector):
@@ -35,10 +36,6 @@ class WireguardCollector(BaseCollector):
                 wg_peer_values = ['tx', 'rx', 'last_handshake']
                 wg_peer_records = WireguardPeerMetricsDataSource.metric_records(router_entry, metric_labels = wg_peer_labels + wg_peer_values)
 
-                #wg_peer_metrics = BaseCollector.info_collector('wireguard_peers', 'Wireguard peers', wg_peer_records, wg_peer_labels)
-                #yield wg_peer_metrics
-
-                #wg_peer_base_labels = ['id', 'interface', 'public_key', 'comment']
                 last_handshake_metrics = BaseCollector.gauge_collector('wireguard_peer_last_handshake', 'Wireguard Peer Last Handshake', wg_peer_records, 'last_handshake', wg_peer_labels)
                 yield last_handshake_metrics
 

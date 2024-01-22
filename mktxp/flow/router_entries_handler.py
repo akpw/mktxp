@@ -17,7 +17,7 @@ from mktxp.flow.router_entry import RouterEntry
 
 
 class RouterEntriesHandler:
-    ''' Handles RouterOS entries defined in MKTXP config 
+    ''' Handles RouterOS entries defined in MKTXP config
     '''         
     def __init__(self):
         self._router_entries = {}            

@@ -76,8 +76,13 @@ def get_last_digit(str_to_search):
 
 def parse_mkt_uptime(time):
     time_dict = re.match(r'((?P<weeks>\d+)w)?((?P<days>\d+)d)?((?P<hours>\d+)h)?((?P<minutes>\d+)m)?((?P<seconds>\d+)s)?', time).groupdict()
-    delta = timedelta(**{key: int(value) for key, value in time_dict.items() if value}).total_seconds() 
+    delta = timedelta(**{key: int(value) for key, value in time_dict.items() if value}).total_seconds()
     return int(delta) if delta else 0
+
+def parse_mkt_timediff(time):
+    time_dict = re.match(r'((?P<seconds>\d+)s)?((?P<milliseconds>\d+)ms)?((?P<microseconds>\d+)us)?', time).groupdict()
+    delta = timedelta(**{key: int(value) for key, value in time_dict.items() if value}).total_seconds()
+    return delta if delta else 0
 
 class FSHelper:
     ''' File System ops helper

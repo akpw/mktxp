@@ -18,18 +18,18 @@ from mktxp.datasource.connection_ds import IPConnectionStatsDatasource
 
 class ConnectionsStatsOutput:
     ''' Connections Stats Output
-    '''    
+    '''
     @staticmethod
     def clients_summary(router_entry):
         connection_records = IPConnectionStatsDatasource.metric_records(router_entry, add_router_id = False)
         if not connection_records:
             print('No connection stats records')
-            return 
+            return
 
         conn_cnt = 0
         output_records = []
         for registration_record in sorted(connection_records, key = lambda rt_record: rt_record['connection_count'], reverse=True):
-            BaseOutputProcessor.resolve_dhcp(router_entry, registration_record, id_key = 'src_address', resolve_address = False)        
+            BaseOutputProcessor.resolve_dhcp(router_entry, registration_record, id_key = 'src_address', resolve_address = False)
             output_records.append(registration_record)
             conn_cnt += registration_record['connection_count']
 

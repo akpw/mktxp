@@ -40,15 +40,15 @@ class DHCPCollector(BaseCollector):
                                             'server': key, 'count': value} for key, value in dhcp_lease_servers.items()]
             
             # yield lease-per-server metrics
-            dhcp_lease_server_metrics = BaseCollector.gauge_collector('dhcp_lease_active_count', 
-                                                                        'Number of active leases per DHCP server', 
+            dhcp_lease_server_metrics = BaseCollector.gauge_collector('dhcp_lease_active_count',
+                                                                        'Number of active leases per DHCP server',
                                                                         dhcp_lease_servers_records, 'count', ['server'])
             yield dhcp_lease_server_metrics
 
             # active lease metrics
             dhcp_lease_labels.remove('expires_after')
             if router_entry.config_entry.dhcp_lease:
-                dhcp_lease_metrics_gauge = BaseCollector.gauge_collector('dhcp_lease_info', 'DHCP Active Leases', 
+                dhcp_lease_metrics_gauge = BaseCollector.gauge_collector('dhcp_lease_info', 'DHCP Active Leases',
                                                                         dhcp_lease_records, 'expires_after', dhcp_lease_labels)
                 yield dhcp_lease_metrics_gauge
 

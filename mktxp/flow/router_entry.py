@@ -112,7 +112,7 @@ class RouterEntry:
             if dhcp_record.get('address'):
                 dhcp_record['type'] = 'address'
                 self._dhcp_records[dhcp_record.get('address')] = DHCPCacheEntry('address', dhcp_record)
-
+    
     def dhcp_record(self, key):
         if self._dhcp_records and self._dhcp_records.get(key):
             return self._dhcp_records[key].record
@@ -132,5 +132,5 @@ class RouterEntry:
     def is_done(self):
         self._dhcp_records = {}
         self._wireless_type = RouterEntryWirelessType.NONE
-
+    
 DHCPCacheEntry = namedtuple('DHCPCacheEntry', ['type', 'record'])

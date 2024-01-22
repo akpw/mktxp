@@ -76,7 +76,7 @@ class MKTXPDispatcher:
                         print(f'    {field}: {getattr(entry, field)}')
                 print('\n')
 
-    def edit_entry(self, args):        
+    def edit_entry(self, args):
         editor = args['editor']
         if not editor:
             print(f'No editor to edit the following file with: {config_handler.usr_conf_data_path}')

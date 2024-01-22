@@ -13,19 +13,24 @@
 
 
 from mktxp.datasource.base_ds import BaseDSProcessor
-from mktxp.utils.utils import builtin_wifi_capsman_version
+from mktxp.utils.utils import parse_mkt_uptime, builtin_wifi_capsman_version
 
 
 class SystemResourceMetricsDataSource:
     ''' System Resource Metrics data provider
-    '''             
+    '''
     @staticmethod    
     def metric_records(router_entry, *, metric_labels = None):
         if metric_labels is None:
-            metric_labels = []                
+            metric_labels = []
         try:
             system_resource_records = router_entry.api_connection.router_api().get_resource('/system/resource').get()
-            return BaseDSProcessor.trimmed_records(router_entry, router_records = system_resource_records, metric_labels = metric_labels)
+
+            translation_table = {
+                'uptime': lambda c: parse_mkt_uptime(c) if c else 0
+            }
+
+            return BaseDSProcessor.trimmed_records(router_entry, router_records = system_resource_records, metric_labels = metric_labels, translation_table=translation_table)
         except Exception as exc:
             print(f'Error getting system resource info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None
