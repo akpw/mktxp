@@ -31,15 +31,16 @@ class BaseDSProcessor:
 
         labeled_records = []
         for router_record in router_records:
-            translated_record = {dash2_(key): value for (key, value) in router_record.items() if dash2_(key) in metric_labels}
+            renamed_record = {dash2_(key): value for (key, value) in router_record.items() if dash2_(key) in metric_labels}
 
             if add_router_id:
                 for key, value in router_entry.router_id.items():
-                    translated_record[key] = value
+                    renamed_record[key] = value
             
             # translate fields if needed
             for key, func in translation_table.items():
-                translated_record[key] = func(translated_record.get(key))
-            labeled_records.append(translated_record)
+                renamed_record[key] = func(renamed_record.get(key))
+
+            labeled_records.append(renamed_record)
             
         return labeled_records

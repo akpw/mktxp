@@ -75,7 +75,7 @@ class CollectorHandler:
         def timeout(timeout_event):
             timeout_event.set()
 
-        # overall scrape duration 
+        # overall scrape duration
         total_scrape_timeout_event = Event()
         total_scrape_timer = Timer(config_handler.system_entry().total_max_scrape_duration, timeout, args=(total_scrape_timeout_event,))
         total_scrape_timer.start()

@@ -40,21 +40,30 @@ class BaseCollector:
         collector = CounterMetricFamily(f'mktxp_{name}', decription, labels=metric_labels)
 
         for router_record in router_records:
-            label_values = [router_record.get(label) if router_record.get(label) else '' for label in metric_labels]        
-            collector.add_metric(label_values, router_record.get(metric_key, 0))
+            label_values = [router_record.get(label) if router_record.get(label) else '' for label in metric_labels]
+
+            val = router_record.get(metric_key)
+            if val is None:
+                continue
+
+            collector.add_metric(label_values, val)
         return collector
 
     @staticmethod
     def gauge_collector(name, decription, router_records, metric_key, metric_labels = None, add_id_labels = True):
         if metric_labels is None:
-            metric_labels = []        
+            metric_labels = []
         if add_id_labels:
             BaseCollector._add_id_labels(metric_labels)
         collector = GaugeMetricFamily(f'mktxp_{name}', decription, labels=metric_labels)
 
-        for router_record in router_records:       
-            label_values = [router_record.get(label) if router_record.get(label) else '' for label in metric_labels]        
-            collector.add_metric(label_values, router_record.get(metric_key, 0))
+        for router_record in router_records:
+            val = router_record.get(metric_key)
+            if val is None:
+                continue
+
+            label_values = [router_record.get(label) if router_record.get(label) else '' for label in metric_labels]
+            collector.add_metric(label_values, val)
         return collector
 
 

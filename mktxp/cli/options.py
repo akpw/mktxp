@@ -65,7 +65,7 @@ Selected metrics info can be printed on the command line. For more information, 
 
         global_options_parser = ArgumentParser(add_help=False)
         self.parse_global_options(global_options_parser)
-        namespace, _ = global_options_parser.parse_known_args()    
+        namespace, _ = global_options_parser.parse_known_args()
         if namespace.cfg_dir:
             config_handler(CustomConfig(namespace.cfg_dir))
         else:
@@ -84,7 +84,7 @@ Selected metrics info can be printed on the command line. For more information, 
     def parse_global_options(self, parser):
         ''' Parses global options
         '''
-        parser.add_argument('--cfg-dir', dest = 'cfg_dir', 
+        parser.add_argument('--cfg-dir', dest = 'cfg_dir',
                     type = lambda d: self._is_valid_dir_path(parser, d),
                     help = 'MKTXP config files directory (optional)')
 
@@ -116,10 +116,10 @@ Selected metrics info can be printed on the command line. For more information, 
         optional_args_group.add_argument('-ed', '--editor', dest='editor',
                 help = f"Command line editor to use ({self._system_editor()} by default)",
                 default = self._system_editor(),
-                type = str)        
+                type = str)
         optional_args_group.add_argument('-i', '--internal', dest='internal',
                 help = f"Edit MKTXP internal configuration (advanced)",
-                action = 'store_true')        
+                action = 'store_true')
 
         # Export command
         export_parser = subparsers.add_parser(MKTXPCommands.EXPORT,
@@ -149,7 +149,6 @@ Selected metrics info can be printed on the command line. For more information, 
         optional_args_group.add_argument('-cn', '--conn_stats', dest='conn_stats',
                 help = "IP connections stats",
                 action = 'store_true')
-
 
     # Options checking
     def _check_args(self, args, parser):

@@ -40,11 +40,11 @@ class FirewallMetricsDataSource:
         return firewall_records
 
     @staticmethod
-    def metric_records_ipv4(router_entry, *, metric_labels=None, raw=False, matching_only=True):
+    def metric_records_ipv4(router_entry, *, metric_labels=None, fw_type='filter', matching_only=True):
         if metric_labels is None:
             metric_labels = []
         try:
-            filter_path = '/ip/firewall/filter' if not raw else '/ip/firewall/raw'
+            filter_path = f'/ip/firewall/{fw_type}'
             firewall_records = FirewallMetricsDataSource._get_records(
                 router_entry,
                 filter_path,
@@ -60,10 +60,10 @@ class FirewallMetricsDataSource:
             return None
 
     @staticmethod
-    def metric_records_ipv6(router_entry, metric_labels=None, raw=False, matching_only=True):
+    def metric_records_ipv6(router_entry, metric_labels=None, fw_type='filter', matching_only=True):
         metric_labels = metric_labels or []
         try:
-            filter_path = '/ipv6/firewall/filter' if not raw else '/ipv6/firewall/raw'
+            filter_path = f'/ipv6/firewall/{fw_type}'
             firewall_records = FirewallMetricsDataSource._get_records(
                 router_entry,
                 filter_path,

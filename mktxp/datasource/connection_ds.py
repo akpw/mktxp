@@ -64,11 +64,11 @@ class IPConnectionStatsDatasource:
             records = []
             for key, entry in connections_per_src_address.items():
                 record = {'src_address': key, 'connection_count': entry.count, 'dst_addresses': ', '.join(entry.destinations)}
-                if add_router_id: 
+                if add_router_id:
                     for router_key, router_value in router_entry.router_id.items():
                         record[router_key] = router_value
                 records.append(record)
-            return records 
+            return records
         except Exception as exc:
             print(f'Error getting IP connection stats info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None

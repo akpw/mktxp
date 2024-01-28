@@ -23,7 +23,7 @@ class PublicIPAddressCollector(BaseCollector):
         if not router_entry.config_entry.public_ip:
             return
 
-        address_labels = ['public_address', 'dns_name']
+        address_labels = ['public_address', 'dns_name', 'public_address_ipv6']
         address_records = PublicIPAddressDatasource.metric_records(router_entry, metric_labels=address_labels)
 
         if address_records:

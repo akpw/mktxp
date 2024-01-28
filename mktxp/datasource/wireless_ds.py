@@ -30,7 +30,7 @@ class WirelessMetricsDataSource:
             wireless_package = WirelessMetricsDataSource.wireless_package(router_entry)
             registration_table_records = router_entry.api_connection.router_api().get_resource(f'/interface/{wireless_package}/registration-table').get()
 
-            # With wifiwave2, Mikrotik renamed the field 'signal-strength' to 'signal' 
+            # With wifiwave2, Mikrotik renamed the field 'signal-strength' to 'signal'
             # For backward compatibility, including both variants
             for record in registration_table_records:
                 if 'signal' in record:

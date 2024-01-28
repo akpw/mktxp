@@ -18,7 +18,7 @@ from mktxp.datasource.identity_ds import IdentityMetricsDataSource
 
 class IdentityCollector(BaseCollector):
     ''' System Identity Metrics collector
-    '''     
+    '''
     @staticmethod
     def collect(router_entry):
         identity_labels = ['name']

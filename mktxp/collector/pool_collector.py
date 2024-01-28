@@ -19,20 +19,20 @@ from mktxp.datasource.pool_ds import PoolMetricsDataSource, PoolUsedMetricsDataS
 
 class PoolCollector(BaseCollector):
     ''' IP Pool Metrics collector
-    '''    
+    '''
     @staticmethod
     def collect(router_entry):
         if not router_entry.config_entry.pool:
             return
 
         # initialize all pool counts, including those currently not used
-        pool_records = PoolMetricsDataSource.metric_records(router_entry, metric_labels = ['name'])   
+        pool_records = PoolMetricsDataSource.metric_records(router_entry, metric_labels = ['name'])
         if pool_records:
             pool_used_labels = ['pool']
             pool_used_counts = {pool_record['name']: 0 for pool_record in pool_records}
 
             # for pools in usage, calculate the current numbers
-            pool_used_records = PoolUsedMetricsDataSource.metric_records(router_entry, metric_labels = pool_used_labels)   
+            pool_used_records = PoolUsedMetricsDataSource.metric_records(router_entry, metric_labels = pool_used_labels)
             for pool_used_record in pool_used_records:
                 pool_used_counts[pool_used_record['pool']] = pool_used_counts.get(pool_used_record['pool'], 0) + 1
 
