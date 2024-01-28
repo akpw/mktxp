@@ -22,7 +22,7 @@ class IPv6NeighborCollector(BaseCollector):
     def collect(router_entry):
         if not router_entry.config_entry.ipv6_neighbor:
             return
-            
+
         metric_labels = ['address', 'interface', 'mac_address', 'status']
 
         records = IPv6NeighborDataSource.metric_records(

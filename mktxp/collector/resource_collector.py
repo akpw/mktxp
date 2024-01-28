@@ -27,7 +27,7 @@ class SystemResourceCollector(BaseCollector):
                            'cpu', 'cpu_count', 'cpu_frequency', 'cpu_load',
                            'free_hdd_space', 'total_hdd_space',
                            'architecture_name', 'board_name']
-                                   
+
         resource_records = SystemResourceMetricsDataSource.metric_records(router_entry, metric_labels = resource_labels)
         if resource_records:
             uptime_metrics = BaseCollector.gauge_collector('system_uptime', 'Time interval since boot-up', resource_records, 'uptime', ['version', 'board_name', 'cpu', 'architecture_name'])

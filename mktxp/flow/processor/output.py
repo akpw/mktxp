@@ -20,7 +20,7 @@ from humanize import naturaldelta
 from mktxp.cli.config.config import config_handler
 from mktxp.datasource.wireless_ds import WirelessMetricsDataSource
 from mktxp.datasource.dhcp_ds import DHCPMetricsDataSource
-from mktxp.utils.utils import parse_mkt_uptime
+from mktxp.utils.utils import parse_mkt_time_duration
 from math import floor, log
 
 
@@ -56,7 +56,7 @@ class BaseOutputProcessor:
         if registration_record.get('rx_rate'):
             registration_record['rx_rate'] = BaseOutputProcessor.parse_bitrates(registration_record['rx_rate'])
         if registration_record.get('uptime'):
-            registration_record['uptime'] = naturaldelta(parse_mkt_uptime(registration_record['uptime']), months=True, minimum_unit='seconds')
+            registration_record['uptime'] = naturaldelta(parse_mkt_time_duration(registration_record['uptime']), months=True, minimum_unit='seconds')
 
         if registration_record.get('signal_strength'):
             registration_record['signal_strength'] = BaseOutputProcessor.parse_signal_strength(registration_record['signal_strength'])
@@ -68,7 +68,7 @@ class BaseOutputProcessor:
         if not router_entry.dhcp_records:
             DHCPMetricsDataSource.metric_records(router_entry)
         dhcp_name = registration_record.get(id_key)
-        dhcp_address = 'No DHCP Record'              
+        dhcp_address = 'No DHCP Record'
         dhcp_comment = ''
 
         dhcp_lease_record = router_entry.dhcp_record(dhcp_name)
@@ -105,7 +105,7 @@ class BaseOutputProcessor:
         wifi_signal_strength_rgx = config_handler.re_compiled.get('wifi_signal_strength_rgx')
         if not wifi_signal_strength_rgx:
             # wifi_signal_strength_rgx = re.compile(r'(-?\d+(?:\.\d+)?)(dBm)?')
-            wifi_signal_strength_rgx = re.compile(r'(-?\d+(?:\.\d+)?)')           
+            wifi_signal_strength_rgx = re.compile(r'(-?\d+(?:\.\d+)?)')
             config_handler.re_compiled['wifi_signal_strength_rgx'] = wifi_signal_strength_rgx
         return wifi_signal_strength_rgx.search(signal_strength).group()
 
@@ -123,7 +123,7 @@ class BaseOutputProcessor:
     @staticmethod
     def output_table(outputEntry = None):
         table = Texttable(max_width = os.get_terminal_size().columns)
-        table.set_deco(Texttable.HEADER | Texttable.BORDER | Texttable.VLINES )        
+        table.set_deco(Texttable.HEADER | Texttable.BORDER | Texttable.VLINES )
         if outputEntry:
             table.header(outputEntry._fields)
             table.set_cols_align(['l']+ ['c']*(len(outputEntry._fields)-1))

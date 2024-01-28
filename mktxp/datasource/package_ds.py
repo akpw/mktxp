@@ -17,11 +17,11 @@ from mktxp.datasource.base_ds import BaseDSProcessor
 
 class PackageMetricsDataSource:
     ''' Wireless Metrics data provider
-    '''             
+    '''
     @staticmethod
     def metric_records(router_entry, *, metric_labels = None, add_router_id = True):
         if metric_labels is None:
-            metric_labels = []                
+            metric_labels = []
         try:
             package_records = router_entry.api_connection.router_api().get_resource('/system/package').get()
             return BaseDSProcessor.trimmed_records(router_entry, router_records = package_records, metric_labels = metric_labels, add_router_id = add_router_id)
@@ -39,5 +39,5 @@ class PackageMetricsDataSource:
                     if package_record['name'] == package_name:
                         return True
             except Exception as exc:
-                print(f'Error getting installed packages info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')        
+                print(f'Error getting installed packages info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
         return False

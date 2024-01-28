@@ -18,12 +18,12 @@ from mktxp.datasource.interface_ds import InterfaceTrafficMetricsDataSource
 
 class InterfaceCollector(BaseCollector):
     ''' Router Interface Metrics collector
-    '''        
+    '''
     @staticmethod
     def collect(router_entry):
         if not router_entry.config_entry.interface:
             return
-            
+
         interface_traffic_labels = ['name', 'comment']
         interface_traffic_values = ['rx_byte', 'tx_byte', 'rx_packet', 'tx_packet', 'rx_error', 'tx_error', 'rx_drop', 'tx_drop', 'link_downs']
 

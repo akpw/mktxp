@@ -41,7 +41,7 @@ class DHCPOutput:
         lease_records = len(dhcp_lease_records)
         output_entry = BaseOutputProcessor.OutputDHCPEntry
         output_table = BaseOutputProcessor.output_table(output_entry)
-                
+
         for key in dhcp_by_server.keys():
             for record in dhcp_by_server[key]:
                 output_table.add_row(output_entry(**record))

@@ -41,7 +41,7 @@ class CapsmanOutput:
         registration_records = len(registration_records)
         output_entry = BaseOutputProcessor.OutputCapsmanEntry
         output_table = BaseOutputProcessor.output_table(output_entry)
-                
+
         for key in dhcp_rt_by_interface.keys():
             for record in dhcp_rt_by_interface[key]:
                 output_table.add_row(output_entry(**record))

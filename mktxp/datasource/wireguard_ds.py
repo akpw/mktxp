@@ -12,7 +12,7 @@
 ## GNU General Public License for more details.
 
 from mktxp.datasource.base_ds import BaseDSProcessor
-from mktxp.utils.utils import parse_mkt_uptime
+from mktxp.utils.utils import parse_mkt_time_duration
 
 class WireguardMetricsDataSource:
     ''' Wireguard Metrics data provider
@@ -44,7 +44,7 @@ class WireguardPeerMetricsDataSource:
 
             #translation rules
             translation_table = {
-                'last_handshake': lambda c: parse_mkt_uptime(c) if c else 0
+                'last_handshake': lambda c: parse_mkt_time_duration(c) if c else 0
             }
 
             return BaseDSProcessor.trimmed_records(router_entry, router_records = wireguard_peer_records, metric_labels = metric_labels, add_router_id = add_router_id, translation_table=translation_table)

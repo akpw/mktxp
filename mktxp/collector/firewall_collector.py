@@ -19,7 +19,7 @@ from mktxp.datasource.firewall_ds import FirewallMetricsDataSource
 
 class FirewallCollector(BaseCollector):
     ''' Firewall rules traffic metrics collector
-    '''    
+    '''
     @staticmethod
     def collect(router_entry):
         # Initialize all pool counts, including those currently not used
@@ -28,13 +28,13 @@ class FirewallCollector(BaseCollector):
 
         if router_entry.config_entry.firewall:
             # ~*~*~*~*~*~ IPv4 ~*~*~*~*~*~
-            firewall_filter_records = FirewallMetricsDataSource.metric_records_ipv4(router_entry, metric_labels = firewall_labels)   
+            firewall_filter_records = FirewallMetricsDataSource.metric_records_ipv4(router_entry, metric_labels = firewall_labels)
             if firewall_filter_records:
                 metrics_records = [FirewallCollector.metric_record(router_entry, record) for record in firewall_filter_records]
                 firewall_filter_metrics = BaseCollector.counter_collector('firewall_filter', 'Total amount of bytes matched by firewall rules', metrics_records, 'bytes', ['name', 'log'])
                 yield firewall_filter_metrics
-            
-            firewall_mangle_records = FirewallMetricsDataSource.metric_records_ipv4(router_entry, metric_labels = firewall_labels, fw_type='mangle')   
+
+            firewall_mangle_records = FirewallMetricsDataSource.metric_records_ipv4(router_entry, metric_labels = firewall_labels, fw_type='mangle')
             if firewall_mangle_records:
                 metrics_records = [FirewallCollector.metric_record(router_entry, record) for record in firewall_mangle_records]
                 firewall_mangle_metrics = BaseCollector.counter_collector('firewall_mangle', 'Total amount of bytes matched by firewall mangle rules', metrics_records, 'bytes', ['name', 'log'])
@@ -53,7 +53,7 @@ class FirewallCollector(BaseCollector):
                 metrics_records_ipv6 = [FirewallCollector.metric_record(router_entry, record) for record in firewall_filter_records_ipv6]
                 firewall_filter_metrics_ipv6 = BaseCollector.counter_collector('firewall_filter_ipv6', 'Total amount of bytes matched by firewall rules (IPv6)', metrics_records_ipv6, 'bytes', ['name', 'log'])
                 yield firewall_filter_metrics_ipv6
-            
+
             firewall_mangle_records_ipv6 =  FirewallMetricsDataSource.metric_records_ipv6(router_entry, metric_labels = firewall_labels, fw_type='mangle')
             if firewall_mangle_records_ipv6:
                 metrics_records_ipv6 = [FirewallCollector.metric_record(router_entry, record) for record in firewall_mangle_records_ipv6]

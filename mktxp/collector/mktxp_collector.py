@@ -18,7 +18,7 @@ from mktxp.datasource.mktxp_ds import MKTXPMetricsDataSource
 
 class MKTXPCollector(BaseCollector):
     ''' System Identity Metrics collector
-    '''     
+    '''
     @staticmethod
     def collect(router_entry):
         mktxp_records = MKTXPMetricsDataSource.metric_records(router_entry)

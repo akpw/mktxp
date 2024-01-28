@@ -14,20 +14,20 @@
 
 class BaseDSProcessor:
     ''' Base Metrics DataSource processing
-    '''             
+    '''
 
     @staticmethod
     def trimmed_records(router_entry, *, router_records = None, metric_labels = None, add_router_id = True, translation_table = None):
         if router_records is None:
             router_records = []
         if metric_labels is None:
-            metric_labels = []   
+            metric_labels = []
         if translation_table is None:
-            translation_table = {}                 
+            translation_table = {}
         dash2_ = lambda x : x.replace('-', '_')
         if len(metric_labels) == 0 and len(router_records) > 0:
             metric_labels = [dash2_(key) for key in router_records[0].keys()]
-        metric_labels = set(metric_labels)      
+        metric_labels = set(metric_labels)
 
         labeled_records = []
         for router_record in router_records:
@@ -36,11 +36,11 @@ class BaseDSProcessor:
             if add_router_id:
                 for key, value in router_entry.router_id.items():
                     renamed_record[key] = value
-            
+
             # translate fields if needed
             for key, func in translation_table.items():
                 renamed_record[key] = func(renamed_record.get(key))
 
             labeled_records.append(renamed_record)
-            
+
         return labeled_records

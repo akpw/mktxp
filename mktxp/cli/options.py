@@ -94,7 +94,7 @@ Selected metrics info can be printed on the command line. For more information, 
         subparsers = parser.add_subparsers(dest = 'sub_cmd',
                                            title = 'MKTXP commands',
                                            metavar = MKTXPCommands.commands_meta())
-        
+
         # Info command
         subparsers.add_parser(MKTXPCommands.INFO,
                                         description = 'Displays MKTXP info',
@@ -235,7 +235,7 @@ Selected metrics info can be printed on the command line. For more information, 
         for command in commands:
             editor = run_cmd(command, quiet = quiet).rstrip()
             if editor:
-                break                                  
+                break
         return editor
 
 

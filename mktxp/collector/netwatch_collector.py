@@ -19,7 +19,7 @@ from mktxp.datasource.netwatch_ds import NetwatchMetricsDataSource
 
 class NetwatchCollector(BaseCollector):
     ''' Netwatch Metrics collector
-    '''    
+    '''
     @staticmethod
     def collect(router_entry):
         if not router_entry.config_entry.netwatch:
@@ -32,7 +32,7 @@ class NetwatchCollector(BaseCollector):
         if netwatch_records:
             yield BaseCollector.gauge_collector('netwatch_status', 'Netwatch Status Metrics', netwatch_records, 'status', netwatch_labels)
             yield BaseCollector.gauge_collector('netwatch_since', 'Netwatch Status Since Metrics', netwatch_records, 'since', netwatch_labels)
-            
+
             # ICMP
             yield BaseCollector.gauge_collector('netwatch_icmp_loss_count', 'Netwatch ICMP Loss Count', netwatch_records, 'loss_count', netwatch_labels)
             yield BaseCollector.gauge_collector('netwatch_icmp_response_count', 'Netwatch ICMP Loss Count', netwatch_records, 'response_count', netwatch_labels)
@@ -47,4 +47,3 @@ class NetwatchCollector(BaseCollector):
             yield BaseCollector.gauge_collector('netwatch_http_status_code', 'Netwatch HTTP Status Code', netwatch_records, 'http_status_code', netwatch_labels)
             yield BaseCollector.gauge_collector('netwatch_http_response_time', 'Netwatch HTTP Response Time', netwatch_records, 'http_resp_time', netwatch_labels)
             yield BaseCollector.gauge_collector('tcp_connect_time', 'Netwatch HTTP TCP Connect Time', netwatch_records, 'tcp_connect_time', netwatch_labels)
-            

@@ -23,7 +23,7 @@ class CapsmanInfo:
             return ['/caps-man', f'/interface/wifi/capsman']
         elif router_entry.wireless_type == RouterEntryWirelessType.WIRELESS:
             return ['/caps-man']
-        else:    
+        else:
             wireless_package = WirelessMetricsDataSource.wireless_package(router_entry)
             return [f'/interface/{wireless_package}/capsman']
 
@@ -33,18 +33,18 @@ class CapsmanInfo:
             return ['/caps-man/registration-table', f'/interface/wifi/registration-table']
         elif router_entry.wireless_type == RouterEntryWirelessType.WIRELESS:
             return ['/caps-man/registration-table']
-        else:    
+        else:
             wireless_package = WirelessMetricsDataSource.wireless_package(router_entry)
             return [f'/interface/{wireless_package}/registration-table']
 
 
 class CapsmanCapsMetricsDataSource:
     ''' Caps Metrics data provider
-    '''             
+    '''
     @staticmethod
     def metric_records(router_entry, *, metric_labels = None):
         if metric_labels is None:
-            metric_labels = []                
+            metric_labels = []
         try:
             remote_caps_records = []
             for capsman_path in CapsmanInfo.capsman_paths(router_entry):
@@ -57,16 +57,16 @@ class CapsmanCapsMetricsDataSource:
 
 class CapsmanRegistrationsMetricsDataSource:
     ''' Capsman Registrations Metrics data provider
-    '''             
+    '''
     @staticmethod
     def metric_records(router_entry, *, metric_labels = None,  add_router_id = True):
         if metric_labels is None:
-            metric_labels = []                
+            metric_labels = []
         try:
             registration_table_records = []
             for registration_table_path in CapsmanInfo.registration_table_paths(router_entry):
                 registration_table_records.extend(router_entry.api_connection.router_api().get_resource(f'{registration_table_path}').get())
-            
+
             # With wifiwave2, Mikrotik renamed the field 'rx-signal' to 'signal'
             # For backward compatibility, including both variants
             for record in registration_table_records:
@@ -85,9 +85,9 @@ class CapsmanInterfacesDatasource:
     @staticmethod
     def metric_records(router_entry, *, metric_labels = None):
         if not router_entry.wireless_type in (RouterEntryWirelessType.DUAL, RouterEntryWirelessType.WIRELESS):
-            return None            
+            return None
         if metric_labels is None:
-            metric_labels = []                
+            metric_labels = []
         try:
             caps_interfaces = router_entry.api_connection.router_api().get_resource('/caps-man/interface').get()
             return BaseDSProcessor.trimmed_records(router_entry, router_records = caps_interfaces, metric_labels = metric_labels)

@@ -17,7 +17,7 @@ from mktxp.flow.router_entry import RouterEntryWirelessType
 
 class WirelessMetricsDataSource:
     ''' Wireless Metrics data provider
-    '''             
+    '''
     WIRELESS = 'wireless'
     WIFIWAVE2 = 'wifiwave2'
     WIFI = 'wifi'
@@ -25,7 +25,7 @@ class WirelessMetricsDataSource:
     @staticmethod
     def metric_records(router_entry, *, metric_labels = None, add_router_id = True):
         if metric_labels is None:
-            metric_labels = []                
+            metric_labels = []
         try:
             wireless_package = WirelessMetricsDataSource.wireless_package(router_entry)
             registration_table_records = router_entry.api_connection.router_api().get_resource(f'/interface/{wireless_package}/registration-table').get()

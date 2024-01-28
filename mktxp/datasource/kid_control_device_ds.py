@@ -14,7 +14,7 @@
 
 from mktxp.datasource.base_ds import BaseDSProcessor
 from mktxp.flow.processor.output import BaseOutputProcessor
-from mktxp.utils.utils import parse_mkt_uptime
+from mktxp.utils.utils import parse_mkt_time_duration
 
 
 class KidDeviceMetricsDataSource:
@@ -36,7 +36,7 @@ class KidDeviceMetricsDataSource:
             translation_table = {
                 'rate_up': lambda value: BaseOutputProcessor.parse_rates(value),
                 'rate_down': lambda value: BaseOutputProcessor.parse_rates(value),
-                'idle_time': lambda value: parse_mkt_uptime(value) if value else 0,
+                'idle_time': lambda value: parse_mkt_time_duration(value) if value else 0,
                 'blocked': lambda value: '1' if value == 'true' else '0',
                 'limited': lambda value: '1' if value == 'true' else '0',
                 'inactive': lambda value: '1' if value == 'true' else '0',

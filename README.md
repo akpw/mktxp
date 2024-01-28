@@ -20,7 +20,7 @@ For effortless visualization of the RouterOS metrics exported to Prometheus, MKT
 
 #### Requirements:
 - Supported OSs:
-   * Linux   
+   * Linux
    * Mac OSX
    * FreeBSD
 
@@ -61,7 +61,7 @@ The default configuration file comes with a sample configuration, making it easy
     
     use_ssl = False                 # enables connection via API-SSL servis
     no_ssl_certificate = False      # enables API_SSL connect without router SSL certificate
-    ssl_certificate_verify = False  # turns SSL certificate verification on / off   
+    ssl_certificate_verify = False  # turns SSL certificate verification on / off
 
     installed_packages = True       # Installed packages
     dhcp = True                     # DHCP general metrics
@@ -85,7 +85,7 @@ The default configuration file comes with a sample configuration, making it easy
     wireless = True                 # WLAN general metrics
     wireless_clients = True         # WLAN clients metrics
     capsman = True                  # CAPsMAN general metrics
-    capsman_clients = True          # CAPsMAN clients metrics    
+    capsman_clients = True          # CAPsMAN clients metrics
 
     kid_control_devices = False     # Kid Control metrics
 
@@ -211,14 +211,14 @@ mktxp edit -i
 
 ```
 [MKTXP]
-    port = 49090                    
+    port = 49090
     socket_timeout = 2
     
     initial_delay_on_failure = 120
     max_delay_on_failure = 900
     delay_inc_div = 5
 
-    bandwidth = False               # Turns metrics bandwidth metrics collection on / off    
+    bandwidth = False               # Turns metrics bandwidth metrics collection on / off
     bandwidth_test_interval = 600   # Interval for colllecting bandwidth metrics
     minimal_collect_interval = 5    # Minimal metric collection interval
 
@@ -239,7 +239,7 @@ Now with your RouterOS metrics being exported to Prometheus, it's easy to visual
 ### mktxp commands
        . MKTXP commands:
         .. info     Shows base MKTXP info
-        .. edit     Open MKTXP configuration file in your editor of choice        
+        .. edit     Open MKTXP configuration file in your editor 
         .. print    Displays selected metrics on the command line
         .. export   Starts collecting metrics for all enabled RouterOS configuration entries
         .. show   	Shows MKTXP configuration entries on the command line

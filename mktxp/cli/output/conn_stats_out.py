@@ -36,12 +36,12 @@ class ConnectionsStatsOutput:
         output_records_cnt = 0
         output_entry = BaseOutputProcessor.OutputConnStatsEntry
         output_table = BaseOutputProcessor.output_table(output_entry)
-        
+
         for record in output_records:
             output_table.add_row(output_entry(**record))
             output_table.add_row(output_entry())
             output_records_cnt += 1
-                
+
         print (output_table.draw())
 
         print(f'Distinct source addresses: {output_records_cnt}')

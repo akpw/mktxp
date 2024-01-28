@@ -18,14 +18,14 @@ from mktxp.datasource.interface_ds import InterfaceMonitorMetricsDataSource
 
 class MonitorCollector(BaseCollector):
     ''' Ethernet Interface Monitor Metrics collector
-    '''    
+    '''
     @staticmethod
     def collect(router_entry):
         if not router_entry.config_entry.monitor:
             return
 
         monitor_labels = ['status', 'rate', 'full_duplex', 'name', 'comment', 'sfp_temperature']
-        monitor_records = InterfaceMonitorMetricsDataSource.metric_records(router_entry, metric_labels = monitor_labels, include_comments = True)   
+        monitor_records = InterfaceMonitorMetricsDataSource.metric_records(router_entry, metric_labels = monitor_labels, include_comments = True)
         if monitor_records:
             monitor_status_metrics = BaseCollector.gauge_collector('interface_status', 'Current interface link status', monitor_records, 'status', ['name', 'comment'])
             yield monitor_status_metrics

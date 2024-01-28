@@ -17,7 +17,7 @@ from mktxp.flow.processor.output import BaseOutputProcessor
 
 class InterfaceTrafficMetricsDataSource:
     ''' Interface Traffic Metrics data provider
-    '''             
+    '''
     @staticmethod
     def metric_records(router_entry, *, metric_labels = None):
         if metric_labels is None:
@@ -48,13 +48,13 @@ class InterfaceMonitorMetricsDataSource:
                 if not running_only or interface['running'] == 'true':
                     interface_monitor_record = router_entry.api_connection.router_api().get_resource(f'/interface/{kind}').call('monitor', {'once':'', '.id': interface['id']})[0]
                 else:
-                    # unless explicitly requested, no need to do a monitor call for not running interfaces                    
+                    # unless explicitly requested, no need to do a monitor call for not running interfaces
                     interface_monitor_record = {'name': interface['name'], 'status': 'no-link'}
 
                 interface_monitor_record['comment'] = interface.get('comment', '')
 
                 interface_monitor_records.append(interface_monitor_record)
-                
+
             # With wifiwave2, Mikrotik renamed the field 'registered-clients' to 'registered-peers'
             # For backward compatibility, including both variants
             for interface_monitor_record in interface_monitor_records:

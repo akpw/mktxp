@@ -54,7 +54,7 @@ class CapsmanCollector(BaseCollector):
                 # translate / trim / augment registration records
                 for registration_record in registration_records:
                     BaseOutputProcessor.augment_record(router_entry, registration_record)
-                    
+
                 tx_byte_metrics = BaseCollector.counter_collector('capsman_clients_tx_bytes', 'Number of sent packet bytes', registration_records, 'tx_bytes', ['dhcp_name', 'mac_address', 'dhcp_comment'])
                 yield tx_byte_metrics
 

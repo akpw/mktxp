@@ -17,11 +17,11 @@ from mktxp.datasource.base_ds import BaseDSProcessor
 
 class HealthMetricsDataSource:
     ''' Health Metrics data provider
-    '''             
+    '''
     @staticmethod
     def metric_records(router_entry, *, metric_labels = None):
         if metric_labels is None:
-            metric_labels = []                
+            metric_labels = []
         try:
             health_records = router_entry.api_connection.router_api().get_resource('/system/health').get()
             for record in health_records:

@@ -49,7 +49,7 @@ class RouteCollector(BaseCollector):
             route_per_protocol_records = [{ MKTXPConfigKeys.ROUTERBOARD_NAME: router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_NAME],
                                             MKTXPConfigKeys.ROUTERBOARD_ADDRESS: router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_ADDRESS],
                                             'protocol': key, 'count': value} for key, value in routes_per_protocol.items()]
-            
+
             # yield route-per-protocol metrics
             route_per_protocol_metrics = BaseCollector.gauge_collector('routes_protocol_count', 'Number of routes per protocol in RIB', route_per_protocol_records, 'count', ['protocol'])
             yield route_per_protocol_metrics

@@ -91,7 +91,7 @@ class CollectorHandler:
                 if not router_entry.is_ready():
                     # let's pick up on things in the next run
                     continue
-                
+
                 # Duration of individual scrapes
                 scrape_timeout_event = Event()
                 scrape_timer = Timer(config_handler.system_entry().max_scrape_duration, timeout, args=(scrape_timeout_event,))
@@ -103,7 +103,7 @@ class CollectorHandler:
                 # cancel unused timers for scrapes finished regularly (within set duration)
                 futures[future].cancel()
                 yield from future.result()
-            
+
         # in case collection finished without timeouts, cancel the overall scrape duration timer
         total_scrape_timer.cancel()
 
@@ -134,7 +134,7 @@ class CollectorHandler:
                 print('deferring..')
             return False
 
-        self.last_collect_timestamp = now       
+        self.last_collect_timestamp = now
         return True
 
 

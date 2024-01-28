@@ -17,13 +17,13 @@ from mktxp.datasource.base_ds import BaseDSProcessor
 
 class MKTXPMetricsDataSource:
     ''' MKTXP Metrics data provider
-    '''             
+    '''
     @staticmethod
     def metric_records(router_entry):
         mktxp_records = []
         for key in router_entry.time_spent.keys():
-            mktxp_records.append({'name': key, 'duration': router_entry.time_spent[key]})           
+            mktxp_records.append({'name': key, 'duration': router_entry.time_spent[key]})
 
-        # translation rules            
+        # translation rules
         translation_table = {'duration': lambda d: d*1000}
         return BaseDSProcessor.trimmed_records(router_entry, router_records = mktxp_records, translation_table = translation_table)

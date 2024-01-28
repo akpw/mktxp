@@ -74,12 +74,12 @@ def get_last_digit(str_to_search):
     else:
         return -1
 
-def parse_mkt_uptime(time):
+def parse_mkt_time_duration(time):
     time_dict = re.match(r'((?P<weeks>\d+)w)?((?P<days>\d+)d)?((?P<hours>\d+)h)?((?P<minutes>\d+)m)?((?P<seconds>\d+)s)?', time).groupdict()
     delta = timedelta(**{key: int(value) for key, value in time_dict.items() if value}).total_seconds()
     return int(delta) if delta else 0
 
-def parse_mkt_timediff(time):
+def parse_mkt_time_duration_short(time):
     time_dict = re.match(r'((?P<seconds>\d+)s)?((?P<milliseconds>\d+)ms)?((?P<microseconds>\d+)us)?', time).groupdict()
     delta = timedelta(**{key: int(value) for key, value in time_dict.items() if value}).total_seconds()
     return delta if delta else 0
@@ -241,15 +241,15 @@ class RepeatableTimer:
         self.process_name = process_name
         self.interval = interval
         self.restartable = restartable
-        
+
         self.func = func
         self.args = args
         self.kwargs = kwargs
-        
+
         self.finished = Event()
         self.run_once = Event()
         if not repeatable:
-            self.run_once.set()            
+            self.run_once.set()
         self.process = Process(name = self.process_name, target=self._execute)
 
     def start(self):
@@ -268,7 +268,7 @@ class RepeatableTimer:
             self.func(*self.args, **self.kwargs)
             if self.finished.is_set() or self.run_once.is_set():
                 break
-            self.finished.wait(self.interval)     
+            self.finished.wait(self.interval)
 
 class Benchmark:
     def __enter__(self):

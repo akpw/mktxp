@@ -31,7 +31,7 @@ class BandwidthCollector(BaseCollector):
     def __init__(self):
         self.pool = Pool()
         self.last_call_timestamp = 0
-    
+
     def collect(self):
         if not config_handler.system_entry().bandwidth:
             return
@@ -48,14 +48,14 @@ class BandwidthCollector(BaseCollector):
                                                                             latency_records, 'latency', [], add_id_labels = False)
             yield latency_metrics
 
-        ts =  datetime.now().timestamp()       
+        ts =  datetime.now().timestamp()
         if (ts - self.last_call_timestamp) > config_handler.system_entry().bandwidth_test_interval:
-            self.pool.apply_async(BandwidthCollector.bandwidth_worker, callback=get_result)            
+            self.pool.apply_async(BandwidthCollector.bandwidth_worker, callback=get_result)
             self.last_call_timestamp = ts
 
     def __del__(self):
         self.pool.close()
-        self.pool.join()        
+        self.pool.join()
 
     @staticmethod
     def bandwidth_worker():

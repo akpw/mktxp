@@ -30,7 +30,7 @@ from mktxp.cli.output.conn_stats_out import ConnectionsStatsOutput
 
 class ExportProcessor:
     ''' Base Export Processing
-    '''    
+    '''
     @staticmethod
     def start():
         REGISTRY.register(CollectorHandler(RouterEntriesHandler(), CollectorRegistry()))
@@ -47,19 +47,19 @@ class ExportProcessor:
 
 class OutputProcessor:
     ''' Base CLI Processing
-    '''    
+    '''
     @staticmethod
     def capsman_clients(entry_name):
         router_entry = RouterEntriesHandler.router_entry(entry_name)
         if router_entry:
             CapsmanOutput.clients_summary(router_entry)
-        
+
     @staticmethod
     def wifi_clients(entry_name):
         router_entry = RouterEntriesHandler.router_entry(entry_name)
         if router_entry:
             WirelessOutput.clients_summary(router_entry)
-        
+
     @staticmethod
     def dhcp_clients(entry_name):
         router_entry = RouterEntriesHandler.router_entry(entry_name)
@@ -71,5 +71,3 @@ class OutputProcessor:
         router_entry = RouterEntriesHandler.router_entry(entry_name)
         if router_entry:
             ConnectionsStatsOutput.clients_summary(router_entry)
-
-            

@@ -18,10 +18,10 @@ from mktxp.flow.router_entry import RouterEntry
 
 class RouterEntriesHandler:
     ''' Handles RouterOS entries defined in MKTXP config
-    '''         
+    '''
     def __init__(self):
-        self._router_entries = {}            
-        for router_name in config_handler.registered_entries():            
+        self._router_entries = {}
+        for router_name in config_handler.registered_entries():
             router_entry = RouterEntry(router_name)
             if router_entry.config_entry.remote_dhcp_entry and config_handler.registered_entry(router_entry.config_entry.remote_dhcp_entry):
                 router_entry.dhcp_entry = RouterEntry(router_entry.config_entry.remote_dhcp_entry)
@@ -30,10 +30,10 @@ class RouterEntriesHandler:
     @property
     def router_entries(self):
         return (entry for key, entry in  self._router_entries.items() if entry.config_entry.enabled) \
-                                                                                if self._router_entries else None   
+                                                                                if self._router_entries else None
 
     def router_entry(self, entry_name, enabled_only = False):
-        entry = self._router_entries.get(entry_name)                                                                                
+        entry = self._router_entries.get(entry_name)
         if entry and (entry.config_entry.enabled or not enabled_only):
             return entry
         return None
@@ -48,6 +48,6 @@ class RouterEntriesHandler:
 
         router_entry = RouterEntry(entry_name)
         if config_entry.remote_dhcp_entry and config_handler.registered_entry(config_entry.remote_dhcp_entry):
-            router_entry.dhcp_entry = RouterEntry(config_entry.remote_dhcp_entry)        
+            router_entry.dhcp_entry = RouterEntry(config_entry.remote_dhcp_entry)
 
         return router_entry

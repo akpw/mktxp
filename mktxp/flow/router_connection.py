@@ -38,16 +38,16 @@ class RouterAPIConnectionError(Exception):
 
 class RouterAPIConnection:
     ''' Base wrapper interface for the routeros_api library
-    '''            
+    '''
     def __init__(self, router_name, config_entry):
         self.router_name = router_name
         self.config_entry = config_entry
         self.last_failure_timestamp = self.successive_failure_count = 0
-        
+
         ctx = None
         if self.config_entry.use_ssl and self.config_entry.no_ssl_certificate:
             ctx = ssl.create_default_context()
-            ctx.set_ciphers('ADH:@SECLEVEL=0')       
+            ctx.set_ciphers('ADH:@SECLEVEL=0')
 
         self.connection = RouterOsApiPool(
                 host = self.config_entry.hostname,
@@ -58,7 +58,7 @@ class RouterAPIConnection:
                 use_ssl = self.config_entry.use_ssl,
                 ssl_verify = self.config_entry.ssl_certificate_verify,
                 ssl_context = ctx)
-        
+
         self.connection.socket_timeout = config_handler.system_entry().socket_timeout
         self.api = None
 

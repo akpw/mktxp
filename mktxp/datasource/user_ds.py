@@ -17,11 +17,11 @@ from mktxp.datasource.base_ds import BaseDSProcessor
 
 class UserMetricsDataSource:
     ''' Active Users Metrics data provider
-    '''             
-    @staticmethod    
+    '''
+    @staticmethod
     def metric_records(router_entry, *, metric_labels = None):
         if metric_labels is None:
-            metric_labels = []                
+            metric_labels = []
         try:
             active_users_records = router_entry.api_connection.router_api().get_resource('/user/active/').get()
             return BaseDSProcessor.trimmed_records(router_entry, router_records = active_users_records, metric_labels = metric_labels)

@@ -20,14 +20,14 @@ from mktxp.datasource.interface_ds import InterfaceMonitorMetricsDataSource
 
 class WLANCollector(BaseCollector):
     ''' Wireless Metrics collector
-    '''    
+    '''
     @staticmethod
     def collect(router_entry):
         if not router_entry.config_entry.wireless:
             return
 
         monitor_labels = ['channel', 'noise_floor', 'overall_tx_ccq', 'registered_clients', 'registered_peers']
-        monitor_records = InterfaceMonitorMetricsDataSource.metric_records(router_entry, metric_labels = monitor_labels, kind = WirelessMetricsDataSource.wireless_package(router_entry))   
+        monitor_records = InterfaceMonitorMetricsDataSource.metric_records(router_entry, metric_labels = monitor_labels, kind = WirelessMetricsDataSource.wireless_package(router_entry))
         if monitor_records:
             # sanitize records for relevant labels
             noise_floor_records = [monitor_record for monitor_record in monitor_records if monitor_record.get('noise_floor')]

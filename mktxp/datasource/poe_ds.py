@@ -16,17 +16,17 @@ from mktxp.datasource.interface_ds import InterfaceTrafficMetricsDataSource
 
 class POEMetricsDataSource:
     ''' POE Metrics data provider
-    '''             
+    '''
     @staticmethod
     def metric_records(router_entry, *, metric_labels = None):
         if metric_labels is None:
-            metric_labels = []                
+            metric_labels = []
         try:
             poe_records = router_entry.api_connection.router_api().get_resource('/interface/ethernet/poe').get()
-            
+
             for poe_record in poe_records:
                 poe_monitor_records = router_entry.api_connection.router_api().get_resource('/interface/ethernet/poe').call('monitor', {'once':'', '.id':poe_record['id']})
-                
+
                 poe_monitor_records = BaseDSProcessor.trimmed_records(router_entry, router_records = poe_monitor_records)
 
                 if poe_monitor_records[0].get('poe_out_status'):

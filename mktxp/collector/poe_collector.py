@@ -18,16 +18,15 @@ from mktxp.datasource.poe_ds import POEMetricsDataSource
 
 class POECollector(BaseCollector):
     ''' POE Metrics collector
-    '''    
+    '''
     @staticmethod
     def collect(router_entry):
         if not router_entry.config_entry.poe:
             return
 
         poe_labels = ['name', 'comment', 'poe_out', 'poe_priority', 'poe_voltage', 'poe_out_status', 'poe_out_voltage', 'poe_out_current', 'poe_out_power']
-        poe_records = POEMetricsDataSource.metric_records(router_entry, metric_labels = poe_labels)  
+        poe_records = POEMetricsDataSource.metric_records(router_entry, metric_labels = poe_labels)
 
         if poe_records:
             poe_metrics = BaseCollector.info_collector('poe', 'POE Metrics', poe_records, poe_labels)
             yield poe_metrics
-            

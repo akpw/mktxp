@@ -35,7 +35,7 @@ class RouterEntryWirelessPackage:
 
 class RouterEntry:
     ''' RouterOS Entry
-    '''                 
+    '''
     def __init__(self, router_name):
         self.router_name = router_name
         self.config_entry  = config_handler.config_entry(router_name)
@@ -44,7 +44,7 @@ class RouterEntry:
             MKTXPConfigKeys.ROUTERBOARD_NAME: self.router_name,
             MKTXPConfigKeys.ROUTERBOARD_ADDRESS: self.config_entry.hostname
             }
-        
+
         self.time_spent =  { CollectorKeys.IDENTITY_COLLECTOR: 0,
                             CollectorKeys.SYSTEM_RESOURCE_COLLECTOR: 0,
                             CollectorKeys.HEALTH_COLLECTOR: 0,
@@ -68,10 +68,10 @@ class RouterEntry:
                             CollectorKeys.KID_CONTROL_DEVICE_COLLECTOR: 0,
                             CollectorKeys.USER_COLLECTOR: 0,
                             CollectorKeys.MKTXP_COLLECTOR: 0
-                            }         
+                            }
         self._dhcp_entry = None
         self._dhcp_records = {}
-        self._wireless_type = RouterEntryWirelessType.NONE                                    
+        self._wireless_type = RouterEntryWirelessType.NONE
 
     @property
     def wireless_type(self):
@@ -103,7 +103,7 @@ class RouterEntry:
     @property
     def dhcp_records(self):
         return (entry.record for key, entry in  self._dhcp_records.items() if entry.type == 'mac_address') \
-                                                                                if self._dhcp_records else None   
+                                                                                if self._dhcp_records else None
     @dhcp_records.setter
     def dhcp_records(self, dhcp_records):
         for dhcp_record in dhcp_records:
@@ -112,7 +112,7 @@ class RouterEntry:
             if dhcp_record.get('address'):
                 dhcp_record['type'] = 'address'
                 self._dhcp_records[dhcp_record.get('address')] = DHCPCacheEntry('address', dhcp_record)
-    
+
     def dhcp_record(self, key):
         if self._dhcp_records and self._dhcp_records.get(key):
             return self._dhcp_records[key].record
@@ -122,7 +122,7 @@ class RouterEntry:
         self.is_done() #flush caches, just in case
         is_ready = True
         if not self.api_connection.is_connected():
-            is_ready = False                        
+            is_ready = False
             # let's get connected now
             self.api_connection.connect()
             if self._dhcp_entry:
@@ -132,5 +132,5 @@ class RouterEntry:
     def is_done(self):
         self._dhcp_records = {}
         self._wireless_type = RouterEntryWirelessType.NONE
-    
+
 DHCPCacheEntry = namedtuple('DHCPCacheEntry', ['type', 'record'])

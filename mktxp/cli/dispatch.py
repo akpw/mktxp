@@ -84,7 +84,7 @@ class MKTXPDispatcher:
             subprocess.check_call([editor, config_handler.mktxp_conf_path])
         else:
             subprocess.check_call([editor, config_handler.usr_conf_data_path])
-       
+
     def start_export(self, args):
         ExportProcessor.start()
 

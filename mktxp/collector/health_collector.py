@@ -18,11 +18,11 @@ from mktxp.datasource.health_ds import HealthMetricsDataSource
 
 class HealthCollector(BaseCollector):
     ''' System Health Metrics collector
-    '''    
+    '''
     @staticmethod
     def collect(router_entry):
         health_labels = ['voltage', 'temperature', 'phy_temperature', 'cpu_temperature', 'switch_temperature', 'fan1_speed', 'fan2_speed', 'fan3_speed', 'fan4_speed', 'power_consumption']
-        health_records = HealthMetricsDataSource.metric_records(router_entry, metric_labels = health_labels)   
+        health_records = HealthMetricsDataSource.metric_records(router_entry, metric_labels = health_labels)
         if health_records:
             for record in health_records:
 

@@ -339,7 +339,7 @@ class MKTXPConfigHandler:
             config_entry_reader[MKTXPConfigKeys.PORT_KEY] = self._default_value_for_key(
                 MKTXPConfigKeys.SSL_KEY, config_entry_reader[MKTXPConfigKeys.SSL_KEY])
             new_keys.append(MKTXPConfigKeys.PORT_KEY) # read from disk next time
-        
+
         if new_keys:
             self.config[entry_name] = config_entry_reader
             try:

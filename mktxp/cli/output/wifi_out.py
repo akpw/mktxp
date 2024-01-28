@@ -45,14 +45,14 @@ class WirelessOutput:
         output_entry = BaseOutputProcessor.OutputWirelessEntry \
                         if router_entry.wireless_type in (RouterEntryWirelessType.DUAL, RouterEntryWirelessType.WIRELESS) else BaseOutputProcessor.OutputWiFiEntry
         output_table = BaseOutputProcessor.output_table(output_entry)
-        
+
         for key in dhcp_rt_by_interface.keys():
             for record in dhcp_rt_by_interface[key]:
                 output_table.add_row(output_entry(**record))
                 output_records += 1
             if output_records < registration_records:
                 output_table.add_row(output_entry())
-                
+
         print (output_table.draw())
 
         for server in dhcp_rt_by_interface.keys():
