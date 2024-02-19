@@ -24,11 +24,7 @@ class KidDeviceMetricsDataSource:
         if metric_labels is None:
             metric_labels = []
         try:
-            device_records = []
-            records = router_entry.api_connection.router_api().get_resource('/ip/kid-control/device').get()
-            for record in records:
-                if record.get('user'):
-                    device_records.append(record)
+            device_records = router_entry.api_connection.router_api().get_resource('/ip/kid-control/device').get()
             return BaseDSProcessor.trimmed_records(router_entry, router_records=device_records, metric_labels=metric_labels)
         except Exception as exc:
             print(

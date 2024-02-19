@@ -41,11 +41,11 @@ class KidDeviceCollector(BaseCollector):
                         record[label] = KidDeviceCollector._translated_values(label, value)
 
             yield BaseCollector.info_collector('kid_control_device', 'Kid-control device Info', records, info_labels)
-            yield BaseCollector.gauge_collector('kid_control_device_bytes_down', 'Number of received bytes', records, 'bytes_down', ['name', 'mac_address', 'user'])
-            yield BaseCollector.gauge_collector('kid_control_device_bytes_up', 'Number of transmitted bytes', records, 'bytes_up', ['name', 'mac_address', 'user'])
-            yield BaseCollector.gauge_collector('kid_control_device_rate_down', 'Device rate down', records, 'rate_down', ['name', 'mac_address', 'user'])
-            yield BaseCollector.gauge_collector('kid_control_device_rate_up', 'Device rate up', records, 'rate_up', ['name', 'mac_address', 'user'])
-            yield BaseCollector.gauge_collector('kid_control_device_idle_time', 'Device idle time', records, 'idle_time', ['name', 'mac_address', 'user'])
+            yield BaseCollector.gauge_collector('kid_control_device_bytes_down', 'Number of received bytes', records, 'bytes_down', ['name', 'mac_address', 'user', 'ip_address'])
+            yield BaseCollector.gauge_collector('kid_control_device_bytes_up', 'Number of transmitted bytes', records, 'bytes_up', ['name', 'mac_address', 'user', 'ip_address'])
+            yield BaseCollector.gauge_collector('kid_control_device_rate_down', 'Device rate down', records, 'rate_down', ['name', 'mac_address', 'user', 'ip_address'])
+            yield BaseCollector.gauge_collector('kid_control_device_rate_up', 'Device rate up', records, 'rate_up', ['name', 'mac_address', 'user', 'ip_address'])
+            yield BaseCollector.gauge_collector('kid_control_device_idle_time', 'Device idle time', records, 'idle_time', ['name', 'mac_address', 'user', 'ip_address'])
 
     # Helpers
     @staticmethod
