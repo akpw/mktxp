@@ -78,7 +78,12 @@ class RouterAPIConnection:
             return
         try:
             print(f'Connecting to router {self.router_name}@{self.config_entry.hostname}')
-            self.api = self.connection.get_api()
+            try:
+                self.api = self.connection.get_api()
+            except:                
+                self.connection.plaintext_login = False
+                self.api = self.connection.get_api()
+
             self._set_connect_state(success = True, connect_time = connect_time)
         except (socket.error, socket.timeout, Exception) as exc:
             self._set_connect_state(success = False, connect_time = connect_time, exc = exc)
