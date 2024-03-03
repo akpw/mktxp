@@ -24,7 +24,7 @@ class BGPCollector(BaseCollector):
         if not router_entry.config_entry.bgp:
             return
 
-        bgp_labels = ['name', 'remote.address', 'remote.as', 'local.as', 'remote.afi', 'local.afi', 'remote.messages', 'remote.bytes', 'local.messages', 'local.bytes', 'prefix_count', 'established', 'uptime']
+        bgp_labels = ['name', 'remote_address', 'remote_as', 'local_as', 'remote_afi', 'local_afi', 'remote_messages', 'remote_bytes', 'local_messages', 'local_bytes', 'prefix_count', 'established', 'uptime']
         bgp_records = BGPMetricsDataSource.metric_records(router_entry, metric_labels=bgp_labels)
         
 
@@ -37,23 +37,23 @@ class BGPCollector(BaseCollector):
                     if value:            
                         bgp_record[translated_field] = BGPCollector._translated_values(translated_field, value)
 
-            session_id_labes = ['name', 'remote.address', 'remote.as', 'local.as', 'remote.afi', 'local.afi']
+            session_id_labes = ['name', 'remote_address', 'remote_as', 'local_as', 'remote_afi', 'local_afi']
             bgp_sessions_metrics = BaseCollector.info_collector('bgp_sessions_info', 'BGP sessions info', bgp_records, session_id_labes)
             yield bgp_sessions_metrics
 
-            remote_messages_metrics = BaseCollector.counter_collector('bgp_remote_messages', 'Number of remote messages', bgp_records, 'remote.messages', session_id_labes)
+            remote_messages_metrics = BaseCollector.counter_collector('bgp_remote_messages', 'Number of remote messages', bgp_records, 'remote_messages', session_id_labes)
             yield remote_messages_metrics
 
 
-            local_messages_metrics = BaseCollector.counter_collector('bgp_local_messages', 'Number of local messages', bgp_records, 'local.messages', session_id_labes)
+            local_messages_metrics = BaseCollector.counter_collector('bgp_local_messages', 'Number of local messages', bgp_records, 'local_messages', session_id_labes)
             yield local_messages_metrics
 
 
-            remote_bytes_metrics = BaseCollector.counter_collector('bgp_remote_bytes', 'Number of remote bytes', bgp_records, 'remote.bytes', session_id_labes)
+            remote_bytes_metrics = BaseCollector.counter_collector('bgp_remote_bytes', 'Number of remote bytes', bgp_records, 'remote_bytes', session_id_labes)
             yield remote_bytes_metrics
 
 
-            local_bytes_metrics = BaseCollector.counter_collector('bgp_local_bytes', 'Number of local bytes', bgp_records, 'local.bytes', session_id_labes)
+            local_bytes_metrics = BaseCollector.counter_collector('bgp_local_bytes', 'Number of local bytes', bgp_records, 'local_bytes', session_id_labes)
             yield local_bytes_metrics
 
 
