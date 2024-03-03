@@ -117,7 +117,7 @@ class BaseOutputProcessor:
     def parse_timedelta(time):
         duration_interval_rgx = config_handler.re_compiled.get('duration_interval_rgx')
         if not duration_interval_rgx:
-            duration_interval_rgx = re.compile(r'((?P<weeks>\d+)w)?((?P<days>\d+)d)?((?P<hours>\d+)h)?((?P<minutes>\d+)m)?((?P<seconds>\d+)s)?')
+            duration_interval_rgx = re.compile(r'((?P<weeks>\d+)w)?((?P<days>\d+)d)?((?P<hours>\d+)h)?((?P<minutes>\d+)m)?((?P<seconds>\d+)s)?((?P<milliseconds>\d+)ms)?')
             config_handler.re_compiled['duration_interval_rgx'] = duration_interval_rgx                        
         time_dict = duration_interval_rgx.match(time).groupdict()
         return timedelta(**{key: int(value) for key, value in time_dict.items() if value})
@@ -125,6 +125,10 @@ class BaseOutputProcessor:
     @staticmethod
     def parse_timedelta_seconds(time):
         return BaseOutputProcessor.parse_timedelta(time).total_seconds()
+
+    @staticmethod
+    def parse_timedelta_milliseconds(time):
+        return BaseOutputProcessor.parse_timedelta(time) / timedelta(milliseconds=1)
 
     @staticmethod
     def parse_signal_strength(signal_strength):

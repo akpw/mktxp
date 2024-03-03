@@ -91,6 +91,8 @@ The default configuration file comes with a sample configuration, making it easy
 
     user = True                     # Active Users metrics
     queue = True                    # Queues metrics
+
+    bgp = False                     # BGP sessions metrics
     
     remote_dhcp_entry = None        # An MKTXP entry for remote DHCP info resolution (capsman/wireless)
 
