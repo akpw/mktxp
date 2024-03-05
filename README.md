@@ -213,7 +213,8 @@ mktxp edit -i
 
 ```
 [MKTXP]
-    port = 49090                    
+    bind_address = 0.0.0.0
+    port = 49090
     socket_timeout = 2
     
     initial_delay_on_failure = 120
@@ -322,11 +323,11 @@ total_max_scrape_duration = 30      # Max overall duration of all metrics collec
 ```
 To keeps things within expected boundaries, the last two parameters allows for controlling both individual and overall scrape durations
 
-
-### mktxp port
-By default, mktxp runs it's HTTP metrics endpoint on port 49090. You can change it via the following [system option](https://github.com/akpw/mktxp/blob/main/README.md#mktxp-system-configuration):
+### mktxp listening address port
+By default, mktxp runs it's HTTP metrics endpoint on all IPv4 addresses (0.0.0.0) and port 49090. You can change it via the following [system option](https://github.com/akpw/mktxp/blob/main/README.md#mktxp-system-configuration):
 ```
-port = 49090 
+bind_address = 127.0.0.1
+port = 49090
 ```
 
 ## Setting up MKTXP to run as a Linux Service
