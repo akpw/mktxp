@@ -56,6 +56,7 @@ class MKTXPConfigKeys:
     # Section Keys
     ENABLED_KEY = 'enabled'
     HOST_KEY = 'hostname'
+    BIND_ADDRESS_KEY = 'bind_address'
     PORT_KEY = 'port'
     USER_KEY = 'username'
     PASSWD_KEY = 'password'
@@ -122,6 +123,7 @@ class MKTXPConfigKeys:
     DEFAULT_API_PORT = 8728
     DEFAULT_API_SSL_PORT = 8729
     DEFAULT_FE_REMOTE_DHCP_ENTRY = 'None'
+    DEFAULT_MKTXP_BIND_ADDRESS = '0.0.0.0'
     DEFAULT_MKTXP_PORT = 49090
     DEFAULT_MKTXP_SOCKET_TIMEOUT = 2
     DEFAULT_MKTXP_INITIAL_DELAY = 120
@@ -148,12 +150,14 @@ class MKTXPConfigKeys:
     SYSTEM_BOOLEAN_KEYS_NO = {MKTXP_BANDWIDTH_KEY, MKTXP_VERBOSE_MODE, MKTXP_FETCH_IN_PARALLEL}
 
     STR_KEYS = (HOST_KEY, USER_KEY, PASSWD_KEY, FE_REMOTE_DHCP_ENTRY)
+    SYSTEM_STR_KEYS = {BIND_ADDRESS_KEY}
+
     INT_KEYS =  ()
     MKTXP_INT_KEYS = (PORT_KEY, MKTXP_SOCKET_TIMEOUT, MKTXP_INITIAL_DELAY, MKTXP_MAX_DELAY,
                       MKTXP_INC_DIV, MKTXP_BANDWIDTH_TEST_INTERVAL, MKTXP_MIN_COLLECT_INTERVAL,
                       MKTXP_MAX_WORKER_THREADS, MKTXP_MAX_SCRAPE_DURATION, MKTXP_TOTAL_MAX_SCRAPE_DURATION)
 
-    # MKTXP config entry nane
+    # MKTXP config entry name
     MKTXP_CONFIG_ENTRY_NAME = 'MKTXP'
 
 
@@ -167,7 +171,7 @@ class ConfigEntry:
                                                        MKTXPConfigKeys.MKTXP_USE_COMMENTS_OVER_NAMES, MKTXPConfigKeys.FE_PUBLIC_IP_KEY, MKTXPConfigKeys.FE_IPV6_FIREWALL_KEY, MKTXPConfigKeys.FE_IPV6_NEIGHBOR_KEY,
                                                        MKTXPConfigKeys.FE_USER_KEY, MKTXPConfigKeys.FE_QUEUE_KEY, MKTXPConfigKeys.FE_REMOTE_DHCP_ENTRY, MKTXPConfigKeys.FE_CHECK_FOR_UPDATES, MKTXPConfigKeys.FE_KID_CONTROL_DEVICE, MKTXPConfigKeys.FE_BGP_KEY,
                                                        ])
-    MKTXPSystemEntry = namedtuple('MKTXPSystemEntry', [MKTXPConfigKeys.PORT_KEY, MKTXPConfigKeys.MKTXP_SOCKET_TIMEOUT,
+    MKTXPSystemEntry = namedtuple('MKTXPSystemEntry', [MKTXPConfigKeys.BIND_ADDRESS_KEY, MKTXPConfigKeys.PORT_KEY, MKTXPConfigKeys.MKTXP_SOCKET_TIMEOUT,
                                                        MKTXPConfigKeys.MKTXP_INITIAL_DELAY, MKTXPConfigKeys.MKTXP_MAX_DELAY,
                                                        MKTXPConfigKeys.MKTXP_INC_DIV, MKTXPConfigKeys.MKTXP_BANDWIDTH_KEY,
                                                        MKTXPConfigKeys.MKTXP_VERBOSE_MODE, MKTXPConfigKeys.MKTXP_BANDWIDTH_TEST_INTERVAL,
@@ -372,6 +376,13 @@ class MKTXPConfigHandler:
                 system_entry_reader[key] = True if key in MKTXPConfigKeys.SYSTEM_BOOLEAN_KEYS_YES else False
                 new_keys.append(key) # read from disk next time
 
+        for key in MKTXPConfigKeys.SYSTEM_STR_KEYS:
+            if self._config[entry_name].get(key):
+                system_entry_reader[key] = self._config[entry_name].get(key)
+            else:
+                system_entry_reader[key] = self._default_value_for_key(key)
+                new_keys.append(key) # read from disk next time
+
         if new_keys:
             self._config[entry_name] = system_entry_reader
             try:
@@ -387,6 +398,7 @@ class MKTXPConfigHandler:
     def _default_value_for_key(self, key, value=None):
         return {
             MKTXPConfigKeys.SSL_KEY: lambda value: MKTXPConfigKeys.DEFAULT_API_SSL_PORT if value else MKTXPConfigKeys.DEFAULT_API_PORT,
+            MKTXPConfigKeys.BIND_ADDRESS_KEY: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_BIND_ADDRESS,
             MKTXPConfigKeys.PORT_KEY: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_PORT,
             MKTXPConfigKeys.FE_REMOTE_DHCP_ENTRY:  lambda _: MKTXPConfigKeys.DEFAULT_FE_REMOTE_DHCP_ENTRY,
             MKTXPConfigKeys.MKTXP_SOCKET_TIMEOUT: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_SOCKET_TIMEOUT,

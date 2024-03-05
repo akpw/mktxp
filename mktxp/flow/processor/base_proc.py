@@ -16,6 +16,7 @@ from http.server import HTTPServer
 from datetime import datetime
 from prometheus_client.core import REGISTRY
 from prometheus_client import MetricsHandler
+from ipaddress import ip_address
 
 from mktxp.cli.config.config import config_handler
 from mktxp.flow.collector_handler import CollectorHandler
@@ -27,6 +28,7 @@ from mktxp.cli.output.wifi_out import WirelessOutput
 from mktxp.cli.output.dhcp_out import DHCPOutput
 from mktxp.cli.output.conn_stats_out import ConnectionsStatsOutput
 
+import socket
 
 class ExportProcessor:
     ''' Base Export Processing
@@ -34,14 +36,16 @@ class ExportProcessor:
     @staticmethod
     def start():
         REGISTRY.register(CollectorHandler(RouterEntriesHandler(), CollectorRegistry()))
-        ExportProcessor.run(port=config_handler.system_entry().port)
+        ExportProcessor.run(port=config_handler.system_entry().port, bind_address=config_handler.system_entry().bind_address)
 
     @staticmethod
-    def run(server_class=HTTPServer, handler_class=MetricsHandler, port=None):
-        server_address = ('', port)
+    def run(server_class=HTTPServer, handler_class=MetricsHandler, port=None, bind_address=''):
+        if ip_address(bind_address).version == 6:
+            server_class.address_family = socket.AF_INET6
+        server_address = (bind_address, port)
         httpd = server_class(server_address, handler_class)
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f'{current_time} Running HTTP metrics server on port {port}')
+        print(f'{current_time} Running HTTP metrics server on {bind_address}:{port}')
         httpd.serve_forever()
 
 
