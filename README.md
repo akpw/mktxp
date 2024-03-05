@@ -323,7 +323,7 @@ total_max_scrape_duration = 30      # Max overall duration of all metrics collec
 ```
 To keeps things within expected boundaries, the last two parameters allows for controlling both individual and overall scrape durations
 
-### mktxp listening address port
+### mktxp listening address and port
 By default, mktxp runs it's HTTP metrics endpoint on all IPv4 addresses (0.0.0.0) and port 49090. You can change it via the following [system option](https://github.com/akpw/mktxp/blob/main/README.md#mktxp-system-configuration):
 ```
 bind_address = 127.0.0.1
