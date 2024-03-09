@@ -36,12 +36,12 @@ class NetwatchCollector(BaseCollector):
             # ICMP
             yield BaseCollector.gauge_collector('netwatch_icmp_loss_count', 'Netwatch ICMP Loss Count', netwatch_records, 'loss_count', netwatch_labels)
             yield BaseCollector.gauge_collector('netwatch_icmp_response_count', 'Netwatch ICMP Loss Count', netwatch_records, 'response_count', netwatch_labels)
+            yield BaseCollector.gauge_collector('netwatch_icmp_sent_count', 'Netwatch ICMP Sent Count', netwatch_records, 'sent_count', netwatch_labels)
             yield BaseCollector.gauge_collector('netwatch_icmp_rtt_avg', 'Netwatch ICMP RTT Average', netwatch_records, 'rtt_avg', netwatch_labels)
             yield BaseCollector.gauge_collector('netwatch_icmp_rtt_jitter', 'Netwatch ICMP RTT Jitter', netwatch_records, 'rtt_jitter', netwatch_labels)
             yield BaseCollector.gauge_collector('netwatch_icmp_rtt_max', 'Netwatch ICMP RTT Max', netwatch_records, 'rtt_max', netwatch_labels)
             yield BaseCollector.gauge_collector('netwatch_icmp_rtt_min', 'Netwatch ICMP RTT Min', netwatch_records, 'rtt_min', netwatch_labels)
             yield BaseCollector.gauge_collector('netwatch_icmp_rtt_stdev', 'Netwatch ICMP RTT Standard Deviation', netwatch_records, 'rtt_stdev', netwatch_labels)
-            yield BaseCollector.gauge_collector('netwatch_icmp_sent_count', 'Netwatch ICMP Sent Count', netwatch_records, 'sent_count', netwatch_labels)
 
             # HTTP(S)
             yield BaseCollector.gauge_collector('netwatch_http_status_code', 'Netwatch HTTP Status Code', netwatch_records, 'http_status_code', netwatch_labels)

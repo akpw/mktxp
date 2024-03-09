@@ -25,15 +25,14 @@ class NetwatchMetricsDataSource:
             metric_labels = []
         try:
             netwatch_records = router_entry.api_connection.router_api().get_resource('/tool/netwatch').get(disabled='false')
-            if 'name' in metric_labels:
-
-                for netwatch_record in netwatch_records:
-                    comment = netwatch_record.get('comment')
-                    host = netwatch_record.get('host')
-                    if comment:
-                        netwatch_record['name'] = f'{host} ({comment[0:20]})' if not router_entry.config_entry.use_comments_over_names else comment
-                    else:
-                        netwatch_record['name'] = host
+            for netwatch_record in netwatch_records:
+                # Filter high packet loss cases
+                if netwatch_record['type'] == 'icmp' and float(netwatch_record['loss-percent']) > 50:
+                    netwatch_record['rtt_avg'] = None
+                    netwatch_record['rtt_jitter'] = None
+                    netwatch_record['rtt_max'] = None
+                    netwatch_record['rtt_min'] = None
+                    netwatch_record['rtt_stdev'] = None
 
             # translation rules
             translation_table = {
