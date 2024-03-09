@@ -34,14 +34,13 @@ class BaseDSProcessor:
 
             if add_router_id:
                 for key, value in router_entry.router_id.items():
-                    renamed_record[key] = value
-
+                    translated_record[key] = value
+            
             # translate fields if needed
             for key, func in translation_table.items():
-                renamed_record[key] = func(renamed_record.get(key))
-
-            labeled_records.append(renamed_record)
-
+                translated_record[key] = func(translated_record.get(key))
+            labeled_records.append(translated_record)
+            
         return labeled_records
 
 
