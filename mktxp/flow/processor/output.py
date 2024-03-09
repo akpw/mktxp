@@ -102,6 +102,23 @@ class BaseOutputProcessor:
         return f"{int(rate / 1000 ** power)} {['bps', 'Kbps', 'Mbps', 'Gbps'][int(power)]}"
 
     @staticmethod
+    def parse_timedelta(time):
+        duration_interval_rgx = config_handler.re_compiled.get('duration_interval_rgx')
+        if not duration_interval_rgx:
+            duration_interval_rgx = re.compile(r'((?P<weeks>\d+)w)?((?P<days>\d+)d)?((?P<hours>\d+)h)?((?P<minutes>\d+)m)?((?P<seconds>\d+)s)?((?P<milliseconds>\d+)ms)?')
+            config_handler.re_compiled['duration_interval_rgx'] = duration_interval_rgx                        
+        time_dict = duration_interval_rgx.match(time).groupdict()
+        return timedelta(**{key: int(value) for key, value in time_dict.items() if value})
+
+    @staticmethod
+    def parse_timedelta_seconds(time):
+        return BaseOutputProcessor.parse_timedelta(time).total_seconds()
+
+    @staticmethod
+    def parse_timedelta_milliseconds(time):
+        return BaseOutputProcessor.parse_timedelta(time) / timedelta(milliseconds=1)
+
+    @staticmethod
     def parse_signal_strength(signal_strength):
         wifi_signal_strength_rgx = config_handler.re_compiled.get('wifi_signal_strength_rgx')
         if not wifi_signal_strength_rgx:

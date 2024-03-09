@@ -91,6 +91,8 @@ The default configuration file comes with a sample configuration, making it easy
 
     user = True                     # Active Users metrics
     queue = True                    # Queues metrics
+
+    bgp = False                     # BGP sessions metrics
     
     remote_dhcp_entry = None        # An MKTXP entry for remote DHCP info resolution (capsman/wireless)
 
@@ -277,7 +279,14 @@ When gathering various IP address-related metrics, MKTXP automatically resolves 
 ```
 remote_dhcp_entry = None        # An MKTXP entry for remote DHCP info resolution in capsman/wireless
 ```
-`MKTXP entry` in this context can be any other mktxp.conf entry, and for the sole purpose of providing DHCP info it does not even need to be enabled.
+`MKTXP entry` in this context can be any other mktxp.conf entry, and for the sole purpose of providing DHCP info it does not even need to be enabled.  An example:
+```
+[RouterA]
+    ...  # RouterA settings as normal
+
+[RouterB]
+    remote_dhcp_entry = RouterA  # Will resolve via RouterA
+```
 
 ### Connections stats
 With many connected devices everywhere, one can often only guess where do they go to and what they actually do with all the information from your network environment. MKTXP let's you easily track those with a single option, with results available both from [mktxp dashboard](https://grafana.com/grafana/dashboards/13679-mikrotik-mktxp-exporter/) and the command line:
