@@ -32,10 +32,14 @@ class WireguardCollector(BaseCollector):
 
         if wg_interface_records:
             if router_entry.config_entry.wireguard_peers:
-                wg_peer_labels = ['id', 'interface', 'public_key', 'endpoint_address', 'endpoint_port', 'current_endpoint_address', 'current_endpoint_port', 'allowed_address', 'comment']
+                wg_peer_info_labels = ['id', 'interface', 'public_key', 'endpoint_address', 'endpoint_port', 'current_endpoint_address', 'current_endpoint_port', 'allowed_address', 'comment']
                 wg_peer_values = ['tx', 'rx', 'last_handshake']
-                wg_peer_records = WireguardPeerMetricsDataSource.metric_records(router_entry, metric_labels = wg_peer_labels + wg_peer_values)
+                wg_peer_records = WireguardPeerMetricsDataSource.metric_records(router_entry, metric_labels = wg_peer_info_labels + wg_peer_values)
 
+                peer_info = BaseCollector.info_collector('wireguard_peer', 'Wireguard Peer Info', wg_peer_records, wg_peer_info_labels)
+                yield peer_info
+
+                wg_peer_labels = ['id', 'interface', 'comment']
                 last_handshake_metrics = BaseCollector.gauge_collector('wireguard_peer_last_handshake', 'Wireguard Peer Last Handshake', wg_peer_records, 'last_handshake', wg_peer_labels)
                 yield last_handshake_metrics
 
