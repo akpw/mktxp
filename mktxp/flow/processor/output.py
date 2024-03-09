@@ -67,14 +67,15 @@ class BaseOutputProcessor:
     def resolve_dhcp(router_entry, registration_record, id_key = 'mac_address', resolve_address = True):
         if not router_entry.dhcp_records:
             DHCPMetricsDataSource.metric_records(router_entry)
-        dhcp_name = registration_record.get(id_key)
+        mac = registration_record.get(id_key)
+        dhcp_name = ''
         dhcp_address = 'No DHCP Record'
         dhcp_comment = ''
 
-        dhcp_lease_record = router_entry.dhcp_record(dhcp_name)
+        dhcp_lease_record = router_entry.dhcp_record(mac)
         if dhcp_lease_record:
             dhcp_comment = dhcp_lease_record.get('comment', '')
-            dhcp_name = dhcp_lease_record['host_name']
+            dhcp_name = dhcp_lease_record.get('host_name', '')
             dhcp_address = dhcp_lease_record.get('address', '')
 
         registration_record['dhcp_name'] = dhcp_name
