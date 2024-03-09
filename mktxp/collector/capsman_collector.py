@@ -55,13 +55,13 @@ class CapsmanCollector(BaseCollector):
                 for registration_record in registration_records:
                     BaseOutputProcessor.augment_record(router_entry, registration_record)
 
-                tx_byte_metrics = BaseCollector.counter_collector('capsman_clients_tx_bytes', 'Number of sent packet bytes', registration_records, 'tx_bytes', ['dhcp_name', 'mac_address', 'dhcp_comment'])
+                tx_byte_metrics = BaseCollector.counter_collector('capsman_clients_tx_bytes', 'Number of sent packet bytes', registration_records, 'tx_bytes', ['dhcp_name', 'dhcp_address', 'mac_address', 'dhcp_comment'])
                 yield tx_byte_metrics
 
-                rx_byte_metrics = BaseCollector.counter_collector('capsman_clients_rx_bytes', 'Number of received packet bytes', registration_records, 'rx_bytes', ['dhcp_name', 'mac_address', 'dhcp_comment'])
+                rx_byte_metrics = BaseCollector.counter_collector('capsman_clients_rx_bytes', 'Number of received packet bytes', registration_records, 'rx_bytes', ['dhcp_name', 'dhcp_address', 'mac_address', 'dhcp_comment'])
                 yield rx_byte_metrics
 
-                signal_strength_metrics = BaseCollector.gauge_collector('capsman_clients_signal_strength', 'Client devices signal strength', registration_records, 'rx_signal', ['dhcp_name', 'mac_address', 'dhcp_comment'])
+                signal_strength_metrics = BaseCollector.gauge_collector('capsman_clients_signal_strength', 'Client devices signal strength', registration_records, 'rx_signal', ['dhcp_name', 'dhcp_address', 'mac_address', 'dhcp_comment'])
                 yield signal_strength_metrics
 
                 registration_metrics = BaseCollector.info_collector('capsman_clients_devices', 'Registered client devices info',
