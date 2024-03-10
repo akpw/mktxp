@@ -37,10 +37,11 @@ class BGPCollector(BaseCollector):
                     if value:            
                         bgp_record[translated_field] = BGPCollector._translated_values(translated_field, value)
 
-            session_id_labes = ['name', 'remote_address', 'remote_as', 'local_as', 'remote_afi', 'local_afi']
-            bgp_sessions_metrics = BaseCollector.info_collector('bgp_sessions_info', 'BGP sessions info', bgp_records, session_id_labes)
+            session_info_labes = ['name', 'remote_address', 'remote_as', 'local_as', 'remote_afi', 'local_afi']
+            bgp_sessions_metrics = BaseCollector.info_collector('bgp_sessions_info', 'BGP sessions info', bgp_records, session_info_labes)
             yield bgp_sessions_metrics
 
+            session_id_labes = ['name']
             remote_messages_metrics = BaseCollector.counter_collector('bgp_remote_messages', 'Number of remote messages', bgp_records, 'remote_messages', session_id_labes)
             yield remote_messages_metrics
 
