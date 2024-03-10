@@ -12,10 +12,9 @@
 ## GNU General Public License for more details.
 
 
-from http.server import HTTPServer
 from datetime import datetime
 from prometheus_client.core import REGISTRY
-from prometheus_client import MetricsHandler
+from prometheus_client import make_wsgi_app
 
 from mktxp.cli.config.config import config_handler
 from mktxp.flow.collector_handler import CollectorHandler
@@ -27,6 +26,8 @@ from mktxp.cli.output.wifi_out import WirelessOutput
 from mktxp.cli.output.dhcp_out import DHCPOutput
 from mktxp.cli.output.conn_stats_out import ConnectionsStatsOutput
 
+from waitress import serve
+
 
 class ExportProcessor:
     ''' Base Export Processing
@@ -34,16 +35,9 @@ class ExportProcessor:
     @staticmethod
     def start():
         REGISTRY.register(CollectorHandler(RouterEntriesHandler(), CollectorRegistry()))
-        ExportProcessor.run(port=config_handler.system_entry().port)
-
-    @staticmethod
-    def run(server_class=HTTPServer, handler_class=MetricsHandler, port=None):
-        server_address = ('', port)
-        httpd = server_class(server_address, handler_class)
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f'{current_time} Running HTTP metrics server on port {port}')
-        httpd.serve_forever()
-
+        print(f'{current_time} Running HTTP metrics server on: {config_handler.system_entry().listen}')
+        serve(make_wsgi_app(), listen = config_handler.system_entry().listen)
 
 class OutputProcessor:
     ''' Base CLI Processing
