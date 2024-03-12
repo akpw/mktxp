@@ -24,20 +24,20 @@ def check_version():
         print(\
         '''
         Mikrotik Prometheus Exporter requires
-                           Python version 3.6 or later.
+                           Python version 3.8 or later.
 
-        You can create an isolated Python 3.6 environment
+        You can create an isolated Python 3.8 environment
         with the virtualenv tool:
           http://docs.python-guide.org/en/latest/dev/virtualenvs
 
         ''')
         sys.exit(0)
-    elif sys.version_info.major == 3 and sys.version_info.minor < 6:
+    elif sys.version_info.major == 3 and sys.version_info.minor < 8:
         print(\
         '''
 
         Mikrotik Prometheus Exporter requires
-                            Python version 3.6 or later.
+                            Python version 3.8 or later.
 
         Please upgrade to the latest Python 3.x version.
 

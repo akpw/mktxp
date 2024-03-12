@@ -91,6 +91,8 @@ The default configuration file comes with a sample configuration, making it easy
 
     user = True                     # Active Users metrics
     queue = True                    # Queues metrics
+
+    bgp = False                     # BGP sessions metrics
     
     remote_dhcp_entry = None        # An MKTXP entry for remote DHCP info resolution (capsman/wireless)
 
@@ -211,7 +213,7 @@ mktxp edit -i
 
 ```
 [MKTXP]
-    port = 49090                    
+    listen = '0.0.0.0:49090'         # Space separated list of socket addresses to listen to, both IPV4 and IPV6
     socket_timeout = 2
     
     initial_delay_on_failure = 120
@@ -273,7 +275,7 @@ optional arguments:
 While most of the [mktxp options](https://github.com/akpw/mktxp#getting-started) are self explanatory, some might require a bit of a context.
 
 ### Remote DHCP resolution
-When gathering various IP address-related metrics, MKTXP automatically resolves IP addresses whenever DHCP info is available. In many cases however, the exported devices do not have this information locally and instead rely on central DHCP servers. To improve readibility / usefulness of the exported metrics, MKTXP supports remote DHCP server calls via the following option:
+When gathering various IP address-related metrics, MKTXP automatically resolves IP addresses whenever DHCP info is available. In many cases however, the exported devices do not have this information locally and instead rely on central DHCP servers. To improve readability / usefulness of the exported metrics, MKTXP supports remote DHCP server calls via the following option:
 ```
 remote_dhcp_entry = None        # An MKTXP entry for remote DHCP info resolution in capsman/wireless
 ```
@@ -321,11 +323,13 @@ total_max_scrape_duration = 30      # Max overall duration of all metrics collec
 To keeps things within expected boundaries, the last two parameters allows for controlling both individual and overall scrape durations
 
 
-### mktxp port
-By default, mktxp runs it's HTTP metrics endpoint on port 49090. You can change it via the following [system option](https://github.com/akpw/mktxp/blob/main/README.md#mktxp-system-configuration):
+### mktxp endpoint listen addresses
+By default, mktxp runs it's HTTP metrics endpoint on any IPv4 address on port 49090. However, it is also able to listen on multiple socket addresses, both IPv4 and IPv6. 
+You can configure this behaviour via the following [system option](https://github.com/akpw/mktxp/blob/main/README.md#mktxp-system-configuration), setting ```listen``` to a space-separated list of sockets to listen to, e.g.:
 ```
-port = 49090 
+listen = '0.0.0.0:49090 [::1]:49090'
 ```
+A wildcard for the hostname is supported as well, and binding to both IPv4/IPv6 as available.
 
 ## Setting up MKTXP to run as a Linux Service
 If you've installed MKTXP on a Linux system, you can run it with system boot via adding a service. \

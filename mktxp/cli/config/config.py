@@ -46,6 +46,7 @@ class CollectorKeys:
     QUEUE_SIMPLE_COLLECTOR = 'QueueSimpleCollector'
     KID_CONTROL_DEVICE_COLLECTOR = 'KidControlCollector'
     USER_COLLECTOR = 'UserCollector'
+    BGP_COLLECTOR = 'BGPCollector'
     MKTXP_COLLECTOR = 'MKTXPCollector'
 
 
@@ -56,6 +57,7 @@ class MKTXPConfigKeys:
     ENABLED_KEY = 'enabled'
     HOST_KEY = 'hostname'
     PORT_KEY = 'port'
+    LISTEN_KEY = 'listen'
     USER_KEY = 'username'
     PASSWD_KEY = 'password'
 
@@ -87,6 +89,8 @@ class MKTXPConfigKeys:
 
     FE_USER_KEY = 'user'
     FE_QUEUE_KEY = 'queue'
+    FE_BGP_KEY = 'bgp'
+
     FE_REMOTE_DHCP_ENTRY = 'remote_dhcp_entry'
 
     FE_CHECK_FOR_UPDATES = 'check_for_updates'
@@ -133,7 +137,7 @@ class MKTXPConfigKeys:
 
 
     BOOLEAN_KEYS_NO = {ENABLED_KEY, SSL_KEY, NO_SSL_CERTIFICATE, FE_CHECK_FOR_UPDATES, FE_KID_CONTROL_DEVICE,
-                       SSL_CERTIFICATE_VERIFY, FE_IPV6_FIREWALL_KEY, FE_IPV6_NEIGHBOR_KEY, FE_CONNECTION_STATS_KEY}
+                       SSL_CERTIFICATE_VERIFY, FE_IPV6_FIREWALL_KEY, FE_IPV6_NEIGHBOR_KEY, FE_CONNECTION_STATS_KEY, FE_BGP_KEY}
 
     # Feature keys enabled by default
     BOOLEAN_KEYS_YES = {FE_DHCP_KEY, FE_PACKAGE_KEY, FE_DHCP_LEASE_KEY, FE_DHCP_POOL_KEY, FE_IP_CONNECTIONS_KEY, FE_INTERFACE_KEY, FE_FIREWALL_KEY,
@@ -150,7 +154,7 @@ class MKTXPConfigKeys:
                       MKTXP_INC_DIV, MKTXP_BANDWIDTH_TEST_INTERVAL, MKTXP_MIN_COLLECT_INTERVAL,
                       MKTXP_MAX_WORKER_THREADS, MKTXP_MAX_SCRAPE_DURATION, MKTXP_TOTAL_MAX_SCRAPE_DURATION)
 
-    # MKTXP config entry nane
+    # MKTXP config entry name
     MKTXP_CONFIG_ENTRY_NAME = 'MKTXP'
 
 
@@ -162,9 +166,9 @@ class ConfigEntry:
                                                        MKTXPConfigKeys.FE_FIREWALL_KEY, MKTXPConfigKeys.FE_MONITOR_KEY, MKTXPConfigKeys.FE_ROUTE_KEY, MKTXPConfigKeys.FE_WIRELESS_KEY, MKTXPConfigKeys.FE_WIRELESS_CLIENTS_KEY,
                                                        MKTXPConfigKeys.FE_IP_CONNECTIONS_KEY, MKTXPConfigKeys.FE_CONNECTION_STATS_KEY, MKTXPConfigKeys.FE_CAPSMAN_KEY, MKTXPConfigKeys.FE_CAPSMAN_CLIENTS_KEY, MKTXPConfigKeys.FE_POE_KEY, MKTXPConfigKeys.FE_NETWATCH_KEY,
                                                        MKTXPConfigKeys.MKTXP_USE_COMMENTS_OVER_NAMES, MKTXPConfigKeys.FE_PUBLIC_IP_KEY, MKTXPConfigKeys.FE_IPV6_FIREWALL_KEY, MKTXPConfigKeys.FE_IPV6_NEIGHBOR_KEY,
-                                                       MKTXPConfigKeys.FE_USER_KEY, MKTXPConfigKeys.FE_QUEUE_KEY, MKTXPConfigKeys.FE_REMOTE_DHCP_ENTRY, MKTXPConfigKeys.FE_CHECK_FOR_UPDATES, MKTXPConfigKeys.FE_KID_CONTROL_DEVICE,
+                                                       MKTXPConfigKeys.FE_USER_KEY, MKTXPConfigKeys.FE_QUEUE_KEY, MKTXPConfigKeys.FE_REMOTE_DHCP_ENTRY, MKTXPConfigKeys.FE_CHECK_FOR_UPDATES, MKTXPConfigKeys.FE_KID_CONTROL_DEVICE, MKTXPConfigKeys.FE_BGP_KEY,
                                                        ])
-    MKTXPSystemEntry = namedtuple('MKTXPSystemEntry', [MKTXPConfigKeys.PORT_KEY, MKTXPConfigKeys.MKTXP_SOCKET_TIMEOUT,
+    MKTXPSystemEntry = namedtuple('MKTXPSystemEntry', [MKTXPConfigKeys.PORT_KEY, MKTXPConfigKeys.LISTEN_KEY, MKTXPConfigKeys.MKTXP_SOCKET_TIMEOUT,
                                                        MKTXPConfigKeys.MKTXP_INITIAL_DELAY, MKTXPConfigKeys.MKTXP_MAX_DELAY,
                                                        MKTXPConfigKeys.MKTXP_INC_DIV, MKTXPConfigKeys.MKTXP_BANDWIDTH_KEY,
                                                        MKTXPConfigKeys.MKTXP_VERBOSE_MODE, MKTXPConfigKeys.MKTXP_BANDWIDTH_TEST_INTERVAL,
@@ -288,10 +292,10 @@ class MKTXPConfigHandler:
     def _read_from_disk(self):
         ''' (Force-)Read conf data from disk
         '''
-        self.config = ConfigObj(self.usr_conf_data_path)
+        self.config = ConfigObj(self.usr_conf_data_path, indent_type = '    ')
         self.config.preserve_comments = True
 
-        self._config = ConfigObj(self.mktxp_conf_path)
+        self._config = ConfigObj(self.mktxp_conf_path, indent_type = '    ')
         self._config.preserve_comments = True
 
     def _create_os_path(self, os_path, resource_path):
@@ -360,7 +364,8 @@ class MKTXPConfigHandler:
                 system_entry_reader[key] = self._config[entry_name].as_int(key)
             else:
                 system_entry_reader[key] = self._default_value_for_key(key)
-                new_keys.append(key) # read from disk next time
+                if key not in (MKTXPConfigKeys.PORT_KEY):  # Port key has been depricated
+                    new_keys.append(key) # read from disk next time
 
         for key in MKTXPConfigKeys.SYSTEM_BOOLEAN_KEYS_NO.union(MKTXPConfigKeys.SYSTEM_BOOLEAN_KEYS_YES):
             if self._config[entry_name].get(key) is not None:
@@ -369,9 +374,17 @@ class MKTXPConfigHandler:
                 system_entry_reader[key] = True if key in MKTXPConfigKeys.SYSTEM_BOOLEAN_KEYS_YES else False
                 new_keys.append(key) # read from disk next time
 
+        # listen 
+        if self._config[entry_name].get(MKTXPConfigKeys.LISTEN_KEY):
+            system_entry_reader[MKTXPConfigKeys.LISTEN_KEY] = self._config[entry_name].get(MKTXPConfigKeys.LISTEN_KEY)
+        else:
+            system_entry_reader[MKTXPConfigKeys.LISTEN_KEY] = f'0.0.0.0:{system_entry_reader[MKTXPConfigKeys.PORT_KEY]}'
+            new_keys.append(MKTXPConfigKeys.LISTEN_KEY) # read from disk next time
+
         if new_keys:
             self._config[entry_name] = system_entry_reader
             try:
+                self._config[entry_name].pop(MKTXPConfigKeys.PORT_KEY, None) # Port key has been depricated
                 self._config.write()
                 if self._config[entry_name].as_bool(MKTXPConfigKeys.MKTXP_VERBOSE_MODE):
                     print(f'Updated system entry {entry_name} with new system keys {new_keys}')    

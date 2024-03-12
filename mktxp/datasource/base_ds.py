@@ -23,15 +23,14 @@ class BaseDSProcessor:
         if metric_labels is None:
             metric_labels = []   
         if translation_table is None:
-            translation_table = {}                 
-        dash2_ = lambda x : x.replace('-', '_')
+            translation_table = {}         
         if len(metric_labels) == 0 and len(router_records) > 0:
-            metric_labels = [dash2_(key) for key in router_records[0].keys()]
+            metric_labels = [BaseDSProcessor._normalise_keys(key) for key in router_records[0].keys()]
         metric_labels = set(metric_labels)      
 
         labeled_records = []
         for router_record in router_records:
-            translated_record = {dash2_(key): value for (key, value) in router_record.items() if dash2_(key) in metric_labels}
+            translated_record = {BaseDSProcessor._normalise_keys(key): value for (key, value) in router_record.items() if BaseDSProcessor._normalise_keys(key) in metric_labels}
 
             if add_router_id:
                 for key, value in router_entry.router_id.items():
@@ -43,3 +42,13 @@ class BaseDSProcessor:
             labeled_records.append(translated_record)
             
         return labeled_records
+
+
+    @staticmethod
+    def _normalise_keys(key):
+        chars = ".-"
+        for chr in chars:
+            if chr in key:
+                key = key.replace(chr, "_")     
+        return key
+
