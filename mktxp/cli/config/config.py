@@ -391,7 +391,7 @@ class MKTXPConfigHandler:
             if compact_config and config_entry_reader[MKTXPConfigKeys.PORT_KEY] == self.default_config_entry_reader[MKTXPConfigKeys.PORT_KEY]:
                 drop_keys.append(MKTXPConfigKeys.PORT_KEY)    
         else:
-            config_entry_reader[MKTXPConfigKeys.PORT_KEY] = self.default_config_entry_reader[key]
+            config_entry_reader[MKTXPConfigKeys.PORT_KEY] = self.default_config_entry_reader[MKTXPConfigKeys.PORT_KEY]
 
         # If allowed, compact mktxp.conf entry
         if drop_keys and compact_config:
