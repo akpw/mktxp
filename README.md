@@ -112,7 +112,7 @@ The default configuration file comes with a sample configuration, making it easy
 
 Most options are easy to understand at first glance, and some are described in more details [later](https://github.com/akpw/mktxp#advanced-features).
 
-💡 To automatically optimise the older format of `mktxp.conf` in the existing installs, set `compact_default_conf_values = True` in [the mktxp system config](https://github.com/akpw/mktxp#mktxp-system-configuration)
+💡 To automatically migrate from the older `mktxp.conf` format in the existing installs, just set `compact_default_conf_values = True` in [the mktxp system config](https://github.com/akpw/mktxp#mktxp-system-configuration)
 
 #### Local install
 If you have a local MKTXP installation, you can edit the configuration file with your default system editor directly from mktxp:
