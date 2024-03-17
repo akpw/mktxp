@@ -109,6 +109,7 @@ class MKTXPConfigKeys:
     MKTXP_MAX_WORKER_THREADS = 'max_worker_threads'
     MKTXP_MAX_SCRAPE_DURATION = 'max_scrape_duration'
     MKTXP_TOTAL_MAX_SCRAPE_DURATION = 'total_max_scrape_duration'
+    MKTXP_COMPACT_CONFIG = 'compact_default_conf_values'
 
     # UnRegistered entries placeholder
     NO_ENTRIES_REGISTERED = 'NoEntriesRegistered'
@@ -119,7 +120,11 @@ class MKTXPConfigKeys:
     ROUTERBOARD_NAME = 'routerboard_name'
     ROUTERBOARD_ADDRESS = 'routerboard_address'
 
-    # Default values
+    # Default values    
+    DEFAULT_HOST_KEY = 'localhost'
+    DEFAULT_USER_KEY = 'user'
+    DEFAULT_PASSWORD_KEY = 'password'    
+
     DEFAULT_API_PORT = 8728
     DEFAULT_API_SSL_PORT = 8729
     DEFAULT_FE_REMOTE_DHCP_ENTRY = 'None'
@@ -130,7 +135,6 @@ class MKTXPConfigKeys:
     DEFAULT_MKTXP_INC_DIV = 5
     DEFAULT_MKTXP_BANDWIDTH_TEST_INTERVAL = 420
     DEFAULT_MKTXP_MIN_COLLECT_INTERVAL = 5
-    DEFAULT_MKTXP_FETCH_IN_PARALLEL = False
     DEFAULT_MKTXP_MAX_WORKER_THREADS = 5
     DEFAULT_MKTXP_MAX_SCRAPE_DURATION = 10
     DEFAULT_MKTXP_TOTAL_MAX_SCRAPE_DURATION = 30
@@ -146,7 +150,7 @@ class MKTXPConfigKeys:
                         FE_NETWATCH_KEY, FE_PUBLIC_IP_KEY, FE_USER_KEY, FE_QUEUE_KEY}
 
     SYSTEM_BOOLEAN_KEYS_YES = set()
-    SYSTEM_BOOLEAN_KEYS_NO = {MKTXP_BANDWIDTH_KEY, MKTXP_VERBOSE_MODE, MKTXP_FETCH_IN_PARALLEL}
+    SYSTEM_BOOLEAN_KEYS_NO = {MKTXP_BANDWIDTH_KEY, MKTXP_VERBOSE_MODE, MKTXP_FETCH_IN_PARALLEL, MKTXP_COMPACT_CONFIG}
 
     STR_KEYS = (HOST_KEY, USER_KEY, PASSWD_KEY, FE_REMOTE_DHCP_ENTRY)
     INT_KEYS =  ()
@@ -154,7 +158,8 @@ class MKTXPConfigKeys:
                       MKTXP_INC_DIV, MKTXP_BANDWIDTH_TEST_INTERVAL, MKTXP_MIN_COLLECT_INTERVAL,
                       MKTXP_MAX_WORKER_THREADS, MKTXP_MAX_SCRAPE_DURATION, MKTXP_TOTAL_MAX_SCRAPE_DURATION)
 
-    # MKTXP config entry name
+    # MKTXP configs entry names
+    DEFAULT_ENTRY_KEY = 'default'
     MKTXP_CONFIG_ENTRY_NAME = 'MKTXP'
 
 
@@ -174,7 +179,7 @@ class ConfigEntry:
                                                        MKTXPConfigKeys.MKTXP_VERBOSE_MODE, MKTXPConfigKeys.MKTXP_BANDWIDTH_TEST_INTERVAL,
                                                        MKTXPConfigKeys.MKTXP_MIN_COLLECT_INTERVAL, MKTXPConfigKeys.MKTXP_FETCH_IN_PARALLEL,
                                                        MKTXPConfigKeys.MKTXP_MAX_WORKER_THREADS, MKTXPConfigKeys.MKTXP_MAX_SCRAPE_DURATION, 
-                                                       MKTXPConfigKeys.MKTXP_TOTAL_MAX_SCRAPE_DURATION])
+                                                       MKTXPConfigKeys.MKTXP_TOTAL_MAX_SCRAPE_DURATION, MKTXPConfigKeys.MKTXP_COMPACT_CONFIG])
 
 
 class OSConfig(metaclass=ABCMeta):
@@ -265,11 +270,14 @@ class MKTXPConfigHandler:
 
         self._read_from_disk()
 
+        self.default_config_entry_reader = self._default_config_entry_reader()
+        self.system_entry = self._system_entry()
+
     # MKTXP entries
     def registered_entries(self):
         ''' All MKTXP registered entries
         '''
-        return (entry_name for entry_name in self.config.keys())
+        return (entry_name for entry_name in self.config.keys() if entry_name != MKTXPConfigKeys.DEFAULT_ENTRY_KEY )
 
     def registered_entry(self, entry_name):
         ''' A specific MKTXP registered entry by name
@@ -282,13 +290,13 @@ class MKTXPConfigHandler:
         entry_reader = self._config_entry_reader(entry_name)
         return ConfigEntry.MKTXPConfigEntry(**entry_reader) if entry_reader else None
 
-    def system_entry(self):
+    # Helpers
+    def _system_entry(self):
         ''' MKTXP internal config entry
         '''
         _entry_reader = self._system_entry_reader()
         return ConfigEntry.MKTXPSystemEntry(**_entry_reader)
 
-    # Helpers
     def _read_from_disk(self):
         ''' (Force-)Read conf data from disk
         '''
@@ -304,55 +312,6 @@ class MKTXPConfigHandler:
             lookup_path = resource_filename(
                 Requirement.parse("mktxp"), resource_path)
             shutil.copy(lookup_path, os_path)
-
-    def _config_entry_reader(self, entry_name):
-        config_entry_reader = {}
-        new_keys = []
-
-        for key in MKTXPConfigKeys.BOOLEAN_KEYS_NO.union(MKTXPConfigKeys.BOOLEAN_KEYS_YES):
-            if self.config[entry_name].get(key) is not None:
-                config_entry_reader[key] = self.config[entry_name].as_bool(key)
-            else:
-                config_entry_reader[key] = True if key in MKTXPConfigKeys.BOOLEAN_KEYS_YES else False
-                new_keys.append(key) # read from disk next time
-
-        for key in MKTXPConfigKeys.STR_KEYS:
-            if self.config[entry_name].get(key):
-                config_entry_reader[key] = self.config[entry_name].get(key)
-            else:
-                config_entry_reader[key] = self._default_value_for_key(key)
-                new_keys.append(key) # read from disk next time
-
-            if key is MKTXPConfigKeys.PASSWD_KEY and type(config_entry_reader[key]) is list:
-                config_entry_reader[key] = ','.join(config_entry_reader[key])
-
-        for key in MKTXPConfigKeys.INT_KEYS:
-            if self.config[entry_name].get(key):
-                config_entry_reader[key] = self.config[entry_name].as_int(key)
-            else:
-                config_entry_reader[key] = self._default_value_for_key(key)
-                new_keys.append(key) # read from disk next time
-
-        # port
-        if self.config[entry_name].get(MKTXPConfigKeys.PORT_KEY):
-            config_entry_reader[MKTXPConfigKeys.PORT_KEY] = self.config[entry_name].as_int(
-                MKTXPConfigKeys.PORT_KEY)
-        else:
-            config_entry_reader[MKTXPConfigKeys.PORT_KEY] = self._default_value_for_key(
-                MKTXPConfigKeys.SSL_KEY, config_entry_reader[MKTXPConfigKeys.SSL_KEY])
-            new_keys.append(MKTXPConfigKeys.PORT_KEY) # read from disk next time
-        
-        if new_keys:
-            self.config[entry_name] = config_entry_reader
-            try:
-                self.config.write()
-                if self._config[MKTXPConfigKeys.MKTXP_CONFIG_ENTRY_NAME].as_bool(MKTXPConfigKeys.MKTXP_VERBOSE_MODE):
-                    print(f'Updated router entry {entry_name} with new feature keys {new_keys}')                    
-            except Exception as exc:
-                print(f'Error updating router entry {entry_name} with new feature keys {new_keys}: {exc}')
-                print('Please update mktxp.conf to its latest version manually')
-
-        return config_entry_reader
 
     def _system_entry_reader(self):
         system_entry_reader = {}
@@ -394,9 +353,115 @@ class MKTXPConfigHandler:
 
         return system_entry_reader
 
+    def _config_entry_reader(self, entry_name):
+        config_entry_reader = {}
+        compact_config = self._config[MKTXPConfigKeys.MKTXP_CONFIG_ENTRY_NAME].as_bool(MKTXPConfigKeys.MKTXP_COMPACT_CONFIG)
+        drop_keys = []
+
+        for key in MKTXPConfigKeys.BOOLEAN_KEYS_NO.union(MKTXPConfigKeys.BOOLEAN_KEYS_YES):
+            if self.config[entry_name].get(key) is not None:
+                config_entry_reader[key] = self.config[entry_name].as_bool(key)
+                if compact_config and config_entry_reader[key] == self.default_config_entry_reader[key]:
+                    drop_keys.append(key)
+            else:
+                config_entry_reader[key] = self.default_config_entry_reader[key]
+
+        for key in MKTXPConfigKeys.STR_KEYS:
+            if self.config[entry_name].get(key):
+                config_entry_reader[key] = self.config[entry_name].get(key)
+                if key is MKTXPConfigKeys.PASSWD_KEY and type(config_entry_reader[key]) is list:
+                    config_entry_reader[key] = ','.join(config_entry_reader[key])         
+
+                if compact_config and config_entry_reader[key] == self.default_config_entry_reader[key]:
+                    drop_keys.append(key)
+            else:
+                config_entry_reader[key] = self.default_config_entry_reader[key]
+
+        for key in MKTXPConfigKeys.INT_KEYS:
+            if self.config[entry_name].get(key):
+                config_entry_reader[key] = self.config[entry_name].as_int(key)
+                if compact_config and config_entry_reader[key] == self.default_config_entry_reader[key]:
+                    drop_keys.append(key)                
+            else:
+                config_entry_reader[key] = self.default_config_entry_reader[key]
+
+        # port
+        if self.config[entry_name].get(MKTXPConfigKeys.PORT_KEY):
+            config_entry_reader[MKTXPConfigKeys.PORT_KEY] = self.config[entry_name].as_int(MKTXPConfigKeys.PORT_KEY)
+            if compact_config and config_entry_reader[MKTXPConfigKeys.PORT_KEY] == self.default_config_entry_reader[MKTXPConfigKeys.PORT_KEY]:
+                drop_keys.append(MKTXPConfigKeys.PORT_KEY)    
+        else:
+            config_entry_reader[MKTXPConfigKeys.PORT_KEY] = self.default_config_entry_reader[key]
+
+        # If allowed, compact mktxp.conf entry
+        if drop_keys and compact_config:
+            for key in drop_keys:
+                self.config[entry_name].pop(key, None)
+            try:
+                self.config.write()
+                if self._config[MKTXPConfigKeys.MKTXP_CONFIG_ENTRY_NAME].as_bool(MKTXPConfigKeys.MKTXP_VERBOSE_MODE):
+                    print(f'compacted router entry {entry_name} for default values of the feature keys {drop_keys}')                    
+            except Exception as exc:
+                print(f'Error compacting router entry {entry_name} for default values of feature keys {drop_keys}: {exc}')
+                print(f'Error compacting router entry {entry_name} for default values of feature keys {drop_keys}: {exc}')
+                print('Please compact mktxp.conf manually')
+
+        return config_entry_reader
+
+    def _default_config_entry_reader(self):
+        default_config_entry_reader = {}
+        new_keys = []
+
+        if not self.config.get(MKTXPConfigKeys.DEFAULT_ENTRY_KEY):
+            self.config[MKTXPConfigKeys.DEFAULT_ENTRY_KEY] = {}
+
+        for key in MKTXPConfigKeys.BOOLEAN_KEYS_NO.union(MKTXPConfigKeys.BOOLEAN_KEYS_YES):
+            if self.config[MKTXPConfigKeys.DEFAULT_ENTRY_KEY].get(key) is not None:
+                default_config_entry_reader[key] = self.config[MKTXPConfigKeys.DEFAULT_ENTRY_KEY].as_bool(key)
+            else:
+                default_config_entry_reader[key] = True if key in MKTXPConfigKeys.BOOLEAN_KEYS_YES else False
+                new_keys.append(key) # read from disk next time
+
+        for key in MKTXPConfigKeys.STR_KEYS:
+            if self.config[MKTXPConfigKeys.DEFAULT_ENTRY_KEY].get(key):
+                default_config_entry_reader[key] = self.config[MKTXPConfigKeys.DEFAULT_ENTRY_KEY].get(key)
+            else:
+                default_config_entry_reader[key] = self._default_value_for_key(key)
+                new_keys.append(key) # read from disk next time
+
+        for key in MKTXPConfigKeys.INT_KEYS:
+            if self.config[MKTXPConfigKeys.DEFAULT_ENTRY_KEY].get(key):
+                default_config_entry_reader[key] = self.config[MKTXPConfigKeys.DEFAULT_ENTRY_KEY].as_int(key)
+            else:
+                default_config_entry_reader[key] = self._default_value_for_key(key)
+                new_keys.append(key) # read from disk next time
+
+        # port
+        if self.config[MKTXPConfigKeys.DEFAULT_ENTRY_KEY].get(MKTXPConfigKeys.PORT_KEY):
+            default_config_entry_reader[MKTXPConfigKeys.PORT_KEY] = self.config[MKTXPConfigKeys.DEFAULT_ENTRY_KEY].as_int(MKTXPConfigKeys.PORT_KEY)
+        else:
+            default_config_entry_reader[MKTXPConfigKeys.PORT_KEY] = self._default_value_for_key(
+                MKTXPConfigKeys.SSL_KEY, default_config_entry_reader[MKTXPConfigKeys.SSL_KEY])
+            new_keys.append(MKTXPConfigKeys.PORT_KEY) # read from disk next time
+        
+        if new_keys:
+            self.config[MKTXPConfigKeys.DEFAULT_ENTRY_KEY] = default_config_entry_reader
+            try:
+                self.config.write()
+                if self._config[MKTXPConfigKeys.MKTXP_CONFIG_ENTRY_NAME].as_bool(MKTXPConfigKeys.MKTXP_VERBOSE_MODE):
+                    print(f'Updated default router entry with new feature keys {new_keys}')                    
+            except Exception as exc:
+                print(f'Error updating default router entry with new feature keys {new_keys}: {exc}')
+                print('Please update mktxp.conf to its latest version manually')
+
+        return default_config_entry_reader
+
     def _default_value_for_key(self, key, value=None):
         return {
             MKTXPConfigKeys.SSL_KEY: lambda value: MKTXPConfigKeys.DEFAULT_API_SSL_PORT if value else MKTXPConfigKeys.DEFAULT_API_PORT,
+            MKTXPConfigKeys.HOST_KEY: lambda _: MKTXPConfigKeys.DEFAULT_HOST_KEY,
+            MKTXPConfigKeys.USER_KEY: lambda _: MKTXPConfigKeys.DEFAULT_USER_KEY,
+            MKTXPConfigKeys.PASSWD_KEY: lambda _: MKTXPConfigKeys.DEFAULT_PASSWORD_KEY,
             MKTXPConfigKeys.PORT_KEY: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_PORT,
             MKTXPConfigKeys.FE_REMOTE_DHCP_ENTRY:  lambda _: MKTXPConfigKeys.DEFAULT_FE_REMOTE_DHCP_ENTRY,
             MKTXPConfigKeys.MKTXP_SOCKET_TIMEOUT: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_SOCKET_TIMEOUT,
@@ -405,7 +470,6 @@ class MKTXPConfigHandler:
             MKTXPConfigKeys.MKTXP_INC_DIV: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_INC_DIV,
             MKTXPConfigKeys.MKTXP_BANDWIDTH_TEST_INTERVAL: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_BANDWIDTH_TEST_INTERVAL,
             MKTXPConfigKeys.MKTXP_MIN_COLLECT_INTERVAL: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_MIN_COLLECT_INTERVAL,
-            MKTXPConfigKeys.MKTXP_FETCH_IN_PARALLEL: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_FETCH_IN_PARALLEL,
             MKTXPConfigKeys.MKTXP_MAX_WORKER_THREADS: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_MAX_WORKER_THREADS,
             MKTXPConfigKeys.MKTXP_MAX_SCRAPE_DURATION: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_MAX_SCRAPE_DURATION,
             MKTXPConfigKeys.MKTXP_TOTAL_MAX_SCRAPE_DURATION: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_TOTAL_MAX_SCRAPE_DURATION,

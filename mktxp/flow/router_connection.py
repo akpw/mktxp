@@ -59,7 +59,7 @@ class RouterAPIConnection:
                 ssl_verify = self.config_entry.ssl_certificate_verify,
                 ssl_context = ctx)
         
-        self.connection.socket_timeout = config_handler.system_entry().socket_timeout
+        self.connection.socket_timeout = config_handler.system_entry.socket_timeout
         self.api = None
 
     def is_connected(self):
@@ -92,11 +92,11 @@ class RouterAPIConnection:
     def _in_connect_timeout(self, connect_timestamp):
         connect_delay = self._connect_delay()
         if (connect_timestamp - self.last_failure_timestamp) < connect_delay:
-            if config_handler.system_entry().verbose_mode: 
+            if config_handler.system_entry.verbose_mode: 
                 print(f'{self.router_name}@{self.config_entry.hostname}: in connect timeout, {int(connect_delay - (connect_timestamp - self.last_failure_timestamp))}secs remaining')
                 print(f'Successive failure count: {self.successive_failure_count}')
             return True
-        if config_handler.system_entry().verbose_mode: 
+        if config_handler.system_entry.verbose_mode: 
             print(f'{self.router_name}@{self.config_entry.hostname}: OK to connect')
             if self.last_failure_timestamp > 0:
                 print(f'Seconds since last failure: {connect_timestamp - self.last_failure_timestamp}')
@@ -104,7 +104,7 @@ class RouterAPIConnection:
         return False
 
     def _connect_delay(self):
-        mktxp_entry = config_handler.system_entry()
+        mktxp_entry = config_handler.system_entry
         connect_delay = (1 + self.successive_failure_count / mktxp_entry.delay_inc_div) * mktxp_entry.initial_delay_on_failure
         return connect_delay if connect_delay < mktxp_entry.max_delay_on_failure else mktxp_entry.max_delay_on_failure
 

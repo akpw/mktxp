@@ -77,7 +77,7 @@ class CollectorHandler:
 
         # overall scrape duration 
         total_scrape_timeout_event = Event()
-        total_scrape_timer = Timer(config_handler.system_entry().total_max_scrape_duration, timeout, args=(total_scrape_timeout_event,))
+        total_scrape_timer = Timer(config_handler.system_entry.total_max_scrape_duration, timeout, args=(total_scrape_timeout_event,))
         total_scrape_timer.start()
 
         with ThreadPoolExecutor(max_workers=max_worker_threads) as executor:
@@ -94,7 +94,7 @@ class CollectorHandler:
                 
                 # Duration of individual scrapes
                 scrape_timeout_event = Event()
-                scrape_timer = Timer(config_handler.system_entry().max_scrape_duration, timeout, args=(scrape_timeout_event,))
+                scrape_timer = Timer(config_handler.system_entry.max_scrape_duration, timeout, args=(scrape_timeout_event,))
                 scrape_timer.start()
 
                 futures[executor.submit(self.collect_router_entry_async, router_entry, scrape_timeout_event, total_scrape_timeout_event)] = scrape_timer
@@ -117,8 +117,8 @@ class CollectorHandler:
 
         # all other collectors
         # Check whether to run in parallel by looking at the mktxp system configuration
-        parallel = config_handler.system_entry().fetch_routers_in_parallel
-        max_worker_threads = config_handler.system_entry().max_worker_threads
+        parallel = config_handler.system_entry.fetch_routers_in_parallel
+        max_worker_threads = config_handler.system_entry.max_worker_threads
         if parallel:
             yield from self.collect_async(max_worker_threads=max_worker_threads)
         else:
@@ -128,9 +128,9 @@ class CollectorHandler:
     def _valid_collect_interval(self):
         now = datetime.now().timestamp()
         diff = now - self.last_collect_timestamp
-        if diff < config_handler.system_entry().minimal_collect_interval:
-            if config_handler.system_entry().verbose_mode:
-                print(f'An attemp to collect metrics within minimal metrics collection interval: {diff} < {config_handler.system_entry().minimal_collect_interval}')
+        if diff < config_handler.system_entry.minimal_collect_interval:
+            if config_handler.system_entry.verbose_mode:
+                print(f'An attemp to collect metrics within minimal metrics collection interval: {diff} < {config_handler.system_entry.minimal_collect_interval}')
                 print('deferring..')
             return False
 

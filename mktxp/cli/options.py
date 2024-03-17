@@ -13,11 +13,10 @@
 
 
 import os
-import pkg_resources
 from argparse import ArgumentParser, HelpFormatter
 from mktxp.cli.config.config import config_handler, MKTXPConfigKeys, CustomConfig
 from mktxp.utils.utils import FSHelper, UniquePartialMatchList, run_cmd
-
+from importlib.metadata import version as Version
 
 class MKTXPCommands:
     INFO = 'info'
@@ -41,7 +40,7 @@ class MKTXPOptionsParser:
     '''
     def __init__(self):
         self._script_name = f'MKTXP'
-        version = pkg_resources.require("mktxp")[0].version
+        version = Version('mktxp')
         self._description =  \
 f'''
 Prometheus Exporter for Mikrotik RouterOS, version {version}
@@ -232,7 +231,7 @@ Selected metrics info can be printed on the command line. For more information, 
             return editor
 
         commands = ['which nano', 'which vi', 'which vim']
-        quiet = not config_handler.system_entry().verbose_mode
+        quiet = not config_handler.system_entry.verbose_mode
         for command in commands:
             editor = run_cmd(command, quiet = quiet).rstrip()
             if editor:

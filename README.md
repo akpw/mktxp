@@ -50,11 +50,20 @@ To get started with MKTXP, you need to edit its main configuration file. This es
 
 The default configuration file comes with a sample configuration, making it easy to copy / edit parameters for your RouterOS devices as needed:
 ```
-[Sample-Router]
-    enabled = False         # turns metrics collection for this RouterOS device on / off
-    
+[Sample-Router-1]
+    # for specific configuration on the router level, overload the defaults here
+    hostname = 192.168.88.1
+
+[Sample-Router-2]
+    # for specific configuration on the router level, overload the defaults here
+    hostname = 192.168.88.2
+
+[default]
+    # this affects configuration of all routers, unless overloaded on their specific levels
+    enabled = True          # turns metrics collection for this RouterOS device on / off
+
     hostname = localhost    # RouterOS IP address
-    port = 8728             # RouterOS API / API-SSL service port
+    port = 8728             # RouterOS IP Port
     
     username = username     # RouterOS user, needs to have 'read' and 'api' permissions
     password = password
@@ -87,7 +96,7 @@ The default configuration file comes with a sample configuration, making it easy
     capsman = True                  # CAPsMAN general metrics
     capsman_clients = True          # CAPsMAN clients metrics    
 
-    kid_control_devices = False     # Kid Control metrics 
+    kid_control_devices = False     # Kid Control metrics    
 
     user = True                     # Active Users metrics
     queue = True                    # Queues metrics
@@ -102,7 +111,7 @@ The default configuration file comes with a sample configuration, making it easy
 ```
 
 Most options are easy to understand at first glance, and some are described in more details [later](https://github.com/akpw/mktxp#advanced-features).
-
+<sup>💡</sup> To automatically optimise older format of the `mktxp.conf` for existing installs, set `compact_default_conf_values = True` in the system config `_mktxp.conf`
 
 #### Local install
 If you have a local MKTXP installation, you can edit the configuration file with your default system editor directly from mktxp:
@@ -230,6 +239,8 @@ mktxp edit -i
     max_worker_threads = 5              # Max number of worker threads that can fetch routers (parallel fetch only)
     max_scrape_duration = 10            # Max duration of individual routers' metrics collection (parallel fetch only)
     total_max_scrape_duration = 30      # Max overall duration of all metrics collection (parallel fetch only)
+
+    compact_default_conf_values = True  # Compact mktxp.conf, so only specific values are kept on the individual routers' level    
 ```    
 <sup>💡</sup> *When changing the default mktxp port for [docker image installs](https://github.com/akpw/mktxp#docker-image-install), you'll need to adjust the `docker run ... -p 49090:49090 ...` command to reflect the new port*
 

@@ -36,8 +36,8 @@ class ExportProcessor:
     def start():
         REGISTRY.register(CollectorHandler(RouterEntriesHandler(), CollectorRegistry()))
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f'{current_time} Running HTTP metrics server on: {config_handler.system_entry().listen}')
-        serve(make_wsgi_app(), listen = config_handler.system_entry().listen)
+        print(f'{current_time} Running HTTP metrics server on: {config_handler.system_entry.listen}')
+        serve(make_wsgi_app(), listen = config_handler.system_entry.listen)
 
 class OutputProcessor:
     ''' Base CLI Processing
