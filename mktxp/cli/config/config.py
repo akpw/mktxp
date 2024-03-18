@@ -17,7 +17,7 @@ import shutil
 from collections import namedtuple
 from configobj import ConfigObj
 from abc import ABCMeta, abstractmethod
-from pkg_resources import Requirement, resource_filename
+import importlib.resources
 from mktxp.utils.utils import FSHelper
 
 
@@ -262,9 +262,9 @@ class MKTXPConfigHandler:
             self.os_config.mktxp_user_dir_path, '_mktxp.conf')
 
         self._create_os_path(self.usr_conf_data_path,
-                             'mktxp/cli/config/mktxp.conf')
+                             'cli/config/mktxp.conf')
         self._create_os_path(self.mktxp_conf_path,
-                             'mktxp/cli/config/_mktxp.conf')
+                             'cli/config/_mktxp.conf')
 
         self.re_compiled = {}
 
@@ -309,9 +309,9 @@ class MKTXPConfigHandler:
     def _create_os_path(self, os_path, resource_path):
         if not os.path.exists(os_path):
             # stage from the conf templates
-            lookup_path = resource_filename(
-                Requirement.parse("mktxp"), resource_path)
-            shutil.copy(lookup_path, os_path)
+            ref = importlib.resources.files('mktxp') / resource_path
+            with importlib.resources.as_file(ref) as path:
+                shutil.copy(path, os_path)
 
     def _system_entry_reader(self):
         system_entry_reader = {}

@@ -21,8 +21,7 @@ import xml.etree.ElementTree as ET
 from contextlib import contextmanager
 from multiprocessing import Process, Event
 from datetime import timedelta
-from pkg_resources import packaging
-
+from packaging.version import parse
 
 
 ''' Utilities / Helpers
@@ -309,7 +308,7 @@ def get_available_updates(channel, ttl_hash=get_ttl_hash()):
                 title, _, _, _, _, _ = child
                 # extract and parse the version number from title
                 version_text = re.findall(r'[\d+\.]+', title.text)[0]
-                version_number = packaging.version.parse(version_text)
+                version_number = parse(version_text)
                 versions.append(version_number)
     return versions
 
@@ -322,15 +321,15 @@ def parse_ros_version(string):
     1.2.3, stable
     """
     version, channel = re.findall(r'([\d\.]+).*?([\w]+)', string)[0]
-    return packaging.version.parse(version), channel
+    return parse(version), channel
 
-def builtin_wifi_capsman_version(string):
+def builtin_wifi_capsman_version(version):
     """Try to check if the version is Wifi version of RouterOS (>= 7.13).
     If anything goes wrong, return None.
     Returns a boolean"""
     try:
-        cur_version, _ = parse_ros_version(string)
-        if cur_version >= packaging.version.parse('7.13'):
+        cur_version, _ = parse_ros_version(version)
+        if cur_version >= parse('7.13'):
             return True
     except Exception as err:
         print(f'could not get current RouterOS version, because: {str(err)}')
