@@ -50,6 +50,7 @@ setup(
                         'texttable>=1.6.3',
                         'speedtest-cli>=2.1.2',
                         'waitress>=3.0.0',
+                        'packaging>=24.0'
                         ],
 
     test_suite = 'tests.mktxp_test_suite',
