@@ -236,7 +236,7 @@ mktxp edit -i
 
     verbose_mode = False            # Set it on for troubleshooting
 
-    fetch_routers_in_parallel = False   # Set to True if you want to fetch multiple routers parallel
+    fetch_routers_in_parallel = False   # Set to True if you want to fetch multiple routers in parallel
     max_worker_threads = 5              # Max number of worker threads that can fetch routers (parallel fetch only)
     max_scrape_duration = 10            # Max duration of individual routers' metrics collection (parallel fetch only)
     total_max_scrape_duration = 30      # Max overall duration of all metrics collection (parallel fetch only)
