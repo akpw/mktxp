@@ -22,7 +22,7 @@ class DHCPMetricsDataSource:
     @staticmethod
     def metric_records(router_entry, *, metric_labels = None, add_router_id = True, dhcp_cache = True, translate = True, bound = False):
         if metric_labels is None or dhcp_cache:
-            metric_labels = ['host_name', 'comment', 'active_address', 'address', 'mac_address', 'server', 'expires_after', 'last_seen', 'client_id', 'active_mac_address']
+            metric_labels = ['host_name', 'comment', 'active_address', 'address', 'mac_address', 'server', 'expires_after', 'client_id', 'active_mac_address']
 
         if dhcp_cache and router_entry.dhcp_records:
             return router_entry.dhcp_records
