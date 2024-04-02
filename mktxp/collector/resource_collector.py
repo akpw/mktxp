@@ -27,17 +27,10 @@ class SystemResourceCollector(BaseCollector):
                            'cpu', 'cpu_count', 'cpu_frequency', 'cpu_load', 
                            'free_hdd_space', 'total_hdd_space', 
                            'architecture_name', 'board_name']
-                                   
-        resource_records = SystemResourceMetricsDataSource.metric_records(router_entry, metric_labels = resource_labels)   
-        if resource_records:
-            # translate records to appropriate values
-            translated_fields = ['uptime']        
-            for resource_record in resource_records:
-                for translated_field in translated_fields:
-                    value = resource_record.get(translated_field, None)    
-                    if value:            
-                        resource_record[translated_field] = SystemResourceCollector._translated_values(translated_field, value)
+        translation_table = {'uptime': lambda value: BaseOutputProcessor.parse_timedelta_seconds(value)}
 
+        resource_records = SystemResourceMetricsDataSource.metric_records(router_entry, metric_labels = resource_labels, translation_table=translation_table)   
+        if resource_records:
             uptime_metrics = BaseCollector.gauge_collector('system_uptime', 'Time interval since boot-up', resource_records, 'uptime', ['version', 'board_name', 'cpu', 'architecture_name'])
             yield uptime_metrics
 
@@ -71,12 +64,3 @@ class SystemResourceCollector(BaseCollector):
 
                 update_available_metrics = BaseCollector.gauge_collector('system_update_available', 'Is there a newer version available', resource_records, 'update_available', ['newest_version',])
                 yield update_available_metrics
-
-
-    # Helpers
-    @staticmethod
-    def _translated_values(translated_field, value):
-        return {
-                'uptime': lambda value: BaseOutputProcessor.parse_timedelta_seconds(value)
-                }[translated_field](value)
-

@@ -25,18 +25,13 @@ class BGPCollector(BaseCollector):
             return
 
         bgp_labels = ['name', 'remote_address', 'remote_as', 'local_as', 'remote_afi', 'local_afi', 'remote_messages', 'remote_bytes', 'local_messages', 'local_bytes', 'prefix_count', 'established', 'uptime']
-        bgp_records = BGPMetricsDataSource.metric_records(router_entry, metric_labels=bgp_labels)
+        translation_table = {
+                'established': lambda value: '1' if value=='true' else '0',
+                'uptime': lambda value: BaseOutputProcessor.parse_timedelta_milliseconds(value) if value else '0'
+                }
+        bgp_records = BGPMetricsDataSource.metric_records(router_entry, metric_labels=bgp_labels, translation_table = translation_table)
         
-
         if bgp_records:
-            # translate records to appropriate values
-            translated_fields = ['established', 'uptime']        
-            for bgp_record in bgp_records:
-                for translated_field in translated_fields:
-                    value = bgp_record.get(translated_field, None)    
-                    if value:            
-                        bgp_record[translated_field] = BGPCollector._translated_values(translated_field, value)
-
             session_info_labes = ['name', 'remote_address', 'remote_as', 'local_as', 'remote_afi', 'local_afi']
             bgp_sessions_metrics = BaseCollector.info_collector('bgp_sessions_info', 'BGP sessions info', bgp_records, session_info_labes)
             yield bgp_sessions_metrics
@@ -68,13 +63,4 @@ class BGPCollector(BaseCollector):
 
             uptime_metrics = BaseCollector.gauge_collector('bgp_uptime', 'BGP uptime in milliseconds', bgp_records, 'uptime', session_id_labes)
             yield uptime_metrics
-
-
-    # Helpers
-    @staticmethod
-    def _translated_values(translated_field, value):
-        return {
-                'established': lambda value: '1' if value=='true' else '0',
-                'uptime': lambda value: BaseOutputProcessor.parse_timedelta_milliseconds(value)
-                }[translated_field](value)
 

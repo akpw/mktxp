@@ -23,43 +23,29 @@ class KidDeviceCollector(BaseCollector):
 
     @staticmethod
     def collect(router_entry):
-        if not router_entry.config_entry.kid_control_devices:
+        if not (router_entry.config_entry.kid_control_assigned or router_entry.config_entry.kid_control_dynamic):
             return
 
-        labels = ['name', 'user', 'mac_address', 'ip_address', 'bytes_down', 'bytes_up', 'rate_up', 'rate_down',
-                  'bytes_up', 'idle_time',
-                  'blocked', 'limited', 'inactive', 'disabled']
-        info_labels = ['name', 'user', 'mac_address', 'ip_address', 'disabled']
-        records = KidDeviceMetricsDataSource.metric_records(router_entry, metric_labels=labels)
+        labels = ['name', 'user', 'mac_address', 'ip_address', 'bytes_down', 'bytes_up', 'rate_up', 
+                    'rate_down','bytes_up', 'idle_time','blocked', 'limited', 'inactive', 'disabled']
 
+        translation_table = {
+            'rate_up': lambda value: BaseOutputProcessor.parse_rates(value),
+            'rate_down': lambda value: BaseOutputProcessor.parse_rates(value),
+            'idle_time': lambda value: BaseOutputProcessor.parse_timedelta_seconds(value) if value else 0,
+            'blocked': lambda value: '1' if value == 'true' else '0',
+            'limited': lambda value: '1' if value == 'true' else '0',
+            'inactive': lambda value: '1' if value == 'true' else '0',
+            'disabled': lambda value: '1' if value == 'true' else '0'}
+
+        records = KidDeviceMetricsDataSource.metric_records(router_entry, metric_labels=labels, translation_table=translation_table)
         if records:
-            # translate records to appropriate values
-            for record in records:
-                for label in record:
-                    value = record.get(label, None)
-                    if value:
-                        record[label] = KidDeviceCollector._translated_values(label, value)
-
+            info_labels = ['name', 'user', 'mac_address', 'ip_address', 'disabled']
             yield BaseCollector.info_collector('kid_control_device', 'Kid-control device Info', records, info_labels)
-            yield BaseCollector.gauge_collector('kid_control_device_bytes_down', 'Number of received bytes', records, 'bytes_down', ['name', 'mac_address', 'user'])
-            yield BaseCollector.gauge_collector('kid_control_device_bytes_up', 'Number of transmitted bytes', records, 'bytes_up', ['name', 'mac_address', 'user'])
-            yield BaseCollector.gauge_collector('kid_control_device_rate_down', 'Device rate down', records, 'rate_down', ['name', 'mac_address', 'user'])
-            yield BaseCollector.gauge_collector('kid_control_device_rate_up', 'Device rate up', records, 'rate_up', ['name', 'mac_address', 'user'])
-            yield BaseCollector.gauge_collector('kid_control_device_idle_time', 'Device idle time', records, 'idle_time', ['name', 'mac_address', 'user'])
 
-    # Helpers
-    @staticmethod
-    def _translated_values(monitor_label, value):
-        try:
-            return {
-                'rate_up': lambda value: BaseOutputProcessor.parse_rates(value),
-                'rate_down': lambda value: BaseOutputProcessor.parse_rates(value),
-                'idle_time': lambda value: BaseOutputProcessor.parse_timedelta_seconds(value),
-                'blocked': lambda value: '1' if value == 'true' else '0',
-                'limited': lambda value: '1' if value == 'true' else '0',
-                'inactive': lambda value: '1' if value == 'true' else '0',
-                'disabled': lambda value: '1' if value == 'true' else '0',
-            }[monitor_label](value)
-        except KeyError:
-            # default to just returning the value
-            return value
+            id_labels = ['name', 'mac_address', 'user']
+            yield BaseCollector.gauge_collector('kid_control_device_bytes_down', 'Number of received bytes', records, 'bytes_down', id_labels)
+            yield BaseCollector.gauge_collector('kid_control_device_bytes_up', 'Number of transmitted bytes', records, 'bytes_up', id_labels)
+            yield BaseCollector.gauge_collector('kid_control_device_rate_down', 'Device rate down', records, 'rate_down', id_labels)
+            yield BaseCollector.gauge_collector('kid_control_device_rate_up', 'Device rate up', records, 'rate_up', id_labels)
+            yield BaseCollector.gauge_collector('kid_control_device_idle_time', 'Device idle time', records, 'idle_time', id_labels)

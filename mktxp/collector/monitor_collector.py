@@ -26,15 +26,16 @@ class MonitorCollector(BaseCollector):
             return
 
         monitor_labels = ['status', 'rate', 'full_duplex', 'name', 'sfp_temperature']
-        monitor_records = InterfaceMonitorMetricsDataSource.metric_records(router_entry, metric_labels = monitor_labels, include_comments = True)   
+        translation_table = {
+                'status': lambda value: '1' if value=='link-ok' else '0',
+                'rate': lambda value: MonitorCollector._rates(value) if value else '0',
+                'full_duplex': lambda value: '1' if value=='true' else '0',
+                'name': lambda value: value if value else '',
+                'sfp_temperature': lambda value: value if value else '0'
+                }
+        monitor_records = InterfaceMonitorMetricsDataSource.metric_records(router_entry, metric_labels = monitor_labels, 
+                                                                                        translation_table=translation_table, include_comments = True)   
         if monitor_records:
-            # translate records to appropriate values
-            for monitor_record in monitor_records:
-                for monitor_label in monitor_labels:
-                    value = monitor_record.get(monitor_label, None)    
-                    if value:            
-                        monitor_record[monitor_label] = MonitorCollector._translated_values(monitor_label, value)
-
             monitor_status_metrics = BaseCollector.gauge_collector('interface_status', 'Current interface link status', monitor_records, 'status', ['name'])
             yield monitor_status_metrics
 
@@ -49,17 +50,6 @@ class MonitorCollector(BaseCollector):
 
             sfp_temperature_metrics = BaseCollector.gauge_collector('interface_sfp_temperature', 'Current SFP temperature', monitor_records, 'sfp_temperature', ['name'])
             yield sfp_temperature_metrics
-
-    # Helpers
-    @staticmethod
-    def _translated_values(monitor_label, value):
-        return {
-                'status': lambda value: '1' if value=='link-ok' else '0',
-                'rate': lambda value: MonitorCollector._rates(value),
-                'full_duplex': lambda value: '1' if value=='true' else '0',
-                'name': lambda value: value,
-                'sfp_temperature': lambda value: value
-                }[monitor_label](value)
 
     @staticmethod
     def _rates(rate_option):

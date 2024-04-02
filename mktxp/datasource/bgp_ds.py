@@ -19,12 +19,12 @@ class BGPMetricsDataSource:
     ''' Wireless Metrics data provider
     '''             
     @staticmethod
-    def metric_records(router_entry, *, metric_labels = None, add_router_id = True):
+    def metric_records(router_entry, *, metric_labels = None, translation_table = None):
         if metric_labels is None:
             metric_labels = []                
         try:
             bgp_records = router_entry.api_connection.router_api().get_resource('/routing/bgp/session').get()
-            return BaseDSProcessor.trimmed_records(router_entry, router_records = bgp_records, metric_labels = metric_labels, add_router_id = add_router_id)
+            return BaseDSProcessor.trimmed_records(router_entry, router_records = bgp_records, metric_labels = metric_labels, translation_table = translation_table)
         except Exception as exc:
             print(f'Error getting BGP sessions info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None
