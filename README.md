@@ -96,7 +96,8 @@ The default configuration file comes with a sample configuration, making it easy
     capsman = True                  # CAPsMAN general metrics
     capsman_clients = True          # CAPsMAN clients metrics    
 
-    kid_control_devices = False     # Kid Control metrics    
+    kid_control_assigned = False    # Allow Kid Control metrics for connected devices with assigned users
+    kid_control_dynamic = False     # Allow Kid Control metrics for all connected devices, including those without assigned user
 
     user = True                     # Active Users metrics
     queue = True                    # Queues metrics
