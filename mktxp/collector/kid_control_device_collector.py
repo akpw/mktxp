@@ -40,12 +40,17 @@ class KidDeviceCollector(BaseCollector):
 
         records = KidDeviceMetricsDataSource.metric_records(router_entry, metric_labels=labels, translation_table=translation_table)
         if records:
-            info_labels = ['name', 'user', 'mac_address', 'ip_address', 'disabled']
+            # dhcp resolution
+            for registration_record in records:
+                BaseOutputProcessor.resolve_dhcp(router_entry, registration_record, resolve_address=False)
+
+            info_labels = ['name', 'dhcp_name', 'mac_address', 'user', 'ip_address', 'disabled']
             yield BaseCollector.info_collector('kid_control_device', 'Kid-control device Info', records, info_labels)
 
-            id_labels = ['name', 'mac_address', 'user']
-            yield BaseCollector.gauge_collector('kid_control_device_bytes_down', 'Number of received bytes', records, 'bytes_down', id_labels)
-            yield BaseCollector.gauge_collector('kid_control_device_bytes_up', 'Number of transmitted bytes', records, 'bytes_up', id_labels)
-            yield BaseCollector.gauge_collector('kid_control_device_rate_down', 'Device rate down', records, 'rate_down', id_labels)
-            yield BaseCollector.gauge_collector('kid_control_device_rate_up', 'Device rate up', records, 'rate_up', id_labels)
+            id_labels = ['name', 'dhcp_name', 'mac_address', 'user']
+            yield BaseCollector.counter_collector('kid_control_device_bytes_down', 'Number of received bytes', records, 'bytes_down', id_labels)
+            yield BaseCollector.counter_collector('kid_control_device_bytes_up', 'Number of transmitted bytes', records, 'bytes_up', id_labels)
+
+            yield BaseCollector.gauge_collector('kid_control_device_rate_up', 'Device rate up', records, 'rate_up', id_labels)        
             yield BaseCollector.gauge_collector('kid_control_device_idle_time', 'Device idle time', records, 'idle_time', id_labels)
+            yield BaseCollector.gauge_collector('kid_control_device_rate_down', 'Device rate down', records, 'rate_down', id_labels)
