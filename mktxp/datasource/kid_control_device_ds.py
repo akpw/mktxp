@@ -20,7 +20,7 @@ class KidDeviceMetricsDataSource:
     """
 
     @staticmethod
-    def metric_records(router_entry, *, metric_labels=None, translation_table = None):
+    def metric_records(router_entry, *, metric_labels=None, translation_table=None):
         if metric_labels is None:
             metric_labels = []
         try:

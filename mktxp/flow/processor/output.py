@@ -114,21 +114,24 @@ class BaseOutputProcessor:
         return f"{int(rate / 1000 ** power)} {['bps', 'Kbps', 'Mbps', 'Gbps'][int(power)]}"
 
     @staticmethod
-    def parse_timedelta(time):
-        duration_interval_rgx = config_handler.re_compiled.get('duration_interval_rgx')
+    def parse_timedelta(time, ms_span=False):
+        # ms_span for milliseconds-long durations, since otherwise minutes would match the ms in the value
+        rgx_key = 'duration_interval_rgx_sp' if ms_span else 'duration_interval_rgx'
+        duration_interval_rgx = config_handler.re_compiled.get(rgx_key)
         if not duration_interval_rgx:
-            duration_interval_rgx = re.compile(r'((?P<weeks>\d+)w)?((?P<days>\d+)d)?((?P<hours>\d+)h)?((?P<minutes>\d+)m)?((?P<seconds>\d+)s)?((?P<milliseconds>\d+)ms)?')
-            config_handler.re_compiled['duration_interval_rgx'] = duration_interval_rgx                        
+            duration_interval_rgx = re.compile(r'((?P<seconds>\d+)s)?((?P<milliseconds>\d+)ms)?((?P<microseconds>\d+)us)?') if ms_span else\
+                    re.compile(r'((?P<weeks>\d+)w)?((?P<days>\d+)d)?((?P<hours>\d+)h)?((?P<minutes>\d+)m)?((?P<seconds>\d+)s)?((?P<milliseconds>\d+)ms)?')
+            config_handler.re_compiled[rgx_key] = duration_interval_rgx                        
         time_dict = duration_interval_rgx.match(time).groupdict()
         return timedelta(**{key: int(value) for key, value in time_dict.items() if value})
 
     @staticmethod
-    def parse_timedelta_seconds(time):
-        return BaseOutputProcessor.parse_timedelta(time).total_seconds()
+    def parse_timedelta_seconds(time, ms_span=False):
+        return BaseOutputProcessor.parse_timedelta(time, ms_span=ms_span).total_seconds()
 
     @staticmethod
-    def parse_timedelta_milliseconds(time):
-        return BaseOutputProcessor.parse_timedelta(time) / timedelta(milliseconds=1)
+    def parse_timedelta_milliseconds(time, ms_span=False):
+        return BaseOutputProcessor.parse_timedelta(time, ms_span=ms_span) / timedelta(milliseconds=1)
 
     @staticmethod
     def parse_signal_strength(signal_strength):
