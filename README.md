@@ -71,6 +71,7 @@ The default configuration file comes with a sample configuration, making it easy
     use_ssl = False                 # enables connection via API-SSL servis
     no_ssl_certificate = False      # enables API_SSL connect without router SSL certificate
     ssl_certificate_verify = False  # turns SSL certificate verification on / off   
+    plaintext_login = True          # for legacy RouterOS versions below 6.43 use False
 
     installed_packages = True       # Installed packages
     dhcp = True                     # DHCP general metrics
