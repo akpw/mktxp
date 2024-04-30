@@ -40,11 +40,17 @@ class FirewallMetricsDataSource:
         return firewall_records
 
     @staticmethod
-    def metric_records_ipv4(router_entry, *, metric_labels=None, raw=False, matching_only=True):
+    def metric_records_ipv4(router_entry, *, metric_labels=None, matching_only=True, filter_path='filter'):
         if metric_labels is None:
             metric_labels = []
         try:
-            filter_path = '/ip/firewall/filter' if not raw else '/ip/firewall/raw'
+            filter_paths = {
+                'filter': '/ip/firewall/filter',
+                'raw': '/ip/firewall/raw',
+                'nat': '/ip/firewall/nat',
+                'mangle': '/ip/firewall/mangle'
+            }
+            filter_path = filter_paths[filter_path]
             firewall_records = FirewallMetricsDataSource._get_records(
                 router_entry,
                 filter_path,
@@ -60,10 +66,16 @@ class FirewallMetricsDataSource:
             return None
 
     @staticmethod
-    def metric_records_ipv6(router_entry, metric_labels=None, raw=False, matching_only=True):
+    def metric_records_ipv6(router_entry, metric_labels=None, matching_only=True, filter_path='filter'):
         metric_labels = metric_labels or []
         try:
-            filter_path = '/ipv6/firewall/filter' if not raw else '/ipv6/firewall/raw'
+            filter_paths = {
+                'filter': '/ipv6/firewall/filter',
+                'raw': '/ipv6/firewall/raw',
+                'nat': '/ipv6/firewall/nat',
+                'mangle': '/ipv6/firewall/mangle'
+            }
+            filter_path = filter_paths[filter_path]
             firewall_records = FirewallMetricsDataSource._get_records(
                 router_entry,
                 filter_path,
