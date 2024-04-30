@@ -1,0 +1,14 @@
+--- /usr/local/lib/python3.12/site-packages/routeros_api/api_socket.py
++++ api_socket.py
+@@ -9,10 +9,9 @@
+ EINTR = getattr(errno, 'EINTR', 4)
+
+ def get_socket(hostname, port, use_ssl=False, ssl_verify=True, ssl_verify_hostname=True, ssl_context=None, timeout=15.0):
+-    api_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+-    api_socket.settimeout(timeout)
+     while True:
+         try:
++            api_socket = socket.create_connection((hostname, port), timeout=timeout)
+             api_socket.connect((hostname, port))
+         except socket.error as e:
+             if e.args[0] != EINTR:
