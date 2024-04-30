@@ -33,7 +33,7 @@ class BGPCollector(BaseCollector):
         
         if bgp_records:
             session_info_labes = ['name', 'remote_address', 'remote_as', 'local_as', 'remote_afi', 'local_afi']
-            bgp_sessions_metrics = BaseCollector.info_collector('bgp_sessions_info', 'BGP sessions info', bgp_records, session_info_labes)
+            bgp_sessions_metrics = BaseCollector.info_collector('bgp_sessions', 'BGP sessions info', bgp_records, session_info_labes)
             yield bgp_sessions_metrics
 
             session_id_labes = ['name']
