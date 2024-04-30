@@ -25,12 +25,13 @@ class MonitorCollector(BaseCollector):
         if not router_entry.config_entry.monitor:
             return
 
-        monitor_labels = ['status', 'rate', 'full_duplex', 'name', 'sfp_temperature']
+        monitor_labels = ['status', 'rate', 'full_duplex', 'name', 'sfp_temperature', 'sfp_module_present', 'sfp_wavelength', 'sfp_tx_power', 'sfp_rx_power']
         translation_table = {
                 'status': lambda value: '1' if value=='link-ok' else '0',
                 'rate': lambda value: MonitorCollector._rates(value) if value else '0',
                 'full_duplex': lambda value: '1' if value=='true' else '0',
                 'name': lambda value: value if value else '',
+                'sfp_module_present': lambda value: '1' if value=='true' else '0',
                 'sfp_temperature': lambda value: value if value else '0'
                 }
         monitor_records = InterfaceMonitorMetricsDataSource.metric_records(router_entry, metric_labels = monitor_labels, 
@@ -48,8 +49,13 @@ class MonitorCollector(BaseCollector):
             monitor_rates_metrics = BaseCollector.gauge_collector('interface_full_duplex', 'Full duplex data transmission', full_duplex_records, 'full_duplex', ['name'])
             yield monitor_rates_metrics
 
-            sfp_temperature_metrics = BaseCollector.gauge_collector('interface_sfp_temperature', 'Current SFP temperature', monitor_records, 'sfp_temperature', ['name'])
-            yield sfp_temperature_metrics
+            sfp_metrics = [record for record in monitor_records if int(record.get("sfp_module_present"))]
+            if sfp_metrics:
+                yield BaseCollector.gauge_collector('interface_sfp_temperature', 'Current SFP Temperature', sfp_metrics, 'sfp_temperature', ['name'])
+                yield BaseCollector.gauge_collector('interface_sfp_wavelength', 'Current SFP Wavelength',sfp_metrics, 'sfp_wavelength', ['name'])
+                yield BaseCollector.gauge_collector('interface_sfp_tx_power', 'Current SFP TX Power', sfp_metrics, 'sfp_tx_power', ['name'])
+                yield BaseCollector.gauge_collector('interface_sfp_rx_power', 'Current SFP RX Power', sfp_metrics, 'sfp_rx_power', ['name'])
+
 
     @staticmethod
     def _rates(rate_option):
