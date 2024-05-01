@@ -26,7 +26,7 @@ class QueueMetricsDataSource:
             queue_records = router_entry.api_connection.router_api().get_resource(f'/queue/{kind}/').get()
             queue_records = BaseDSProcessor.trimmed_records(router_entry, router_records = queue_records, metric_labels = metric_labels)            
         except Exception as exc:
-            print(f'Error getting system resource info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
+            print(f'Error getting system resource info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None
 
         if kind == 'tree':            

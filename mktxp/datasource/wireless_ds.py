@@ -38,7 +38,7 @@ class WirelessMetricsDataSource:
 
             return BaseDSProcessor.trimmed_records(router_entry, router_records = registration_table_records, metric_labels = metric_labels, add_router_id = add_router_id,)
         except Exception as exc:
-            print(f'Error getting wireless registration table info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
+            print(f'Error getting wireless registration table info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None
 
     @staticmethod

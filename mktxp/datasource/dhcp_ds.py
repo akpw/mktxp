@@ -49,5 +49,5 @@ class DHCPMetricsDataSource:
             return records
 
         except Exception as exc:
-            print(f'Error getting dhcp info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
+            print(f'Error getting dhcp info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None

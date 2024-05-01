@@ -27,5 +27,5 @@ class RouteMetricsDataSource:
             route_records = router_entry.api_connection.router_api().get_resource(f'/{ip_stack}/route').get(active='yes')
             return BaseDSProcessor.trimmed_records(router_entry, router_records = route_records, metric_labels = metric_labels)
         except Exception as exc:
-            print(f'Error getting {"IPv6" if ipv6 else "IPv4"} routes info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
+            print(f'Error getting {"IPv6" if ipv6 else "IPv4"} routes info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None
