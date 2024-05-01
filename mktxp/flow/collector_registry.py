@@ -21,7 +21,7 @@ from mktxp.collector.interface_collector import InterfaceCollector
 from mktxp.collector.health_collector import HealthCollector
 from mktxp.collector.identity_collector import IdentityCollector
 from mktxp.collector.public_ip_collector import PublicIPAddressCollector
-from mktxp.collector.ipv6_neighbor_collector import IPv6NeighborCollector
+from mktxp.collector.neighbor_collector import NeighborCollector
 from mktxp.collector.monitor_collector import MonitorCollector
 from mktxp.collector.poe_collector import POECollector
 from mktxp.collector.netwatch_collector import NetwatchCollector
@@ -53,7 +53,7 @@ class CollectorRegistry:
         self.register(CollectorKeys.HEALTH_COLLECTOR, HealthCollector.collect)
         self.register(CollectorKeys.PUBLIC_IP_ADDRESS_COLLECTOR, PublicIPAddressCollector.collect)
 
-        self.register(CollectorKeys.IPV6_NEIGHBOR_COLLECTOR, IPv6NeighborCollector.collect)
+        self.register(CollectorKeys.NEIGHBOR_COLLECTOR, NeighborCollector.collect)
 
         self.register(CollectorKeys.PACKAGE_COLLECTOR, PackageCollector.collect)
         self.register(CollectorKeys.DHCP_COLLECTOR, DHCPCollector.collect)

@@ -28,25 +28,25 @@ class FirewallCollector(BaseCollector):
 
         if router_entry.config_entry.firewall:
             # ~*~*~*~*~*~ IPv4 ~*~*~*~*~*~
-            firewall_filter_records = FirewallMetricsDataSource.metric_records_ipv4(router_entry, metric_labels = firewall_labels, filter_path='filter')
+            firewall_filter_records = FirewallMetricsDataSource.metric_records(router_entry, metric_labels = firewall_labels, filter_path='filter')
             if firewall_filter_records:           
                 metrics_records = [FirewallCollector.metric_record(router_entry, record) for record in firewall_filter_records]
                 firewall_filter_metrics = BaseCollector.counter_collector('firewall_filter', 'Total amount of bytes matched by firewall rules', metrics_records, 'bytes', ['name', 'log'])
                 yield firewall_filter_metrics
 
-            firewall_raw_records = FirewallMetricsDataSource.metric_records_ipv4(router_entry, metric_labels = firewall_labels, filter_path='raw')
+            firewall_raw_records = FirewallMetricsDataSource.metric_records(router_entry, metric_labels = firewall_labels, filter_path='raw')
             if firewall_raw_records:      
                 metrics_records = [FirewallCollector.metric_record(router_entry, record) for record in firewall_raw_records]     
                 firewall_raw_metrics = BaseCollector.counter_collector('firewall_raw', 'Total amount of bytes matched by raw firewall rules', metrics_records, 'bytes', ['name', 'log'])
                 yield firewall_raw_metrics
 
-            filter_nat_records = FirewallMetricsDataSource.metric_records_ipv4(router_entry, metric_labels = firewall_labels, filter_path='nat')
+            filter_nat_records = FirewallMetricsDataSource.metric_records(router_entry, metric_labels = firewall_labels, filter_path='nat')
             if filter_nat_records:
                 metrics_records = [FirewallCollector.metric_record(router_entry, record) for record in filter_nat_records]
                 filter_nat_metrics = BaseCollector.counter_collector('firewall_nat', 'Total amount of bytes matched by NAT rules', metrics_records, 'bytes', ['name', 'log'])
                 yield filter_nat_metrics
 
-            filter_mangle_records = FirewallMetricsDataSource.metric_records_ipv4(router_entry, metric_labels = firewall_labels, filter_path='mangle')
+            filter_mangle_records = FirewallMetricsDataSource.metric_records(router_entry, metric_labels = firewall_labels, filter_path='mangle')
             if filter_mangle_records:
                 metrics_records = [FirewallCollector.metric_record(router_entry, record) for record in filter_mangle_records]
                 filter_mangle_metrics = BaseCollector.counter_collector('firewall_mangle', 'Total amount of bytes matched by Mangle rules', metrics_records, 'bytes', ['name', 'log'])
@@ -54,25 +54,25 @@ class FirewallCollector(BaseCollector):
 
         # ~*~*~*~*~*~ IPv6 ~*~*~*~*~*~
         if router_entry.config_entry.ipv6_firewall:
-            firewall_filter_records_ipv6 =  FirewallMetricsDataSource.metric_records_ipv6(router_entry, metric_labels = firewall_labels, filter_path='filter')
+            firewall_filter_records_ipv6 =  FirewallMetricsDataSource.metric_records(router_entry, metric_labels = firewall_labels, filter_path='filter', ipv6=True)
             if firewall_filter_records_ipv6:           
                 metrics_records_ipv6 = [FirewallCollector.metric_record(router_entry, record) for record in firewall_filter_records_ipv6]
                 firewall_filter_metrics_ipv6 = BaseCollector.counter_collector('firewall_filter_ipv6', 'Total amount of bytes matched by firewall rules (IPv6)', metrics_records_ipv6, 'bytes', ['name', 'log'])
                 yield firewall_filter_metrics_ipv6
 
-            firewall_raw_records_ipv6 = FirewallMetricsDataSource.metric_records_ipv6(router_entry, metric_labels = firewall_labels, filter_path='raw')
+            firewall_raw_records_ipv6 = FirewallMetricsDataSource.metric_records(router_entry, metric_labels = firewall_labels, filter_path='raw', ipv6=True)
             if firewall_raw_records_ipv6:      
                 metrics_records_ipv6 = [FirewallCollector.metric_record(router_entry, record) for record in firewall_raw_records_ipv6]     
                 firewall_raw_metrics_ipv6 = BaseCollector.counter_collector('firewall_raw_ipv6', 'Total amount of bytes matched by raw firewall rules (IPv6)', metrics_records_ipv6, 'bytes', ['name', 'log'])
                 yield firewall_raw_metrics_ipv6
 
-            filter_nat_records_ipv6 = FirewallMetricsDataSource.metric_records_ipv6(router_entry, metric_labels = firewall_labels, filter_path='nat')
+            filter_nat_records_ipv6 = FirewallMetricsDataSource.metric_records(router_entry, metric_labels = firewall_labels, filter_path='nat', ipv6=True)
             if filter_nat_records_ipv6:
                 metrics_records_ipv6 = [FirewallCollector.metric_record(router_entry, record) for record in filter_nat_records_ipv6]
                 filter_nat_metrics_ipv6 = BaseCollector.counter_collector('firewall_nat_ipv6', 'Total amount of bytes matched by NAT rules (IPv6)', metrics_records_ipv6, 'bytes', ['name', 'log'])
                 yield filter_nat_metrics_ipv6
 
-            filter_mangle_records_ipv6 = FirewallMetricsDataSource.metric_records_ipv6(router_entry, metric_labels = firewall_labels, filter_path='mangle')
+            filter_mangle_records_ipv6 = FirewallMetricsDataSource.metric_records(router_entry, metric_labels = firewall_labels, filter_path='mangle', ipv6=True)
             if filter_mangle_records_ipv6:
                 metrics_records_ipv6 = [FirewallCollector.metric_record(router_entry, record) for record in filter_mangle_records_ipv6]
                 filter_mangle_metrics_ipv6 = BaseCollector.counter_collector('firewall_mangle_ipv6', 'Total amount of bytes matched by Mangle rules (IPv6)', metrics_records_ipv6, 'bytes', ['name', 'log'])

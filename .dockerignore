@@ -6,5 +6,4 @@ k8s
 build
 dist
 mktxp.egg-info
-conf
-test-cli.py
+tests

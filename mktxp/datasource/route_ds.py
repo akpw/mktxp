@@ -19,12 +19,13 @@ class RouteMetricsDataSource:
     ''' Routes Metrics data provider
     '''             
     @staticmethod
-    def metric_records(router_entry, *, metric_labels = None):
+    def metric_records(router_entry, *, metric_labels = None, ipv6 = False):
+        ip_stack = 'ipv6' if ipv6 else 'ip'
         if metric_labels is None:
             metric_labels = []                
         try:
-            route_records = router_entry.api_connection.router_api().get_resource('/ip/route').get(active='yes')
+            route_records = router_entry.api_connection.router_api().get_resource(f'/{ip_stack}/route').get(active='yes')
             return BaseDSProcessor.trimmed_records(router_entry, router_records = route_records, metric_labels = metric_labels)
         except Exception as exc:
-            print(f'Error getting routes info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
+            print(f'Error getting {"IPv6" if ipv6 else "IPv4"} routes info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None

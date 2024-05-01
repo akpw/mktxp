@@ -70,6 +70,7 @@ setup(
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
         'Intended Audience :: Information Technology',
+        'Intended Audience :: Customer Service',
         'Operating System :: MacOS',
         'Operating System :: POSIX :: BSD :: FreeBSD',
         'Operating System :: POSIX :: Linux',

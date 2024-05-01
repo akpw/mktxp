@@ -15,9 +15,15 @@
 from mktxp.datasource.base_ds import BaseDSProcessor
 
 
-class IPv6NeighborDataSource:
+class NeighborDataSource:
+    def metric_records(router_entry, metric_labels, ipv6=False):    
+        
+        metric_labels = metric_labels or []                        
+        router_records = []        
+        
+        if ipv6:
+            router_records = router_entry.api_connection.router_api().get_resource(f'/ipv6/neighbor').get(status='reachable')
+        else:
+            router_records = router_entry.api_connection.router_api().get_resource(f'/ip/neighbor').get()
 
-    def metric_records(router_entry, metric_labels):
-        metric_labels = metric_labels or []
-        records = router_entry.api_connection.router_api().get_resource('/ipv6/neighbor').get(status='reachable')
-        return BaseDSProcessor.trimmed_records(router_entry, router_records=records, metric_labels=metric_labels, )
+        return BaseDSProcessor.trimmed_records(router_entry, router_records=router_records, metric_labels=metric_labels)

@@ -80,10 +80,15 @@ The default configuration file comes with a sample configuration, making it easy
     connections = True              # IP connections metrics
     connection_stats = False        # Open IP connections metrics 
 
-    pool = True                     # Pool metrics
     interface = True                # Interfaces traffic metrics
     
+    route = True                    # IPv4 Routes metrics
+    pool = True                     # Pool metrics
     firewall = True                 # IPv4 Firewall rules traffic metrics
+    neighbor = True                 # Reachable IPv4 Neighbors
+
+    ipv6_route = False              # IPv6 Routes metrics    
+    ipv6_pool = False               # IPv6 Pool metrics
     ipv6_firewall = False           # IPv6 Firewall rules traffic metrics
     ipv6_neighbor = False           # Reachable IPv6 Neighbors
 
@@ -91,7 +96,6 @@ The default configuration file comes with a sample configuration, making it easy
     monitor = True                  # Interface monitor metrics
     netwatch = True                 # Netwatch metrics
     public_ip = True                # Public IP metrics
-    route = True                    # Routes metrics
     wireless = True                 # WLAN general metrics
     wireless_clients = True         # WLAN clients metrics
     capsman = True                  # CAPsMAN general metrics

@@ -22,35 +22,66 @@ class RouteCollector(BaseCollector):
     '''        
     @staticmethod
     def collect(router_entry):
-        if not router_entry.config_entry.route:
-            return
-
         route_labels = ['connect', 'dynamic', 'static', 'bgp', 'ospf']
-        route_records = RouteMetricsDataSource.metric_records(router_entry, metric_labels = route_labels)   
-        if route_records:       
-            # compile total routes records
-            total_routes = len(route_records)
-            total_routes_records = [{ MKTXPConfigKeys.ROUTERBOARD_NAME: router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_NAME],
-                                      MKTXPConfigKeys.ROUTERBOARD_ADDRESS: router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_ADDRESS],
-                                      'count': total_routes
-                                    }]
-            total_routes_metrics = BaseCollector.gauge_collector('routes_total_routes', 'Overall number of routes in RIB', total_routes_records, 'count')
-            yield total_routes_metrics
+
+        # ~*~*~*~*~*~ IPv4 ~*~*~*~*~*~        
+        if router_entry.config_entry.route:            
+            route_records = RouteMetricsDataSource.metric_records(router_entry, metric_labels = route_labels)   
+            if route_records:       
+                # compile total routes records
+                total_routes = len(route_records)
+                total_routes_records = [{ MKTXPConfigKeys.ROUTERBOARD_NAME: router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_NAME],
+                                          MKTXPConfigKeys.ROUTERBOARD_ADDRESS: router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_ADDRESS],
+                                          'count': total_routes
+                                        }]
+                total_routes_metrics = BaseCollector.gauge_collector('routes_total_routes', 'Overall number of routes in RIB', total_routes_records, 'count')
+                yield total_routes_metrics
 
 
-            # init routes per protocol (with 0)
-            routes_per_protocol = {route_label: 0 for route_label in route_labels}
-            for route_record in route_records:
-                for route_label in route_labels:
-                    if route_record.get(route_label):
-                        routes_per_protocol[route_label] += 1 
+                # init routes per protocol (with 0)
+                routes_per_protocol = {route_label: 0 for route_label in route_labels}
+                for route_record in route_records:
+                    for route_label in route_labels:
+                        if route_record.get(route_label):
+                            routes_per_protocol[route_label] += 1 
 
-            # compile route-per-protocol records
-            route_per_protocol_records = [{ MKTXPConfigKeys.ROUTERBOARD_NAME: router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_NAME],
-                                            MKTXPConfigKeys.ROUTERBOARD_ADDRESS: router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_ADDRESS],
-                                            'protocol': key, 'count': value} for key, value in routes_per_protocol.items()]
-            
-            # yield route-per-protocol metrics
-            route_per_protocol_metrics = BaseCollector.gauge_collector('routes_protocol_count', 'Number of routes per protocol in RIB', route_per_protocol_records, 'count', ['protocol'])
-            yield route_per_protocol_metrics
+                # compile route-per-protocol records
+                route_per_protocol_records = [{ MKTXPConfigKeys.ROUTERBOARD_NAME: router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_NAME],
+                                                MKTXPConfigKeys.ROUTERBOARD_ADDRESS: router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_ADDRESS],
+                                                'protocol': key, 'count': value} for key, value in routes_per_protocol.items()]
+                
+                # yield route-per-protocol metrics
+                route_per_protocol_metrics = BaseCollector.gauge_collector('routes_protocol_count', 'Number of routes per protocol in RIB', route_per_protocol_records, 'count', ['protocol'])
+                yield route_per_protocol_metrics
+
+        # ~*~*~*~*~*~ IPv6 ~*~*~*~*~*~
+        if router_entry.config_entry.ipv6_route:
+            # ~*~*~*~*~*~ IPv4 ~*~*~*~*~*~        
+            route_records = RouteMetricsDataSource.metric_records(router_entry, metric_labels = route_labels, ipv6 = True)   
+            if route_records:       
+                # compile total routes records
+                total_routes = len(route_records)
+                total_routes_records = [{ MKTXPConfigKeys.ROUTERBOARD_NAME: router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_NAME],
+                                          MKTXPConfigKeys.ROUTERBOARD_ADDRESS: router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_ADDRESS],
+                                          'count': total_routes
+                                        }]
+                total_routes_metrics = BaseCollector.gauge_collector('routes_total_routes_ipv6', 'Overall number of routes in RIB (IPv6)', total_routes_records, 'count')
+                yield total_routes_metrics
+
+
+                # init routes per protocol (with 0)
+                routes_per_protocol = {route_label: 0 for route_label in route_labels}
+                for route_record in route_records:
+                    for route_label in route_labels:
+                        if route_record.get(route_label):
+                            routes_per_protocol[route_label] += 1 
+
+                # compile route-per-protocol records
+                route_per_protocol_records = [{ MKTXPConfigKeys.ROUTERBOARD_NAME: router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_NAME],
+                                                MKTXPConfigKeys.ROUTERBOARD_ADDRESS: router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_ADDRESS],
+                                                'protocol': key, 'count': value} for key, value in routes_per_protocol.items()]
+                
+                # yield route-per-protocol metrics
+                route_per_protocol_metrics = BaseCollector.gauge_collector('routes_protocol_count_ipv6', 'Number of routes per protocol in RIB (IPv6)', route_per_protocol_records, 'count', ['protocol'])
+                yield route_per_protocol_metrics
 
