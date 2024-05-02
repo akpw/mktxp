@@ -32,7 +32,7 @@ class IPConnectionDatasource:
             records = [{'count': cnt}]
             return BaseDSProcessor.trimmed_records(router_entry, router_records = records, metric_labels = metric_labels)
         except Exception as exc:
-            print(f'Error getting IP connection info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
+            print(f'Error getting IP connection info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None
 
 
@@ -70,7 +70,7 @@ class IPConnectionStatsDatasource:
                 records.append(record)
             return records 
         except Exception as exc:
-            print(f'Error getting IP connection stats info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
+            print(f'Error getting IP connection stats info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None
 
 

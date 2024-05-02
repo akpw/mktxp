@@ -32,5 +32,5 @@ class KidDeviceMetricsDataSource:
             return BaseDSProcessor.trimmed_records(router_entry, router_records=device_records, metric_labels=metric_labels, translation_table=translation_table)
         except Exception as exc:
             print(
-                f'Error getting Kid-control device info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
+                f'Error getting Kid-control device info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None

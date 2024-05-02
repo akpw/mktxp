@@ -46,7 +46,7 @@ class FirewallMetricsDataSource:
             return BaseDSProcessor.trimmed_records(router_entry, router_records=firewall_records, metric_labels=metric_labels, translation_table=TRANSLATION_TABLE)
         except Exception as exc:
             print(
-                f'Error getting {"IPv6" if ipv6 else "IPv4"} firewall filters info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}'
+                f'Error getting {"IPv6" if ipv6 else "IPv4"} firewall filters info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}'
             )
             return None
 

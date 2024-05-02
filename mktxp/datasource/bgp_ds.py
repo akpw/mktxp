@@ -26,6 +26,6 @@ class BGPMetricsDataSource:
             bgp_records = router_entry.api_connection.router_api().get_resource('/routing/bgp/session').get()
             return BaseDSProcessor.trimmed_records(router_entry, router_records = bgp_records, metric_labels = metric_labels, translation_table = translation_table)
         except Exception as exc:
-            print(f'Error getting BGP sessions info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
+            print(f'Error getting BGP sessions info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None
 

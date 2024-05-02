@@ -26,7 +26,7 @@ class RouterboardMetricsDataSource:
             routerboard_records = router_entry.api_connection.router_api().get_resource('/system/routerboard').get()
             return BaseDSProcessor.trimmed_records(router_entry, router_records = routerboard_records, metric_labels = metric_labels)
         except Exception as exc:
-            print(f'Error getting system routerboard info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
+            print(f'Error getting system routerboard info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None
 
     @staticmethod
@@ -37,7 +37,7 @@ class RouterboardMetricsDataSource:
                 return version_st['current-firmware']
             return None
         except Exception as exc:
-            print(f'Error getting routerboard current-firmware from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
+            print(f'Error getting routerboard current-firmware from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None
 
     @staticmethod
@@ -48,6 +48,6 @@ class RouterboardMetricsDataSource:
                 return version_st['upgrade-firmware']
             return None
         except Exception as exc:
-            print(f'Error getting routerboard upgrade-firmware from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
+            print(f'Error getting routerboard upgrade-firmware from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None
 

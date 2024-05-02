@@ -35,6 +35,6 @@ class NetwatchMetricsDataSource:
 
             return BaseDSProcessor.trimmed_records(router_entry, router_records = netwatch_records, translation_table = translation_table, metric_labels = metric_labels)
         except Exception as exc:
-            print(f'Error getting Netwatch info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
+            print(f'Error getting Netwatch info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None
 

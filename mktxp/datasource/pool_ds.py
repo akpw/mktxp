@@ -26,7 +26,7 @@ class PoolMetricsDataSource:
             pool_records = router_entry.api_connection.router_api().get_resource('/ip/pool').get()
             return BaseDSProcessor.trimmed_records(router_entry, router_records = pool_records, metric_labels = metric_labels)
         except Exception as exc:
-            print(f'Error getting pool info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
+            print(f'Error getting pool info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None
 
 
@@ -41,5 +41,5 @@ class PoolUsedMetricsDataSource:
             pool_used_records = router_entry.api_connection.router_api().get_resource('/ip/pool/used').get()
             return BaseDSProcessor.trimmed_records(router_entry, router_records = pool_used_records, metric_labels = metric_labels)
         except Exception as exc:
-            print(f'Error getting pool used info from router{router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
+            print(f'Error getting pool used info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None
