@@ -77,6 +77,17 @@ def parse_mkt_uptime(time):
     delta = timedelta(**{key: int(value) for key, value in time_dict.items() if value}).total_seconds() 
     return int(delta) if delta else 0
 
+def str2bool(str_value):
+    if not str_value or not type(str_value) is str:
+        return False
+    str_value = str_value.lower()
+    if str_value in ('y', 'yes', 't', 'true', 'on', '1'):
+        return True
+    elif str_value in ('n', 'no', 'f', 'false', 'off', '0'):
+        return False
+    else:
+        raise ValueError(f'Invalid truth value: {str_value}')
+        
 class FSHelper:
     ''' File System ops helper
     '''
