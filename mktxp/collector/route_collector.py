@@ -15,6 +15,7 @@
 from mktxp.cli.config.config import MKTXPConfigKeys
 from mktxp.collector.base_collector import BaseCollector
 from mktxp.datasource.route_ds import RouteMetricsDataSource
+from mktxp.utils.utils import str2bool
 
 
 class RouteCollector(BaseCollector):
@@ -42,7 +43,7 @@ class RouteCollector(BaseCollector):
                 routes_per_protocol = {route_label: 0 for route_label in route_labels}
                 for route_record in route_records:
                     for route_label in route_labels:
-                        if route_record.get(route_label):
+                        if str2bool(route_record.get(route_label)):
                             routes_per_protocol[route_label] += 1 
 
                 # compile route-per-protocol records
