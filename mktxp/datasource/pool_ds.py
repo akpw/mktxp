@@ -19,14 +19,15 @@ class PoolMetricsDataSource:
     ''' Pool Metrics data provider
     '''             
     @staticmethod
-    def metric_records(router_entry, *, metric_labels = None):
+    def metric_records(router_entry, *, metric_labels = None, ipv6 = False):
+        ip_stack = 'ipv6' if ipv6 else 'ip'
         if metric_labels is None:
             metric_labels = []                
         try:
-            pool_records = router_entry.api_connection.router_api().get_resource('/ip/pool').get()
+            pool_records = router_entry.api_connection.router_api().get_resource(f'/{ip_stack}/pool').get()
             return BaseDSProcessor.trimmed_records(router_entry, router_records = pool_records, metric_labels = metric_labels)
         except Exception as exc:
-            print(f'Error getting pool info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
+            print(f'Error getting {"IPv6" if ipv6 else "IPv4"} pool info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None
 
 
@@ -34,12 +35,13 @@ class PoolUsedMetricsDataSource:
     ''' Pool/Used Metrics data provider
     '''             
     @staticmethod
-    def metric_records(router_entry, *, metric_labels = None):
+    def metric_records(router_entry, *, metric_labels = None, ipv6 = False):
+        ip_stack = 'ipv6' if ipv6 else 'ip'
         if metric_labels is None:
             metric_labels = []                
         try:
-            pool_used_records = router_entry.api_connection.router_api().get_resource('/ip/pool/used').get()
+            pool_used_records = router_entry.api_connection.router_api().get_resource(f'/{ip_stack}/pool/used').get()
             return BaseDSProcessor.trimmed_records(router_entry, router_records = pool_used_records, metric_labels = metric_labels)
         except Exception as exc:
-            print(f'Error getting pool used info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
+            print(f'Error getting {"IPv6" if ipv6 else "IPv4"} pool used info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None

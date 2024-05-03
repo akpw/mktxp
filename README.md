@@ -60,8 +60,8 @@ The default configuration file comes with a sample configuration, making it easy
 
 [default]
     # this affects configuration of all routers, unless overloaded on their specific levels
+    
     enabled = True          # turns metrics collection for this RouterOS device on / off
-
     hostname = localhost    # RouterOS IP address
     port = 8728             # RouterOS IP Port
     
@@ -83,14 +83,14 @@ The default configuration file comes with a sample configuration, making it easy
     interface = True                # Interfaces traffic metrics
     
     route = True                    # IPv4 Routes metrics
-    pool = True                     # Pool metrics
+    pool = True                     # IPv4 Pool metrics
     firewall = True                 # IPv4 Firewall rules traffic metrics
-    neighbor = True                 # Reachable IPv4 Neighbors
+    neighbor = True                 # IPv4 Reachable Neighbors
 
     ipv6_route = False              # IPv6 Routes metrics    
     ipv6_pool = False               # IPv6 Pool metrics
     ipv6_firewall = False           # IPv6 Firewall rules traffic metrics
-    ipv6_neighbor = False           # Reachable IPv6 Neighbors
+    ipv6_neighbor = False           # IPv6 Reachable Neighbors
 
     poe = True                      # POE metrics
     monitor = True                  # Interface monitor metrics

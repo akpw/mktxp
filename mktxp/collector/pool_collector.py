@@ -22,17 +22,27 @@ class PoolCollector(BaseCollector):
     '''    
     @staticmethod
     def collect(router_entry):
-        if not router_entry.config_entry.pool:
-            return
+        # ~*~*~*~*~*~ IPv4 ~*~*~*~*~*~
+        if router_entry.config_entry.pool:
+            yield from PoolCollector._process_ip_stack(router_entry)
+
+        # ~*~*~*~*~*~ IPv6 ~*~*~*~*~*~
+        if router_entry.config_entry.ipv6_pool:
+            yield from PoolCollector._process_ip_stack(router_entry, ipv6=True)
+
+    # helpers
+    @staticmethod
+    def _process_ip_stack(router_entry, ipv6=False):
+        ip_stack = 'ipv6' if ipv6 else 'ipv4'
 
         # initialize all pool counts, including those currently not used
-        pool_records = PoolMetricsDataSource.metric_records(router_entry, metric_labels = ['name'])   
+        pool_records = PoolMetricsDataSource.metric_records(router_entry, metric_labels = ['name'], ipv6=ipv6)   
         if pool_records:
             pool_used_labels = ['pool']
             pool_used_counts = {pool_record['name']: 0 for pool_record in pool_records}
 
             # for pools in usage, calculate the current numbers
-            pool_used_records = PoolUsedMetricsDataSource.metric_records(router_entry, metric_labels = pool_used_labels)   
+            pool_used_records = PoolUsedMetricsDataSource.metric_records(router_entry, metric_labels = pool_used_labels, ipv6=ipv6)   
             for pool_used_record in pool_used_records:
                 pool_used_counts[pool_used_record['pool']] = pool_used_counts.get(pool_used_record['pool'], 0) + 1
 
@@ -42,5 +52,5 @@ class PoolCollector(BaseCollector):
                                        'pool': key, 'count': value} for key, value in pool_used_counts.items()]
             
             # yield used-per-pool metrics
-            used_per_pool_metrics = BaseCollector.gauge_collector('ip_pool_used', 'Number of used addresses per IP pool', used_per_pool_records, 'count', ['pool'])
+            used_per_pool_metrics = BaseCollector.gauge_collector(f'ip_pool_used{"_ipv6" if ipv6 else ""}', f'Number of used addresses per IP pool ({ip_stack.upper()})', used_per_pool_records, 'count', ['pool'])
             yield used_per_pool_metrics
