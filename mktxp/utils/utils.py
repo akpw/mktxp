@@ -22,6 +22,7 @@ from contextlib import contextmanager
 from multiprocessing import Process, Event
 from datetime import timedelta
 from packaging.version import parse
+import re
 
 ''' Utilities / Helpers
 '''
@@ -65,7 +66,7 @@ def get_last_digit_from_shell_cmd(cmd):
         return get_last_digit(cmd_output)
 
 def get_last_digit(str_to_search):
-    p = re.compile('(\d*\.?\d+)')
+    p = re.compile(r'(\d*\.?\d+)')
     match = p.search(str_to_search)
     if match:
         return float(match.group())
