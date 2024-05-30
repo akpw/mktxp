@@ -109,7 +109,8 @@ The default configuration file comes with a sample configuration, making it easy
 
     bgp = False                     # BGP sessions metrics
     
-    remote_dhcp_entry = None        # An MKTXP entry for remote DHCP info resolution (capsman/wireless)
+    remote_dhcp_entry = None        # An MKTXP entry to provide for remote DHCP info / resolution
+    remote_capsman_entry = None     # An MKTXP entry to provide for remote capsman info 
 
     use_comments_over_names = True  # when available, forces using comments over the interfaces names
 

@@ -54,24 +54,6 @@ def run_cmd(cmd, shell = False, quiet = False):
         raise CmdProcessingError(output)
     return output
 
-def get_last_digit_from_shell_cmd(cmd):
-    try:
-        cmd_output = run_cmd(cmd, shell = True)
-    except CmdProcessingError as e:
-        if not quiet:
-            print ('Error while running cmd: {}'.format(e.args[0]))
-        return -1
-    else:
-        return get_last_digit(cmd_output)
-
-def get_last_digit(str_to_search):
-    p = re.compile('(\d*\.?\d+)')
-    match = p.search(str_to_search)
-    if match:
-        return float(match.group())
-    else:
-        return -1
-
 def parse_mkt_uptime(time):
     time_dict = re.match(r'((?P<weeks>\d+)w)?((?P<days>\d+)d)?((?P<hours>\d+)h)?((?P<minutes>\d+)m)?((?P<seconds>\d+)s)?', time).groupdict()
     delta = timedelta(**{key: int(value) for key, value in time_dict.items() if value}).total_seconds() 

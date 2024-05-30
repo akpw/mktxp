@@ -69,8 +69,9 @@ class RouterEntry:
                             CollectorKeys.BGP_COLLECTOR: 0,                        
                             CollectorKeys.MKTXP_COLLECTOR: 0
                             }         
-        self._dhcp_entry = None
+        self._dhcp_entry = None        
         self._dhcp_records = {}
+        self._capsman_entry = None
         self._wireless_type = RouterEntryWirelessType.NONE                                    
 
     @property
@@ -101,6 +102,15 @@ class RouterEntry:
         self._dhcp_entry = dhcp_entry
 
     @property
+    def capsman_entry(self):
+        if self._capsman_entry:
+            return self._capsman_entry
+        return self
+    @capsman_entry.setter
+    def capsman_entry(self, capsman_entry):
+        self._capsman_entry = capsman_entry
+
+    @property
     def dhcp_records(self):
         return (entry.record for key, entry in  self._dhcp_records.items() if entry.type == 'mac_address') \
                                                                                 if self._dhcp_records else None   
@@ -127,6 +137,8 @@ class RouterEntry:
             self.api_connection.connect()
             if self._dhcp_entry:
                 self._dhcp_entry.api_connection.connect()
+            if self._capsman_entry:
+                self._capsman_entry.api_connection.connect()
         return is_ready
 
     def is_done(self):

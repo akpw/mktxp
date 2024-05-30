@@ -25,6 +25,10 @@ class RouterEntriesHandler:
             router_entry = RouterEntry(router_name)
             if router_entry.config_entry.remote_dhcp_entry and config_handler.registered_entry(router_entry.config_entry.remote_dhcp_entry):
                 router_entry.dhcp_entry = RouterEntry(router_entry.config_entry.remote_dhcp_entry)
+
+            if router_entry.config_entry.remote_capsman_entry and config_handler.registered_entry(router_entry.config_entry.remote_capsman_entry):
+                router_entry.capsman_entry = RouterEntry(router_entry.config_entry.remote_capsman_entry)
+
             self._router_entries[router_name] = router_entry
 
     @property
@@ -49,5 +53,8 @@ class RouterEntriesHandler:
         router_entry = RouterEntry(entry_name)
         if config_entry.remote_dhcp_entry and config_handler.registered_entry(config_entry.remote_dhcp_entry):
             router_entry.dhcp_entry = RouterEntry(config_entry.remote_dhcp_entry)        
+
+        if config_entry.remote_capsman_entry and config_handler.registered_entry(config_entry.remote_capsman_entry):
+            router_entry.capsman_entry = RouterEntry(config_entry.remote_capsman_entry)        
 
         return router_entry

@@ -97,6 +97,7 @@ class MKTXPConfigKeys:
     FE_BGP_KEY = 'bgp'
 
     FE_REMOTE_DHCP_ENTRY = 'remote_dhcp_entry'
+    FE_REMOTE_CAPSMAN_ENTRY = 'remote_capsman_entry'
 
     FE_CHECK_FOR_UPDATES = 'check_for_updates'
 
@@ -134,6 +135,7 @@ class MKTXPConfigKeys:
     DEFAULT_API_PORT = 8728
     DEFAULT_API_SSL_PORT = 8729
     DEFAULT_FE_REMOTE_DHCP_ENTRY = 'None'
+    DEFAULT_FE_REMOTE_CAPSMAN_ENTRY = 'None'
     DEFAULT_MKTXP_PORT = 49090
     DEFAULT_MKTXP_SOCKET_TIMEOUT = 2
     DEFAULT_MKTXP_INITIAL_DELAY = 120
@@ -158,7 +160,7 @@ class MKTXPConfigKeys:
     SYSTEM_BOOLEAN_KEYS_YES = set()
     SYSTEM_BOOLEAN_KEYS_NO = {MKTXP_BANDWIDTH_KEY, MKTXP_VERBOSE_MODE, MKTXP_FETCH_IN_PARALLEL, MKTXP_COMPACT_CONFIG}
 
-    STR_KEYS = (HOST_KEY, USER_KEY, PASSWD_KEY, FE_REMOTE_DHCP_ENTRY)
+    STR_KEYS = (HOST_KEY, USER_KEY, PASSWD_KEY, FE_REMOTE_DHCP_ENTRY, FE_REMOTE_CAPSMAN_ENTRY)
     INT_KEYS =  ()
     MKTXP_INT_KEYS = (PORT_KEY, MKTXP_SOCKET_TIMEOUT, MKTXP_INITIAL_DELAY, MKTXP_MAX_DELAY,
                       MKTXP_INC_DIV, MKTXP_BANDWIDTH_TEST_INTERVAL, MKTXP_MIN_COLLECT_INTERVAL,
@@ -179,7 +181,7 @@ class ConfigEntry:
                                                        MKTXPConfigKeys.FE_NETWATCH_KEY, MKTXPConfigKeys.MKTXP_USE_COMMENTS_OVER_NAMES, MKTXPConfigKeys.FE_PUBLIC_IP_KEY, 
                                                        MKTXPConfigKeys.FE_ROUTE_KEY, MKTXPConfigKeys.FE_DHCP_POOL_KEY, MKTXPConfigKeys.FE_FIREWALL_KEY, MKTXPConfigKeys.FE_NEIGHBOR_KEY,
                                                        MKTXPConfigKeys.FE_IPV6_ROUTE_KEY, MKTXPConfigKeys.FE_IPV6_DHCP_POOL_KEY, MKTXPConfigKeys.FE_IPV6_FIREWALL_KEY, MKTXPConfigKeys.FE_IPV6_NEIGHBOR_KEY,                                               
-                                                       MKTXPConfigKeys.FE_USER_KEY, MKTXPConfigKeys.FE_QUEUE_KEY, MKTXPConfigKeys.FE_REMOTE_DHCP_ENTRY, MKTXPConfigKeys.FE_CHECK_FOR_UPDATES, MKTXPConfigKeys.FE_BGP_KEY,
+                                                       MKTXPConfigKeys.FE_USER_KEY, MKTXPConfigKeys.FE_QUEUE_KEY, MKTXPConfigKeys.FE_REMOTE_DHCP_ENTRY, MKTXPConfigKeys.FE_REMOTE_CAPSMAN_ENTRY, MKTXPConfigKeys.FE_CHECK_FOR_UPDATES, MKTXPConfigKeys.FE_BGP_KEY,
                                                        MKTXPConfigKeys.FE_KID_CONTROL_DEVICE, MKTXPConfigKeys.FE_KID_CONTROL_DYNAMIC
                                                        ])
     MKTXPSystemEntry = namedtuple('MKTXPSystemEntry', [MKTXPConfigKeys.PORT_KEY, MKTXPConfigKeys.LISTEN_KEY, MKTXPConfigKeys.MKTXP_SOCKET_TIMEOUT,
@@ -473,6 +475,7 @@ class MKTXPConfigHandler:
             MKTXPConfigKeys.PASSWD_KEY: lambda _: MKTXPConfigKeys.DEFAULT_PASSWORD_KEY,
             MKTXPConfigKeys.PORT_KEY: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_PORT,
             MKTXPConfigKeys.FE_REMOTE_DHCP_ENTRY:  lambda _: MKTXPConfigKeys.DEFAULT_FE_REMOTE_DHCP_ENTRY,
+            MKTXPConfigKeys.FE_REMOTE_CAPSMAN_ENTRY:  lambda _: MKTXPConfigKeys.DEFAULT_FE_REMOTE_CAPSMAN_ENTRY,
             MKTXPConfigKeys.MKTXP_SOCKET_TIMEOUT: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_SOCKET_TIMEOUT,
             MKTXPConfigKeys.MKTXP_INITIAL_DELAY: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_INITIAL_DELAY,
             MKTXPConfigKeys.MKTXP_MAX_DELAY: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_MAX_DELAY,
