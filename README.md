@@ -243,7 +243,7 @@ mktxp edit -i
 
     verbose_mode = False            # Set it on for troubleshooting
 
-    fetch_routers_in_parallel = False   # Set to True if you want to fetch multiple routers in parallel
+    fetch_routers_in_parallel = False   # Perform fetching metrics from multiple routers in parallel / sequentially 
     max_worker_threads = 5              # Max number of worker threads that can fetch routers (parallel fetch only)
     max_scrape_duration = 10            # Max duration of individual routers' metrics collection (parallel fetch only)
     total_max_scrape_duration = 30      # Max overall duration of all metrics collection (parallel fetch only)
@@ -296,7 +296,7 @@ While most of the [mktxp options](https://github.com/akpw/mktxp#getting-started)
 ### Remote DHCP resolution
 When gathering various IP address-related metrics, MKTXP automatically resolves IP addresses whenever DHCP info is available. In many cases however, the exported devices do not have this information locally and instead rely on central DHCP servers. To improve readability / usefulness of the exported metrics, MKTXP supports remote DHCP server calls via the following option:
 ```
-remote_dhcp_entry = None        # An MKTXP entry for remote DHCP info resolution in capsman/wireless
+remote_dhcp_entry = None        # An MKTXP entry to provide for remote DHCP info / resolution
 ```
 `MKTXP entry` in this context can be any other mktxp.conf entry, and for the sole purpose of providing DHCP info it does not even need to be enabled.  An example:
 ```
@@ -305,6 +305,20 @@ remote_dhcp_entry = None        # An MKTXP entry for remote DHCP info resolution
 
 [RouterB]
     remote_dhcp_entry = RouterA  # Will resolve via RouterA
+```
+
+### Remote CAPsMAN info
+Similar to remote DHCP resolution, mktxp allows collecting CAPsMAN-related metrics via the following option: 
+```
+    remote_capsman_entry = None     # An MKTXP entry to provide for remote capsman info
+```
+`MKTXP entry` in this context can be any other mktxp.conf entry, and for the sole purpose of collecting CAPsMAN-related metrics it does not even need to be enabled.  An example:
+```
+[RouterA]
+    ...  # RouterA settings as normal
+
+[RouterB]
+    remote_capsman_entry = RouterA  # Will collect the CAPsMAN-related info via router A
 ```
 
 ### Connections stats

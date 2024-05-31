@@ -21,7 +21,9 @@ class HealthCollector(BaseCollector):
     '''    
     @staticmethod
     def collect(router_entry):
-        health_labels = ['voltage', 'temperature', 'phy_temperature', 'cpu_temperature', 'switch_temperature', 'fan1_speed', 'fan2_speed', 'fan3_speed', 'fan4_speed', 'power_consumption']
+        health_labels = ['voltage', 'temperature', 'phy_temperature', 'cpu_temperature', 'switch_temperature', 
+                        'fan1_speed', 'fan2_speed', 'fan3_speed', 'fan4_speed', 'power_consumption', ' board_temperature1', 'board_temperature2',
+                        'psu1_voltage', 'psu2_voltage', 'psu1_current', 'psu2_current', 'poe_out_consumption', 'jack_voltage', '2pin_voltage', 'poe_in_voltage', ]
         health_records = HealthMetricsDataSource.metric_records(router_entry, metric_labels = health_labels)   
         if health_records:
             for record in health_records:
@@ -63,3 +65,44 @@ class HealthCollector(BaseCollector):
                 if 'power_consumption' in record:
                     power_consumption_metrics = BaseCollector.gauge_collector('system_power_consumption', 'System Power Consumption', [record, ], 'power_consumption')
                     yield power_consumption_metrics
+
+                if 'board_temperature1' in record:
+                    board_temperature1_metrics = BaseCollector.gauge_collector('system_board_temperature1', 'System board temperature 1', [record, ], 'board_temperature1')
+                    yield board_temperature1_metrics
+
+                if 'board_temperature2' in record:
+                    board_temperature2_metrics = BaseCollector.gauge_collector('system_board_temperature2', 'System board temperature 2', [record, ], 'board_temperature2')
+                    yield board_temperature2_metrics
+
+                if 'psu1_voltage' in record:
+                    psu1_voltage_metrics = BaseCollector.gauge_collector('system_psu1_voltage', 'System PSU1 voltage', [record, ], 'psu1_voltage')
+                    yield psu1_voltage
+
+                if 'psu2_voltage' in record:
+                    psu2_voltage_metrics = BaseCollector.gauge_collector('system_psu2_voltage', 'System PSU2 voltage', [record, ], 'psu2_voltage')
+                    yield psu2_voltage_metrics
+
+                if 'psu1_current' in record:
+                    psu1_current_metrics = BaseCollector.gauge_collector('system_psu1_current', 'System PSU1 current', [record, ], 'psu1_current')
+                    yield psu1_current_metrics
+
+                if 'psu2_current' in record:
+                    psu2_current_metrics = BaseCollector.gauge_collector('system_psu2_current', 'System PSU2 current', [record, ], 'psu2_current')
+                    yield psu2_current_metrics
+
+                if 'poe_out_consumption' in record:
+                    poe_out_consumption_metrics = BaseCollector.gauge_collector('system_poe_out_consumption', 'System POE-out consumption', [record, ], 'poe_out_consumption')
+                    yield poe_out_consumption_metrics
+
+                if 'jack_voltage' in record:
+                    jack_voltage_metrics = BaseCollector.gauge_collector('system_jack_voltage', 'System Jack Voltage', [record, ], 'jack_voltage')
+                    yield jack_voltage_metrics
+
+                if '2pin_voltage' in record:
+                    pin_voltage_metrics = BaseCollector.gauge_collector('system_2pin_voltage', 'System 2pin Voltage', [record, ], '2pin_voltage')
+                    yield pin_voltage_metrics
+
+                if 'poe_in_voltage' in record:
+                    poe_in_voltage_metrics = BaseCollector.gauge_collector('system_poe_in_voltage', 'System POE-in Voltage', [record, ], 'poe_in_voltage')
+                    yield poe_in_voltage_metrics
+
