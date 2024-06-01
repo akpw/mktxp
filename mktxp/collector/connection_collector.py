@@ -29,13 +29,13 @@ class IPConnectionCollector(BaseCollector):
                 yield connection_metrics
 
         if router_entry.config_entry.connection_stats:
-            connection_stats_records = IPConnectionStatsDatasource.metric_records(router_entry)            
+            connection_stats_records = IPConnectionStatsDatasource.metric_records(router_entry)
+            if connection_stats_records:
+                for connection_stat_record in connection_stats_records:
+                    BaseOutputProcessor.augment_record(router_entry, connection_stat_record, id_key = 'src_address')
 
-            for connection_stat_record in connection_stats_records:
-                BaseOutputProcessor.augment_record(router_entry, connection_stat_record, id_key = 'src_address')
-
-            connection_stats_labels = ['src_address', 'dst_addresses', 'dhcp_name']                
-            connection_stats_metrics_gauge = BaseCollector.gauge_collector('connection_stats', 'Open connection stats', 
-                                                                connection_stats_records, 'connection_count', connection_stats_labels)
-            yield connection_stats_metrics_gauge
+                connection_stats_labels = ['src_address', 'dst_addresses', 'dhcp_name']                
+                connection_stats_metrics_gauge = BaseCollector.gauge_collector('connection_stats', 'Open connection stats', 
+                                                                    connection_stats_records, 'connection_count', connection_stats_labels)
+                yield connection_stats_metrics_gauge
 
