@@ -76,7 +76,7 @@ class HealthCollector(BaseCollector):
 
                 if 'psu1_voltage' in record:
                     psu1_voltage_metrics = BaseCollector.gauge_collector('system_psu1_voltage', 'System PSU1 voltage', [record, ], 'psu1_voltage')
-                    yield psu1_voltage
+                    yield psu1_voltage_metrics
 
                 if 'psu2_voltage' in record:
                     psu2_voltage_metrics = BaseCollector.gauge_collector('system_psu2_voltage', 'System PSU2 voltage', [record, ], 'psu2_voltage')
