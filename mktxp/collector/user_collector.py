@@ -20,7 +20,7 @@ class UserCollector(BaseCollector):
     '''Active Users collector'''
     @staticmethod
     def collect(router_entry):
-        if not router_entry.config_entry.installed_packages:
+        if not router_entry.config_entry.user:
             return
 
         user_labels = ['name', 'when', 'address', 'via', 'group']
