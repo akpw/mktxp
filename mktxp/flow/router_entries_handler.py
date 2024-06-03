@@ -11,10 +11,9 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
-
 from mktxp.cli.config.config import config_handler
 from mktxp.flow.router_entry import RouterEntry
-
+from mktxp.flow.router_connection import RouterAPIConnectionError
 
 class RouterEntriesHandler:
     ''' Handles RouterOS entries defined in MKTXP config 
@@ -23,24 +22,13 @@ class RouterEntriesHandler:
         self._router_entries = {}            
         for router_name in config_handler.registered_entries():            
             router_entry = RouterEntry(router_name)
-            if router_entry.config_entry.remote_dhcp_entry and config_handler.registered_entry(router_entry.config_entry.remote_dhcp_entry):
-                router_entry.dhcp_entry = RouterEntry(router_entry.config_entry.remote_dhcp_entry)
-
-            if router_entry.config_entry.remote_capsman_entry and config_handler.registered_entry(router_entry.config_entry.remote_capsman_entry):
-                router_entry.capsman_entry = RouterEntry(router_entry.config_entry.remote_capsman_entry)
-
+            RouterEntriesHandler._set_child_entries(router_entry)
             self._router_entries[router_name] = router_entry
 
     @property
     def router_entries(self):
         return (entry for key, entry in  self._router_entries.items() if entry.config_entry.enabled) \
                                                                                 if self._router_entries else None   
-
-    def router_entry(self, entry_name, enabled_only = False):
-        entry = self._router_entries.get(entry_name)                                                                                
-        if entry and (entry.config_entry.enabled or not enabled_only):
-            return entry
-        return None
 
     @staticmethod
     def router_entry(entry_name, enabled_only = False):
@@ -51,10 +39,27 @@ class RouterEntriesHandler:
             return None
 
         router_entry = RouterEntry(entry_name)
-        if config_entry.remote_dhcp_entry and config_handler.registered_entry(config_entry.remote_dhcp_entry):
-            router_entry.dhcp_entry = RouterEntry(config_entry.remote_dhcp_entry)        
-
-        if config_entry.remote_capsman_entry and config_handler.registered_entry(config_entry.remote_capsman_entry):
-            router_entry.capsman_entry = RouterEntry(config_entry.remote_capsman_entry)        
-
+        RouterEntriesHandler._set_child_entries(router_entry)
+        try:
+            router_entry.connect()
+        except RouterAPIConnectionError as exc:
+            print (f'{exc}')
         return router_entry
+
+    @staticmethod
+    def _set_child_entries(router_entry):
+        if router_entry.config_entry.remote_dhcp_entry and config_handler.registered_entry(router_entry.config_entry.remote_dhcp_entry):
+            router_entry.dhcp_entry = RouterEntry(router_entry.config_entry.remote_dhcp_entry)        
+
+        if router_entry.config_entry.remote_capsman_entry and config_handler.registered_entry(router_entry.config_entry.remote_capsman_entry):
+            router_entry.capsman_entry = RouterEntry(router_entry.config_entry.remote_capsman_entry)       
+
+
+#import sys
+#_, ex_value, _ = sys.exc_info()
+#    def router_entry(self, entry_name, enabled_only = False):
+#        entry = self._router_entries.get(entry_name)                                                                                
+#        if entry and (entry.config_entry.enabled or not enabled_only):
+#            return entry
+#        return None
+

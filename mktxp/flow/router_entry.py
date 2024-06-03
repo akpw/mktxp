@@ -18,7 +18,7 @@ from mktxp.cli.config.config import config_handler, MKTXPConfigKeys, CollectorKe
 from mktxp.flow.router_connection import RouterAPIConnection
 from mktxp.datasource.package_ds import PackageMetricsDataSource
 from mktxp.datasource.system_resource_ds import SystemResourceMetricsDataSource
-
+from mktxp.flow.router_connection import RouterAPIConnectionError
 
 class RouterEntryWirelessType(IntEnum):
     NONE = 0
@@ -33,12 +33,17 @@ class RouterEntryWirelessPackage:
     WIFIWAVE2_PACKAGE = 'wifiwave2'
     WIRELESS_PACKAGE = 'wireless'
 
+class RouterEntryConnectionState(IntEnum):
+    NOT_CONNECTED = 0
+    PARTIALLY_CONNECTED = 1
+    CONNECTED = 2
+
 class RouterEntry:
     ''' RouterOS Entry
     '''                 
     def __init__(self, router_name):
         self.router_name = router_name
-        self.config_entry  = config_handler.config_entry(router_name)
+        self.config_entry = config_handler.config_entry(router_name)
         self.api_connection = RouterAPIConnection(router_name, self.config_entry)
         self.router_id = {
             MKTXPConfigKeys.ROUTERBOARD_NAME: self.router_name,
@@ -128,17 +133,47 @@ class RouterEntry:
             return self._dhcp_records[key].record
         return None
 
-    def is_ready(self):
-        self.is_done() #flush caches, just in case
-        is_ready = True
+    def connection_status(self):
+        primary_connection_status = self.api_connection.is_connected()
+        dhcp_connection_status = self.dhcp_entry.api_connection.is_connected()
+        capsman_connection_status = self.capsman_entry.api_connection.is_connected()
+
+        if primary_connection_status and dhcp_connection_status and capsman_connection_status:
+            return RouterEntryConnectionState.CONNECTED
+
+        if primary_connection_status or dhcp_connection_status or capsman_connection_status:
+            return RouterEntryConnectionState.PARTIALLY_CONNECTED
+
+        return RouterEntryConnectionState.NOT_CONNECTED
+
+    def connect(self):
         if not self.api_connection.is_connected():
-            is_ready = False                        
-            # let's get connected now
-            self.api_connection.connect()
-            if self._dhcp_entry:
+            try:
+                self.api_connection.connect()
+            except RouterAPIConnectionError as exc:
+                print (f'{exc}')
+        
+        if self._dhcp_entry and not self._dhcp_entry.api_connection.is_connected():            
+            try:
                 self._dhcp_entry.api_connection.connect()
-            if self._capsman_entry:
+            except RouterAPIConnectionError as exc:
+                print (f'{exc}')
+
+        if self._capsman_entry and not self._capsman_entry.api_connection.is_connected():
+            try:
                 self._capsman_entry.api_connection.connect()
+            except RouterAPIConnectionError as exc:
+                print (f'{exc}')
+
+    def is_ready(self):           
+        self.is_done() #flush caches, just in case
+        is_ready = False
+
+        if self.connection_status() in (RouterEntryConnectionState.NOT_CONNECTED, RouterEntryConnectionState.PARTIALLY_CONNECTED):
+            self.connect()
+        if self.connection_status() in (RouterEntryConnectionState.CONNECTED, RouterEntryConnectionState.PARTIALLY_CONNECTED):            
+            is_ready = True        
+        
         return is_ready
 
     def is_done(self):
@@ -146,3 +181,17 @@ class RouterEntry:
         self._wireless_type = RouterEntryWirelessType.NONE
 
 DHCPCacheEntry = namedtuple('DHCPCacheEntry', ['type', 'record'])
+
+
+
+
+#    def is_connected(self):
+#        if self.api_connection.is_connected():
+#            return True
+#        if self._dhcp_entry and self._dhcp_entry.api_connection.is_connected():
+#            return True
+#        if self._capsman_entry and self._capsman_entry.api_connection.is_connected():
+#            return True
+#        return False
+
+

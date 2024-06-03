@@ -18,12 +18,10 @@ class BaseDSProcessor:
 
     @staticmethod
     def trimmed_records(router_entry, *, router_records = None, metric_labels = None, add_router_id = True, translation_table = None):
-        if router_records is None:
-            router_records = []
-        if metric_labels is None:
-            metric_labels = []   
-        if translation_table is None:
-            translation_table = {}         
+        metric_labels = metric_labels or []
+        router_records = router_records or []            
+        translation_table = translation_table or {}         
+
         if len(metric_labels) == 0 and len(router_records) > 0:
             metric_labels = [BaseDSProcessor._normalise_keys(key) for key in router_records[0].keys()]
         metric_labels = set(metric_labels)      
@@ -39,8 +37,7 @@ class BaseDSProcessor:
             # translate fields if needed
             for key, func in translation_table.items():
                 translated_record[key] = func(translated_record.get(key))
-            labeled_records.append(translated_record)
-            
+            labeled_records.append(translated_record)            
         return labeled_records
 
 

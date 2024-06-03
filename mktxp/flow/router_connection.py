@@ -17,6 +17,7 @@ import socket
 import collections
 from datetime import datetime
 from mktxp.cli.config.config import config_handler
+import functools 
 
 # Fix UTF-8 decode error
 # See: https://github.com/akpw/mktxp/issues/47
@@ -31,10 +32,17 @@ routeros_api.api_structure.default_structure = collections.defaultdict(routeros_
 
 from routeros_api import RouterOsApiPool
 
-
 class RouterAPIConnectionError(Exception):
     pass
 
+def check_connected(func):
+    @functools.wraps(func)
+    def wrapper(self, *args, **kwargs):
+        if not self.is_connected():
+            raise RouterAPIConnectionError(f'No network connection to router: {self.router_name}@{self.config_entry.hostname}')
+        else:
+            return func(self, *args, **kwargs)
+    return wrapper
 
 class RouterAPIConnection:
     ''' Base wrapper interface for the routeros_api library
@@ -61,16 +69,11 @@ class RouterAPIConnection:
         
         self.connection.socket_timeout = config_handler.system_entry.socket_timeout
         self.api = None
-
+    
     def is_connected(self):
-        if not (self.connection and self.connection.connected and self.api):
-            return False
-        try:
-            self.api.get_resource('/system/identity').get()
+        if self.connection and self.connection.connected and self.api:
             return True
-        except (socket.error, socket.timeout, Exception) as exc:
-            self._set_connect_state(success = False, exc = exc)
-            return False
+        return False
 
     def connect(self):
         connect_time = datetime.now()
@@ -83,11 +86,10 @@ class RouterAPIConnection:
             self._set_connect_state(success = True, connect_time = connect_time)
         except (socket.error, socket.timeout, Exception) as exc:
             self._set_connect_state(success = False, connect_time = connect_time, exc = exc)
-            #raise RouterAPIConnectionError
+            raise RouterAPIConnectionError(f'Failed attemp to establish network connection to router: {self.router_name}@{self.config_entry.hostname}')
 
+    @check_connected
     def router_api(self):
-        if not self.is_connected():
-            self.connect()
         return self.api
 
     def _in_connect_timeout(self, connect_timestamp):
@@ -122,9 +124,18 @@ class RouterAPIConnection:
             print(f'{connect_time.strftime("%Y-%m-%d %H:%M:%S")} Connection to router {self.router_name}@{self.config_entry.hostname} has failed: {exc}')
 
 
-
-
-
+#    def is_not_connected(self):
+#        if not (self.connection and self.connection.connected and self.api):
+#            return True
+#    def is_connected(self):
+#        if self.is_not_connected():
+#            return False
+#        try:
+#            self.api.get_resource('/system/identity').get()
+#            return True
+#        except (socket.error, socket.timeout, Exception) as exc:
+#            self._set_connect_state(success = False, exc = exc)
+#            return False
 
 
 

@@ -22,8 +22,9 @@ class BaseCollector:
     '''
     @staticmethod
     def info_collector(name, decription, router_records, metric_labels=None):
-        if metric_labels is None:
-            metric_labels = []
+        metric_labels = metric_labels or []
+        router_records = router_records or []
+
         BaseCollector._add_id_labels(metric_labels)
         collector = InfoMetricFamily(f'mktxp_{name}', decription)
 
@@ -34,8 +35,9 @@ class BaseCollector:
 
     @staticmethod
     def counter_collector(name, decription, router_records, metric_key, metric_labels=None):
-        if metric_labels is None:
-            metric_labels = []
+        metric_labels = metric_labels or []
+        router_records = router_records or []            
+
         BaseCollector._add_id_labels(metric_labels)
         collector = CounterMetricFamily(f'mktxp_{name}', decription, labels=metric_labels)
 
@@ -46,8 +48,9 @@ class BaseCollector:
 
     @staticmethod
     def gauge_collector(name, decription, router_records, metric_key, metric_labels = None, add_id_labels = True):
-        if metric_labels is None:
-            metric_labels = []        
+        metric_labels = metric_labels or []
+        router_records = router_records or []            
+
         if add_id_labels:
             BaseCollector._add_id_labels(metric_labels)
         collector = GaugeMetricFamily(f'mktxp_{name}', decription, labels=metric_labels)
