@@ -24,7 +24,7 @@ class FirewallCollector(BaseCollector):
     def collect(router_entry):
         # Initialize all pool counts, including those currently not used
         # These are the same for both IPv4 and IPv6
-        firewall_labels = ['chain', 'action', 'bytes', 'comment', 'log', 'out-interface', 'protocol']
+        firewall_labels = ['chain', 'action', 'bytes', 'comment', 'log', 'out_interface', 'protocol']
 
         if router_entry.config_entry.firewall:
             # ~*~*~*~*~*~ IPv4 ~*~*~*~*~*~
@@ -83,7 +83,7 @@ class FirewallCollector(BaseCollector):
     def metric_record(router_entry, firewall_record):
         name = f"| {firewall_record.get('chain', ' ')} | {firewall_record.get('action', ' ')} | {firewall_record.get('comment', ' ')}"
         bytes = firewall_record.get('bytes', 0)
-        out_interface = firewall_record.get('out-interface')
+        out_interface = firewall_record.get('out_interface')
         protocol = firewall_record.get('protocol')
         if out_interface:
             name += f" | {out_interface}"
