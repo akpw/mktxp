@@ -86,9 +86,9 @@ class FirewallCollector(BaseCollector):
         out_interface = firewall_record.get('out_interface')
         protocol = firewall_record.get('protocol')
         if out_interface:
-            name += f" | {out_interface}"
+            name = f"{name} | {out_interface}"
         if protocol:
-            name += f" | {protocol}"
+            name = f"{name} | {protocol}"
         return {MKTXPConfigKeys.ROUTERBOARD_NAME: router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_NAME],
                 MKTXPConfigKeys.ROUTERBOARD_ADDRESS: router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_ADDRESS],
                 'name': name, 'log': firewall_record['log'], 'bytes': bytes}
