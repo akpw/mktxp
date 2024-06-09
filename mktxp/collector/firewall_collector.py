@@ -24,7 +24,7 @@ class FirewallCollector(BaseCollector):
     def collect(router_entry):
         # Initialize all pool counts, including those currently not used
         # These are the same for both IPv4 and IPv6
-        firewall_labels = ['chain', 'action', 'bytes', 'comment', 'log']
+        firewall_labels = ['chain', 'action', 'bytes', 'comment', 'log', 'out-interface', 'protocol']
 
         if router_entry.config_entry.firewall:
             # ~*~*~*~*~*~ IPv4 ~*~*~*~*~*~
