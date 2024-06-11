@@ -54,12 +54,3 @@ class RouterEntriesHandler:
         if router_entry.config_entry.remote_capsman_entry and config_handler.registered_entry(router_entry.config_entry.remote_capsman_entry):
             router_entry.capsman_entry = RouterEntry(router_entry.config_entry.remote_capsman_entry)       
 
-
-#import sys
-#_, ex_value, _ = sys.exc_info()
-#    def router_entry(self, entry_name, enabled_only = False):
-#        entry = self._router_entries.get(entry_name)                                                                                
-#        if entry and (entry.config_entry.enabled or not enabled_only):
-#            return entry
-#        return None
-

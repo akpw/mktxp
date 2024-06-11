@@ -28,6 +28,20 @@ class POECollector(BaseCollector):
         poe_records = POEMetricsDataSource.metric_records(router_entry, include_comments = True, metric_labels = poe_labels)  
 
         if poe_records:
-            poe_metrics = BaseCollector.info_collector('poe', 'POE Metrics', poe_records, poe_labels)
+            poe_info_labels = ['name', 'poe_out', 'poe_priority', 'poe_voltage', 'poe_out_status']
+            poe_metrics = BaseCollector.info_collector('poe', 'POE Info Metrics', poe_records, poe_info_labels)
             yield poe_metrics
-            
+
+            for poe_record in poe_records:
+                if 'poe_out_voltage' in poe_record:
+                    poe_voltage_metrics = BaseCollector.gauge_collector('poe_out_voltage', 'POE Out Voltage', [poe_record, ], 'poe_out_voltage')
+                    yield poe_voltage_metrics
+
+                if 'poe_out_current' in poe_record:
+                    poe_current_metrics = BaseCollector.gauge_collector('poe_out_current', 'POE Out Current', [poe_record, ], 'poe_out_current')
+                    yield poe_current_metrics
+
+                if 'poe_out_power' in poe_record:
+                    poe_power_metrics = BaseCollector.gauge_collector('poe_out_power', 'POE Out Power', [poe_record, ], 'poe_out_power')
+                    yield poe_power_metrics
+

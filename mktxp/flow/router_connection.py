@@ -122,21 +122,3 @@ class RouterAPIConnection:
             self.successive_failure_count += 1
             self.last_failure_timestamp = connect_time.timestamp() 
             print(f'{connect_time.strftime("%Y-%m-%d %H:%M:%S")} Connection to router {self.router_name}@{self.config_entry.hostname} has failed: {exc}')
-
-
-#    def is_not_connected(self):
-#        if not (self.connection and self.connection.connected and self.api):
-#            return True
-#    def is_connected(self):
-#        if self.is_not_connected():
-#            return False
-#        try:
-#            self.api.get_resource('/system/identity').get()
-#            return True
-#        except (socket.error, socket.timeout, Exception) as exc:
-#            self._set_connect_state(success = False, exc = exc)
-#            return False
-
-
-
-

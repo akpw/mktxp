@@ -181,17 +181,3 @@ class RouterEntry:
         self._wireless_type = RouterEntryWirelessType.NONE
 
 DHCPCacheEntry = namedtuple('DHCPCacheEntry', ['type', 'record'])
-
-
-
-
-#    def is_connected(self):
-#        if self.api_connection.is_connected():
-#            return True
-#        if self._dhcp_entry and self._dhcp_entry.api_connection.is_connected():
-#            return True
-#        if self._capsman_entry and self._capsman_entry.api_connection.is_connected():
-#            return True
-#        return False
-
-
