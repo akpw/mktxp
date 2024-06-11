@@ -35,16 +35,18 @@ class HealthCollector(BaseCollector):
                 if 'temperature' in record:
                     temperature_metrics = BaseCollector.gauge_collector('system_routerboard_temperature', 'Routerboard current temperature', [record, ], 'temperature')
                     yield temperature_metrics
-                elif 'phy_temperature' in record:
-                    temperature_metrics = BaseCollector.gauge_collector('system_routerboard_temperature', 'Routerboard current temperature', [record, ], 'phy_temperature')
-                    yield temperature_metrics
+
+                if 'phy_temperature' in record:
+                    phy_temperature_metrics = BaseCollector.gauge_collector('system_phy_temperature', 'Current PHY temperature', [record, ], 'phy_temperature')
+                    yield phy_temperature_metrics
 
                 if 'cpu_temperature' in record:
-                    cpu_temperature_metrics = BaseCollector.gauge_collector('system_cpu_temperature', 'CPU current temperature', [record, ], 'cpu_temperature')
+                    cpu_temperature_metrics = BaseCollector.gauge_collector('system_cpu_temperature', 'Current CPU temperature', [record, ], 'cpu_temperature')
                     yield cpu_temperature_metrics
-                elif 'switch_temperature' in record:
-                    cpu_temperature_metrics = BaseCollector.gauge_collector('system_cpu_temperature', 'CPU current temperature', [record, ], 'switch_temperature')
-                    yield cpu_temperature_metrics
+                
+                if 'switch_temperature' in record:
+                    switch_temperature_metrics = BaseCollector.gauge_collector('system_switch_temperature', 'Current switch temperature', [record, ], 'switch_temperature')
+                    yield switch_temperature_metrics
 
                 if 'fan1_speed' in record:
                     fan_one_speed_metrics = BaseCollector.gauge_collector('system_fan_one_speed', 'System fan 1 current speed', [record, ], 'fan1_speed')
