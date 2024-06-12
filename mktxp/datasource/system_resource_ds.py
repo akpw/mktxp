@@ -28,7 +28,7 @@ class SystemResourceMetricsDataSource:
             return BaseDSProcessor.trimmed_records(router_entry, router_records = system_resource_records, metric_labels = metric_labels, translation_table=translation_table)
         except Exception as exc:
             print(f'Error getting system resource info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
-            return None
+        return None
 
     @staticmethod
     def os_version(router_entry):
@@ -37,14 +37,14 @@ class SystemResourceMetricsDataSource:
             for record in system_version_records:
                 ver = record.get('version', None)
                 if ver:
-                    return ver
-                    
-            return None
+                    return ver                    
         except Exception as exc:
-            print(f'Error getting system resource info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
-        return False
+            print(f'Error getting OS version info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
+        return None
     
     @staticmethod
     def has_builtin_wifi_capsman(router_entry):
         ver = SystemResourceMetricsDataSource.os_version(router_entry)
-        return builtin_wifi_capsman_version(ver)
+        if ver:
+            return builtin_wifi_capsman_version(ver)
+        return False

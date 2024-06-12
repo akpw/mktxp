@@ -39,5 +39,5 @@ class PackageMetricsDataSource:
                     if package_record['name'] == package_name:
                         return True
             except Exception as exc:
-                print(f'Error getting installed packages info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')        
+                print(f'Error getting an installed package status from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')        
         return False

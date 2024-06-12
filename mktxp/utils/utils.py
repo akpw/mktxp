@@ -317,16 +317,13 @@ def parse_ros_version(string):
 
 def builtin_wifi_capsman_version(version):
     """Try to check if the version is Wifi version of RouterOS (>= 7.13).
-    If anything goes wrong, return None.
     Returns a boolean"""
     try:
         cur_version, _ = parse_ros_version(version)
         if cur_version >= parse('7.13'):
             return True
     except Exception as err:
-        print(f'could not get current RouterOS version, because: {str(err)}')
-        return None
-
+        print(f'could not get current RouterOS version, because: {err}')
     return False
 
 def check_for_updates(cur_version):
@@ -342,10 +339,10 @@ def check_for_updates(cur_version):
         print(f'unknown update channel {channel}')
         error = True
     except urllib.error.HTTPError as err:
-        print(f'update feed returned: {str(err)}')
+        print(f'update feed returned: {err}')
         error = True
     except Exception as err:
-        print(f'could not check for updates, because: {str(err)}')
+        print(f'could not check for updates, because: {err}')
         error = True
 
     if error:
