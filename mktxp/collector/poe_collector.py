@@ -34,14 +34,14 @@ class POECollector(BaseCollector):
 
             for poe_record in poe_records:
                 if 'poe_out_voltage' in poe_record:
-                    poe_voltage_metrics = BaseCollector.gauge_collector('poe_out_voltage', 'POE Out Voltage', [poe_record, ], 'poe_out_voltage')
+                    poe_voltage_metrics = BaseCollector.gauge_collector('poe_out_voltage', 'POE Out Voltage', [poe_record, ], 'poe_out_voltage', ['name'])
                     yield poe_voltage_metrics
 
                 if 'poe_out_current' in poe_record:
-                    poe_current_metrics = BaseCollector.gauge_collector('poe_out_current', 'POE Out Current', [poe_record, ], 'poe_out_current')
+                    poe_current_metrics = BaseCollector.gauge_collector('poe_out_current', 'POE Out Current', [poe_record, ], 'poe_out_current', ['name'])
                     yield poe_current_metrics
 
                 if 'poe_out_power' in poe_record:
-                    poe_power_metrics = BaseCollector.gauge_collector('poe_out_power', 'POE Out Power', [poe_record, ], 'poe_out_power')
+                    poe_power_metrics = BaseCollector.gauge_collector('poe_out_power', 'POE Out Power', [poe_record, ], 'poe_out_power', ['name'])
                     yield poe_power_metrics
 
