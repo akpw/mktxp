@@ -40,9 +40,6 @@ def temp_dir(quiet = True):
             if not quiet:
                 print ('Error while removing a tmp dir: {}'.format(e.args[0]))
 
-class CmdProcessingError(Exception):
-    pass
-
 def run_cmd(cmd, shell = False, quiet = False):
     ''' Runs shell commands in a separate process
     '''
@@ -51,7 +48,7 @@ def run_cmd(cmd, shell = False, quiet = False):
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell = shell)
     output = proc.communicate()[0].decode('utf-8')
     if proc.returncode != 0 and not quiet:
-        raise CmdProcessingError(output)
+        return 'nothing'
     return output
 
 def parse_mkt_uptime(time):

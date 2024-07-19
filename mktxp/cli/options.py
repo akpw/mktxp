@@ -234,8 +234,8 @@ Selected metrics info can be printed on the command line. For more information, 
         quiet = not config_handler.system_entry.verbose_mode
         for command in commands:
             editor = run_cmd(command, quiet = quiet).rstrip()
-            if editor:
-                break                                  
+            if editor != 'nothing':
+                break
         return editor
 
 
