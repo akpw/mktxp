@@ -231,11 +231,10 @@ Selected metrics info can be printed on the command line. For more information, 
             return editor
 
         commands = ['which nano', 'which vi', 'which vim']
-        quiet = not config_handler.system_entry.verbose_mode
         for command in commands:
-            editor = run_cmd(command, quiet = quiet).rstrip()
+            editor = run_cmd(command, quiet = True).rstrip()
             if editor:
-                break                                  
+                break               
         return editor
 
 
