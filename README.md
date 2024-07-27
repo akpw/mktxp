@@ -102,6 +102,7 @@ The default configuration file comes with a sample configuration, making it easy
     capsman_clients = True          # CAPsMAN clients metrics
 
     lte = False                     # LTE signal and status metrics
+    ipsec = False                   # IPSec active peer metrics
 
     kid_control_assigned = False    # Allow Kid Control metrics for connected devices with assigned users
     kid_control_dynamic = False     # Allow Kid Control metrics for all connected devices, including those without assigned user

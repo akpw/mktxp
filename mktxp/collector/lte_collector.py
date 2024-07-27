@@ -36,15 +36,17 @@ class LTECollector(BaseCollector):
                                                                            kind = 'lte',
                                                                            running_only = False)   
         if monitor_records:
-            # sanitize records for relevant labels
-            rsrp_records = [monitor_record for monitor_record in monitor_records if monitor_record.get('rsrp')]
-            rsrq_records = [monitor_record for monitor_record in monitor_records if monitor_record.get('rsrq')]
-            sinr_records = [monitor_record for monitor_record in monitor_records if monitor_record.get('sinr')]
-            rssi_records = [monitor_record for monitor_record in monitor_records if monitor_record.get('rssi')]
             yield BaseCollector.gauge_collector('lte_pin_status', 'Pin status', monitor_records, 'pin_status', [])
             yield BaseCollector.gauge_collector('lte_registration_status', 'Registration status', monitor_records, 'registration_status', [])
             yield BaseCollector.info_collector('lte_current_operator', 'LTE operator', monitor_records, ['current_operator', 'access_technology', 'functionality', 'subscriber_number'])
             yield BaseCollector.gauge_collector('lte_session_uptime', 'LTE session uptime', monitor_records, 'session_uptime', [])
+
+            # specific labels
+            rsrp_records = [monitor_record for monitor_record in monitor_records if monitor_record.get('rsrp')]
+            rsrq_records = [monitor_record for monitor_record in monitor_records if monitor_record.get('rsrq')]
+            sinr_records = [monitor_record for monitor_record in monitor_records if monitor_record.get('sinr')]
+            rssi_records = [monitor_record for monitor_record in monitor_records if monitor_record.get('rssi')]
+
             if rsrp_records:
                 yield BaseCollector.gauge_collector('lte_rsrp', 'LTE Reference Signal Received Qualityrsrp value', rsrp_records, 'rsrp', [])
             if rsrq_records:
