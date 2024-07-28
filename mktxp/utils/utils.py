@@ -297,7 +297,7 @@ def get_available_updates(channel, ttl_hash=get_ttl_hash()):
         for child in channel:
             # iterate over all updates
             if child.tag == 'item':
-                title, _, _, _, _ = child
+                title = child[0]
                 # extract and parse the version number from title
                 version_text = re.findall(r'[\d+\.]+', title.text)[0]
                 version_number = parse(version_text)

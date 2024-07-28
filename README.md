@@ -116,7 +116,6 @@ The default configuration file comes with a sample configuration, making it easy
     remote_capsman_entry = None     # An MKTXP entry to provide for remote capsman info 
 
     use_comments_over_names = True  # when available, forces using comments over the interfaces names
-
     check_for_updates = False       # check for available ROS updates
 ```
 
