@@ -39,52 +39,43 @@ class IPSecCollector(BaseCollector):
 
         if ipsec_records:
             ipsec_info_labels = ['local_address', 'name', 'remote_address', 'state']
-            ipsec_state_metric = BaseCollector.info_collector('ipsec_peer_state',
-                                                              'State of negotiation with the peer.',
-                                                              ipsec_records, ipsec_info_labels)
-            yield ipsec_state_metric
+            yield BaseCollector.info_collector('ipsec_peer_state',
+                                               'State of negotiation with the peer.',
+                                               ipsec_records, ipsec_info_labels)
 
             ipsec_value_labels = ['local_address', 'name', 'remote_address']
-            rx_byte_metric = BaseCollector.counter_collector('ipsec_peer_rx_byte',
-                                                             'The total amount of bytes received from this peer.',
-                                                             ipsec_records, 'rx_bytes', ipsec_value_labels)
-            yield rx_byte_metric
+            yield BaseCollector.counter_collector('ipsec_peer_rx_byte',
+                                                  'The total amount of bytes received from this peer.',
+                                                  ipsec_records, 'rx_bytes', ipsec_value_labels)
 
-            tx_byte_metric = BaseCollector.counter_collector('ipsec_peer_tx_byte',
-                                                             'The total amount of bytes transmitted to this peer.',
-                                                             ipsec_records, 'tx_bytes', ipsec_value_labels)
-            yield tx_byte_metric
+            yield BaseCollector.counter_collector('ipsec_peer_tx_byte',
+                                                  'The total amount of bytes transmitted to this peer.',
+                                                  ipsec_records, 'tx_bytes', ipsec_value_labels)
 
-            rx_packet_metric = BaseCollector.counter_collector('ipsec_peer_rx_packet',
-                                                               'The total amount of packets received from this peer.',
-                                                               ipsec_records, 'rx_packets', ipsec_value_labels)
-            yield rx_byte_metric
+            yield BaseCollector.counter_collector('ipsec_peer_rx_packet',
+                                                  'The total amount of packets received from this peer.',
+                                                  ipsec_records, 'rx_packets', ipsec_value_labels)
 
-            tx_packet_metric = BaseCollector.counter_collector('ipsec_peer_tx_packet',
-                                                               'The total amount of packets transmitted to this peer.',
-                                                               ipsec_records, 'tx_packets', ipsec_value_labels)
-            yield tx_packet_metric
+            yield BaseCollector.counter_collector('ipsec_peer_tx_packet',
+                                                  'The total amount of packets transmitted to this peer.',
+                                                  ipsec_records, 'tx_packets', ipsec_value_labels)
 
-            p2_total_metric = BaseCollector.gauge_collector('ipsec_peer_security_association',
-                                                             'The total amount of active IPsec security associations.',
-                                                             ipsec_records, 'p2_total', ipsec_value_labels)
-            yield p2_total_metric
+            yield BaseCollector.gauge_collector('ipsec_peer_security_association',
+                                                'The total amount of active IPsec security associations.',
+                                                ipsec_records, 'p2_total', ipsec_value_labels)
 
-            last_seen_metric = BaseCollector.gauge_collector('ipsec_peer_last_seen',
-                                                             'Duration since the last message received by this peer.',
-                                                             ipsec_records, 'last_seen', ipsec_value_labels)
-            yield last_seen_metric
+            yield BaseCollector.gauge_collector('ipsec_peer_last_seen',
+                                                'Duration since the last message received by this peer.',
+                                                ipsec_records, 'last_seen', ipsec_value_labels)
 
-            uptime_metric = BaseCollector.gauge_collector('ipsec_peer_uptime', 'How long peer is in an established state.',
-                                                          ipsec_records, 'uptime', ipsec_value_labels)
-            yield uptime_metric
+            yield BaseCollector.gauge_collector('ipsec_peer_uptime',
+                                                'How long peer is in an established state.',
+                                                ipsec_records, 'uptime', ipsec_value_labels)
 
-            responder_metric = BaseCollector.gauge_collector('ipsec_peer_responder',
-                                                        'Whether the connection is initiated by a remote peer.',
-                                                          ipsec_records, 'responder', ipsec_value_labels)
-            yield responder_metric
+            yield BaseCollector.gauge_collector('ipsec_peer_responder',
+                                                'Whether the connection is initiated by a remote peer.',
+                                                ipsec_records, 'responder', ipsec_value_labels)
 
-            natt_metric = BaseCollector.gauge_collector('ipsec_peer_natt_enabled',
-                                                        'Whether NAT-T is used for this peer.',
-                                                          ipsec_records, 'natt_peer', ipsec_value_labels)
-            yield natt_metric
+            yield BaseCollector.gauge_collector('ipsec_peer_natt_enabled',
+                                                'Whether NAT-T is used for this peer.',
+                                                ipsec_records, 'natt_peer', ipsec_value_labels)
