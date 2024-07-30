@@ -25,7 +25,7 @@ class InterfaceCollector(BaseCollector):
             return
             
         interface_traffic_labels = ['name', 'comment', 'rx_byte', 'tx_byte', 'rx_packet', 'tx_packet', 'rx_error', 'tx_error', 'rx_drop', 'tx_drop', 'link_downs']
-        interface_traffic_records = InterfaceTrafficMetricsDataSource.metric_records(router_entry, metric_labels = interface_traffic_labels)   
+        interface_traffic_records = InterfaceTrafficMetricsDataSource.metric_stats_records(router_entry, metric_labels = interface_traffic_labels)   
 
         if interface_traffic_records:
             for interface_traffic_record in interface_traffic_records:

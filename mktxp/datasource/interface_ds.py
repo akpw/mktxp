@@ -17,7 +17,7 @@ from mktxp.datasource.base_ds import BaseDSProcessor
 
 class InterfaceTrafficMetricsDataSource:
     ''' Interface Traffic Metrics data provider
-    '''             
+    '''
     @staticmethod
     def metric_records(router_entry, *, metric_labels = None):
         if metric_labels is None:
@@ -29,6 +29,28 @@ class InterfaceTrafficMetricsDataSource:
             print(f'Error getting interface traffic info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None
 
+    ''' Interface Traffic Stats data provider
+    '''
+    @staticmethod
+    def metric_stats_records(router_entry, *, metric_labels):
+        metric_labels = metric_labels or []
+        try:
+            # get stats for all existing interfaces 
+            all_records = router_entry.api_connection.router_api().get_resource('/interface').call('print', {'stats': 'detail'})
+
+            # but then, ethernet interfaces stats need to come from another level ¯\_(``)_/¯
+            metric_stats_records = router_entry.api_connection.router_api().get_resource('/interface/ethernet').call('print', {'stats': 'detail'})
+            eth_int_names = set([record['name'] for record in metric_stats_records])
+
+            # so now, merge the ethernet interfaces stats with those from non-ethernet interfaces
+            for record in all_records:
+                if record.get('name') and record.get('name') not in (eth_int_names):
+                    metric_stats_records.append(record)
+            
+            return BaseDSProcessor.trimmed_records(router_entry, router_records = metric_stats_records, metric_labels = metric_labels)
+        except Exception as exc:
+            print(f'Error getting interface traffic stats info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
+            return None
 
 class InterfaceMonitorMetricsDataSource:
     ''' Interface Monitor Metrics data provider
