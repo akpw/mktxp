@@ -32,7 +32,6 @@ class IPSecCollector(BaseCollector):
             'natt_peer': lambda value: '1' if value == 'true' else '0',
             'last_seen': lambda value: BaseOutputProcessor.parse_timedelta_milliseconds(value) if value else '0',
             'uptime': lambda value: BaseOutputProcessor.parse_timedelta_milliseconds(value) if value else '0'
-
         }
         ipsec_records = IPSecMetricsDataSource.metric_records(router_entry, metric_labels=ipsec_labels,
                                                               translation_table=translation_table)
@@ -62,7 +61,7 @@ class IPSecCollector(BaseCollector):
 
             yield BaseCollector.gauge_collector('ipsec_peer_security_association',
                                                 'The total amount of active IPsec security associations.',
-                                                ipsec_records, 'p2_total', ipsec_value_labels)
+                                                ipsec_records, 'ph2_total', ipsec_value_labels)
 
             yield BaseCollector.gauge_collector('ipsec_peer_last_seen',
                                                 'Duration since the last message received by this peer.',
