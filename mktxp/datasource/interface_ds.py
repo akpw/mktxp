@@ -36,17 +36,7 @@ class InterfaceTrafficMetricsDataSource:
         metric_labels = metric_labels or []
         try:
             # get stats for all existing interfaces 
-            all_records = router_entry.api_connection.router_api().get_resource('/interface').call('print', {'stats': 'detail'})
-
-            # but then, ethernet interfaces stats need to come from another level ¯\_(``)_/¯
-            metric_stats_records = router_entry.api_connection.router_api().get_resource('/interface/ethernet').call('print', {'stats': 'detail'})
-            eth_int_names = set([record['name'] for record in metric_stats_records])
-
-            # so now, merge the ethernet interfaces stats with those from non-ethernet interfaces
-            for record in all_records:
-                if record.get('name') and record.get('name') not in (eth_int_names):
-                    metric_stats_records.append(record)
-            
+            metric_stats_records = router_entry.api_connection.router_api().get_resource('/interface').call('print', {'stats': 'detail'})
             return BaseDSProcessor.trimmed_records(router_entry, router_records = metric_stats_records, metric_labels = metric_labels)
         except Exception as exc:
             print(f'Error getting interface traffic stats info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
