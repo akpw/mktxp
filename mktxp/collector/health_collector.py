@@ -23,8 +23,12 @@ class HealthCollector(BaseCollector):
     def collect(router_entry):
         health_labels = ['voltage', 'temperature', 'phy_temperature', 'cpu_temperature', 'switch_temperature', 
                         'fan1_speed', 'fan2_speed', 'fan3_speed', 'fan4_speed', 'power_consumption', ' board_temperature1', 'board_temperature2',
-                        'psu1_voltage', 'psu2_voltage', 'psu1_current', 'psu2_current', 'poe_out_consumption', 'jack_voltage', '2pin_voltage', 'poe_in_voltage', ]
-        health_records = HealthMetricsDataSource.metric_records(router_entry, metric_labels = health_labels)   
+                        'psu1_voltage', 'psu2_voltage', 'psu1_current', 'psu2_current', 'psu1_state', 'psu2_state', 
+                        'poe_out_consumption', 'jack_voltage', '2pin_voltage', 'poe_in_voltage']
+        translation_table = {
+                'psu1_state': lambda value: '1' if value=='ok' else '0',
+                'psu2_state': lambda value: '1' if value=='ok' else '0'}
+        health_records = HealthMetricsDataSource.metric_records(router_entry, metric_labels = health_labels, translation_table = translation_table)   
         if health_records:
             for record in health_records:
 
@@ -91,6 +95,12 @@ class HealthCollector(BaseCollector):
                 if 'psu2_current' in record:
                     psu2_current_metrics = BaseCollector.gauge_collector('system_psu2_current', 'System PSU2 current', [record, ], 'psu2_current')
                     yield psu2_current_metrics
+
+                if 'psu1_state' in record:
+                    yield BaseCollector.gauge_collector('system_psu1_state', 'System PSU1 state', [record, ], 'psu1_state')
+
+                if 'psu2_state' in record:
+                    yield BaseCollector.gauge_collector('system_psu2_state', 'System PSU2 state', [record, ], 'psu2_state')
 
                 if 'poe_out_consumption' in record:
                     poe_out_consumption_metrics = BaseCollector.gauge_collector('system_poe_out_consumption', 'System POE-out consumption', [record, ], 'poe_out_consumption')

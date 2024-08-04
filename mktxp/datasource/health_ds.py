@@ -19,7 +19,7 @@ class HealthMetricsDataSource:
     ''' Health Metrics data provider
     '''             
     @staticmethod
-    def metric_records(router_entry, *, metric_labels = None):
+    def metric_records(router_entry, *, metric_labels = None, translation_table = None):
         if metric_labels is None:
             metric_labels = []                
         try:
@@ -34,7 +34,8 @@ class HealthMetricsDataSource:
                     val = record.get('value', None)
                     record[name] = val
 
-            return BaseDSProcessor.trimmed_records(router_entry, router_records = health_records, metric_labels = metric_labels)
+            return BaseDSProcessor.trimmed_records(router_entry, router_records = health_records, 
+                                                    metric_labels = metric_labels, translation_table = translation_table)
         except Exception as exc:
             print(f'Error getting system health info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None
