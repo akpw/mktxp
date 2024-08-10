@@ -34,7 +34,6 @@ class CollectorKeys:
     DHCP_COLLECTOR = 'DHCPCollector'
     POOL_COLLECTOR = 'PoolCollector'
     IP_CONNECTION_COLLECTOR = 'IPConnectionCollector'
-    IPSEC_COLLECTOR = 'IPSecCollector'
     INTERFACE_COLLECTOR = 'InterfaceCollector'
     FIREWALL_COLLECTOR = 'FirewallCollector'
     MONITOR_COLLECTOR = 'MonitorCollector'
@@ -48,7 +47,9 @@ class CollectorKeys:
     KID_CONTROL_DEVICE_COLLECTOR = 'KidControlCollector'
     USER_COLLECTOR = 'UserCollector'
     BGP_COLLECTOR = 'BGPCollector'
+    IPSEC_COLLECTOR = 'IPSecCollector'
     LTE_COLLECTOR = 'LTECollector'
+    SWITCH_PORT_COLLECTOR = 'SwitchPortCollector'
     MKTXP_COLLECTOR = 'MKTXPCollector'
 
 
@@ -72,7 +73,6 @@ class MKTXPConfigKeys:
     FE_DHCP_KEY = 'dhcp'
     FE_DHCP_LEASE_KEY = 'dhcp_lease'
     FE_IP_CONNECTIONS_KEY = 'connections'
-    FE_IPSEC_KEY = 'ipsec'
     FE_CONNECTION_STATS_KEY = 'connection_stats'
     FE_INTERFACE_KEY = 'interface'
 
@@ -95,7 +95,9 @@ class MKTXPConfigKeys:
     FE_PUBLIC_IP_KEY = 'public_ip'
     FE_NETWATCH_KEY = 'netwatch'
 
+    FE_IPSEC_KEY = 'ipsec'
     FE_LTE_KEY = "lte"
+    FE_SWITCH_PORT_KEY = "switch_port"
 
     FE_USER_KEY = 'user'
     FE_QUEUE_KEY = 'queue'
@@ -155,7 +157,7 @@ class MKTXPConfigKeys:
 
     BOOLEAN_KEYS_NO = {ENABLED_KEY, SSL_KEY, NO_SSL_CERTIFICATE, FE_CHECK_FOR_UPDATES, FE_KID_CONTROL_DEVICE, FE_KID_CONTROL_DYNAMIC,
                        SSL_CERTIFICATE_VERIFY, FE_IPV6_ROUTE_KEY, FE_IPV6_DHCP_POOL_KEY, FE_IPV6_FIREWALL_KEY, FE_IPV6_NEIGHBOR_KEY, FE_CONNECTION_STATS_KEY, FE_BGP_KEY,
-                       FE_IPSEC_KEY, FE_LTE_KEY}
+                       FE_IPSEC_KEY, FE_LTE_KEY, FE_SWITCH_PORT_KEY}
 
     # Feature keys enabled by default
     BOOLEAN_KEYS_YES = {PLAINTEXT_LOGIN_KEY, FE_DHCP_KEY, FE_PACKAGE_KEY, FE_DHCP_LEASE_KEY, FE_IP_CONNECTIONS_KEY, FE_INTERFACE_KEY, 
@@ -188,7 +190,7 @@ class ConfigEntry:
                                                        MKTXPConfigKeys.FE_ROUTE_KEY, MKTXPConfigKeys.FE_DHCP_POOL_KEY, MKTXPConfigKeys.FE_FIREWALL_KEY, MKTXPConfigKeys.FE_NEIGHBOR_KEY,
                                                        MKTXPConfigKeys.FE_IPV6_ROUTE_KEY, MKTXPConfigKeys.FE_IPV6_DHCP_POOL_KEY, MKTXPConfigKeys.FE_IPV6_FIREWALL_KEY, MKTXPConfigKeys.FE_IPV6_NEIGHBOR_KEY,                                               
                                                        MKTXPConfigKeys.FE_USER_KEY, MKTXPConfigKeys.FE_QUEUE_KEY, MKTXPConfigKeys.FE_REMOTE_DHCP_ENTRY, MKTXPConfigKeys.FE_REMOTE_CAPSMAN_ENTRY, MKTXPConfigKeys.FE_CHECK_FOR_UPDATES, MKTXPConfigKeys.FE_BGP_KEY,
-                                                       MKTXPConfigKeys.FE_KID_CONTROL_DEVICE, MKTXPConfigKeys.FE_KID_CONTROL_DYNAMIC, MKTXPConfigKeys.FE_LTE_KEY, MKTXPConfigKeys.FE_IPSEC_KEY
+                                                       MKTXPConfigKeys.FE_KID_CONTROL_DEVICE, MKTXPConfigKeys.FE_KID_CONTROL_DYNAMIC, MKTXPConfigKeys.FE_LTE_KEY, MKTXPConfigKeys.FE_IPSEC_KEY, MKTXPConfigKeys.FE_SWITCH_PORT_KEY
                                                        ])
     MKTXPSystemEntry = namedtuple('MKTXPSystemEntry', [MKTXPConfigKeys.PORT_KEY, MKTXPConfigKeys.LISTEN_KEY, MKTXPConfigKeys.MKTXP_SOCKET_TIMEOUT,
                                                        MKTXPConfigKeys.MKTXP_INITIAL_DELAY, MKTXPConfigKeys.MKTXP_MAX_DELAY,
