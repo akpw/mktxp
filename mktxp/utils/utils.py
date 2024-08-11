@@ -328,6 +328,15 @@ def builtin_wifi_capsman_version(version):
         print(f'could not get current RouterOS version, because: {err}')
     return False
 
+def routerOS7_version(version):
+    try:
+        cur_version, _ = parse_ros_version(version)
+        if cur_version >= parse('7.0'):
+            return True
+    except Exception as err:
+        print(f'could not get current RouterOS version, because: {err}')
+    return False
+
 def check_for_updates(cur_version):
     """Try to check if there is a newer version available.
     If anything goes wrong, it returns the same version.
