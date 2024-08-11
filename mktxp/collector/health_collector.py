@@ -14,7 +14,7 @@
 
 from mktxp.collector.base_collector import BaseCollector
 from mktxp.datasource.health_ds import HealthMetricsDataSource
-
+from mktxp.utils.utils import str2bool
 
 class HealthCollector(BaseCollector):
     ''' System Health Metrics collector
@@ -26,8 +26,8 @@ class HealthCollector(BaseCollector):
                         'psu1_voltage', 'psu2_voltage', 'psu1_current', 'psu2_current', 'psu1_state', 'psu2_state', 
                         'poe_out_consumption', 'jack_voltage', '2pin_voltage', 'poe_in_voltage']
         translation_table = {
-                'psu1_state': lambda value: '1' if value=='ok' else '0',
-                'psu2_state': lambda value: '1' if value=='ok' else '0'}
+                'psu1_state': lambda value: '1' if str2bool(value, default = False) else '0',
+                'psu2_state': lambda value: '1' if str2bool(value, default = False) else '0'}
         health_records = HealthMetricsDataSource.metric_records(router_entry, metric_labels = health_labels, translation_table = translation_table)   
         if health_records:
             for record in health_records:
