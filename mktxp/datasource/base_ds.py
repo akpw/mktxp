@@ -17,7 +17,7 @@ class BaseDSProcessor:
     '''             
 
     @staticmethod
-    def trimmed_records(router_entry, *, router_records = None, metric_labels = None, add_router_id = True, translation_table = None):
+    def trimmed_records(router_entry, *, router_records = None, metric_labels = None, add_router_id = True, translation_table = None, translate_if_no_value = True):
         metric_labels = metric_labels or []
         router_records = router_records or []            
         translation_table = translation_table or {}         
@@ -36,7 +36,8 @@ class BaseDSProcessor:
             
             # translate fields if needed
             for key, func in translation_table.items():
-                translated_record[key] = func(translated_record.get(key))
+                if translate_if_no_value or translated_record.get(key) is not None:
+                    translated_record[key] = func(translated_record.get(key))
             labeled_records.append(translated_record)            
         return labeled_records
 
