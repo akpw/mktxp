@@ -11,7 +11,6 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
-from mktxp.flow.processor.output import BaseOutputProcessor
 from mktxp.collector.base_collector import BaseCollector
 from mktxp.datasource.interface_ds import InterfaceMonitorMetricsDataSource
 from mktxp.utils.utils import parse_mkt_uptime
@@ -19,7 +18,7 @@ from mktxp.utils.utils import parse_mkt_uptime
 
 class LTECollector(BaseCollector):
     ''' LTE Metrics collector
-    '''    
+    '''
     @staticmethod
     def collect(router_entry):
         if not router_entry.config_entry.lte:
@@ -34,7 +33,7 @@ class LTECollector(BaseCollector):
         monitor_records = InterfaceMonitorMetricsDataSource.metric_records(router_entry,
                                                                            translation_table=translation_table,
                                                                            kind = 'lte',
-                                                                           running_only = False)   
+                                                                           running_only = False)
         if monitor_records:
             yield BaseCollector.gauge_collector('lte_pin_status', 'Pin status', monitor_records, 'pin_status', [])
             yield BaseCollector.gauge_collector('lte_registration_status', 'Registration status', monitor_records, 'registration_status', [])

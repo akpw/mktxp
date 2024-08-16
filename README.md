@@ -101,7 +101,7 @@ The default configuration file comes with a sample configuration, making it easy
     capsman = True                  # CAPsMAN general metrics
     capsman_clients = True          # CAPsMAN clients metrics
 
-    lte = False                     # LTE signal and status metrics
+    lte = False                     # LTE signal and status metrics (requires 'test' permission policy on RouterOS 6) 
     ipsec = False                   # IPSec active peer metrics
     switch_port = False             # Switch Port metrics
 
@@ -162,6 +162,7 @@ MKTXP only needs ```API``` and ```Read```, so at that point you can go to your r
 /user group add name=mktxp_group policy=api,read
 /user add name=mktxp_user group=mktxp_group password=mktxp_user_password
 ```
+For the LTE exporter on RouterOS 6, you will also need the `test` policy.
 
 ## A check on reality
 Now let's put some Mikrotik device address / user credentials in the above MKTXP configuration file, and at that point we should already be able to check out on our progress so far. Since MKTXP can output selected metrics directly on the command line with the ````mktxp print```` command, it's easy to do it even without Prometheus or Grafana. \
