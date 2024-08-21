@@ -102,7 +102,7 @@ The default configuration file comes with a sample configuration, making it easy
     capsman = True                  # CAPsMAN general metrics
     capsman_clients = True          # CAPsMAN clients metrics
 
-    lte = False                     # LTE signal and status metrics (requires an additional 'test' permission policy on RouterOS v6) 
+    lte = False                     # LTE signal and status metrics (requires additional 'test' permission policy on RouterOS v6) 
     ipsec = False                   # IPSec active peer metrics
     switch_port = False             # Switch Port metrics
 
@@ -158,13 +158,13 @@ docker run -v "$(pwd)/mktxp:/home/mktxp/mktxp/" -p 49090:49090 -it --rm ghcr.io/
 
 ## Mikrotik Device Config
 For the purpose of RouterOS device monitoring, it's best to create a dedicated user with minimal required permissions. \
-MKTXP only needs ```API``` and ```Read```, so at that point you can go to your router's terminal and type:
+MKTXP only needs ```API``` and ```Read```<sup>💡</sup>, so at that point you can go to your router's terminal and type:
 ```
 /user group add name=mktxp_group policy=api,read
 /user add name=mktxp_user group=mktxp_group password=mktxp_user_password
 ```
 
-<sup>💡</sup> *For the LTE metrics on RouterOS v6, you will also need the `test` policy.*
+<sup>💡</sup> *For the LTE metrics on RouterOS v6, the mktxp user will also need the `test` permission policy.*
 
 ## A check on reality
 Now let's put some Mikrotik device address / user credentials in the above MKTXP configuration file, and at that point we should already be able to check out on our progress so far. Since MKTXP can output selected metrics directly on the command line with the ````mktxp print```` command, it's easy to do it even without Prometheus or Grafana. \
@@ -244,7 +244,7 @@ mktxp edit -i
     delay_inc_div = 5
 
     bandwidth = False               # Turns metrics bandwidth metrics collection on / off    
-    bandwidth_test_interval = 600   # Interval for colllecting bandwidth metrics
+    bandwidth_test_interval = 600   # Interval for collecting bandwidth metrics
     minimal_collect_interval = 5    # Minimal metric collection interval
 
     verbose_mode = False            # Set it on for troubleshooting
