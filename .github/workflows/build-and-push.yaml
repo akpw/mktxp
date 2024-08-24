@@ -18,7 +18,6 @@ on:
 
 jobs:
   call-docker-build:
-
     name: Call Docker Build
 
     uses: bretfisher/docker-build-workflow/.github/workflows/reusable-docker-build.yaml@2f9fdc0325196df9f11bfe4263e277793e648922
@@ -27,16 +26,14 @@ jobs:
       contents: read
       packages: write # needed to push docker image to ghcr.io
       pull-requests: write # needed to create and update comments in PRs
-    
-    secrets:
 
+    secrets:
       # Only needed if with:dockerhub-enable is true below
       # https://hub.docker.com/settings/security
       dockerhub-username: ""
       dockerhub-token: ""
 
     with:
-      
       ### REQUIRED
       ### ENABLE ONE OR BOTH REGISTRIES
       ### tell docker where to push.
@@ -53,28 +50,29 @@ jobs:
       ### set rules for tagging images, based on special action syntax:
       ### https://github.com/docker/metadata-action#tags-input
       ### defaults to:
-      #tag-rules: |
-      #  type=raw,value=latest,enable=${{ endsWith(github.ref, github.event.repository.default_branch) }}
-      #  type=raw,value=stable-{{date 'YYYYMMDDHHmmss'}},enable=${{ endsWith(github.ref, github.event.repository.default_branch) }}
-      #  type=ref,event=pr
-      #  type=ref,event=branch
-      #  type=raw,value=gha-${{ github.run_id }}
-      
+      tag-rules: |
+        type=raw,value=latest,enable=${{ endsWith(github.ref, github.event.repository.default_branch) }}
+        type=raw,value=stable-{{date 'YYYYMMDDHHmmss'}},enable=${{ endsWith(github.ref, github.event.repository.default_branch) }}
+        type=raw,value=gha-${{ github.run_id }}
+        type=semver,pattern=v{{major}}.{{minor}}.{{patch}}
+        type=semver,pattern=v{{major}}.{{minor}}
+        type=semver,pattern=v{{major}}
+
       ### path to where docker should copy files into image
       ### defaults to root of repository (.)
       # context: .
-      
+
       ### Dockerfile alternate name. Default is Dockerfile (relative to context path)
       # file: Containerfile
 
       ### build stage to target, defaults to empty, which builds to last stage in Dockerfile
       # target:
-      
+
       ### platforms to build for
       ### defaults to linux/amd64
       ### other options: linux/amd64,linux/arm64,linux/arm/v7
       platforms: linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6,linux/386
-      
+
       ### Create a PR comment with image tags and labels
       ### defaults to true
       # comment-enable: false
