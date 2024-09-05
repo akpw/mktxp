@@ -4,6 +4,8 @@ name: Docker Build
 
 on:
   push:
+    tags:
+      - 'v*'
     branches:
       - main
     # don't rebuild image if someone only edited unrelated files
@@ -53,12 +55,13 @@ jobs:
       ### set rules for tagging images, based on special action syntax:
       ### https://github.com/docker/metadata-action#tags-input
       ### defaults to:
-      #tag-rules: |
-      #  type=raw,value=latest,enable=${{ endsWith(github.ref, github.event.repository.default_branch) }}
-      #  type=raw,value=stable-{{date 'YYYYMMDDHHmmss'}},enable=${{ endsWith(github.ref, github.event.repository.default_branch) }}
-      #  type=ref,event=pr
-      #  type=ref,event=branch
-      #  type=raw,value=gha-${{ github.run_id }}
+      tag-rules: |
+        type=raw,value=latest,enable=${{ endsWith(github.ref, github.event.repository.default_branch) }}
+        type=raw,value=stable-{{date 'YYYYMMDDHHmmss'}},enable=${{ endsWith(github.ref, github.event.repository.default_branch) }}
+        type=raw,value=gha-${{ github.run_id }}
+        type=semver,pattern=v{{major}}.{{minor}}.{{patch}}
+        type=semver,pattern=v{{major}}.{{minor}}
+        type=semver,pattern=v{{major}}
       
       ### path to where docker should copy files into image
       ### defaults to root of repository (.)
