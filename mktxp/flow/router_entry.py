@@ -75,7 +75,8 @@ class RouterEntry:
                             CollectorKeys.BGP_COLLECTOR: 0,
                             CollectorKeys.LTE_COLLECTOR: 0,
                             CollectorKeys.SWITCH_PORT_COLLECTOR: 0,
-                            CollectorKeys.MKTXP_COLLECTOR: 0
+                            CollectorKeys.MKTXP_COLLECTOR: 0,
+                            CollectorKeys.CERTIFICATE_COLLECTOR: 0
                             }         
         self._dhcp_entry = None        
         self._dhcp_records = {}
