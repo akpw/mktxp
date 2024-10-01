@@ -6,4 +6,6 @@ k8s
 build
 dist
 mktxp.egg-info
-tests
+tests/
+.github/
+deploy/
