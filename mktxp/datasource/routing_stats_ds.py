@@ -5,7 +5,7 @@ from mktxp.utils.utils import routerOS7_version
 
 
 class RoutingStatsMetricsDataSource:
-    ''' Wireless Metrics data provider
+    ''' Routing Stats data provider
     '''             
     @staticmethod
     def metric_records(router_entry, *, metric_labels = None, translation_table = None):
