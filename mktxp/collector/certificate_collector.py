@@ -31,10 +31,9 @@ class CertificateCollector(BaseCollector):
         }
 
         certificate_records = CertificateMetricsDataSource.metric_records(router_entry, translation_table=translation_table, metric_labels = certificate_labels)   
-
-        for record in certificate_records:
-            # Convert invalid_after time to epoch time
-            record['invalid_after_epoch'] = int(datetime.strptime(record['invalid_after'], "%Y-%m-%d %H:%M:%S").timestamp())
-            
+        if isinstance(certificate_records, list): 
+            for record in certificate_records:
+                # Convert invalid_after time to epoch time
+                record['invalid_after_epoch'] = int(datetime.strptime(record['invalid_after'], "%Y-%m-%d %H:%M:%S").timestamp())
         if certificate_records:
             yield BaseCollector.gauge_collector('certificate_expiration_timestamp_seconds', 'The number of seconds before expiration time the certificate should renew.', certificate_records, 'invalid_after_epoch', certificate_labels)
