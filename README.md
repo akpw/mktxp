@@ -472,6 +472,3 @@ mktxp is running as pid 36704
 **Running Tests**
 - TDB
 - Run via: `$ python setup.py test`
-
-
-

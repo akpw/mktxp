@@ -41,6 +41,7 @@ from mktxp.collector.kid_control_device_collector import KidDeviceCollector
 from mktxp.collector.bgp_collector import BGPCollector
 from mktxp.collector.lte_collector import LTECollector
 from mktxp.collector.switch_collector import SwitchPortCollector
+from mktxp.collector.certificate_collector import CertificateCollector
 
 class CollectorRegistry:
     ''' MKTXP Collectors Registry
@@ -84,6 +85,8 @@ class CollectorRegistry:
         self.register(CollectorKeys.SWITCH_PORT_COLLECTOR, SwitchPortCollector.collect)
 
         self.register(CollectorKeys.MKTXP_COLLECTOR, MKTXPCollector.collect)
+        
+        self.register(CollectorKeys.CERTIFICATE_COLLECTOR, CertificateCollector.collect)
 
     def register(self, collector_ID, collect_func):
         self.registered_collectors[collector_ID] = collect_func
