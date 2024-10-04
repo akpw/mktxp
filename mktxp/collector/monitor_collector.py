@@ -25,7 +25,7 @@ class MonitorCollector(BaseCollector):
         if not router_entry.config_entry.monitor:
             return
 
-        monitor_labels = ['status', 'rate', 'full_duplex', 'name', 'sfp_temperature', 'sfp_module_present', 'sfp_wavelength', 'sfp_tx_power', 'sfp_rx_power']
+        monitor_labels = ['status', 'rate', 'full_duplex', 'name', 'sfp_temperature', 'sfp_module_present', 'sfp_wavelength', 'sfp_tx_power', 'sfp_rx_power', 'sfp_supply_voltage', 'sfp_tx_bias_current']
         translation_table = {
                 'status': lambda value: '1' if value=='link-ok' else '0',
                 'rate': lambda value: MonitorCollector._rates(value) if value else '0',
@@ -35,7 +35,7 @@ class MonitorCollector(BaseCollector):
                 'sfp_temperature': lambda value: value if value else '0'
                 }
         monitor_records = InterfaceMonitorMetricsDataSource.metric_records(router_entry, metric_labels = monitor_labels, 
-                                                                                        translation_table=translation_table, include_comments = True)   
+                                                                                        translation_table=translation_table, include_comments = True, running_only = not router_entry.config_entry.monitor_unplugged)
         if monitor_records:
             monitor_status_metrics = BaseCollector.gauge_collector('interface_status', 'Current interface link status', monitor_records, 'status', ['name'])
             yield monitor_status_metrics
