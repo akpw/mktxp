@@ -95,6 +95,7 @@ The default configuration file comes with a sample configuration, making it easy
 
     poe = True                      # POE metrics
     monitor = True                  # Interface monitor metrics
+    monitor_unplugged = False       # Interface monitor metrics for unplugged SFP/SFP+ ports
     netwatch = True                 # Netwatch metrics
     public_ip = True                # Public IP metrics
     wireless = True                 # WLAN general metrics
