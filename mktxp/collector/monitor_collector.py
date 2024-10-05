@@ -25,13 +25,15 @@ class MonitorCollector(BaseCollector):
         if not router_entry.config_entry.monitor:
             return
 
-        monitor_labels = ['status', 'rate', 'full_duplex', 'name', 'sfp_temperature', 'sfp_module_present', 'sfp_wavelength', 'sfp_tx_power', 'sfp_rx_power', 'sfp_supply_voltage', 'sfp_tx_bias_current']
+        monitor_labels = ['status', 'rate', 'full_duplex', 'name', 'sfp_temperature', 'sfp_module_present', 'sfp_wavelength', 'sfp_tx_power', 'sfp_rx_power', 'sfp_supply_voltage', 'sfp_tx_bias_current', 'sfp_rx_loss', 'sfp_tx_fault']
         translation_table = {
                 'status': lambda value: '1' if value=='link-ok' else '0',
                 'rate': lambda value: MonitorCollector._rates(value) if value else '0',
                 'full_duplex': lambda value: '1' if value=='true' else '0',
                 'name': lambda value: value if value else '',
                 'sfp_module_present': lambda value: '1' if value=='true' else '0',
+                'sfp_rx_loss': lambda value: '1' if value=='true' else '0',
+                'sfp_tx_fault': lambda value: '1' if value=='true' else '0',
                 'sfp_temperature': lambda value: value if value else '0'
                 }
         monitor_records = InterfaceMonitorMetricsDataSource.metric_records(router_entry, metric_labels = monitor_labels, 
@@ -55,6 +57,10 @@ class MonitorCollector(BaseCollector):
                 yield BaseCollector.gauge_collector('interface_sfp_wavelength', 'Current SFP Wavelength',sfp_metrics, 'sfp_wavelength', ['name'])
                 yield BaseCollector.gauge_collector('interface_sfp_tx_power', 'Current SFP TX Power', sfp_metrics, 'sfp_tx_power', ['name'])
                 yield BaseCollector.gauge_collector('interface_sfp_rx_power', 'Current SFP RX Power', sfp_metrics, 'sfp_rx_power', ['name'])
+                yield BaseCollector.gauge_collector('interface_sfp_supply_voltage', 'Current SFP Supply Voltage', sfp_metrics, 'sfp_supply_voltage', ['name'])
+                yield BaseCollector.gauge_collector('interface_sfp_tx_bias_current', 'Current SFP TX Bias Current', sfp_metrics, 'sfp_tx_bias_current', ['name'])
+                yield BaseCollector.gauge_collector('interface_sfp_tx_fault', 'Current SFP Suffering TX fault', sfp_metrics, 'sfp_tx_fault', ['name'])
+                yield BaseCollector.gauge_collector('interface_sfp_rx_loss', 'Current SFP Suffering RX loss', sfp_metrics, 'sfp_rx_loss', ['name'])
 
 
     @staticmethod
