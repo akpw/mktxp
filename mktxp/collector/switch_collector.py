@@ -27,8 +27,13 @@ class SwitchPortCollector(BaseCollector):
                               'rx_bytes', 'rx_broadcast', 'rx_pause', 'rx_multicast', 'rx_fcs_error', 'rx_align_error', 'rx_fragment', 'rx_overflow', 
                               'tx_bytes', 'tx_broadcast', 'tx_pause', 'tx_multicast', 'tx_underrun', 'tx_collision', 'tx_deferred']
 
-        switch_port_records = SwitchPortMetricsDataSource.metric_records(router_entry, metric_labels = switch_port_labels)   
+        switch_port_records = SwitchPortMetricsDataSource.metric_records(router_entry, metric_labels = switch_port_labels)
         if switch_port_records:
+            for record in switch_port_records:
+                for field in switch_port_labels[1:]:
+                    if field in record and ',' in record[field]: # https://help.mikrotik.com/docs/display/ROS/Switch+Chip+Features#SwitchChipFeatures-Statistics
+                        # Sum each CPU lane for the total
+                        record[field] = str(sum([int(count) for count in record[field].split(",")]))
             yield BaseCollector.counter_collector('switch_driver_rx_byte', 'Total count of received bytes', switch_port_records, 'driver_rx_byte', ['name'])
             yield BaseCollector.counter_collector('switch_driver_rx_packet', 'Total count of received packets', switch_port_records, 'driver_rx_packet', ['name'])
             yield BaseCollector.counter_collector('switch_driver_tx_byte', 'Total count of transmitted bytes', switch_port_records, 'driver_tx_byte', ['name'])
