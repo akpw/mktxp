@@ -39,6 +39,9 @@ class BaseOutputProcessor:
     OutputConnStatsEntry = namedtuple('OutputConnStatsEntry', ['dhcp_name', 'src_address', 'connection_count', 'dst_addresses'])
     OutputConnStatsEntry.__new__.__defaults__ = ('',) * len(OutputConnStatsEntry._fields)
 
+    OutputInterfaceStatsEntry = namedtuple('InterfaceStatsEntry', ['name', 'status', 'rate', 'full_duplex', 'sfp_module_present', 'sfp_temperature', 'sfp_wavelength', 'sfp_tx_power', 'sfp_rx_power', 'sfp_supply_voltage', 'sfp_tx_bias_current'])
+    OutputInterfaceStatsEntry.__new__.__defaults__ = ('',) * len(OutputInterfaceStatsEntry._fields)
+
 
     @staticmethod
     def augment_record(router_entry, registration_record, id_key = 'mac_address'):
