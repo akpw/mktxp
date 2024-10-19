@@ -113,6 +113,7 @@ The default configuration file comes with a sample configuration, making it easy
     queue = True                    # Queues metrics
 
     bgp = False                     # BGP sessions metrics
+    certificate = False             # Certificates metrics
     
     remote_dhcp_entry = None        # An MKTXP entry to provide for remote DHCP info / resolution
     remote_capsman_entry = None     # An MKTXP entry to provide for remote capsman info 
