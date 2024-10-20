@@ -113,8 +113,9 @@ The default configuration file comes with a sample configuration, making it easy
     queue = True                    # Queues metrics
 
     bgp = False                     # BGP sessions metrics
-    routing_stats = False           # routing process stats
-    
+    routing_stats = False           # Routing process stats
+    certificate = False             # Certificates metrics
+   
     remote_dhcp_entry = None        # An MKTXP entry to provide for remote DHCP info / resolution
     remote_capsman_entry = None     # An MKTXP entry to provide for remote capsman info 
 
@@ -473,6 +474,3 @@ mktxp is running as pid 36704
 **Running Tests**
 - TDB
 - Run via: `$ python setup.py test`
-
-
-
