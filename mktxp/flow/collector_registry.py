@@ -84,9 +84,10 @@ class CollectorRegistry:
         self.register(CollectorKeys.LTE_COLLECTOR, LTECollector.collect)
         self.register(CollectorKeys.SWITCH_PORT_COLLECTOR, SwitchPortCollector.collect)
 
+        self.register(CollectorKeys.CERTIFICATE_COLLECTOR, CertificateCollector.collect)
+
         self.register(CollectorKeys.MKTXP_COLLECTOR, MKTXPCollector.collect)
         
-        self.register(CollectorKeys.CERTIFICATE_COLLECTOR, CertificateCollector.collect)
 
     def register(self, collector_ID, collect_func):
         self.registered_collectors[collector_ID] = collect_func
