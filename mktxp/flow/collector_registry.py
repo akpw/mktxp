@@ -82,10 +82,10 @@ class CollectorRegistry:
 
         self.register(CollectorKeys.KID_CONTROL_DEVICE_COLLECTOR, KidDeviceCollector.collect)
         self.register(CollectorKeys.BGP_COLLECTOR, BGPCollector.collect)
-        self.register(CollectorKeys.ROUTING_STATS_COLLECTOR, RoutingStatsCollector.collect)
         self.register(CollectorKeys.LTE_COLLECTOR, LTECollector.collect)
         self.register(CollectorKeys.SWITCH_PORT_COLLECTOR, SwitchPortCollector.collect)
 
+        self.register(CollectorKeys.ROUTING_STATS_COLLECTOR, RoutingStatsCollector.collect)
         self.register(CollectorKeys.CERTIFICATE_COLLECTOR, CertificateCollector.collect)
 
         self.register(CollectorKeys.MKTXP_COLLECTOR, MKTXPCollector.collect)

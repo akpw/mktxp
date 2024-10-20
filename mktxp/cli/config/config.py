@@ -104,7 +104,6 @@ class MKTXPConfigKeys:
     FE_USER_KEY = 'user'
     FE_QUEUE_KEY = 'queue'
     FE_BGP_KEY = 'bgp'
-    FE_ROUTING_STATS_KEY = 'routing_stats'
 
     FE_REMOTE_DHCP_ENTRY = 'remote_dhcp_entry'
     FE_REMOTE_CAPSMAN_ENTRY = 'remote_capsman_entry'
@@ -113,7 +112,9 @@ class MKTXPConfigKeys:
 
     FE_KID_CONTROL_DEVICE = 'kid_control_assigned'
     FE_KID_CONTROL_DYNAMIC = 'kid_control_dynamic'
+    
     FE_CERTIFICATE_KEY = 'certificate'
+    FE_ROUTING_STATS_KEY = 'routing_stats'
 
     MKTXP_SOCKET_TIMEOUT = 'socket_timeout'
     MKTXP_INITIAL_DELAY = 'initial_delay_on_failure'
