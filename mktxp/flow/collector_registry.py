@@ -39,6 +39,7 @@ from mktxp.collector.queue_collector import QueueTreeCollector
 from mktxp.collector.queue_collector import QueueSimpleCollector
 from mktxp.collector.kid_control_device_collector import KidDeviceCollector
 from mktxp.collector.bgp_collector import BGPCollector
+from mktxp.collector.routing_stats_collector import RoutingStatsCollector
 from mktxp.collector.lte_collector import LTECollector
 from mktxp.collector.switch_collector import SwitchPortCollector
 from mktxp.collector.certificate_collector import CertificateCollector
@@ -81,6 +82,7 @@ class CollectorRegistry:
 
         self.register(CollectorKeys.KID_CONTROL_DEVICE_COLLECTOR, KidDeviceCollector.collect)
         self.register(CollectorKeys.BGP_COLLECTOR, BGPCollector.collect)
+        self.register(CollectorKeys.ROUTING_STATS_COLLECTOR, RoutingStatsCollector.collect)
         self.register(CollectorKeys.LTE_COLLECTOR, LTECollector.collect)
         self.register(CollectorKeys.SWITCH_PORT_COLLECTOR, SwitchPortCollector.collect)
 
