@@ -1,5 +1,5 @@
 # coding=utf8
-## Copyright (c) 2024 Patrick Plenefisch
+## Copyright (c) 2024 The mktxp Project Contributors
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
