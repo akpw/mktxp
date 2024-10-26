@@ -22,7 +22,7 @@ class InterfaceStatsOutput:
     @staticmethod
     def clients_summary(router_entry):
         monitor_labels = ['status', 'rate', 'full_duplex', 'name', 'sfp_temperature', 'sfp_module_present', 'sfp_wavelength', 'sfp_tx_power', 'sfp_rx_power', 'sfp_supply_voltage', 'sfp_tx_bias_current', 'sfp_rx_loss', 'sfp_tx_fault']
-        monitor_records = InterfaceMonitorMetricsDataSource.metric_records(router_entry, metric_labels = monitor_labels, add_router_id = False, running_only = not router_entry.config_entry.monitor_unplugged)
+        monitor_records = InterfaceMonitorMetricsDataSource.metric_records(router_entry, metric_labels = monitor_labels, add_router_id = False, running_only = not router_entry.config_entry.monitor_sfp_unplugged)
         if not monitor_records:
             print('No monitor stats records')
             return

@@ -37,7 +37,7 @@ class MonitorCollector(BaseCollector):
                 'sfp_temperature': lambda value: value if value else '0'
                 }
         monitor_records = InterfaceMonitorMetricsDataSource.metric_records(router_entry, metric_labels = monitor_labels, 
-                                                                                        translation_table=translation_table, include_comments = True, running_only = not router_entry.config_entry.monitor_unplugged)
+                                                                                        translation_table=translation_table, include_comments = True, running_only = not router_entry.config_entry.monitor_sfp_unplugged)
         if monitor_records:
             monitor_status_metrics = BaseCollector.gauge_collector('interface_status', 'Current interface link status', monitor_records, 'status', ['name'])
             yield monitor_status_metrics
