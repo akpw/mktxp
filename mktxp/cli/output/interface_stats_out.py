@@ -1,5 +1,5 @@
 # coding=utf8
-## Copyright (c) 2024 The mktxp Project Contributors
+## Copyright (c) 2024 Arseniy Kuznetsov
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
