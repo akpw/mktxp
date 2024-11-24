@@ -55,6 +55,7 @@ class RouterEntry:
                             CollectorKeys.HEALTH_COLLECTOR: 0,
                             CollectorKeys.PUBLIC_IP_ADDRESS_COLLECTOR: 0,
                             CollectorKeys.NEIGHBOR_COLLECTOR: 0,
+                            CollectorKeys.DNS_COLLECTOR: 0,
                             CollectorKeys.PACKAGE_COLLECTOR: 0,
                             CollectorKeys.DHCP_COLLECTOR: 0,
                             CollectorKeys.POOL_COLLECTOR: 0,
