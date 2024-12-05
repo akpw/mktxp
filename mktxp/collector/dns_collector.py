@@ -14,10 +14,10 @@
 
 from mktxp.cli.config.config import MKTXPConfigKeys
 from mktxp.collector.base_collector import BaseCollector
-from mktxp.datasource.dns_ds import DnsDataSource
+from mktxp.datasource.dns_ds import DNSDataSource
 
 
-class DnsCollector(BaseCollector):
+class DNSCollector(BaseCollector):
     '''Dns Collector'''
 
     @staticmethod
@@ -26,7 +26,7 @@ class DnsCollector(BaseCollector):
         if not router_entry.config_entry.dns:
             return
 
-        record = DnsDataSource.metric_records(router_entry)
+        record = DNSDataSource.metric_records(router_entry)
 
         if not record:
             return

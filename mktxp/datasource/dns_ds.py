@@ -15,7 +15,7 @@
 from mktxp.datasource.base_ds import BaseDSProcessor
 
 
-class DnsDataSource:
+class DNSDataSource:
     def metric_records(router_entry):
         try:
             router_records = router_entry.api_connection.router_api().get_resource('/ip/dns').get()

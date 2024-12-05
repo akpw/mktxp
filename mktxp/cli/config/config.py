@@ -30,7 +30,7 @@ class CollectorKeys:
     HEALTH_COLLECTOR = 'HealthCollector'
     PUBLIC_IP_ADDRESS_COLLECTOR = 'PublicIPAddressCollector'
     NEIGHBOR_COLLECTOR = 'NeighborCollector'
-    DNS_COLLECTOR = 'DnsCollector'
+    DNS_COLLECTOR = 'DNSCollector'
     PACKAGE_COLLECTOR = 'PackageCollector'
     DHCP_COLLECTOR = 'DHCPCollector'
     POOL_COLLECTOR = 'PoolCollector'
