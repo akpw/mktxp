@@ -43,6 +43,7 @@ from mktxp.collector.routing_stats_collector import RoutingStatsCollector
 from mktxp.collector.lte_collector import LTECollector
 from mktxp.collector.switch_collector import SwitchPortCollector
 from mktxp.collector.certificate_collector import CertificateCollector
+from mktxp.collector.dns_collector import DNSCollector
 
 class CollectorRegistry:
     ''' MKTXP Collectors Registry
@@ -59,6 +60,7 @@ class CollectorRegistry:
         self.register(CollectorKeys.PUBLIC_IP_ADDRESS_COLLECTOR, PublicIPAddressCollector.collect)
 
         self.register(CollectorKeys.NEIGHBOR_COLLECTOR, NeighborCollector.collect)
+        self.register(CollectorKeys.DNS_COLLECTOR, DNSCollector.collect)
 
         self.register(CollectorKeys.PACKAGE_COLLECTOR, PackageCollector.collect)
         self.register(CollectorKeys.DHCP_COLLECTOR, DHCPCollector.collect)

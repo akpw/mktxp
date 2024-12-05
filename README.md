@@ -87,6 +87,7 @@ The default configuration file comes with a sample configuration, making it easy
     pool = True                     # IPv4 Pool metrics
     firewall = True                 # IPv4 Firewall rules traffic metrics
     neighbor = True                 # IPv4 Reachable Neighbors
+    dns = False                     # DNS stats
 
     ipv6_route = False              # IPv6 Routes metrics    
     ipv6_pool = False               # IPv6 Pool metrics
