@@ -17,6 +17,38 @@ from mktxp.datasource.system_resource_ds import SystemResourceMetricsDataSource
 from mktxp.utils.utils import routerOS7_version
 
 
+class InterfaceMetricsDataSource:
+    ''' Interface Monitor Metrics data provider
+    '''
+    @staticmethod
+    def metric_records(router_entry, *, metric_labels = None, kind = 'ethernet', additional_proplist=None, translation_table=None):
+        if metric_labels is None:
+            metric_labels = []
+
+        if additional_proplist is None:
+            additional_proplist = []
+
+        call_params = {
+            'proplist': ','.join(['name', 'running', 'disabled'] + additional_proplist)
+        }
+
+        try:
+
+            interface_records = router_entry.api_connection.router_api().get_resource(
+                f'/interface/{kind}'
+            ).call(
+                'print',
+                call_params
+            )
+            return BaseDSProcessor.trimmed_records(router_entry,
+                                                   router_records=interface_records,
+                                                   metric_labels=metric_labels,
+                                                   translation_table=translation_table)
+        except Exception as exc:
+            print(f'Error getting {kind} interface info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
+            return None
+
+
 class InterfaceTrafficMetricsDataSource:
     ''' Interface Traffic Metrics data provider
     '''
