@@ -66,12 +66,17 @@ class InterfaceTrafficMetricsDataSource:
     ''' Interface Traffic Stats data provider
     '''
     @staticmethod
-    def metric_stats_records(router_entry, *, metric_labels):
+    def metric_stats_records(router_entry, *, metric_labels, translation_table=None):
         metric_labels = metric_labels or []
         try:
             # get stats for all existing interfaces
             metric_stats_records = router_entry.api_connection.router_api().get_resource('/interface').call('print', {'stats': 'detail'})
-            return BaseDSProcessor.trimmed_records(router_entry, router_records = metric_stats_records, metric_labels = metric_labels)
+            return BaseDSProcessor.trimmed_records(
+                router_entry,
+                router_records=metric_stats_records,
+                metric_labels=metric_labels,
+                translation_table=translation_table,
+            )
         except Exception as exc:
             print(f'Error getting interface traffic stats info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None

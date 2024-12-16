@@ -17,40 +17,33 @@ from mktxp.utils.utils import parse_mkt_uptime
 
 
 class EOIPCollector(BaseCollector):
-    ''' EoIP Metrics collector
-    '''
+    """ EoIP Metrics collector
+    """
     @staticmethod
     def collect(router_entry):
         if not router_entry.config_entry.eoip:
             return
 
         default_labels = ['name', 'local_address', 'remote_address', 'tunnel_id']
-        translation_table = {
-            'running': lambda value: '1' if value == 'true' else '0',
-            'disabled': lambda value: '1' if value == 'true' else '0'
-        }
         monitor_records = InterfaceMetricsDataSource.metric_records(
             router_entry,
             kind='eoip',
             additional_proplist=['actual-mtu', 'l2mtu', 'local-address', 'mtu', 'remote-address', 'tunnel-id'],
-            translation_table=translation_table
         )
 
         if monitor_records:
-            yield BaseCollector.gauge_collector('interface_status',
-                                                'Current status of the interface',
-                                                monitor_records,
-                                                metric_key='running',
-                                                metric_labels=default_labels + ['disabled'])
+            yield BaseCollector.gauge_collector(
+                'interface_l2mtu',
+                'Current used layer 2 mtu for this interface',
+                monitor_records,
+                metric_key='actual_mtu',
+                metric_labels=default_labels
+            )
 
-            yield BaseCollector.gauge_collector('interface_l2mtu',
-                                                'Current used layer 2 mtu for this interface',
-                                                monitor_records,
-                                                metric_key='actual_mtu',
-                                                metric_labels=default_labels)
-
-            yield BaseCollector.gauge_collector('interface_mtu',
-                                                'Current used mut for this interface',
-                                                monitor_records,
-                                                metric_key='actual_mtu',
-                                                metric_labels=default_labels + ['mtu'])
+            yield BaseCollector.gauge_collector(
+                'interface_mtu',
+                'Current used mut for this interface',
+                monitor_records,
+                metric_key='actual_mtu',
+                metric_labels=default_labels + ['mtu']
+            )
