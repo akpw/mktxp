@@ -24,14 +24,31 @@ class InterfaceCollector(BaseCollector):
         if not router_entry.config_entry.interface:
             return
             
-        interface_traffic_labels = ['name', 'comment', 'rx_byte', 'tx_byte', 'rx_packet', 'tx_packet', 'rx_error', 'tx_error', 'rx_drop', 'tx_drop', 'link_downs']
-        interface_traffic_records = InterfaceTrafficMetricsDataSource.metric_stats_records(router_entry, metric_labels = interface_traffic_labels)   
+        interface_traffic_labels = ['disabled', 'name', 'comment', 'rx_byte', 'tx_byte', 'rx_packet', 'tx_packet', 'rx_error', 'tx_error', 'rx_drop', 'tx_drop', 'link_downs', 'running']
+        interface_traffic_translation_table = {
+            'running': lambda value: '1' if value == 'true' else '0',
+            'disabled': lambda value: '1' if value == 'true' else '0'
+        }
+
+        interface_traffic_records = InterfaceTrafficMetricsDataSource.metric_stats_records(
+            router_entry,
+            metric_labels=interface_traffic_labels,
+            translation_table=interface_traffic_translation_table,
+        )
 
         if interface_traffic_records:
             for interface_traffic_record in interface_traffic_records:
                 if interface_traffic_record.get('comment'):
                     interface_traffic_record['name'] = interface_traffic_record['comment'] if router_entry.config_entry.use_comments_over_names \
                                                                                 else f"{interface_traffic_record['name']} ({interface_traffic_record['comment']})"
+
+            yield BaseCollector.gauge_collector(
+                'interface_status',
+                'Current running status of the interface',
+                interface_traffic_records,
+                metric_key='running',
+                metric_labels=['name', 'disabled']
+            )
 
             rx_byte_metric = BaseCollector.counter_collector('interface_rx_byte', 'Number of received bytes', interface_traffic_records, 'rx_byte', ['name'])
             yield rx_byte_metric

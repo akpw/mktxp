@@ -17,34 +17,25 @@ from mktxp.utils.utils import parse_mkt_uptime
 
 
 class GRECollector(BaseCollector):
-    ''' GRE Metrics collector
-    '''
+    """ GRE Metrics collector
+    """
     @staticmethod
     def collect(router_entry):
         if not router_entry.config_entry.gre:
             return
 
         default_labels = ['name', 'local_address', 'remote_address']
-        translation_table = {
-            'running': lambda value: '1' if value == 'true' else '0',
-            'disabled': lambda value: '1' if value == 'true' else '0'
-        }
         monitor_records = InterfaceMetricsDataSource.metric_records(
             router_entry,
             kind='gre',
             additional_proplist=['mtu', 'actual-mtu', 'local-address', 'remote-address'],
-            translation_table=translation_table
         )
 
         if monitor_records:
-            yield BaseCollector.gauge_collector('interface_status',
-                                                'Current status of the interface',
-                                                monitor_records,
-                                                metric_key='running',
-                                                metric_labels=default_labels + ['disabled'])
-
-            yield BaseCollector.gauge_collector('interface_mtu',
-                                                'Current used MTU for this interface',
-                                                monitor_records,
-                                                metric_key='actual_mtu',
-                                                metric_labels=default_labels + ['mtu'])
+            yield BaseCollector.gauge_collector(
+                'interface_mtu',
+                'Current used MTU for this interface',
+                monitor_records,
+                metric_key='actual_mtu',
+                metric_labels=default_labels + ['mtu']
+            )
