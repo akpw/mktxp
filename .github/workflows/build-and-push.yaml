@@ -60,7 +60,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          push: true
+          push: ${{ github.ref == 'refs/heads/main' || github.event_name == 'release' }}
           platforms: |
             linux/amd64
             linux/arm64/v8
