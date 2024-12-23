@@ -103,6 +103,9 @@ The default configuration file comes with a sample configuration, making it easy
     capsman = True                  # CAPsMAN general metrics
     capsman_clients = True          # CAPsMAN clients metrics
 
+    eoip = False                    # EoIP status metrics
+    gre = False                     # GRE status metrics
+    ipip = False                    # IPIP status metrics
     lte = False                     # LTE signal and status metrics (requires additional 'test' permission policy on RouterOS v6) 
     ipsec = False                   # IPSec active peer metrics
     switch_port = False             # Switch Port metrics
