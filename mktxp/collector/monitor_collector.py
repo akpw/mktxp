@@ -25,15 +25,39 @@ class MonitorCollector(BaseCollector):
         if not router_entry.config_entry.monitor:
             return
 
-        monitor_labels = ['status', 'rate', 'full_duplex', 'name', 'sfp_temperature', 'sfp_module_present',
-                          'sfp_wavelength', 'sfp_tx_power', 'sfp_rx_power']
+        monitor_labels = [
+            'full_duplex',
+            'name',
+            'rate',
+            'sfp_connector_type',
+            'sfp_manufacturing_date',
+            'sfp_module_present',
+            'sfp_rx_loss',
+            'sfp_rx_power',
+            'sfp_supply_voltage',
+            'sfp_temperature',
+            'sfp_tx_bias_current',
+            'sfp_tx_fault',
+            'sfp_tx_power',
+            'sfp_type',
+            'sfp_vendor_name',
+            'sfp_vendor_part_number',
+            'sfp_vendor_revision',
+            'sfp_vendor_serial',
+            'sfp_wavelength',
+            'status',
+        ]
+
         translation_table = {
-            'status': lambda value: '1' if value == 'link-ok' else '0',
-            'rate': lambda value: MonitorCollector._rates(value) if value else '0',
             'full_duplex': lambda value: '1' if value == 'true' else '0',
             'name': lambda value: value if value else '',
+            'rate': lambda value: MonitorCollector._rates(value) if value else '0',
             'sfp_module_present': lambda value: '1' if value == 'true' else '0',
-            'sfp_temperature': lambda value: value if value else '0'
+            'sfp_rx_loss': lambda value: '1' if value == 'true' else '0',
+            'sfp_temperature': lambda value: value if value else '0',
+            'sfp_tx_bias_current': lambda value: float(value) / 1000 if value else '0',
+            'sfp_tx_fault': lambda value: '1' if value == 'true' else '0',
+            'status': lambda value: '1' if value == 'link-ok' else '0',
         }
         monitor_records = InterfaceMonitorMetricsDataSource.metric_records(
             router_entry,
@@ -74,10 +98,77 @@ class MonitorCollector(BaseCollector):
 
         sfp_metrics = [record for record in monitor_records if int(record.get("sfp_module_present"))]
         if sfp_metrics:
-            yield BaseCollector.gauge_collector('interface_sfp_temperature', 'Current SFP Temperature', sfp_metrics, 'sfp_temperature', ['name'])
-            yield BaseCollector.gauge_collector('interface_sfp_wavelength', 'Current SFP Wavelength',sfp_metrics, 'sfp_wavelength', ['name'])
-            yield BaseCollector.gauge_collector('interface_sfp_tx_power', 'Current SFP TX Power', sfp_metrics, 'sfp_tx_power', ['name'])
-            yield BaseCollector.gauge_collector('interface_sfp_rx_power', 'Current SFP RX Power', sfp_metrics, 'sfp_rx_power', ['name'])
+            yield BaseCollector.info_collector(
+                'interface_sfp',
+                'Information about the used transceiver',
+                sfp_metrics,
+                metric_labels=[
+                    'name',
+                    'sfp_connector_type',
+                    'sfp_manufacturing_date',
+                    'sfp_type',
+                    'sfp_vendor_name',
+                    'sfp_vendor_part_number',
+                    'sfp_vendor_revision',
+                    'sfp_vendor_serial',
+                ]
+            )
+            yield BaseCollector.gauge_collector(
+                'interface_sfp_supply_voltage',
+                'The transceivers current supply voltage',
+                sfp_metrics,
+                metric_key='sfp_supply_voltage',
+                metric_labels=['name']
+            )
+            yield BaseCollector.gauge_collector(
+                'interface_sfp_rx_loss',
+                'The receiver signal is lost',
+                sfp_metrics,
+                metric_key='sfp_rx_loss',
+                metric_labels=['name']
+            )
+            yield BaseCollector.gauge_collector(
+                'interface_sfp_rx_power',
+                'Current SFP RX Power',
+                sfp_metrics,
+                metric_key='sfp_rx_power',
+                metric_labels=['name']
+            )
+            yield BaseCollector.gauge_collector(
+                'interface_sfp_temperature',
+                'Current SFP Temperature',
+                sfp_metrics,
+                metric_key='sfp_temperature',
+                metric_labels=['name']
+            )
+            yield BaseCollector.gauge_collector(
+                'interface_sfp_tx_bias_current',
+                'The transceivers current tx bias current',
+                sfp_metrics,
+                metric_key='sfp_tx_bias_current',
+                metric_labels=['name']
+            )
+            yield BaseCollector.gauge_collector(
+                'interface_sfp_tx_power',
+                'Current SFP TX Power',
+                sfp_metrics,
+                metric_key='sfp_tx_power',
+                metric_labels=['name']
+            )
+            yield BaseCollector.gauge_collector(
+                'interface_sfp_tx_fault',
+                'The transceiver transmitter is in fault state',
+                sfp_metrics,
+                metric_key='sfp_tx_fault',
+                metric_labels=['name']
+            )
+            yield BaseCollector.gauge_collector(
+                'interface_sfp_wavelength',
+                'Current SFP Wavelength',
+                sfp_metrics,
+                metric_key='sfp_wavelength',
+                metric_labels=['name']
+            )
 
     @staticmethod
     def _rates(rate_option):
@@ -93,6 +184,6 @@ class MonitorCollector(BaseCollector):
                 }.get(rate_option, None)
         if rate_value:
             return rate_value
-        
+
         # ...or just calculate in case it's not
         return BaseOutputProcessor.parse_interface_rate(rate_option)
