@@ -17,36 +17,83 @@ from mktxp.datasource.system_resource_ds import SystemResourceMetricsDataSource
 from mktxp.utils.utils import routerOS7_version
 
 
-class InterfaceTrafficMetricsDataSource:
-    ''' Interface Traffic Metrics data provider
-    '''
+class BaseInterfaceDataSource:
     @staticmethod
-    def metric_records(router_entry, *, metric_labels = None):
+    def rewrite_interface_names(router_entry, metric_records):
+        for metric_record in metric_records:
+            if metric_record.get('comment'):
+                if router_entry.config_entry.use_comments_over_names:
+                    metric_record['name'] = metric_record['comment']
+                else:
+                    metric_record['name'] = f"{metric_record['name']} ({metric_record['comment']})"
+
+        return metric_records
+
+
+class InterfaceMetricsDataSource(BaseInterfaceDataSource):
+    """ Interface Monitor Metrics data provider
+    """
+    @staticmethod
+    def metric_records(router_entry, *, metric_labels=None, kind='ethernet', additional_proplist=None,
+                       translation_table=None):
         if metric_labels is None:
             metric_labels = []
+
+        if additional_proplist is None:
+            additional_proplist = []
+
+        call_params = {
+            'proplist': ','.join(['name', 'running', 'disabled'] + additional_proplist)
+        }
+
         try:
-            traffic_records = router_entry.api_connection.router_api().get_resource('/interface').get(running='yes', disabled='no')
-            return BaseDSProcessor.trimmed_records(router_entry, router_records = traffic_records, metric_labels = metric_labels)
+            interface_records = router_entry.api_connection.router_api().get_resource(
+                f'/interface/{kind}'
+            ).call(
+                'print',
+                call_params
+            )
+            interface_records = BaseInterfaceDataSource.rewrite_interface_names(router_entry, interface_records)
+            return BaseDSProcessor.trimmed_records(
+                router_entry,
+                router_records=interface_records,
+                metric_labels=metric_labels,
+                translation_table=translation_table
+            )
         except Exception as exc:
-            print(f'Error getting interface traffic info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
+            print(f'Error getting {kind} interface info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None
 
-    ''' Interface Traffic Stats data provider
-    '''
+
+class InterfaceTrafficMetricsDataSource(BaseInterfaceDataSource):
+    """ Interface Traffic Metrics data provider
+    """
     @staticmethod
-    def metric_stats_records(router_entry, *, metric_labels):
+    def metric_records(router_entry, *, metric_labels, translation_table=None):
         metric_labels = metric_labels or []
         try:
             # get stats for all existing interfaces
-            metric_stats_records = router_entry.api_connection.router_api().get_resource('/interface').call('print', {'stats': 'detail'})
-            return BaseDSProcessor.trimmed_records(router_entry, router_records = metric_stats_records, metric_labels = metric_labels)
+            metric_stats_records = router_entry.api_connection.router_api().get_resource(
+                '/interface'
+            ).call(
+                'print',
+                {'stats': 'detail'}
+            )
+            metric_stats_records = BaseInterfaceDataSource.rewrite_interface_names(router_entry, metric_stats_records)
+            return BaseDSProcessor.trimmed_records(
+                router_entry=router_entry,
+                router_records=metric_stats_records,
+                metric_labels=metric_labels,
+                translation_table=translation_table,
+            )
         except Exception as exc:
             print(f'Error getting interface traffic stats info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None
 
+
 class InterfaceMonitorMetricsDataSource:
-    ''' Interface Monitor Metrics data provider
-    '''
+    """ Interface Monitor Metrics data provider
+    """
     @staticmethod
     def metric_records(router_entry, *, metric_labels = None, translation_table = None, kind = 'ethernet', include_comments = False, running_only = True):
         if metric_labels is None:
@@ -84,4 +131,3 @@ class InterfaceMonitorMetricsDataSource:
         except Exception as exc:
             print(f'Error getting {kind} interface monitor info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None
-
