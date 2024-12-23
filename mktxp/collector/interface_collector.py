@@ -23,56 +23,107 @@ class InterfaceCollector(BaseCollector):
     def collect(router_entry):
         if not router_entry.config_entry.interface:
             return
-            
-        interface_traffic_labels = ['disabled', 'name', 'comment', 'rx_byte', 'tx_byte', 'rx_packet', 'tx_packet', 'rx_error', 'tx_error', 'rx_drop', 'tx_drop', 'link_downs', 'running']
+
+        interface_traffic_labels = ['disabled', 'name', 'comment', 'rx_byte', 'tx_byte', 'rx_packet', 'tx_packet',
+                                    'rx_error', 'tx_error', 'rx_drop', 'tx_drop', 'link_downs', 'running']
         interface_traffic_translation_table = {
             'running': lambda value: '1' if value == 'true' else '0',
             'disabled': lambda value: '1' if value == 'true' else '0'
         }
 
-        interface_traffic_records = InterfaceTrafficMetricsDataSource.metric_stats_records(
+        interface_traffic_records = InterfaceTrafficMetricsDataSource.metric_records(
             router_entry,
             metric_labels=interface_traffic_labels,
             translation_table=interface_traffic_translation_table,
         )
 
-        if interface_traffic_records:
-            for interface_traffic_record in interface_traffic_records:
-                if interface_traffic_record.get('comment'):
-                    interface_traffic_record['name'] = interface_traffic_record['comment'] if router_entry.config_entry.use_comments_over_names \
-                                                                                else f"{interface_traffic_record['name']} ({interface_traffic_record['comment']})"
+        if not interface_traffic_records:
+            return
 
-            yield BaseCollector.gauge_collector(
-                'interface_status',
-                'Current running status of the interface',
-                interface_traffic_records,
-                metric_key='running',
-                metric_labels=['name', 'disabled']
-            )
+        yield BaseCollector.gauge_collector(
+            'interface_running',
+            'Current running status of the interface',
+            interface_traffic_records,
+            metric_key='running',
+            metric_labels=['name']
+        )
 
-            rx_byte_metric = BaseCollector.counter_collector('interface_rx_byte', 'Number of received bytes', interface_traffic_records, 'rx_byte', ['name'])
-            yield rx_byte_metric
+        yield BaseCollector.gauge_collector(
+            'interface_disabled',
+            'Current disabled status of the interface',
+            interface_traffic_records,
+            metric_key='disabled',
+            metric_labels=['name']
+        )
 
-            tx_byte_metric = BaseCollector.counter_collector('interface_tx_byte', 'Number of transmitted bytes', interface_traffic_records, 'tx_byte', ['name'])
-            yield tx_byte_metric
+        yield BaseCollector.counter_collector(
+            'interface_rx_byte',
+            'Number of received bytes',
+            interface_traffic_records,
+            'rx_byte',
+            ['name']
+        )
 
-            rx_packet_metric = BaseCollector.counter_collector('interface_rx_packet', 'Number of packets received', interface_traffic_records, 'rx_packet', ['name'])
-            yield rx_packet_metric
+        yield BaseCollector.counter_collector(
+            'interface_tx_byte',
+            'Number of transmitted bytes',
+            interface_traffic_records,
+            'tx_byte',
+            ['name']
+        )
 
-            tx_packet_metric = BaseCollector.counter_collector('interface_tx_packet', 'Number of transmitted packets', interface_traffic_records, 'tx_packet', ['name'])
-            yield tx_packet_metric
+        yield BaseCollector.counter_collector(
+            'interface_rx_packet',
+            'Number of packets received',
+            interface_traffic_records,
+            'rx_packet',
+            ['name']
+        )
 
-            rx_error_metric = BaseCollector.counter_collector('interface_rx_error', 'Number of packets received with an error', interface_traffic_records, 'rx_error', ['name'])
-            yield rx_error_metric
+        yield BaseCollector.counter_collector(
+            'interface_tx_packet',
+            'Number of transmitted packets',
+            interface_traffic_records,
+            'tx_packet',
+            ['name']
+        )
 
-            tx_error_metric = BaseCollector.counter_collector('interface_tx_error', 'Number of packets transmitted with an error', interface_traffic_records, 'tx_error', ['name'])
-            yield tx_error_metric
+        yield BaseCollector.counter_collector(
+            'interface_rx_error',
+            'Number of packets received with an error',
+            interface_traffic_records,
+            'rx_error',
+            ['name']
+        )
 
-            rx_drop_metric = BaseCollector.counter_collector('interface_rx_drop', 'Number of received packets being dropped', interface_traffic_records, 'rx_drop', ['name'])
-            yield rx_drop_metric
+        yield BaseCollector.counter_collector(
+            'interface_tx_error',
+            'Number of packets transmitted with an error',
+            interface_traffic_records,
+            'tx_error',
+            ['name']
+        )
 
-            tx_drop_metric = BaseCollector.counter_collector('interface_tx_drop', 'Number of transmitted packets being dropped', interface_traffic_records, 'tx_drop', ['name'])
-            yield tx_drop_metric
+        yield BaseCollector.counter_collector(
+            'interface_rx_drop',
+            'Number of received packets being dropped',
+            interface_traffic_records,
+            'rx_drop',
+            ['name']
+        )
 
-            link_downs_metric = BaseCollector.counter_collector('link_downs', 'Number of times link went down', interface_traffic_records, 'link_downs', ['name'])
-            yield link_downs_metric
+        yield BaseCollector.counter_collector(
+            'interface_tx_drop',
+            'Number of transmitted packets being dropped',
+            interface_traffic_records,
+            'tx_drop',
+            ['name']
+        )
+
+        yield BaseCollector.counter_collector(
+            'link_downs',
+            'Number of times link went down',
+            interface_traffic_records,
+            'link_downs',
+            ['name']
+        )
