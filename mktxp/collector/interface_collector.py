@@ -25,7 +25,7 @@ class InterfaceCollector(BaseCollector):
             return
 
         interface_traffic_labels = ['disabled', 'name', 'comment', 'rx_byte', 'tx_byte', 'rx_packet', 'tx_packet',
-                                    'rx_error', 'tx_error', 'rx_drop', 'tx_drop', 'link_downs', 'running']
+                                    'rx_error', 'tx_error', 'rx_drop', 'tx_drop', 'link_downs', 'running', 'type']
         interface_traffic_translation_table = {
             'running': lambda value: '1' if value == 'true' else '0',
             'disabled': lambda value: '1' if value == 'true' else '0'
@@ -45,6 +45,13 @@ class InterfaceCollector(BaseCollector):
             'The interface comment',
             interface_traffic_records,
             metric_labels=['name', 'comment']
+        )
+
+        yield BaseCollector.info_collector(
+            'interface_type',
+            'Interface type like ether, vrrp, eoip, gre-tunnel, ...',
+            interface_traffic_records,
+            metric_labels=['name', 'type']
         )
 
         yield BaseCollector.gauge_collector(
