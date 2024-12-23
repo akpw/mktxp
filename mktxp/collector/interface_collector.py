@@ -40,6 +40,13 @@ class InterfaceCollector(BaseCollector):
         if not interface_traffic_records:
             return
 
+        yield BaseCollector.info_collector(
+            'interface_comment',
+            'The interface comment',
+            interface_traffic_records,
+            metric_labels=['name', 'comment']
+        )
+
         yield BaseCollector.gauge_collector(
             'interface_running',
             'Current running status of the interface',
