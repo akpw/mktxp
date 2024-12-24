@@ -17,16 +17,16 @@ from mktxp.cli.config.config import MKTXPConfigKeys
      
 
 class BaseCollector:
-    ''' Base Collector methods
+    """ Base Collector methods
         For use by custom collector
-    '''
+    """
     @staticmethod
-    def info_collector(name, decription, router_records, metric_labels=None):
+    def info_collector(name: str, documentation: str, router_records, metric_labels=None):
         metric_labels = metric_labels or []
         router_records = router_records or []
 
         BaseCollector._add_id_labels(metric_labels)
-        collector = InfoMetricFamily(f'mktxp_{name}', decription)
+        collector = InfoMetricFamily(f'mktxp_{name}', documentation=documentation)
 
         for router_record in router_records:
             label_values = {label: router_record.get(label) if router_record.get(label) else '' for label in metric_labels}
@@ -34,12 +34,12 @@ class BaseCollector:
         return collector
 
     @staticmethod
-    def counter_collector(name, decription, router_records, metric_key, metric_labels=None):
+    def counter_collector(name: str, documentation: str, router_records, metric_key, metric_labels=None):
         metric_labels = metric_labels or []
         router_records = router_records or []            
 
         BaseCollector._add_id_labels(metric_labels)
-        collector = CounterMetricFamily(f'mktxp_{name}', decription, labels=metric_labels)
+        collector = CounterMetricFamily(f'mktxp_{name}', documentation=documentation, labels=metric_labels)
 
         for router_record in router_records:
             label_values = [router_record.get(label) if router_record.get(label) else '' for label in metric_labels]        
@@ -47,19 +47,18 @@ class BaseCollector:
         return collector
 
     @staticmethod
-    def gauge_collector(name, decription, router_records, metric_key, metric_labels = None, add_id_labels = True):
+    def gauge_collector(name: str, documentation: str, router_records, metric_key, metric_labels = None, add_id_labels = True):
         metric_labels = metric_labels or []
         router_records = router_records or []            
 
         if add_id_labels:
             BaseCollector._add_id_labels(metric_labels)
-        collector = GaugeMetricFamily(f'mktxp_{name}', decription, labels=metric_labels)
+        collector = GaugeMetricFamily(f'mktxp_{name}', documentation=documentation, labels=metric_labels)
 
         for router_record in router_records:       
             label_values = [router_record.get(label) if router_record.get(label) else '' for label in metric_labels]        
             collector.add_metric(label_values, router_record.get(metric_key, 0))
         return collector
-
 
     # Helpers
     @staticmethod
