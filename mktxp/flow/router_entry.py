@@ -92,13 +92,13 @@ class RouterEntry:
     def wireless_type(self):
         router_entry = self
         if self._wireless_type == RouterEntryWirelessType.NONE:
-            if PackageMetricsDataSource.is_package_installed(router_entry, package_name = RouterEntryWirelessPackage.WIFI_PACKAGE):
+            if PackageMetricsDataSource.is_package_enabled(router_entry, package_name = RouterEntryWirelessPackage.WIFI_PACKAGE):
               self._wireless_type = RouterEntryWirelessType.WIFI
-            elif PackageMetricsDataSource.is_package_installed(router_entry, package_name = RouterEntryWirelessPackage.WIFI_AC_PACKAGE):
+            elif PackageMetricsDataSource.is_package_enabled(router_entry, package_name = RouterEntryWirelessPackage.WIFI_AC_PACKAGE):
               self._wireless_type = RouterEntryWirelessType.WIFI
-            elif PackageMetricsDataSource.is_package_installed(router_entry, package_name = RouterEntryWirelessPackage.WIFIWAVE2_PACKAGE):
+            elif PackageMetricsDataSource.is_package_enabled(router_entry, package_name = RouterEntryWirelessPackage.WIFIWAVE2_PACKAGE):
               self._wireless_type = RouterEntryWirelessType.WIFIWAVE2
-            elif PackageMetricsDataSource.is_package_installed(router_entry, package_name = RouterEntryWirelessPackage.WIRELESS_PACKAGE):
+            elif PackageMetricsDataSource.is_package_enabled(router_entry, package_name = RouterEntryWirelessPackage.WIRELESS_PACKAGE):
               self._wireless_type = RouterEntryWirelessType.DUAL
             elif SystemResourceMetricsDataSource.has_builtin_wifi_capsman(router_entry):
               self._wireless_type = RouterEntryWirelessType.WIFI
