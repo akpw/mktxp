@@ -41,3 +41,14 @@ class PackageMetricsDataSource:
             except Exception as exc:
                 print(f'Error getting an installed package status from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')        
         return False
+
+    def is_package_enabled (router_entry, package_name = None):
+        if package_name:
+            try:
+                package_records = router_entry.api_connection.router_api().get_resource('/system/package').get(disabled='false')
+                for package_record in package_records:
+                    if package_record['name'] == package_name:
+                        return True
+            except Exception as exc:
+                print(f'Error getting an enabled package status from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
+        return False
