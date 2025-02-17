@@ -53,7 +53,7 @@ setup(
                         'packaging>=24.0'
                         ],
 
-    test_suite = 'tests.mktxp_test_suite',
+    test_suite = 'tests',
 
     entry_points={'console_scripts': [
         'mktxp = mktxp.cli.dispatch:main',

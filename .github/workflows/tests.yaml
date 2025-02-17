@@ -1,0 +1,30 @@
+name: Tests
+on:
+  push:
+    branches: [main]
+    paths-ignore: [ '*.md', '*.rst']
+  pull_request:
+    paths-ignore: [ '*.md', '*.rst' ]
+jobs:
+  tests:
+    name: ${{ matrix.name || matrix.python }}
+    runs-on: ${{ matrix.os || 'ubuntu-latest' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {python: '3.13'}
+          - {python: '3.12'}
+          - {python: '3.11'}
+          - {python: '3.10'}
+          - {python: '3.9'}
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-python@v5.4.0
+        with:
+          python-version: ${{ matrix.python }}
+          allow-prereleases: true
+          # We need a requirements.txt or pyproject.toml
+          # cache: pip
+      - run: pip install tox
+      - run: tox run -e ${{ matrix.tox || format('py{0}', matrix.python) }}
