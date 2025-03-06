@@ -44,7 +44,7 @@ setup(
     keywords = 'Mikrotik RouterOS Prometheus Exporter',
 
     install_requires = ['prometheus-client>=0.9.0', 
-                        'RouterOS-api>=0.18.0',
+                        'RouterOS-api>=0.19.0',
                         'configobj>=5.0.6',
                         'humanize>=3.2.0',
                         'texttable>=1.6.3',

@@ -74,6 +74,7 @@ The default configuration file comes with a sample configuration, making it easy
     ssl_certificate_verify = False  # turns SSL certificate verification on / off   
     plaintext_login = True          # for legacy RouterOS versions below 6.43 use False
 
+    health = True                   # System Health metrics
     installed_packages = True       # Installed packages
     dhcp = True                     # DHCP general metrics
     dhcp_lease = True               # DHCP lease metrics
