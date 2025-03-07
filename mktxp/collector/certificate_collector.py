@@ -25,7 +25,7 @@ class CertificateCollector(BaseCollector):
         certificate_labels = ['name', 'digest_algorithm', 'key_type', 'country', 'state', 'locality', 'organization', 
                                 'common_name', 'key_size', 'subject_alt_name', 'days_valid', 'trusted', 'key_usage', 
                                 'ca', 'serial_number', 'key_usage', 'ca', 'serial_number', 'fingerprint', 'akid', 'skid', 
-                                'invalid_before', 'invalid_after', 'expires-after']
+                                'invalid_before', 'invalid_after', 'expires_after']
 
         translation_table = {
         }
