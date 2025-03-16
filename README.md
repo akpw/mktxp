@@ -72,6 +72,7 @@ The default configuration file comes with a sample configuration, making it easy
     use_ssl = False                 # enables connection via API-SSL servis
     no_ssl_certificate = False      # enables API_SSL connect without router SSL certificate
     ssl_certificate_verify = False  # turns SSL certificate verification on / off   
+    ssl_ca_file = ""                # path to the certificate authority file to validate against, leave empty to use system store
     plaintext_login = True          # for legacy RouterOS versions below 6.43 use False
 
     health = True                   # System Health metrics

@@ -53,9 +53,10 @@ class RouterAPIConnection:
         self.last_failure_timestamp = self.successive_failure_count = 0
         
         ctx = None
-        if self.config_entry.use_ssl and self.config_entry.no_ssl_certificate:
-            ctx = ssl.create_default_context()
-            ctx.set_ciphers('ADH:@SECLEVEL=0')       
+        if self.config_entry.use_ssl:
+            ctx = ssl.create_default_context(cafile=self.config_entry.ssl_ca_file if self.config_entry.ssl_ca_file else None)
+            if self.config_entry.no_ssl_certificate:
+                ctx.set_ciphers('ADH:@SECLEVEL=0')
 
         self.connection = RouterOsApiPool(
                 host = self.config_entry.hostname,
