@@ -34,8 +34,9 @@ For effortless visualization of the RouterOS metrics exported to Prometheus, MKT
 
 ## Install:
 There are multiple ways to install this project, from a standalone app to a [fully dockerized monitoring stack](https://github.com/akpw/mktxp-stack). The supported options include:
-- [MKTXP Stack](https://github.com/akpw/mktxp-stack): a ready-to-go MKTXP monitoring stack, with added Mikrotik centralized log processing based on a preconfigured syslog-ng / promtail / Loki stack.
+- [MKTXP Stack](https://github.com/akpw/mktxp-stack): a mktxp companion project, that provides ready-to-go MKTXP monitoring stack along with added Mikrotik centralized log processing:
 
+  <img width="48%" alt="loki" src="https://user-images.githubusercontent.com/5028474/210771516-06a3e6ab-8eab-458c-9f38-5d44f95d23d4.png">
 
 - from [Docker image](https://github.com/akpw/mktxp/pkgs/container/mktxp) : `❯ docker pull ghcr.io/akpw/mktxp:latest`
 
