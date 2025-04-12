@@ -56,7 +56,10 @@ class RouterAPIConnection:
         if self.config_entry.use_ssl:
             ctx = ssl.create_default_context(cafile=self.config_entry.ssl_ca_file if self.config_entry.ssl_ca_file else None)
             if self.config_entry.no_ssl_certificate:
-                ctx.set_ciphers('ADH:@SECLEVEL=0')
+                ctx.check_hostname = False
+                ctx.verify_mode = ssl.CERT_NONE
+            elif self.config_entry.ssl_ca_file:
+                ctx.load_verify_locations(self.config_entry.ssl_ca_file)
 
         self.connection = RouterOsApiPool(
                 host = self.config_entry.hostname,
