@@ -23,7 +23,8 @@ class NetwatchMetricsDataSource:
         if metric_labels is None:
             metric_labels = []                
         try:
-            netwatch_records = router_entry.api_connection.router_api().get_resource('/tool/netwatch').get(disabled='false')
+            netwatch_records = router_entry.api_connection.router_api().get_resource('/tool/netwatch').get()
+            netwatch_records = [entry for entry in netwatch_records if entry.get('disabled', 'false') != 'true']
             if 'name' in metric_labels:
                 for netwatch_record in netwatch_records:
                     comment = netwatch_record.get('comment')
