@@ -61,10 +61,15 @@ class RouterAPIConnection:
             elif self.config_entry.ssl_ca_file:
                 ctx.load_verify_locations(self.config_entry.ssl_ca_file)
 
+        password = self.config_entry.password
+        if self.config_entry.password_file:
+            with open(self.config_entry.password_file, 'r') as file:
+                password = file.read().rstrip()
+
         self.connection = RouterOsApiPool(
                 host = self.config_entry.hostname,
                 username = self.config_entry.username,
-                password = self.config_entry.password,
+                password = password,
                 port = self.config_entry.port,
                 plaintext_login = True,
                 use_ssl = self.config_entry.use_ssl,
