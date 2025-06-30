@@ -31,13 +31,12 @@ class PackageMetricsDataSource:
 
 
     @staticmethod
-    def is_package_installed (router_entry, package_name = None):
+    def is_package_installed (router_entry, package_name = None, enabled_only = True):
         if package_name:
             try:
-                package_records = router_entry.api_connection.router_api().get_resource('/system/package').get()
-                for package_record in package_records:
-                    if package_record['name'] == package_name:
-                        return True
+                get_params = {'disabled': 'false'} if enabled_only else {}        
+                package_records = router_entry.api_connection.router_api().get_resource('/system/package').get(**get_params)
+                return any(pkg['name'] == package_name for pkg in package_records)                                             
             except Exception as exc:
                 print(f'Error getting an installed package status from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')        
         return False
