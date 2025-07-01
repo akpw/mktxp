@@ -50,7 +50,8 @@ setup(
                         'texttable>=1.6.3',
                         'speedtest-cli>=2.1.2',
                         'waitress>=3.0.0',
-                        'packaging>=24.0'
+                        'packaging>=24.0',
+                        'pyyaml>=5.1'
                         ],
 
     test_suite = 'tests',

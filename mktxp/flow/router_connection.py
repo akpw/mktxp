@@ -17,7 +17,8 @@ import socket
 import collections
 from datetime import datetime
 from mktxp.cli.config.config import config_handler
-import functools 
+import functools
+import yaml
 
 # Fix UTF-8 decode error
 # See: https://github.com/akpw/mktxp/issues/47
@@ -61,14 +62,24 @@ class RouterAPIConnection:
             elif self.config_entry.ssl_ca_file:
                 ctx.load_verify_locations(self.config_entry.ssl_ca_file)
 
+        username = self.config_entry.username
         password = self.config_entry.password
-        if self.config_entry.password_file:
-            with open(self.config_entry.password_file, 'r') as file:
-                password = file.read().rstrip()
+        if self.config_entry.credentials_file:
+            with open(self.config_entry.credentials_file, 'r') as file:
+                try:
+                    credentials = yaml.safe_load(file)
+                    if isinstance(credentials, str):
+                        raise TypeError(credentials)
+                except (TypeError, yaml.YAMLError) as e:
+                    print('Error parsing credentials file - check that it is valid yaml')
+                    exit(1)
+
+                username = credentials.get('username', username)
+                password = credentials.get('password', password)
 
         self.connection = RouterOsApiPool(
                 host = self.config_entry.hostname,
-                username = self.config_entry.username,
+                username = username,
                 password = password,
                 port = self.config_entry.port,
                 plaintext_login = True,

@@ -70,7 +70,7 @@ class MKTXPConfigKeys:
     LISTEN_KEY = 'listen'
     USER_KEY = 'username'
     PASSWD_KEY = 'password'
-    PASSWD_FILE_KEY = 'password_file'
+    CREDENTIALS_FILE_KEY = 'credentials_file'
 
     SSL_KEY = 'use_ssl'
     NO_SSL_CERTIFICATE = 'no_ssl_certificate'
@@ -156,7 +156,7 @@ class MKTXPConfigKeys:
     DEFAULT_HOST_KEY = 'localhost'
     DEFAULT_USER_KEY = 'user'
     DEFAULT_PASSWORD_KEY = 'password'
-    DEFAULT_PASSWORD_FILE_KEY = ""
+    DEFAULT_CREDENTIALS_FILE_KEY = ""
 
     DEFAULT_SSL_CA_FILE = ""
 
@@ -189,7 +189,7 @@ class MKTXPConfigKeys:
     SYSTEM_BOOLEAN_KEYS_YES = set()
     SYSTEM_BOOLEAN_KEYS_NO = {MKTXP_BANDWIDTH_KEY, MKTXP_VERBOSE_MODE, MKTXP_FETCH_IN_PARALLEL, MKTXP_COMPACT_CONFIG}
 
-    STR_KEYS = (HOST_KEY, USER_KEY, PASSWD_KEY, PASSWD_FILE_KEY, SSL_CA_FILE, FE_REMOTE_DHCP_ENTRY, FE_REMOTE_CAPSMAN_ENTRY)
+    STR_KEYS = (HOST_KEY, USER_KEY, PASSWD_KEY, CREDENTIALS_FILE_KEY, SSL_CA_FILE, FE_REMOTE_DHCP_ENTRY, FE_REMOTE_CAPSMAN_ENTRY)
     INT_KEYS =  ()
     MKTXP_INT_KEYS = (PORT_KEY, MKTXP_SOCKET_TIMEOUT, MKTXP_INITIAL_DELAY, MKTXP_MAX_DELAY,
                       MKTXP_INC_DIV, MKTXP_BANDWIDTH_TEST_INTERVAL, MKTXP_MIN_COLLECT_INTERVAL,
@@ -202,7 +202,7 @@ class MKTXPConfigKeys:
 
 class ConfigEntry:
     MKTXPConfigEntry = namedtuple('MKTXPConfigEntry', [MKTXPConfigKeys.ENABLED_KEY, MKTXPConfigKeys.HOST_KEY, MKTXPConfigKeys.PORT_KEY,
-                                                       MKTXPConfigKeys.USER_KEY, MKTXPConfigKeys.PASSWD_KEY, MKTXPConfigKeys.PASSWD_FILE_KEY,
+                                                       MKTXPConfigKeys.USER_KEY, MKTXPConfigKeys.PASSWD_KEY, MKTXPConfigKeys.CREDENTIALS_FILE_KEY,
                                                        MKTXPConfigKeys.SSL_KEY, MKTXPConfigKeys.NO_SSL_CERTIFICATE, MKTXPConfigKeys.SSL_CERTIFICATE_VERIFY, MKTXPConfigKeys.SSL_CA_FILE, MKTXPConfigKeys.PLAINTEXT_LOGIN_KEY,
                                                        MKTXPConfigKeys.FE_DHCP_KEY, MKTXPConfigKeys.FE_HEALTH_KEY, MKTXPConfigKeys.FE_PACKAGE_KEY, MKTXPConfigKeys.FE_DHCP_LEASE_KEY, MKTXPConfigKeys.FE_INTERFACE_KEY,
                                                        MKTXPConfigKeys.FE_MONITOR_KEY, MKTXPConfigKeys.FE_WIRELESS_KEY, MKTXPConfigKeys.FE_WIRELESS_CLIENTS_KEY,
@@ -503,7 +503,7 @@ class MKTXPConfigHandler:
             MKTXPConfigKeys.HOST_KEY: lambda _: MKTXPConfigKeys.DEFAULT_HOST_KEY,
             MKTXPConfigKeys.USER_KEY: lambda _: MKTXPConfigKeys.DEFAULT_USER_KEY,
             MKTXPConfigKeys.PASSWD_KEY: lambda _: MKTXPConfigKeys.DEFAULT_PASSWORD_KEY,
-            MKTXPConfigKeys.PASSWD_FILE_KEY: lambda _: MKTXPConfigKeys.DEFAULT_PASSWORD_FILE_KEY,
+            MKTXPConfigKeys.CREDENTIALS_FILE_KEY: lambda _: MKTXPConfigKeys.DEFAULT_CREDENTIALS_FILE_KEY,
             MKTXPConfigKeys.PORT_KEY: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_PORT,
             MKTXPConfigKeys.SSL_CA_FILE: lambda _: MKTXPConfigKeys.DEFAULT_SSL_CA_FILE,
             MKTXPConfigKeys.FE_REMOTE_DHCP_ENTRY:  lambda _: MKTXPConfigKeys.DEFAULT_FE_REMOTE_DHCP_ENTRY,
