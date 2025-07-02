@@ -69,7 +69,7 @@ The default configuration file comes with a sample configuration, making it easy
     
     username = username     # RouterOS user, needs to have 'read' and 'api' permissions
     password = password
-    credentials_file = ""
+    credentials_file = ""   # To use an external file in YAML format for both username and password, specify the path here
     
     use_ssl = False                 # enables connection via API-SSL servis
     no_ssl_certificate = False      # enables API_SSL connect without router SSL certificate
