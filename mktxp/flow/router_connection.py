@@ -68,12 +68,11 @@ class RouterAPIConnection:
             with open(self.config_entry.credentials_file, 'r') as file:
                 try:
                     credentials = yaml.safe_load(file)
-                    if isinstance(credentials, str):
-                        raise TypeError(credentials)
-                except (TypeError, yaml.YAMLError) as e:
-                    print('Error parsing credentials file - check that it is valid yaml')
-                    exit(1)
-
+                    if not isinstance(credentials, dict):
+                        raise yaml.YAMLError("Credentials file is not a valid key-value map.")
+               except yaml.YAMLError as e:
+                    print(f"Error parsing credentials file: {e}\nCheck that it is valid YAML (e.g., 'username: user').")
+                    exit(1)                    
                 username = credentials.get('username', username)
                 password = credentials.get('password', password)
 
