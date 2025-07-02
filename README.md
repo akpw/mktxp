@@ -62,13 +62,14 @@ The default configuration file comes with a sample configuration, making it easy
 
 [default]
     # this affects configuration of all routers, unless overloaded on their specific levels
-    
+
     enabled = True          # turns metrics collection for this RouterOS device on / off
     hostname = localhost    # RouterOS IP address
     port = 8728             # RouterOS IP Port
     
     username = username     # RouterOS user, needs to have 'read' and 'api' permissions
     password = password
+    credentials_file = ""
     
     use_ssl = False                 # enables connection via API-SSL servis
     no_ssl_certificate = False      # enables API_SSL connect without router SSL certificate
@@ -109,7 +110,7 @@ The default configuration file comes with a sample configuration, making it easy
     eoip = False                    # EoIP status metrics
     gre = False                     # GRE status metrics
     ipip = False                    # IPIP status metrics
-    lte = False                     # LTE signal and status metrics (requires additional 'test' permission policy on RouterOS v6) 
+    lte = False                     # LTE signal and status metrics (requires additional 'test' permission policy on RouterOS v6)
     ipsec = False                   # IPSec active peer metrics
     switch_port = False             # Switch Port metrics
 
@@ -119,10 +120,11 @@ The default configuration file comes with a sample configuration, making it easy
     user = True                     # Active Users metrics
     queue = True                    # Queues metrics
 
+    bfd = False                     # BFD sessions metrics
     bgp = False                     # BGP sessions metrics
     routing_stats = False           # Routing process stats
     certificate = False             # Certificates metrics
-   
+    
     remote_dhcp_entry = None        # An MKTXP entry to provide for remote DHCP info / resolution
     remote_capsman_entry = None     # An MKTXP entry to provide for remote capsman info 
 
