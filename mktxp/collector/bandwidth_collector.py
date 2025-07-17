@@ -15,7 +15,7 @@
 import socket
 import speedtest
 from datetime import datetime
-from multiprocessing import Pool
+from multiprocessing import Pool, get_context
 from mktxp.cli.config.config import config_handler
 from mktxp.collector.base_collector import BaseCollector
 
@@ -29,12 +29,16 @@ class BandwidthCollector(BaseCollector):
     ''' MKTXP collector
     '''    
     def __init__(self):
-        self.pool = Pool()
+        self.pool_ctx = get_context("spawn")
+        self.pool = None
         self.last_call_timestamp = 0        
     
     def collect(self):
         if not config_handler.system_entry.bandwidth:
             return
+
+        if self.pool is None:
+            self.pool = self.pool_ctx.Pool()
 
         if result_list:      
             result_dict = result_list[0]
@@ -54,8 +58,9 @@ class BandwidthCollector(BaseCollector):
             self.last_call_timestamp = ts
 
     def __del__(self):
-        self.pool.close()
-        self.pool.join()        
+        if self.pool is not None:
+                self.pool.close()
+                self.pool.join()
 
     @staticmethod
     def bandwidth_worker():
