@@ -29,7 +29,6 @@ class BandwidthCollector(BaseCollector):
     ''' MKTXP collector
     '''    
     def __init__(self):
-        self.pool_ctx = get_context("spawn")
         self.pool = None
         self.last_call_timestamp = 0        
     
@@ -38,7 +37,7 @@ class BandwidthCollector(BaseCollector):
             return
 
         if self.pool is None:
-            self.pool = self.pool_ctx.Pool()
+            self.pool = get_context("spawn").Pool()
 
         if result_list:      
             result_dict = result_list[0]
