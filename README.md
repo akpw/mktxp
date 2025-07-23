@@ -247,7 +247,7 @@ mktxp edit -i
 
 ```
 [MKTXP]
-    listen = '0.0.0.0:49090'         # Space separated list of socket addresses to listen to, both IPV4 and IPV6
+    listen = '*:49090'         # Space separated list of socket addresses to listen to, both IPV4 and IPV6
     socket_timeout = 2
     
     initial_delay_on_failure = 120
@@ -374,10 +374,10 @@ To keeps things within expected boundaries, the last two parameters allows for c
 
 
 ### mktxp endpoint listen addresses
-By default, mktxp runs it's HTTP metrics endpoint on any IPv4 address on port 49090. However, it is also able to listen on multiple socket addresses, both IPv4 and IPv6. 
+By default, mktxp runs it's HTTP metrics endpoint on any IPv4/IPv6 address on port 49090. However, it is also able to listen on multiple socket addresses, both IPv4 and IPv6. 
 You can configure this behaviour via the following [system option](https://github.com/akpw/mktxp/blob/main/README.md#mktxp-system-configuration), setting ```listen``` to a space-separated list of sockets to listen to, e.g.:
 ```
-listen = '0.0.0.0:49090 [::1]:49090'
+listen = '0.0.0.0:49090 [::]:49090'
 ```
 A wildcard for the hostname is supported as well, and binding to both IPv4/IPv6 as available.
 

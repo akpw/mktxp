@@ -378,7 +378,7 @@ class MKTXPConfigHandler:
         if self._config[entry_name].get(MKTXPConfigKeys.LISTEN_KEY):
             system_entry_reader[MKTXPConfigKeys.LISTEN_KEY] = self._config[entry_name].get(MKTXPConfigKeys.LISTEN_KEY)
         else:
-            system_entry_reader[MKTXPConfigKeys.LISTEN_KEY] = f'0.0.0.0:{system_entry_reader[MKTXPConfigKeys.PORT_KEY]}'
+            system_entry_reader[MKTXPConfigKeys.LISTEN_KEY] = f'*:{system_entry_reader[MKTXPConfigKeys.PORT_KEY]}'
             new_keys.append(MKTXPConfigKeys.LISTEN_KEY) # read from disk next time
 
         if new_keys:
