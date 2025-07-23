@@ -11,4 +11,5 @@ EXPOSE 49090
 
 USER mktxp
 ENTRYPOINT ["/usr/local/bin/mktxp"]
+ENV PYTHONUNBUFFERED=1
 CMD ["export"]
