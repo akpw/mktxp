@@ -14,6 +14,7 @@
 
 from mktxp.collector.base_collector import BaseCollector
 from mktxp.datasource.container_ds import ContainerDataSource
+from mktxp.datasource.package_ds import PackageMetricsDataSource
 
 
 class ContainerCollector(BaseCollector):
@@ -21,7 +22,7 @@ class ContainerCollector(BaseCollector):
 
     @staticmethod
     def collect(router_entry):
-        if router_entry.config_entry.container:
+        if router_entry.config_entry.container and PackageMetricsDataSource.is_package_installed(router_entry, package_name='container'):
             metric_labels = ['name', 'repo', 'os', 'arch', 'status']
             records = ContainerDataSource.metric_records(router_entry, metric_labels=metric_labels)
             metrics = BaseCollector.info_collector('container', 'Containers', records, metric_labels=metric_labels)
