@@ -130,7 +130,7 @@ class CollectorHandler:
         diff = now - self.last_collect_timestamp
         if diff < config_handler.system_entry.minimal_collect_interval:
             if config_handler.system_entry.verbose_mode:
-                print(f'An attemp to collect metrics within minimal metrics collection interval: {diff} < {config_handler.system_entry.minimal_collect_interval}')
+                print(f'An attempt to collect metrics within minimal metrics collection interval: {diff} < {config_handler.system_entry.minimal_collect_interval}')
                 print('deferring..')
             return False
 
