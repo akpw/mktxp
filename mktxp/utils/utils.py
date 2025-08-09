@@ -313,9 +313,23 @@ def parse_ros_version(string):
 
     >>> parse_ros_version('1.2.3 (stable)')
     1.2.3, stable
+
+    >>> parse_ros_version('7.14.3 (long-term)')
+    7.14.3, long-term    
     """
-    version, channel = re.findall(r'([\d\.]+).*?([\w]+)', string)[0]
-    return parse(version), channel
+
+    match = re.findall(r'([\d\.]+).*?\(([\w-]+)\)', string)
+    if match:
+        version, channel = match[0]
+        return parse(version), channel
+    else:
+        # Fallback for versions without parentheses or non-standard format
+        version_match = re.findall(r'([\d\.]+)', string)
+        if version_match:
+            return parse(version_match[0]), 'stable'  # Default to stable if no channel found
+        else:
+            raise ValueError(f'Unable to parse RouterOS version from: {string}')
+
 
 def builtin_wifi_capsman_version(version):
     """Try to check if the version is Wifi version of RouterOS (>= 7.13).
