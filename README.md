@@ -125,6 +125,8 @@ The default configuration file comes with a sample configuration, making it easy
     routing_stats = False           # Routing process stats
     certificate = False             # Certificates metrics
     
+    container = False               # Containers metrics
+    
     remote_dhcp_entry = None        # An MKTXP entry to provide for remote DHCP info / resolution
     remote_capsman_entry = None     # An MKTXP entry to provide for remote capsman info 
 

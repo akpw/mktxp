@@ -48,6 +48,7 @@ from mktxp.collector.lte_collector import LTECollector
 from mktxp.collector.switch_collector import SwitchPortCollector
 from mktxp.collector.certificate_collector import CertificateCollector
 from mktxp.collector.dns_collector import DNSCollector
+from mktxp.collector.container_collector import ContainerCollector
 
 class CollectorRegistry:
     ''' MKTXP Collectors Registry
@@ -94,6 +95,8 @@ class CollectorRegistry:
         self.register(CollectorKeys.IPIP_COLLECTOR, IPIPCollector.collect)
         self.register(CollectorKeys.LTE_COLLECTOR, LTECollector.collect)
         self.register(CollectorKeys.SWITCH_PORT_COLLECTOR, SwitchPortCollector.collect)
+
+        self.register(CollectorKeys.CONTAINER_COLLECTOR, ContainerCollector.collect)
 
         self.register(CollectorKeys.ROUTING_STATS_COLLECTOR, RoutingStatsCollector.collect)
         self.register(CollectorKeys.CERTIFICATE_COLLECTOR, CertificateCollector.collect)
