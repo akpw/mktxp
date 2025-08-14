@@ -1,7 +1,20 @@
+# coding=utf8
+## Copyright (c) 2020 Arseniy Kuznetsov
+##
+## This program is free software; you can redistribute it and/or
+## modify it under the terms of the GNU General Public License
+## as published by the Free Software Foundation; either version 2
+## of the License, or (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+
 from datetime import timedelta
 import pytest
-
 from mktxp.utils import utils
+from packaging.version import parse
 
 
 @pytest.mark.parametrize("time_string, expected", [
@@ -23,6 +36,26 @@ def test_parse_mkt_uptime(time_string, expected):
 def test_routerOS7_version(version_str, expected):
     assert utils.routerOS7_version(version_str) == expected
 
+
+@pytest.mark.parametrize(
+    "version_string, expected_version, expected_channel",
+    [
+        ("2.1.5 (stable)", "2.1.5", "stable"),
+        ("2.2.0 (long-term)", "2.2.0", "long-term"),
+        ("2.3.1 (development)", "2.3.1", "development"),
+        ("2.4.0 (testing)", "2.4.0", "testing"),
+        ("2.5.5", "2.5.5", "stable"),
+    ],
+)
+def test_parse_ros_version(version_string, expected_version, expected_channel):
+    version, channel = utils.parse_ros_version(version_string)
+    assert version == parse(expected_version)
+    assert channel == expected_channel
+
+
+def test_parse_ros_version_invalid():
+    with pytest.raises(ValueError):
+        utils.parse_ros_version("invalid_version")
 
 @pytest.mark.parametrize("str_value, expected", [
     ("y", True),

@@ -15,7 +15,6 @@
 from mktxp.collector.base_collector import BaseCollector
 from mktxp.datasource.user_ds import UserMetricsDataSource
 
-
 class UserCollector(BaseCollector):
     '''Active Users collector'''
     @staticmethod
@@ -24,8 +23,8 @@ class UserCollector(BaseCollector):
             return
 
         user_labels = ['name', 'when', 'address', 'via', 'group']
-        user_records = UserMetricsDataSource.metric_records(router_entry, metric_labels=user_labels)
+        user_records = UserMetricsDataSource.metric_records(router_entry, metric_labels=user_labels)        
         if user_records:
-            user_metrics = BaseCollector.info_collector('active_users', 'Active Users', user_records, user_labels)
+            # Auto de-duplicate the records from the scrapes via API silently
+            user_metrics = BaseCollector.info_collector('active_users', 'Active Users', user_records, user_labels, verbose_reporting = False)
             yield user_metrics
-
