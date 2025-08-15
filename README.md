@@ -267,7 +267,8 @@ mktxp edit -i
     max_scrape_duration = 10            # Max duration of individual routers' metrics collection (parallel fetch only)
     total_max_scrape_duration = 30      # Max overall duration of all metrics collection (parallel fetch only)
 
-    compact_default_conf_values = False # Compact mktxp.conf, so only specific values are kept on the individual routers' level    
+    compact_default_conf_values = False       # Compact mktxp.conf, so only specific values are kept on the individual routers' level    
+    prometheus_headers_deduplication = False  # Deduplicate Prometheus HELP / TYPE headers in the metrics output 
 ```    
 <sup>💡</sup> *When changing the default mktxp port for [docker image installs](https://github.com/akpw/mktxp#docker-image-install), you'll need to adjust the `docker run ... -p 49090:49090 ...` command to reflect the new port*
 
