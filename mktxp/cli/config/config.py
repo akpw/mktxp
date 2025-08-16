@@ -284,11 +284,31 @@ class CustomConfig(OSConfig):
     def mktxp_user_dir_path(self):
         return FSHelper.full_path(self._user_dir_path)
 
+# Mock system entry to enable running tests
+mockSystemEntry = ConfigEntry.MKTXPSystemEntry(
+            port=MKTXPConfigKeys.DEFAULT_MKTXP_PORT,
+            listen=f'0.0.0.0:{MKTXPConfigKeys.DEFAULT_MKTXP_PORT}',
+            socket_timeout=MKTXPConfigKeys.DEFAULT_MKTXP_SOCKET_TIMEOUT,
+            initial_delay_on_failure=MKTXPConfigKeys.DEFAULT_MKTXP_INITIAL_DELAY,
+            max_delay_on_failure=MKTXPConfigKeys.DEFAULT_MKTXP_MAX_DELAY,
+            delay_inc_div=MKTXPConfigKeys.DEFAULT_MKTXP_INC_DIV,
+            bandwidth=False,
+            verbose_mode=False,
+            bandwidth_test_interval=MKTXPConfigKeys.DEFAULT_MKTXP_BANDWIDTH_TEST_INTERVAL,
+            minimal_collect_interval=MKTXPConfigKeys.DEFAULT_MKTXP_MIN_COLLECT_INTERVAL,
+            fetch_routers_in_parallel=False,
+            max_worker_threads=MKTXPConfigKeys.DEFAULT_MKTXP_MAX_WORKER_THREADS,
+            max_scrape_duration=MKTXPConfigKeys.DEFAULT_MKTXP_MAX_SCRAPE_DURATION,
+            total_max_scrape_duration=MKTXPConfigKeys.DEFAULT_MKTXP_TOTAL_MAX_SCRAPE_DURATION,
+            compact_default_conf_values=False,
+            prometheus_headers_deduplication=False
+        )
 
 class MKTXPConfigHandler:
     # two-phase init
     def __init__(self):
-        pass
+        # to be re-inisialised properly in the second phase
+        self.system_entry = mockSystemEntry
 
     # two-phase init, to enable custom config
     def __call__(self, os_config = None):

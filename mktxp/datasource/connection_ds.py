@@ -24,12 +24,14 @@ class IPConnectionDatasource:
         if metric_labels is None:
             metric_labels = []        
         try:
-            answer = router_entry.api_connection.router_api().get_binary_resource('/ip/firewall/connection/').call('print', {'count-only': b''})
-            # answer looks and feels like an empty list: [], but it has a special attribute `done_message`
-            done_message = answer.done_message
-            # `done_msg` is a dict with the return code as a key - which is the count that we are looking for
-            cnt = done_message['ret'].decode()
-            records = [{'count': cnt}]
+            res = router_entry.api_connection.router_api().get_resource('/ip/firewall/connection/').call('print', {'count-only': ''})
+            # result processing as described at: https://github.com/socialwifi/RouterOS-api/issues/79#issuecomment-2089744809
+            cnt_str = res.done_message.get('ret')
+            try:
+                count = int(cnt_str)
+            except (ValueError, TypeError):
+                cnt_str = '0'
+            records = [{'count': cnt_str}]            
             return BaseDSProcessor.trimmed_records(router_entry, router_records = records, metric_labels = metric_labels)
         except Exception as exc:
             print(f'Error getting IP connection info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
@@ -44,12 +46,16 @@ class IPConnectionStatsDatasource:
         if metric_labels is None:
             metric_labels = []        
         try:
+            # First, check if there are any connections
+            count_records = IPConnectionDatasource.metric_records(router_entry)
+            if count_records[0].get('count', 0) == '0':
+                return []
+
             connection_records = router_entry.api_connection.router_api().get_resource('/ip/firewall/connection/').call('print', \
                                                                                             {'proplist':'src-address,dst-address,protocol'})
              # calculate number of connections per src-address
             connections_per_src_address = {}
             for connection_record in connection_records:
-                #address, port = (connection_record['src-address'].split(':') + [None])[:2]
                 address = connection_record['src-address'].split(':')[0]
                 destination = f"{connection_record.get('dst-address')}({connection_record.get('protocol')})"
 
