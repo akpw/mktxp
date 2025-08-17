@@ -146,6 +146,7 @@ class MKTXPConfigKeys:
     MKTXP_TOTAL_MAX_SCRAPE_DURATION = 'total_max_scrape_duration'
     MKTXP_COMPACT_CONFIG = 'compact_default_conf_values'
     MKTXP_PROMETHEUS_HEADERS_DEDUPLICATION = 'prometheus_headers_deduplication'
+    MKTXP_PERSISTENT_ROUTER_CONNECTION_POOL = 'persistent_router_connection_pool'
 
     # UnRegistered entries placeholder
     NO_ENTRIES_REGISTERED = 'NoEntriesRegistered'
@@ -190,7 +191,7 @@ class MKTXPConfigKeys:
                         FE_WIRELESS_KEY, FE_WIRELESS_CLIENTS_KEY, FE_CAPSMAN_KEY, FE_CAPSMAN_CLIENTS_KEY, FE_POE_KEY,
                         FE_NETWATCH_KEY, FE_PUBLIC_IP_KEY, FE_USER_KEY, FE_QUEUE_KEY}
 
-    SYSTEM_BOOLEAN_KEYS_YES = set()
+    SYSTEM_BOOLEAN_KEYS_YES = {MKTXP_PERSISTENT_ROUTER_CONNECTION_POOL}
     SYSTEM_BOOLEAN_KEYS_NO = {MKTXP_BANDWIDTH_KEY, MKTXP_VERBOSE_MODE, MKTXP_FETCH_IN_PARALLEL, MKTXP_COMPACT_CONFIG, MKTXP_PROMETHEUS_HEADERS_DEDUPLICATION}
 
     STR_KEYS = (HOST_KEY, USER_KEY, PASSWD_KEY, CREDENTIALS_FILE_KEY, SSL_CA_FILE, FE_REMOTE_DHCP_ENTRY, FE_REMOTE_CAPSMAN_ENTRY)
@@ -224,7 +225,8 @@ class ConfigEntry:
                                                        MKTXPConfigKeys.MKTXP_VERBOSE_MODE, MKTXPConfigKeys.MKTXP_BANDWIDTH_TEST_INTERVAL,
                                                        MKTXPConfigKeys.MKTXP_MIN_COLLECT_INTERVAL, MKTXPConfigKeys.MKTXP_FETCH_IN_PARALLEL,
                                                        MKTXPConfigKeys.MKTXP_MAX_WORKER_THREADS, MKTXPConfigKeys.MKTXP_MAX_SCRAPE_DURATION, 
-                                                       MKTXPConfigKeys.MKTXP_TOTAL_MAX_SCRAPE_DURATION, MKTXPConfigKeys.MKTXP_COMPACT_CONFIG, MKTXPConfigKeys.MKTXP_PROMETHEUS_HEADERS_DEDUPLICATION])
+                                                       MKTXPConfigKeys.MKTXP_TOTAL_MAX_SCRAPE_DURATION, MKTXPConfigKeys.MKTXP_COMPACT_CONFIG, 
+                                                       MKTXPConfigKeys.MKTXP_PROMETHEUS_HEADERS_DEDUPLICATION, MKTXPConfigKeys.MKTXP_PERSISTENT_ROUTER_CONNECTION_POOL]) 
 
 
 class OSConfig(metaclass=ABCMeta):
@@ -301,7 +303,8 @@ mockSystemEntry = ConfigEntry.MKTXPSystemEntry(
             max_scrape_duration=MKTXPConfigKeys.DEFAULT_MKTXP_MAX_SCRAPE_DURATION,
             total_max_scrape_duration=MKTXPConfigKeys.DEFAULT_MKTXP_TOTAL_MAX_SCRAPE_DURATION,
             compact_default_conf_values=False,
-            prometheus_headers_deduplication=False
+            prometheus_headers_deduplication=False,
+            persistent_router_connection_pool=True
         )
 
 class MKTXPConfigHandler:

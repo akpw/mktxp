@@ -43,7 +43,7 @@ class CollectorHandler:
                 start = default_timer()
                 yield from collect_func(router_entry)
                 router_entry.time_spent[collector_ID] += default_timer() - start
-                router_entry.is_done()
+            router_entry.is_done()
 
     def collect_router_entry_async(self, router_entry, scrape_timeout_event, total_scrape_timeout_event):
         results = []
@@ -59,9 +59,8 @@ class CollectorHandler:
             start = default_timer()
             result = list(collect_func(router_entry))
             results += result
-            router_entry.time_spent[collector_ID] += default_timer() - start
-            router_entry.is_done()
-
+            router_entry.time_spent[collector_ID] += default_timer() - start        
+        router_entry.is_done()
         return results
 
 

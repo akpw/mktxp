@@ -107,6 +107,11 @@ class RouterAPIConnection:
             self._set_connect_state(success = False, connect_time = connect_time, exc = exc)
             raise RouterAPIConnectionError(f'Failed attemp to establish network connection to router: {self.router_name}@{self.config_entry.hostname}')
 
+    def disconnect(self):
+        if self.is_connected():
+            self.connection.disconnect()
+            self.api = None
+
     @check_connected
     def router_api(self):
         return self.api

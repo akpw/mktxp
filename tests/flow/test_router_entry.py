@@ -1,0 +1,86 @@
+import pytest
+from unittest.mock import MagicMock, patch
+from mktxp.flow.router_entry import RouterEntry
+from mktxp.flow.router_connection import RouterAPIConnection
+
+@pytest.fixture
+def mock_api_connection():
+    """Fixture to create a mock RouterAPIConnection"""
+    connection = MagicMock(spec=RouterAPIConnection)
+    connection.is_connected.return_value = False
+    return connection
+
+@pytest.fixture(params=[True, False])
+def router_entry(request, tmpdir, mock_api_connection):
+    """Fixture to create a RouterEntry with different persistence setting."""
+    
+    persistent = request.param
+    
+    # Create temporary config files
+    mktxp_conf = tmpdir.join("mktxp.conf")
+    mktxp_conf.write("""
+[test_router]
+hostname = localhost
+""")
+    _mktxp_conf = tmpdir.join("_mktxp.conf")
+    _mktxp_conf.write(f"""
+[MKTXP]
+persistent_router_connection_pool = {persistent}
+""")
+    
+    with patch('mktxp.flow.router_entry.RouterAPIConnection', return_value=mock_api_connection):
+        from mktxp.cli.config.config import config_handler, CustomConfig
+        config_handler(os_config=CustomConfig(str(tmpdir)))
+        
+        entry = RouterEntry('test_router')
+        entry.persistent = persistent  # attaching for easy access in the test
+        return entry
+
+@pytest.mark.parametrize(
+    "initial_connected_state, connect_succeeds, expected_ready_state, expect_connect_call",
+    [
+        (True, None, True, False),
+        (False, True, True, True),
+        (False, False, False, True),
+    ]
+)
+def test_is_ready_logic(initial_connected_state, connect_succeeds, expected_ready_state, expect_connect_call, router_entry, mock_api_connection):
+    # Arrange
+    mock_api_connection.is_connected.return_value = initial_connected_state
+    if connect_succeeds is not None:
+        def connect_side_effect():
+            mock_api_connection.is_connected.return_value = connect_succeeds
+        mock_api_connection.connect.side_effect = connect_side_effect
+
+    # Act
+    ready = router_entry.is_ready()
+
+    # Assert
+    assert ready is expected_ready_state
+    if expect_connect_call:
+        mock_api_connection.connect.assert_called_once()
+    else:
+        mock_api_connection.connect.assert_not_called()
+
+def test_is_done_disconnects(router_entry, mock_api_connection):
+    # Arrange
+    # Setup child entries to test their disconnection as well
+    dhcp_connection = MagicMock(spec=RouterAPIConnection)
+    capsman_connection = MagicMock(spec=RouterAPIConnection)
+    router_entry.dhcp_entry = MagicMock()
+    router_entry.dhcp_entry.api_connection = dhcp_connection
+    router_entry.capsman_entry = MagicMock()
+    router_entry.capsman_entry.api_connection = capsman_connection
+
+    # Act
+    router_entry.is_done()
+
+    # Assert
+    if not router_entry.persistent:
+        mock_api_connection.disconnect.assert_called_once()
+        dhcp_connection.disconnect.assert_called_once()
+        capsman_connection.disconnect.assert_called_once()
+    else:
+        mock_api_connection.disconnect.assert_not_called()
+        dhcp_connection.disconnect.assert_not_called()
+        capsman_connection.disconnect.assert_not_called()

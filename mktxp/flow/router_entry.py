@@ -177,7 +177,7 @@ class RouterEntry:
                 print (f'{exc}')
 
     def is_ready(self):           
-        self.is_done() #flush caches, just in case
+        # self.is_done() #flush caches, just in case
         is_ready = False
 
         if self.connection_status() in (RouterEntryConnectionState.NOT_CONNECTED, RouterEntryConnectionState.PARTIALLY_CONNECTED):
@@ -188,6 +188,13 @@ class RouterEntry:
         return is_ready
 
     def is_done(self):
+        if not config_handler.system_entry.persistent_router_connection_pool:
+            self.api_connection.disconnect()
+            if self._dhcp_entry:
+                self._dhcp_entry.api_connection.disconnect()
+            if self._capsman_entry:
+                self._capsman_entry.api_connection.disconnect()
+
         self._dhcp_records = {}
         self._wireless_type = RouterEntryWirelessType.NONE
 

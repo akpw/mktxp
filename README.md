@@ -267,6 +267,7 @@ mktxp edit -i
     max_scrape_duration = 10            # Max duration of individual routers' metrics collection (parallel fetch only)
     total_max_scrape_duration = 30      # Max overall duration of all metrics collection (parallel fetch only)
 
+    persistent_router_connection_pool = True  # Use a persistent router connections pool between scrapes
     compact_default_conf_values = False       # Compact mktxp.conf, so only specific values are kept on the individual routers' level    
     prometheus_headers_deduplication = False  # Deduplicate Prometheus HELP / TYPE headers in the metrics output 
 ```    
@@ -484,5 +485,5 @@ mktxp is running as pid 36704
 
 
 **Running Tests**
-- TDB
-- Run via: `$ python setup.py test`
+- To run the test suite, first install the development dependencies: `pip install -e .[test]`
+- Then run the tests using `tox`: `$ tox`

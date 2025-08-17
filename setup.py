@@ -56,6 +56,13 @@ setup(
 
     test_suite = 'tests',
 
+    extras_require={
+        'test': [
+            'pytest',
+            'pytest-mock',
+        ],
+    },
+    
     entry_points={'console_scripts': [
         'mktxp = mktxp.cli.dispatch:main',
     ]},
