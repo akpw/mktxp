@@ -28,7 +28,14 @@ import yaml
 
 MIKROTIK_ENCODING = 'latin-1'
 import routeros_api.api_structure
-routeros_api.api_structure.StringField.get_python_value = lambda _, bytes:  bytes.decode(MIKROTIK_ENCODING) 
+
+def _decode_bytes(bytes_to_decode):
+    try:
+        return bytes_to_decode.decode('utf-8')
+    except UnicodeDecodeError:
+        return bytes_to_decode.decode(MIKROTIK_ENCODING)
+
+routeros_api.api_structure.StringField.get_python_value = lambda _, bytes:  _decode_bytes(bytes)
 routeros_api.api_structure.default_structure = collections.defaultdict(routeros_api.api_structure.StringField)
 
 from routeros_api import RouterOsApiPool
