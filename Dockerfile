@@ -1,5 +1,9 @@
 FROM python:3-alpine
-LABEL org.opencontainers.image.source github.com/akpw/mktxp
+
+LABEL org.opencontainers.image.source=https://github.com/akpw/mktxp
+LABEL org.opencontainers.image.description="MKTXP is a Prometheus Exporter for Mikrotik RouterOS devices"
+LABEL org.opencontainers.image.licenses=GPLv2+
+
 RUN addgroup -S mktxp && adduser -S mktxp -G mktxp
 RUN apk add nano
 
