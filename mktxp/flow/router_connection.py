@@ -111,6 +111,8 @@ class RouterAPIConnection:
             return
         try:
             print(f'Connecting to router {self.router_name}@{self.config_entry.hostname}')
+            if self.config_entry.use_ssl and self.config_entry.no_ssl_certificate:
+                print(f'Warning: API_SSL connect without router SSL certificate is insecure and should not be used in production environments!')
             self.connection.plaintext_login = self.config_entry.plaintext_login
             self.api = self.connection.get_api()
             self._set_connect_state(success = True, connect_time = connect_time)
