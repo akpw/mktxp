@@ -62,12 +62,18 @@ class RouterAPIConnection:
         
         ctx = None
         if self.config_entry.use_ssl:
-            ctx = ssl.create_default_context(cafile=self.config_entry.ssl_ca_file if self.config_entry.ssl_ca_file else None)
+            ctx = ssl.create_default_context(
+                cafile=self.config_entry.ssl_ca_file if self.config_entry.ssl_ca_file else None
+            )
             if self.config_entry.no_ssl_certificate:
                 ctx.check_hostname = False
+                ctx.set_ciphers('ADH:@SECLEVEL=0')
+            elif not self.config_entry.ssl_certificate_verify:
+                ctx.check_hostname = False
                 ctx.verify_mode = ssl.CERT_NONE
-            elif self.config_entry.ssl_ca_file:
-                ctx.load_verify_locations(self.config_entry.ssl_ca_file)
+            else:
+                ctx.check_hostname = self.config_entry.ssl_check_hostname
+                ctx.verify_mode = ssl.CERT_REQUIRED
 
         username = self.config_entry.username
         password = self.config_entry.password
@@ -89,8 +95,6 @@ class RouterAPIConnection:
                 password = password,
                 port = self.config_entry.port,
                 plaintext_login = True,
-                use_ssl = self.config_entry.use_ssl,
-                ssl_verify = self.config_entry.ssl_certificate_verify,
                 ssl_context = ctx)
         
         self.connection.socket_timeout = config_handler.system_entry.socket_timeout
