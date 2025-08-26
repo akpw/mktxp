@@ -203,7 +203,9 @@ class MKTXPConfigKeys:
 
     # MKTXP configs entry names
     DEFAULT_ENTRY_KEY = 'default'
+    MKTXP_LATEST_DEFAULT_ENTRY_KEY = 'new_default_parameters'
     MKTXP_CONFIG_ENTRY_NAME = 'MKTXP'
+    MKTXP_LATEST_SYSTEM_ENTRY_KEY = 'new_system_parameters'
 
 
 class ConfigEntry:
@@ -385,37 +387,54 @@ class MKTXPConfigHandler:
     def _system_entry_reader(self):
         system_entry_reader = {}
         entry_name = MKTXPConfigKeys.MKTXP_CONFIG_ENTRY_NAME
-        new_keys = []
+        new_keys, new_keys_values = [], {}
+
+        if not self._config.get(MKTXPConfigKeys.MKTXP_CONFIG_ENTRY_NAME):
+            self._config[MKTXPConfigKeys.MKTXP_CONFIG_ENTRY_NAME] = {}
+        if not self._config.get(MKTXPConfigKeys.MKTXP_LATEST_SYSTEM_ENTRY_KEY):
+            self._config[MKTXPConfigKeys.MKTXP_LATEST_SYSTEM_ENTRY_KEY] = {}
 
         for key in MKTXPConfigKeys.MKTXP_INT_KEYS:
             if self._config[entry_name].get(key):
                 system_entry_reader[key] = self._config[entry_name].as_int(key)
+            elif self._config[MKTXPConfigKeys.MKTXP_LATEST_SYSTEM_ENTRY_KEY].get(key):
+                system_entry_reader[key] = self._config[MKTXPConfigKeys.MKTXP_LATEST_SYSTEM_ENTRY_KEY].as_int(key)
             else:
                 system_entry_reader[key] = self._default_value_for_key(key)
                 if key not in (MKTXPConfigKeys.PORT_KEY):  # Port key has been depricated
                     new_keys.append(key) # read from disk next time
+                    new_keys_values[key] = system_entry_reader[key]
 
         for key in MKTXPConfigKeys.SYSTEM_BOOLEAN_KEYS_NO.union(MKTXPConfigKeys.SYSTEM_BOOLEAN_KEYS_YES):
             if self._config[entry_name].get(key) is not None:
                 system_entry_reader[key] = self._config[entry_name].as_bool(key)
+            elif self._config[MKTXPConfigKeys.MKTXP_LATEST_SYSTEM_ENTRY_KEY].get(key) is not None:
+                system_entry_reader[key] = self._config[MKTXPConfigKeys.MKTXP_LATEST_SYSTEM_ENTRY_KEY].as_bool(key)
             else:
                 system_entry_reader[key] = True if key in MKTXPConfigKeys.SYSTEM_BOOLEAN_KEYS_YES else False
                 new_keys.append(key) # read from disk next time
+                new_keys_values[key] = system_entry_reader[key]
 
-        # listen 
+        # listen
         if self._config[entry_name].get(MKTXPConfigKeys.LISTEN_KEY):
             system_entry_reader[MKTXPConfigKeys.LISTEN_KEY] = self._config[entry_name].get(MKTXPConfigKeys.LISTEN_KEY)
+        elif self._config[MKTXPConfigKeys.MKTXP_LATEST_SYSTEM_ENTRY_KEY].get(MKTXPConfigKeys.LISTEN_KEY):
+            system_entry_reader[MKTXPConfigKeys.LISTEN_KEY] = self._config[MKTXPConfigKeys.MKTXP_LATEST_SYSTEM_ENTRY_KEY].get(MKTXPConfigKeys.LISTEN_KEY)
         else:
-            system_entry_reader[MKTXPConfigKeys.LISTEN_KEY] = f'0.0.0.0:{system_entry_reader[MKTXPConfigKeys.PORT_KEY]}'
+            system_entry_reader[MKTXPConfigKeys.LISTEN_KEY] = f'0.0.0.0:{system_entry_reader.get(MKTXPConfigKeys.PORT_KEY, MKTXPConfigKeys.DEFAULT_MKTXP_PORT)}'
             new_keys.append(MKTXPConfigKeys.LISTEN_KEY) # read from disk next time
+            new_keys_values[MKTXPConfigKeys.LISTEN_KEY] = system_entry_reader[MKTXPConfigKeys.LISTEN_KEY]
 
         if new_keys:
-            self._config[entry_name] = system_entry_reader
+            self._config[MKTXPConfigKeys.MKTXP_LATEST_SYSTEM_ENTRY_KEY] = new_keys_values
+            self._config.comments[MKTXPConfigKeys.MKTXP_LATEST_SYSTEM_ENTRY_KEY] = \
+                ['', '# The section below contains the latest system parameters introduced by MKTXP',
+                 f'# For organizational purposes, you can move these parameters to the [{MKTXPConfigKeys.MKTXP_CONFIG_ENTRY_NAME}] section']
             try:
                 self._config[entry_name].pop(MKTXPConfigKeys.PORT_KEY, None) # Port key has been depricated
                 self._config.write()
                 if self._config[entry_name].as_bool(MKTXPConfigKeys.MKTXP_VERBOSE_MODE):
-                    print(f'Updated system entry {entry_name} with new system keys {new_keys}')    
+                    print(f'Updated system entry {entry_name} with new system keys {new_keys}')
             except Exception as exc:
                 print(f'Error updating system entry {entry_name} with new system keys {new_keys}: {exc}')
                 print('Please update _mktxp.conf to its latest version manually')
@@ -479,46 +498,63 @@ class MKTXPConfigHandler:
 
     def _default_config_entry_reader(self):
         default_config_entry_reader = {}
-        new_keys = []
+        new_keys, new_keys_values = [], {}
 
         if not self.config.get(MKTXPConfigKeys.DEFAULT_ENTRY_KEY):
             self.config[MKTXPConfigKeys.DEFAULT_ENTRY_KEY] = {}
+        if not self.config.get(MKTXPConfigKeys.MKTXP_LATEST_DEFAULT_ENTRY_KEY):
+            self.config[MKTXPConfigKeys.MKTXP_LATEST_DEFAULT_ENTRY_KEY] = {}
 
         for key in MKTXPConfigKeys.BOOLEAN_KEYS_NO.union(MKTXPConfigKeys.BOOLEAN_KEYS_YES):
             if self.config[MKTXPConfigKeys.DEFAULT_ENTRY_KEY].get(key) is not None:
                 default_config_entry_reader[key] = self.config[MKTXPConfigKeys.DEFAULT_ENTRY_KEY].as_bool(key)
+            elif self.config[MKTXPConfigKeys.MKTXP_LATEST_DEFAULT_ENTRY_KEY].get(key) is not None:
+                default_config_entry_reader[key] = self.config[MKTXPConfigKeys.MKTXP_LATEST_DEFAULT_ENTRY_KEY].as_bool(key)
             else:
                 default_config_entry_reader[key] = True if key in MKTXPConfigKeys.BOOLEAN_KEYS_YES else False
                 new_keys.append(key) # read from disk next time
+                new_keys_values[key] = default_config_entry_reader[key]
 
         for key in MKTXPConfigKeys.STR_KEYS:
             if self.config[MKTXPConfigKeys.DEFAULT_ENTRY_KEY].get(key) is not None:
                 default_config_entry_reader[key] = self.config[MKTXPConfigKeys.DEFAULT_ENTRY_KEY].get(key)
+            elif self.config[MKTXPConfigKeys.MKTXP_LATEST_DEFAULT_ENTRY_KEY].get(key) is not None:
+                default_config_entry_reader[key] = self.config[MKTXPConfigKeys.MKTXP_LATEST_DEFAULT_ENTRY_KEY].get(key)
             else:
                 default_config_entry_reader[key] = self._default_value_for_key(key)
                 new_keys.append(key) # read from disk next time
+                new_keys_values[key] = default_config_entry_reader[key]
 
         for key in MKTXPConfigKeys.INT_KEYS:
             if self.config[MKTXPConfigKeys.DEFAULT_ENTRY_KEY].get(key):
                 default_config_entry_reader[key] = self.config[MKTXPConfigKeys.DEFAULT_ENTRY_KEY].as_int(key)
+            elif self.config[MKTXPConfigKeys.MKTXP_LATEST_DEFAULT_ENTRY_KEY].get(key):
+                default_config_entry_reader[key] = self.config[MKTXPConfigKeys.MKTXP_LATEST_DEFAULT_ENTRY_KEY].as_int(key)
             else:
                 default_config_entry_reader[key] = self._default_value_for_key(key)
                 new_keys.append(key) # read from disk next time
+                new_keys_values[key] = default_config_entry_reader[key]
 
         # port
         if self.config[MKTXPConfigKeys.DEFAULT_ENTRY_KEY].get(MKTXPConfigKeys.PORT_KEY):
             default_config_entry_reader[MKTXPConfigKeys.PORT_KEY] = self.config[MKTXPConfigKeys.DEFAULT_ENTRY_KEY].as_int(MKTXPConfigKeys.PORT_KEY)
+        elif self.config[MKTXPConfigKeys.MKTXP_LATEST_DEFAULT_ENTRY_KEY].get(MKTXPConfigKeys.PORT_KEY):
+            default_config_entry_reader[MKTXPConfigKeys.PORT_KEY] = self.config[MKTXPConfigKeys.MKTXP_LATEST_DEFAULT_ENTRY_KEY].as_int(MKTXPConfigKeys.PORT_KEY)
         else:
             default_config_entry_reader[MKTXPConfigKeys.PORT_KEY] = self._default_value_for_key(
                 MKTXPConfigKeys.SSL_KEY, default_config_entry_reader[MKTXPConfigKeys.SSL_KEY])
             new_keys.append(MKTXPConfigKeys.PORT_KEY) # read from disk next time
-        
+            new_keys_values[MKTXPConfigKeys.PORT_KEY] = default_config_entry_reader[MKTXPConfigKeys.PORT_KEY]
+
         if new_keys:
-            self.config[MKTXPConfigKeys.DEFAULT_ENTRY_KEY] = default_config_entry_reader
+            self.config[MKTXPConfigKeys.MKTXP_LATEST_DEFAULT_ENTRY_KEY] = new_keys_values
+            self.config.comments[MKTXPConfigKeys.MKTXP_LATEST_DEFAULT_ENTRY_KEY] = \
+                ['', '# The section below contains the latest default parameters introduced by MKTXP',
+                 f'# For organizational purposes, you can move these parameters to the [{MKTXPConfigKeys.DEFAULT_ENTRY_KEY}] section']
             try:
                 self.config.write()
                 if self._config[MKTXPConfigKeys.MKTXP_CONFIG_ENTRY_NAME].as_bool(MKTXPConfigKeys.MKTXP_VERBOSE_MODE):
-                    print(f'Updated default router entry with new feature keys {new_keys}')                    
+                    print(f'Updated default router entry with new feature keys {new_keys}')
             except Exception as exc:
                 print(f'Error updating default router entry with new feature keys {new_keys}: {exc}')
                 print('Please update mktxp.conf to its latest version manually')

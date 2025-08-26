@@ -39,6 +39,8 @@ hostname = localhost
     _mktxp_conf.write(f"""
 [MKTXP]
 persistent_router_connection_pool = {persistent}
+compact_default_conf_values = False
+verbose_mode = False
 """)
     
     with patch('mktxp.flow.router_entry.RouterAPIConnection', return_value=mock_api_connection):
