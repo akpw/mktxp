@@ -348,7 +348,8 @@ class MKTXPConfigHandler:
     def registered_entries(self):
         ''' All MKTXP registered entries
         '''
-        return (entry_name for entry_name in self.config.keys() if entry_name != MKTXPConfigKeys.DEFAULT_ENTRY_KEY )
+        return (entry_name for entry_name in self.config.keys() if entry_name not in
+                (MKTXPConfigKeys.DEFAULT_ENTRY_KEY, MKTXPConfigKeys.MKTXP_LATEST_DEFAULT_ENTRY_KEY))
 
     def registered_entry(self, entry_name):
         ''' A specific MKTXP registered entry by name
