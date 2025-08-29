@@ -132,6 +132,7 @@ The default configuration file comes with a sample configuration, making it easy
     remote_capsman_entry = None     # An MKTXP entry to provide for remote capsman info 
 
     use_comments_over_names = True  # when available, forces using comments over the interfaces names
+    netwatch_name_label = "default" # define behaviour of name label in netwatch metrics: default/id/host/name/comment/name_or_host/comment_or_name_or_host
     check_for_updates = False       # check for available ROS updates
 ```
 
@@ -385,6 +386,22 @@ You can configure this behaviour via the following [system option](https://githu
 listen = '0.0.0.0:49090 [::1]:49090'
 ```
 A wildcard for the hostname is supported as well, and binding to both IPv4/IPv6 as available.
+
+### Behaviour of `name` label in Netwatch metrics (`netwatch_name_label`)
+
+Before [ROS 7.14](https://mikrotik.com/download/changelogs/#c-stable-v7_14), Netwatch didn't offer separate field for setting task name. Therefore, `mktxp_netwatch_` exported `name` label as either `host` or `host`+`comment` when `use_comments_over_names` was enabled.
+
+To retain backwards compatibility, `name` label can be controlled using `netwatch_name_label`:
+
+- `default`: keeps previous behaviour
+- `host`: use `host` field, irrespective of `use_comments_over_names` setting, allowing it to be used in other resources
+- `id`: use `id` field (e.g. `*1`)
+- `name`: use `name` field if it's set, otherwise fallback to *default*
+- `comment`: use `comment` field (without any changes) if it's set, otherwise fallback to *default*
+- `comment_or_name_or_host`: prefer `comment`, falling back to `name` and then to `host` (`host` is mandatory)
+- `name_or_host`: same as `comment_or_name_or_host` except first `comment` step
+
+Keep in mind that the only field guaranteed to be unique is `id`. If you plan to use multiple tasks of the same type targetting the same host (e.g. multiple TCP ports on same IP), avoid setting `netwatch_name_label` to mode which could set `name` label to `host`.
 
 ## Setting up MKTXP to run as a Linux Service
 If you've installed MKTXP on a Linux system, you can run it with system boot via adding a service. \

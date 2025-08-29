@@ -28,11 +28,40 @@ class NetwatchMetricsDataSource:
             if 'name' in metric_labels:
                 for netwatch_record in netwatch_records:
                     comment = netwatch_record.get('comment')
-                    host = netwatch_record.get('host')        
-                    if comment:
-                        netwatch_record['name'] = f'{host} ({comment[0:20]})' if not router_entry.config_entry.use_comments_over_names else comment
+                    host = netwatch_record.get('host')
+                    name = netwatch_record.get('name')
+                    if router_entry.config_entry.netwatch_name_label == 'host':
+                      # force host, allowing use_comments_over_names=True to be used as intended
+                      netwatch_record['name'] = host
+                    elif router_entry.config_entry.netwatch_name_label == 'id':
+                      # force ID
+                      netwatch_record['name'] = netwatch_record.get('id')
+                    elif router_entry.config_entry.netwatch_name_label == 'name' and name:
+                      # if available, use name field as introduced in ROS v7.14, which was not available before
+                      pass # use name as is
+                    elif router_entry.config_entry.netwatch_name_label == 'comment' and comment:
+                      # if available, set pure comment value
+                      netwatch_record['name'] = comment
+                    elif router_entry.config_entry.netwatch_name_label == 'name_or_host':
+                      # prefer name, if not available use host
+                      if name:
+                          netwatch_record['name'] = name
+                      else:
+                          netwatch_record['name'] = host
+                    elif router_entry.config_entry.netwatch_name_label == 'comment_or_name_or_host':
+                      # prefer comment, if not available, prefer name, otherwise use host
+                      if comment:
+                          netwatch_record['name'] = comment
+                      elif name:
+                          netwatch_record['name'] = name
+                      else:
+                          netwatch_record['name'] = host
                     else:
-                        netwatch_record['name'] = host
+                      # original behaviour
+                      if comment:
+                          netwatch_record['name'] = f'{host} ({comment[0:20]})' if not router_entry.config_entry.use_comments_over_names else comment
+                      else:
+                          netwatch_record['name'] = host
 
             return BaseDSProcessor.trimmed_records(router_entry, router_records = netwatch_records, translation_table = translation_table, metric_labels = metric_labels)
         except Exception as exc:
