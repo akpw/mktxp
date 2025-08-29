@@ -133,6 +133,7 @@ The default configuration file comes with a sample configuration, making it easy
 
     use_comments_over_names = True  # when available, forces using comments over the interfaces names
     netwatch_name_label = "default" # define behaviour of name label in netwatch metrics: default/id/host/name/comment/name_or_host/comment_or_name_or_host
+    netwatch_target_details = False # include target details (IP address, TCP port, DNS record etc.) in netwatch metrics
     check_for_updates = False       # check for available ROS updates
 ```
 
