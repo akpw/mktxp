@@ -21,6 +21,7 @@ from mktxp.collector.interface_collector import InterfaceCollector
 from mktxp.collector.health_collector import HealthCollector
 from mktxp.collector.identity_collector import IdentityCollector
 from mktxp.collector.ipsec_collector import IPSecCollector
+from mktxp.collector.address_list_collector import AddressListCollector
 from mktxp.collector.public_ip_collector import PublicIPAddressCollector
 from mktxp.collector.neighbor_collector import NeighborCollector
 from mktxp.collector.monitor_collector import MonitorCollector
@@ -71,6 +72,7 @@ class CollectorRegistry:
         self.register(CollectorKeys.DHCP_COLLECTOR, DHCPCollector.collect)
         self.register(CollectorKeys.IP_CONNECTION_COLLECTOR, IPConnectionCollector.collect)
         self.register(CollectorKeys.IPSEC_COLLECTOR, IPSecCollector.collect)
+        self.register(CollectorKeys.ADDRESS_LIST_COLLECTOR, AddressListCollector.collect)
         self.register(CollectorKeys.POOL_COLLECTOR, PoolCollector.collect)
         self.register(CollectorKeys.INTERFACE_COLLECTOR, InterfaceCollector.collect)
 

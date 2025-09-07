@@ -54,6 +54,7 @@ class CollectorKeys:
     GRE_COLLECTOR = 'GRECollector'
     IPIP_COLLECTOR = 'IPIPCollector'
     IPSEC_COLLECTOR = 'IPSecCollector'
+    ADDRESS_LIST_COLLECTOR = 'AddressListCollector'
     LTE_COLLECTOR = 'LTECollector'
     SWITCH_PORT_COLLECTOR = 'SwitchPortCollector'
     MKTXP_COLLECTOR = 'MKTXPCollector'
@@ -91,12 +92,14 @@ class MKTXPConfigKeys:
     FE_ROUTE_KEY = 'route'
     FE_DHCP_POOL_KEY = 'pool'
     FE_FIREWALL_KEY = 'firewall'
+    FE_ADDRESS_LIST_KEY = 'address_list'
     FE_NEIGHBOR_KEY = 'neighbor'
     FE_DNS_KEY = 'dns'
 
     FE_IPV6_ROUTE_KEY = 'ipv6_route'
     FE_IPV6_DHCP_POOL_KEY = 'ipv6_pool'
     FE_IPV6_FIREWALL_KEY = 'ipv6_firewall'
+    FE_IPV6_ADDRESS_LIST_KEY = 'ipv6_address_list'
     FE_IPV6_NEIGHBOR_KEY = 'ipv6_neighbor'
 
     FE_MONITOR_KEY = 'monitor'
@@ -170,6 +173,8 @@ class MKTXPConfigKeys:
     DEFAULT_API_SSL_PORT = 8729
     DEFAULT_FE_REMOTE_DHCP_ENTRY = 'None'
     DEFAULT_FE_REMOTE_CAPSMAN_ENTRY = 'None'
+    DEFAULT_FE_ADDRESS_LIST_KEY = 'None'
+    DEFAULT_FE_IPV6_ADDRESS_LIST_KEY = 'None'
     DEFAULT_MKTXP_PORT = 49090
     DEFAULT_MKTXP_SOCKET_TIMEOUT = 2
     DEFAULT_MKTXP_INITIAL_DELAY = 120
@@ -195,7 +200,7 @@ class MKTXPConfigKeys:
     SYSTEM_BOOLEAN_KEYS_YES = {MKTXP_PERSISTENT_ROUTER_CONNECTION_POOL}
     SYSTEM_BOOLEAN_KEYS_NO = {MKTXP_BANDWIDTH_KEY, MKTXP_VERBOSE_MODE, MKTXP_FETCH_IN_PARALLEL, MKTXP_COMPACT_CONFIG, MKTXP_PROMETHEUS_HEADERS_DEDUPLICATION}
 
-    STR_KEYS = (HOST_KEY, USER_KEY, PASSWD_KEY, CREDENTIALS_FILE_KEY, SSL_CA_FILE, FE_REMOTE_DHCP_ENTRY, FE_REMOTE_CAPSMAN_ENTRY)
+    STR_KEYS = (HOST_KEY, USER_KEY, PASSWD_KEY, CREDENTIALS_FILE_KEY, SSL_CA_FILE, FE_REMOTE_DHCP_ENTRY, FE_REMOTE_CAPSMAN_ENTRY, FE_ADDRESS_LIST_KEY, FE_IPV6_ADDRESS_LIST_KEY)
     INT_KEYS =  ()
     MKTXP_INT_KEYS = (PORT_KEY, MKTXP_SOCKET_TIMEOUT, MKTXP_INITIAL_DELAY, MKTXP_MAX_DELAY,
                       MKTXP_INC_DIV, MKTXP_BANDWIDTH_TEST_INTERVAL, MKTXP_MIN_COLLECT_INTERVAL,
@@ -216,8 +221,8 @@ class ConfigEntry:
                                                        MKTXPConfigKeys.FE_MONITOR_KEY, MKTXPConfigKeys.FE_WIRELESS_KEY, MKTXPConfigKeys.FE_WIRELESS_CLIENTS_KEY,
                                                        MKTXPConfigKeys.FE_IP_CONNECTIONS_KEY, MKTXPConfigKeys.FE_CONNECTION_STATS_KEY, MKTXPConfigKeys.FE_CAPSMAN_KEY, MKTXPConfigKeys.FE_CAPSMAN_CLIENTS_KEY, MKTXPConfigKeys.FE_POE_KEY, 
                                                        MKTXPConfigKeys.FE_NETWATCH_KEY, MKTXPConfigKeys.MKTXP_USE_COMMENTS_OVER_NAMES, MKTXPConfigKeys.FE_PUBLIC_IP_KEY,
-                                                       MKTXPConfigKeys.FE_ROUTE_KEY, MKTXPConfigKeys.FE_DHCP_POOL_KEY, MKTXPConfigKeys.FE_FIREWALL_KEY, MKTXPConfigKeys.FE_NEIGHBOR_KEY, MKTXPConfigKeys.FE_DNS_KEY,
-                                                       MKTXPConfigKeys.FE_IPV6_ROUTE_KEY, MKTXPConfigKeys.FE_IPV6_DHCP_POOL_KEY, MKTXPConfigKeys.FE_IPV6_FIREWALL_KEY, MKTXPConfigKeys.FE_IPV6_NEIGHBOR_KEY,                                               
+                                                       MKTXPConfigKeys.FE_ROUTE_KEY, MKTXPConfigKeys.FE_DHCP_POOL_KEY, MKTXPConfigKeys.FE_FIREWALL_KEY, MKTXPConfigKeys.FE_ADDRESS_LIST_KEY, MKTXPConfigKeys.FE_NEIGHBOR_KEY, MKTXPConfigKeys.FE_DNS_KEY,
+                                                       MKTXPConfigKeys.FE_IPV6_ROUTE_KEY, MKTXPConfigKeys.FE_IPV6_DHCP_POOL_KEY, MKTXPConfigKeys.FE_IPV6_FIREWALL_KEY, MKTXPConfigKeys.FE_IPV6_ADDRESS_LIST_KEY, MKTXPConfigKeys.FE_IPV6_NEIGHBOR_KEY,                                               
                                                        MKTXPConfigKeys.FE_USER_KEY, MKTXPConfigKeys.FE_QUEUE_KEY, MKTXPConfigKeys.FE_REMOTE_DHCP_ENTRY, MKTXPConfigKeys.FE_REMOTE_CAPSMAN_ENTRY, MKTXPConfigKeys.FE_CHECK_FOR_UPDATES, MKTXPConfigKeys.FE_BFD_KEY, MKTXPConfigKeys.FE_BGP_KEY,
                                                        MKTXPConfigKeys.FE_KID_CONTROL_DEVICE, MKTXPConfigKeys.FE_KID_CONTROL_DYNAMIC, MKTXPConfigKeys.FE_EOIP_KEY, MKTXPConfigKeys.FE_GRE_KEY, MKTXPConfigKeys.FE_IPIP_KEY, MKTXPConfigKeys.FE_LTE_KEY, MKTXPConfigKeys.FE_IPSEC_KEY, MKTXPConfigKeys.FE_SWITCH_PORT_KEY,
                                                        MKTXPConfigKeys.FE_ROUTING_STATS_KEY, MKTXPConfigKeys.FE_CERTIFICATE_KEY, MKTXPConfigKeys.FE_CONTAINER_KEY
@@ -372,10 +377,10 @@ class MKTXPConfigHandler:
     def _read_from_disk(self):
         ''' (Force-)Read conf data from disk
         '''
-        self.config = ConfigObj(self.usr_conf_data_path, indent_type = '    ')
+        self.config = ConfigObj(self.usr_conf_data_path, indent_type = '    ', encoding='utf-8')
         self.config.preserve_comments = True
 
-        self._config = ConfigObj(self.mktxp_conf_path, indent_type = '    ')
+        self._config = ConfigObj(self.mktxp_conf_path, indent_type = '    ', encoding='utf-8')
         self._config.preserve_comments = True
 
     def _create_os_path(self, os_path, resource_path):
@@ -573,6 +578,8 @@ class MKTXPConfigHandler:
             MKTXPConfigKeys.SSL_CA_FILE: lambda _: MKTXPConfigKeys.DEFAULT_SSL_CA_FILE,
             MKTXPConfigKeys.FE_REMOTE_DHCP_ENTRY:  lambda _: MKTXPConfigKeys.DEFAULT_FE_REMOTE_DHCP_ENTRY,
             MKTXPConfigKeys.FE_REMOTE_CAPSMAN_ENTRY:  lambda _: MKTXPConfigKeys.DEFAULT_FE_REMOTE_CAPSMAN_ENTRY,
+            MKTXPConfigKeys.FE_ADDRESS_LIST_KEY: lambda _: MKTXPConfigKeys.DEFAULT_FE_ADDRESS_LIST_KEY,
+            MKTXPConfigKeys.FE_IPV6_ADDRESS_LIST_KEY: lambda _: MKTXPConfigKeys.DEFAULT_FE_IPV6_ADDRESS_LIST_KEY,
             MKTXPConfigKeys.MKTXP_SOCKET_TIMEOUT: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_SOCKET_TIMEOUT,
             MKTXPConfigKeys.MKTXP_INITIAL_DELAY: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_INITIAL_DELAY,
             MKTXPConfigKeys.MKTXP_MAX_DELAY: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_MAX_DELAY,

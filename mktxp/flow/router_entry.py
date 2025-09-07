@@ -61,6 +61,7 @@ class RouterEntry:
                             CollectorKeys.POOL_COLLECTOR: 0,
                             CollectorKeys.IP_CONNECTION_COLLECTOR: 0,
                             CollectorKeys.IPSEC_COLLECTOR: 0,
+                            CollectorKeys.ADDRESS_LIST_COLLECTOR: 0,
                             CollectorKeys.INTERFACE_COLLECTOR: 0,
                             CollectorKeys.FIREWALL_COLLECTOR: 0,
                             CollectorKeys.MONITOR_COLLECTOR: 0,
