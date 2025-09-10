@@ -35,3 +35,36 @@ class AddressListMetricsDataSource:
         except Exception as exc:
             print(f'Error getting Address List info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None
+
+    @staticmethod
+    def count_metric_records(router_entry, address_lists, ip_version):
+        api_path = f'/{ip_version}/firewall/address-list'
+        queries = {
+            'total': {},
+            'dynamic': {'dynamic': 'yes'},
+            'static': {'dynamic': 'no'}
+        }
+        
+        # Count entries in all lists
+        all_lists_counts = {}
+        for count_type, query in queries.items():
+            count = BaseDSProcessor.count_records(router_entry, api_path=api_path, api_query=query)
+            if count is None:
+                return None  # Some error occurred
+            all_lists_counts[count_type] = count
+
+        # Count entries in selected lists
+        selected_lists_counts = {}
+        for list_name in address_lists:
+            selected_lists_counts[list_name] = {}
+            for count_type, query in queries.items():
+                query['list'] = list_name
+                count = BaseDSProcessor.count_records(router_entry, api_path=api_path, api_query=query)
+                if count is None:
+                    return None  # Some error occurred
+                selected_lists_counts[list_name][count_type] = count
+        
+        return {
+            'all_lists': all_lists_counts,
+            'selected_lists': selected_lists_counts
+        }

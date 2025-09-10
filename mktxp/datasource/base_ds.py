@@ -41,6 +41,18 @@ class BaseDSProcessor:
             labeled_records.append(translated_record)            
         return labeled_records
 
+    @staticmethod
+    def count_records(router_entry, *, api_path, api_query=None):
+        api_query = api_query or {}
+        try:
+            resource = router_entry.api_connection.router_api().get_resource(api_path)
+            response = resource.call('print', {'count-only': ''}, api_query).done_message
+            if response:
+                return int(response.get('ret', 0))
+            return 0
+        except Exception as exc:
+            print(f'Error getting record count for {api_path} from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
+            return None
 
     @staticmethod
     def _normalise_keys(key):
@@ -49,4 +61,3 @@ class BaseDSProcessor:
             if chr in key:
                 key = key.replace(chr, "_")     
         return key
-

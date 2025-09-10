@@ -16,7 +16,7 @@ from mktxp.collector.base_collector import BaseCollector
 from mktxp.flow.processor.output import BaseOutputProcessor
 from mktxp.cli.config.config import MKTXPConfigKeys
 from mktxp.datasource.address_list_ds import AddressListMetricsDataSource
-from collections import defaultdict
+
 
 class AddressListCollector(BaseCollector):
     '''Address List collector'''
@@ -24,7 +24,7 @@ class AddressListCollector(BaseCollector):
     @staticmethod
     def collect(router_entry):
         metric_labels = ['list', 'address', 'dynamic', 'timeout', 'disabled', 'comment']
-        reduced_metric_labels = ['list', 'address', 'dynamic', 'disabled', 'comment']
+        reduced_metric_labels = [label for label in metric_labels if label != 'timeout']
         translation_table = {
             'dynamic': lambda value: '1' if value == 'true' else '0',
             'disabled': lambda value: '1' if value == 'true' else '0',
@@ -35,38 +35,59 @@ class AddressListCollector(BaseCollector):
         # IPv4
         address_list_names = AddressListCollector._get_list_names(router_entry.config_entry.address_list)
         if address_list_names:
-            ipv4_records = AddressListMetricsDataSource.metric_records(
-                router_entry,
-                address_list_names,
-                'ip',
-                metric_labels = metric_labels,
-                translation_table = translation_table
-            )
-            if ipv4_records:
-                yield BaseCollector.gauge_collector('firewall_address_list', 'IPv4 Firewall Address List Entry', 
-                                                                    ipv4_records, 'timeout', reduced_metric_labels)
-
-                count_records = AddressListCollector._get_count_records(router_entry, ipv4_records)
-                yield BaseCollector.gauge_collector('firewall_address_list_entries_count', 'Number of entries in a IPv4 firewall address list',
-                                                                    count_records, 'count', ['list', MKTXPConfigKeys.ROUTERBOARD_NAME, MKTXPConfigKeys.ROUTERBOARD_ADDRESS])
+            yield from AddressListCollector._collect_and_yield_metrics(router_entry, address_list_names, 'ip', metric_labels, reduced_metric_labels, translation_table)
 
         # IPv6
         ipv6_address_list_names = AddressListCollector._get_list_names(router_entry.config_entry.ipv6_address_list)
         if ipv6_address_list_names:
-            ipv6_records = AddressListMetricsDataSource.metric_records(
-                router_entry,
-                ipv6_address_list_names,
-                'ipv6',
-                metric_labels=metric_labels,
-                translation_table = translation_table
-            )
-            if ipv6_records:
-                yield BaseCollector.gauge_collector('firewall_address_list_ipv6', 'Firewall IPv6 Address List Entry',
-                                                                    ipv6_records, 'timeout', reduced_metric_labels)
+            yield from AddressListCollector._collect_and_yield_metrics(router_entry, ipv6_address_list_names, 'ipv6', metric_labels, reduced_metric_labels, translation_table)
 
-                count_records = AddressListCollector._get_count_records(router_entry, ipv6_records)
-                yield BaseCollector.gauge_collector('firewall_address_list_entries_count_ipv6', 'Number of entries in a IPv6 firewall address list',
-                                                                    count_records, 'count', ['list', MKTXPConfigKeys.ROUTERBOARD_NAME, MKTXPConfigKeys.ROUTERBOARD_ADDRESS])
+    @staticmethod
+    def _collect_and_yield_metrics(router_entry, address_list_names, ip_version, metric_labels, reduced_metric_labels, translation_table):
+        ipv6_suffix = '_ipv6' if ip_version == 'ipv6' else ''
+        
+        # Collect and yield address list entries
+        records = AddressListMetricsDataSource.metric_records(
+            router_entry,
+            address_list_names,
+            ip_version,
+            metric_labels=metric_labels,
+            translation_table=translation_table
+        )
+        if records:
+            yield BaseCollector.gauge_collector(f'firewall_address_list{ipv6_suffix}', f'Firewall {ip_version.upper()} Address List Entry',
+                                                                records, 'timeout', reduced_metric_labels)
+
+        # Collect and yield address list counts
+        counts = AddressListMetricsDataSource.count_metric_records(router_entry, address_list_names, ip_version)
+        if not counts:
+            return
+
+        # Counts for all lists
+        all_lists_records = []
+        for count_type, count in counts['all_lists'].items():
+            all_lists_records.append({
+                'count_type': count_type,
+                'count': count,
+                **router_entry.router_id
+            })
+        if all_lists_records:
+            yield BaseCollector.gauge_collector(f'firewall_address_list_all_count{ipv6_suffix}',
+                                                f'Total number of addresses in all {ip_version.upper()} address lists',
+                                                all_lists_records, 'count', ['count_type'])
+
+        # Counts for selected lists
+        selected_lists_records = []
+        for list_name, list_counts in counts['selected_lists'].items():
+            selected_lists_records.append({
+                'list': list_name,
+                'count': list_counts['total'],
+                **router_entry.router_id
+            })
+        if selected_lists_records:
+            yield BaseCollector.gauge_collector(f'firewall_address_list_selected_count{ipv6_suffix}',
+                                                f'Number of addresses in the selected {ip_version.upper()} address list',
+                                                selected_lists_records, 'count', ['list'])
 
     @staticmethod
     def _get_list_names(config_value):
@@ -79,17 +100,3 @@ class AddressListCollector(BaseCollector):
         if isinstance(config_value, list):
             return [name for name in config_value if name]
         return []
-
-    @staticmethod
-    def _get_count_records(router_entry, records):
-        counts = defaultdict(int)
-        for record in records:
-            counts[record['list']] += 1
-        
-        count_records = []
-        for list_name, count in counts.items():
-            count_records.append({
-                MKTXPConfigKeys.ROUTERBOARD_NAME: router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_NAME],
-                MKTXPConfigKeys.ROUTERBOARD_ADDRESS: router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_ADDRESS],
-                'list': list_name, 'count': count})
-        return count_records

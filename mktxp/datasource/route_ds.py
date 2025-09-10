@@ -14,30 +14,21 @@
 
 from mktxp.datasource.base_ds import BaseDSProcessor
 
+
 class RouteMetricsDataSource:
     ''' Routes Metrics data provider
     '''
     @staticmethod
-    def _count_records(router_entry, *, protocol_label=None, ipv6=False):
-        ip_stack = 'ipv6' if ipv6 else 'ip'
-        try:
-            resource = router_entry.api_connection.router_api().get_resource(f'/{ip_stack}/route')
-            if protocol_label:
-                response = resource.call('print', {'count-only': ''}, {f'{protocol_label}': 'yes'}).done_message
-            else:
-                response = resource.call('print', {'count-only': ''}).done_message
-            return int(response.get('ret', 0))
-        except Exception as exc:
-            print(f'Error getting {"IPv6" if ipv6 else "IPv4"} routes count for protocol {protocol_label or "total"} from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
-            return None
-
-    @staticmethod
     def metric_records(router_entry, *, metric_labels = None, ipv6 = False):
         if metric_labels is None:
             metric_labels = []
+        
+        ip_stack = 'ipv6' if ipv6 else 'ip'
+        api_path = f'/{ip_stack}/route'
+
         try:
             # Get total routes
-            total_routes = RouteMetricsDataSource._count_records(router_entry, protocol_label=None, ipv6=ipv6)
+            total_routes = BaseDSProcessor.count_records(router_entry, api_path=api_path)
             if total_routes is None:
                 # Abort if there was an error
                 return None
@@ -45,7 +36,7 @@ class RouteMetricsDataSource:
             # Get counts per protocol
             routes_per_protocol = {}
             for label in metric_labels:
-                count = RouteMetricsDataSource._count_records(router_entry, protocol_label=label, ipv6=ipv6)
+                count = BaseDSProcessor.count_records(router_entry, api_path=api_path, api_query={f'{label}': 'yes'})
                 if count is None:
                     # Abort if there was an error
                     return None
