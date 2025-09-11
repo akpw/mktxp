@@ -20,7 +20,7 @@ with open(path.join(pkg_dir, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='mktxp',
-    version='1.2.13',
+    version='1.2.14',
 
     url='https://github.com/akpw/mktxp',
 
