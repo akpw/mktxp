@@ -432,7 +432,7 @@ class MKTXPConfigHandler:
             new_keys_values[MKTXPConfigKeys.LISTEN_KEY] = system_entry_reader[MKTXPConfigKeys.LISTEN_KEY]
 
         if new_keys:
-            self._config[MKTXPConfigKeys.MKTXP_LATEST_SYSTEM_ENTRY_KEY] = new_keys_values
+            self._config[MKTXPConfigKeys.MKTXP_LATEST_SYSTEM_ENTRY_KEY].update(new_keys_values)
             self._config.comments[MKTXPConfigKeys.MKTXP_LATEST_SYSTEM_ENTRY_KEY] = \
                 ['', '# The section below contains the latest system parameters introduced by MKTXP',
                  f'# For organizational purposes, you can move these parameters to the [{MKTXPConfigKeys.MKTXP_CONFIG_ENTRY_NAME}] section']
@@ -553,7 +553,7 @@ class MKTXPConfigHandler:
             new_keys_values[MKTXPConfigKeys.PORT_KEY] = default_config_entry_reader[MKTXPConfigKeys.PORT_KEY]
 
         if new_keys:
-            self.config[MKTXPConfigKeys.MKTXP_LATEST_DEFAULT_ENTRY_KEY] = new_keys_values
+            self.config[MKTXPConfigKeys.MKTXP_LATEST_DEFAULT_ENTRY_KEY].update(new_keys_values)
             self.config.comments[MKTXPConfigKeys.MKTXP_LATEST_DEFAULT_ENTRY_KEY] = \
                 ['', '# The section below contains the latest default parameters introduced by MKTXP',
                  f'# For organizational purposes, you can move these parameters to the [{MKTXPConfigKeys.DEFAULT_ENTRY_KEY}] section']
