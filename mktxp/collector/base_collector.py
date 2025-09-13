@@ -26,60 +26,104 @@ class BaseCollector:
             verbose_reporting = config_handler.system_entry.verbose_mode
 
         for record in router_records:
-            label_values = tuple(record.get(label, '') for label in metric_labels)
-            if label_values in unique_records:
-                if verbose_reporting: 
-                    print(f"Warning: Duplicate metric record found for labels {dict(zip(metric_labels, label_values))}. Keeping last.")
-            unique_records[label_values] = record
+            custom_labels_dict = record.get(MKTXPConfigKeys.CUSTOM_LABELS_METADATA_ID, {})
+            label_values_tuple = tuple(record.get(label, custom_labels_dict.get(label, '')) for label in metric_labels)
+            
+            if label_values_tuple in unique_records:
+                if verbose_reporting:
+                    print(f"Warning: Duplicate metric record found for labels {dict(zip(metric_labels, label_values_tuple))}. Keeping last.")
+            unique_records[label_values_tuple] = record
         return unique_records.values()
 
     @staticmethod
-    def info_collector(name: str, documentation: str, router_records, metric_labels=None, verbose_reporting=None):
+    def info_collector(name: str, documentation: str, router_records, metric_labels=None, add_id_labels = True, add_custom_labels=True, verbose_reporting=None):
         metric_labels = metric_labels or []
         router_records = router_records or []
 
-        BaseCollector._add_id_labels(metric_labels)
-        collector = InfoMetricFamily(f'mktxp_{name}', documentation=documentation)
+        if add_id_labels:
+            metric_labels = BaseCollector._add_id_labels(metric_labels)
+        if add_custom_labels:
+            metric_labels = BaseCollector._add_custom_labels(metric_labels, router_records)
+        
+        collector = InfoMetricFamily(f'mktxp_{name}', documentation=documentation, labels=metric_labels)
 
         deduplicated_records = BaseCollector._de_duplicate_records(router_records, metric_labels, verbose_reporting)
         for router_record in deduplicated_records:
-            label_values = {label: router_record.get(label) if router_record.get(label) else '' for label in metric_labels}
+            label_values = {}
+            custom_labels_dict = router_record.get(MKTXPConfigKeys.CUSTOM_LABELS_METADATA_ID, {})
+            for label in metric_labels:
+                value = router_record.get(label, custom_labels_dict.get(label, ''))
+                label_values[label] = value
             collector.add_metric(metric_labels, label_values)
         return collector
 
     @staticmethod
-    def counter_collector(name: str, documentation: str, router_records, metric_key, metric_labels=None, verbose_reporting=None):
+    def counter_collector(name: str, documentation: str, router_records, metric_key, metric_labels=None, add_id_labels = True, add_custom_labels=True, verbose_reporting=None):
         metric_labels = metric_labels or []
-        router_records = router_records or []            
+        router_records = router_records or []
 
-        BaseCollector._add_id_labels(metric_labels)
+        if add_id_labels:
+            metric_labels = BaseCollector._add_id_labels(metric_labels)
+        if add_custom_labels:
+            metric_labels = BaseCollector._add_custom_labels(metric_labels, router_records, metric_key)
+
         collector = CounterMetricFamily(f'mktxp_{name}', documentation=documentation, labels=metric_labels)
 
         deduplicated_records = BaseCollector._de_duplicate_records(router_records, metric_labels, verbose_reporting)
         for router_record in deduplicated_records:
-            label_values = [router_record.get(label) if router_record.get(label) else '' for label in metric_labels]
+            label_values = []
+            custom_labels_dict = router_record.get(MKTXPConfigKeys.CUSTOM_LABELS_METADATA_ID, {})
+            for label in metric_labels:
+                value = router_record.get(label, custom_labels_dict.get(label, ''))
+                label_values.append(value)
             collector.add_metric(label_values, router_record.get(metric_key, 0))
         return collector
 
     @staticmethod
-    def gauge_collector(name: str, documentation: str, router_records, metric_key, metric_labels = None, add_id_labels = True, verbose_reporting=None):
+    def gauge_collector(name: str, documentation: str, router_records, metric_key, metric_labels = None, add_id_labels = True, add_custom_labels = True, verbose_reporting=None):
         metric_labels = metric_labels or []
-        router_records = router_records or []            
+        router_records = router_records or []
 
         if add_id_labels:
-            BaseCollector._add_id_labels(metric_labels)
+            metric_labels = BaseCollector._add_id_labels(metric_labels)
+        if add_custom_labels:
+            metric_labels = BaseCollector._add_custom_labels(metric_labels, router_records, metric_key)
+
         collector = GaugeMetricFamily(f'mktxp_{name}', documentation=documentation, labels=metric_labels)
 
         deduplicated_records = BaseCollector._de_duplicate_records(router_records, metric_labels, verbose_reporting)
-        for router_record in deduplicated_records:       
-            label_values = [router_record.get(label) if router_record.get(label) else '' for label in metric_labels]        
+        for router_record in deduplicated_records:
+            label_values = []
+            custom_labels_dict = router_record.get(MKTXPConfigKeys.CUSTOM_LABELS_METADATA_ID, {})
+            for label in metric_labels:
+                value = router_record.get(label, custom_labels_dict.get(label, ''))
+                label_values.append(value)
             collector.add_metric(label_values, router_record.get(metric_key, 0))
         return collector
 
     # Helpers
     @staticmethod
+    def _add_custom_labels(metric_labels, router_records, metric_key = None):
+        if not router_records:
+            return metric_labels
+
+        first_record = router_records[0]
+        extended_labels = list(metric_labels) 
+
+        if MKTXPConfigKeys.CUSTOM_LABELS_METADATA_ID in first_record and isinstance(first_record.get(MKTXPConfigKeys.CUSTOM_LABELS_METADATA_ID), dict):
+            for key in first_record[MKTXPConfigKeys.CUSTOM_LABELS_METADATA_ID].keys():
+                if key not in extended_labels:
+                    extended_labels.append(key)
+        
+        return extended_labels
+
+    @staticmethod
     def _add_id_labels(metric_labels):
-        if MKTXPConfigKeys.ROUTERBOARD_NAME not in metric_labels:
-            metric_labels.append(MKTXPConfigKeys.ROUTERBOARD_NAME)
-        if MKTXPConfigKeys.ROUTERBOARD_ADDRESS not in metric_labels:
-            metric_labels.append(MKTXPConfigKeys.ROUTERBOARD_ADDRESS)
+        extended_labels = list(metric_labels)
+
+        if MKTXPConfigKeys.ROUTERBOARD_NAME not in extended_labels:
+            extended_labels.append(MKTXPConfigKeys.ROUTERBOARD_NAME)
+        if MKTXPConfigKeys.ROUTERBOARD_ADDRESS not in extended_labels:
+            extended_labels.append(MKTXPConfigKeys.ROUTERBOARD_ADDRESS)
+
+        return extended_labels

@@ -14,6 +14,7 @@
 import pytest
 from configobj import ConfigObj
 from mktxp.cli.config.config import MKTXPConfigHandler, MKTXPConfigKeys, CustomConfig
+from mktxp.datasource.base_ds import BaseDSProcessor
 
 def test_default_config_no_new_keys(tmpdir):
     mktxp_conf_path = tmpdir.join("mktxp.conf")
@@ -154,3 +155,4 @@ def test_system_config_key_in_new_section(tmpdir):
     final_config = ConfigObj(str(_mktxp_conf_path))
     assert 'verbose_mode' in final_config[MKTXPConfigKeys.MKTXP_LATEST_SYSTEM_ENTRY_KEY]
     assert final_config[MKTXPConfigKeys.MKTXP_LATEST_SYSTEM_ENTRY_KEY].as_bool('verbose_mode') is False
+

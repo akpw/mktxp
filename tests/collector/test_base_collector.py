@@ -13,6 +13,7 @@
 
 import pytest
 from mktxp.collector.base_collector import BaseCollector
+from mktxp.cli.config.config import MKTXPConfigKeys
 
 # Case 1: Records with duplicates
 records_with_duplicates = [
@@ -49,3 +50,163 @@ def test_de_duplicate_records(input_records, expected_records):
 
     assert len(deduplicated) == len(expected_records)
     assert sorted(str(d) for d in deduplicated) == sorted(str(d) for d in expected_records)
+
+def test_add_custom_labels():
+    """
+    Test that _add_custom_labels correctly adds custom label names to metric labels.
+    """
+    metric_labels = ['interface', 'status']
+    router_records = [{
+        'interface': 'eth0',
+        'status': 'up',
+        MKTXPConfigKeys.CUSTOM_LABELS_METADATA_ID: {
+            'dc': 'london',
+            'rack': 'a1'
+        }
+    }]
+    
+    extended_labels = BaseCollector._add_custom_labels(metric_labels, router_records)
+    
+    assert 'interface' in extended_labels
+    assert 'status' in extended_labels
+    assert 'dc' in extended_labels
+    assert 'rack' in extended_labels
+    assert len(extended_labels) == 4
+
+def test_add_custom_labels_no_duplicates():
+    """
+    Test that _add_custom_labels doesn't add duplicate labels.
+    """
+    metric_labels = ['interface', 'dc']  # 'dc' already exists
+    router_records = [{
+        'interface': 'eth0',
+        MKTXPConfigKeys.CUSTOM_LABELS_METADATA_ID: {
+            'dc': 'london',
+            'rack': 'a1'
+        }
+    }]
+    
+    extended_labels = BaseCollector._add_custom_labels(metric_labels, router_records)
+    
+    assert extended_labels.count('dc') == 1  # Should not be duplicated
+    assert 'interface' in extended_labels
+    assert 'dc' in extended_labels
+    assert 'rack' in extended_labels
+    assert len(extended_labels) == 3
+
+def test_add_custom_labels_empty_records():
+    """
+    Test that _add_custom_labels handles empty router records gracefully.
+    """
+    metric_labels = ['interface', 'status']
+    router_records = []
+    
+    extended_labels = BaseCollector._add_custom_labels(metric_labels, router_records)
+    
+    assert extended_labels == metric_labels
+
+def test_add_custom_labels_no_metadata():
+    """
+    Test that _add_custom_labels handles records without custom labels metadata.
+    """
+    metric_labels = ['interface', 'status']
+    router_records = [{
+        'interface': 'eth0',
+        'status': 'up'
+    }]
+    
+    extended_labels = BaseCollector._add_custom_labels(metric_labels, router_records)
+    
+    assert extended_labels == metric_labels
+
+def test_gauge_collector_with_custom_labels():
+    """
+    Integration test: Test that gauge_collector properly incorporates custom labels.
+    """
+    router_records = [{
+        'interface': 'eth0',
+        'bytes': 1000,
+        MKTXPConfigKeys.ROUTERBOARD_NAME: 'router1',
+        MKTXPConfigKeys.ROUTERBOARD_ADDRESS: '192.168.1.1',
+        MKTXPConfigKeys.CUSTOM_LABELS_METADATA_ID: {
+            'dc': 'london',
+            'rack': 'a1'
+        }
+    }]
+    
+    metric_labels = ['interface']
+    collector = BaseCollector.gauge_collector(
+        'test_metric', 
+        'Test metric with custom labels', 
+        router_records, 
+        'bytes',
+        metric_labels=metric_labels,
+        verbose_reporting=False
+    )
+    
+    # Check that the collector was created with the right labels
+    assert collector.name == 'mktxp_test_metric'
+    # The labels should include original + router ID + custom labels
+    expected_labels = ['interface', 'routerboard_name', 'routerboard_address', 'dc', 'rack']
+    assert set(collector._labelnames) == set(expected_labels)
+
+def test_counter_collector_with_custom_labels():
+    """
+    Integration test: Test that counter_collector properly incorporates custom labels.
+    """
+    router_records = [{
+        'interface': 'eth0',
+        'packets': 5000,
+        MKTXPConfigKeys.ROUTERBOARD_NAME: 'router1',
+        MKTXPConfigKeys.ROUTERBOARD_ADDRESS: '192.168.1.1',
+        MKTXPConfigKeys.CUSTOM_LABELS_METADATA_ID: {
+            'environment': 'prod',
+            'service': 'web'
+        }
+    }]
+    
+    metric_labels = ['interface']
+    collector = BaseCollector.counter_collector(
+        'test_counter', 
+        'Test counter with custom labels', 
+        router_records, 
+        'packets',
+        metric_labels=metric_labels,
+        verbose_reporting=False
+    )
+    
+    # Check that the collector was created with the right labels
+    assert collector.name == 'mktxp_test_counter'
+    # The labels should include original + router ID + custom labels
+    expected_labels = ['interface', 'routerboard_name', 'routerboard_address', 'environment', 'service']
+    assert set(collector._labelnames) == set(expected_labels)
+
+def test_info_collector_with_custom_labels():
+    """
+    Integration test: Test that info_collector properly incorporates custom labels.
+    """
+    router_records = [{
+        'interface': 'eth0',
+        'status': 'up',
+        MKTXPConfigKeys.ROUTERBOARD_NAME: 'router1',
+        MKTXPConfigKeys.ROUTERBOARD_ADDRESS: '192.168.1.1',
+        MKTXPConfigKeys.CUSTOM_LABELS_METADATA_ID: {
+            'location': 'datacenter-1',
+            'owner': 'team-alpha'
+        }
+    }]
+    
+    metric_labels = ['interface', 'status']
+    collector = BaseCollector.info_collector(
+        'test_info', 
+        'Test info with custom labels', 
+        router_records,
+        metric_labels=metric_labels,
+        verbose_reporting=False
+    )
+    
+    # Check that the collector was created with the right labels
+    assert collector.name == 'mktxp_test_info'
+    # The labels should include original + router ID + custom labels
+    expected_labels = ['interface', 'status', 'routerboard_name', 'routerboard_address', 'location', 'owner']
+    assert set(collector._labelnames) == set(expected_labels)

@@ -11,6 +11,7 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
+from mktxp.cli.config.config import MKTXPConfigKeys
 
 class BaseDSProcessor:
     ''' Base Metrics DataSource processing
@@ -31,9 +32,13 @@ class BaseDSProcessor:
             translated_record = {BaseDSProcessor._normalise_keys(key): value for (key, value) in router_record.items() if BaseDSProcessor._normalise_keys(key) in metric_labels}
 
             if add_router_id:
-                for key, value in router_entry.router_id.items():
-                    translated_record[key] = value
+                translated_record.update(router_entry.router_id)
             
+            if router_entry.config_entry.custom_labels:
+                custom_labels = BaseDSProcessor._parse_custom_labels(router_entry.config_entry.custom_labels)
+                if custom_labels:
+                    translated_record[MKTXPConfigKeys.CUSTOM_LABELS_METADATA_ID] = custom_labels
+
             # translate fields if needed
             for key, func in translation_table.items():
                 if translate_if_no_value or translated_record.get(key) is not None:
@@ -61,3 +66,23 @@ class BaseDSProcessor:
             if chr in key:
                 key = key.replace(chr, "_")     
         return key
+
+    @staticmethod
+    def _parse_custom_labels(custom_labels):
+        if not custom_labels:
+            return {}
+
+        labels_list = []
+        if isinstance(custom_labels, str):
+            labels_list = custom_labels.split(',')
+        elif isinstance(custom_labels, (list, tuple)):
+            labels_list = [str(item) for item in custom_labels]
+        else:
+            return {}
+
+        return {
+            key.strip(): value.strip()
+            for item in labels_list
+            if isinstance(item, str) and (':' in item or '=' in item)
+            for key, value in [item.split(':', 1) if ':' in item else item.split('=', 1)]
+        }

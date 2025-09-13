@@ -9,7 +9,7 @@
 MKTXP is a Prometheus Exporter for Mikrotik RouterOS devices.\
 It gathers and exports a rich set of metrics across multiple routers, all easily configurable via built-in CLI interface. 
 
-While simple to use, MKTXP supports [advanced features](https://github.com/akpw/mktxp#advanced-features) such as automatic IP address resolution with both local & remote DHCP servers, concurrent exports across multiple router devices, configurable data processing & transformations, optional bandwidth testing, etc.
+While simple to use, MKTXP supports [advanced features](https://github.com/akpw/mktxp#advanced-features) such as automatic IP address resolution with both local & remote DHCP servers, concurrent exports across multiple router devices, configurable data processing & transformations, injectable custom labels for easy device grouping, optional bandwidth testing, etc.
 
 Apart from exporting to Prometheus, MKTXP can print selected metrics directly on the command line (see examples below). 
 
@@ -55,6 +55,7 @@ The default configuration file comes with a sample configuration, making it easy
 [Sample-Router-1]
     # for specific configuration on the router level, overload the defaults here
     hostname = 192.168.88.1
+    custom_labels = dc:london, rack=a1, service:prod
 
 [Sample-Router-2]
     # for specific configuration on the router level, overload the defaults here
@@ -71,6 +72,9 @@ The default configuration file comes with a sample configuration, making it easy
     password = password
     credentials_file = ""   # To use an external file in YAML format for both username and password, specify the path here
     
+    custom_labels = None    # Custom labels to be injected to all device metrics, comma-separated key:value (or key=value) pairs    
+                            # Example: 'dc:london, rack=a1, service:prod' (quotation marks are optional)
+
     use_ssl = False                 # enables connection via API-SSL servis
     no_ssl_certificate = False      # enables API_SSL connect without router SSL certificate
     ssl_certificate_verify = False  # turns SSL certificate verification on / off
@@ -92,12 +96,14 @@ The default configuration file comes with a sample configuration, making it easy
     pool = True                     # IPv4 Pool metrics
     firewall = True                 # IPv4 Firewall rules traffic metrics
     neighbor = True                 # IPv4 Reachable Neighbors
+    address_list = None             # Firewall Address List metrics, a comma-separated list of names
     dns = False                     # DNS stats
 
     ipv6_route = False              # IPv6 Routes metrics    
     ipv6_pool = False               # IPv6 Pool metrics
     ipv6_firewall = False           # IPv6 Firewall rules traffic metrics
     ipv6_neighbor = False           # IPv6 Reachable Neighbors
+    ipv6_address_list = None        # IPv6 Firewall Address List metrics, a comma-separated list of names
 
     poe = True                      # POE metrics
     monitor = True                  # Interface monitor metrics
@@ -125,7 +131,7 @@ The default configuration file comes with a sample configuration, making it easy
     bgp = False                     # BGP sessions metrics
     routing_stats = False           # Routing process stats
     certificate = False             # Certificates metrics
-    
+
     container = False               # Containers metrics
     
     remote_dhcp_entry = None        # An MKTXP entry to provide for remote DHCP info / resolution
@@ -285,7 +291,7 @@ Now with your RouterOS metrics being exported to Prometheus, it's easy to visual
         .. edit     Open MKTXP configuration file in your editor of choice        
         .. print    Displays selected metrics on the command line
         .. export   Starts collecting metrics for all enabled RouterOS configuration entries
-        .. show   	Shows MKTXP configuration entries on the command line
+        .. show     Shows MKTXP configuration entries on the command line
 
 ````
 ❯ mktxp -h
@@ -377,6 +383,9 @@ total_max_scrape_duration = 30      # Max overall duration of all metrics collec
 ```
 To keeps things within expected boundaries, the last two parameters allows for controlling both individual and overall scrape durations
 
+
+### Injectable router-level custom labels
+You can add custom labels to your devices using the `custom_labels` option. These labels are attached to all the metrics for a specific device, allowing e.g. easy router grouping for detailed overview dashboards in Grafana. You can define default labels in the `[default]` section and override or extend them in the router-specific sections.
 
 ### mktxp endpoint listen addresses
 By default, mktxp runs it's HTTP metrics endpoint on any IPv4 address on port 49090. However, it is also able to listen on multiple socket addresses, both IPv4 and IPv6. 
