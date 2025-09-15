@@ -272,7 +272,7 @@ CHANNEL_RSS_FEED_MAPPING = {
     'development': 'https://mikrotik.com/development.rss',
     'long-term': 'https://mikrotik.com/bugfix.rss',
     'stable': 'https://mikrotik.com/current.rss',
-    'testing': 'https://mikrotik.com/candidate.rss',
+    'testing': 'https://download.mikrotik.com/routeros/latest-testing.rss',
 }
 
 
