@@ -129,7 +129,7 @@ class RouterEntry:
 
     @property
     def dhcp_records(self):
-        return (entry.record for key, entry in  self._dhcp_records.items() if entry.type == 'mac_address') \
+        return [entry.record for key, entry in  self._dhcp_records.items() if entry.type == 'mac_address'] \
                                                                                 if self._dhcp_records else None   
     @dhcp_records.setter
     def dhcp_records(self, dhcp_records):
