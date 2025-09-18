@@ -23,11 +23,11 @@ def mock_api_connection():
     connection.is_connected.return_value = False
     return connection
 
-@pytest.fixture(params=[True, False])
+@pytest.fixture(params=[(True, True), (True, False), (False, True), (False, False)])
 def router_entry(request, tmpdir, mock_api_connection):
-    """Fixture to create a RouterEntry with different persistence setting."""
+    """Fixture to create a RouterEntry with different persistence settings."""
     
-    persistent = request.param
+    persistent_pool, persistent_dhcp = request.param
     
     # Create temporary config files
     mktxp_conf = tmpdir.join("mktxp.conf")
@@ -38,7 +38,8 @@ hostname = localhost
     _mktxp_conf = tmpdir.join("_mktxp.conf")
     _mktxp_conf.write(f"""
 [MKTXP]
-persistent_router_connection_pool = {persistent}
+persistent_router_connection_pool = {persistent_pool}
+persistent_dhcp_cache = {persistent_dhcp}
 compact_default_conf_values = False
 verbose_mode = False
 """)
@@ -48,7 +49,8 @@ verbose_mode = False
         config_handler(os_config=CustomConfig(str(tmpdir)))
         
         entry = RouterEntry('test_router')
-        entry.persistent = persistent  # attaching for easy access in the test
+        entry.persistent_pool = persistent_pool
+        entry.persistent_dhcp_cache = persistent_dhcp
         return entry
 
 @pytest.mark.parametrize(
@@ -91,7 +93,7 @@ def test_is_done_disconnects(router_entry, mock_api_connection):
     router_entry.is_done()
 
     # Assert
-    if not router_entry.persistent:
+    if not router_entry.persistent_pool:
         mock_api_connection.disconnect.assert_called_once()
         dhcp_connection.disconnect.assert_called_once()
         capsman_connection.disconnect.assert_called_once()
@@ -99,3 +101,20 @@ def test_is_done_disconnects(router_entry, mock_api_connection):
         mock_api_connection.disconnect.assert_not_called()
         dhcp_connection.disconnect.assert_not_called()
         capsman_connection.disconnect.assert_not_called()
+
+def test_is_done_dhcp_cache(router_entry):
+    """
+    Tests that the DHCP cache is cleared or not based on the persistent_dhcp_cache setting.
+    """
+    # Arrange
+    router_entry.dhcp_records = [{'mac_address': '00:00:00:00:00:01', 'address': '1.1.1.1'}]
+    assert router_entry._dhcp_records != {}
+
+    # Act
+    router_entry.is_done()
+
+    # Assert
+    if not router_entry.persistent_dhcp_cache:
+        assert router_entry._dhcp_records == {}
+    else:
+        assert router_entry._dhcp_records != {}

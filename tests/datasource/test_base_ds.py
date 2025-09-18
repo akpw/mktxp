@@ -87,5 +87,39 @@ def test_parse_custom_labels(test_input, expected_output):
     """
     Tests the _parse_custom_labels method with various valid and invalid inputs.
     """
-    assert BaseDSProcessor._parse_custom_labels(test_input) == expected_output
+    # Create a mock router_entry for the method call
+    mock_router_entry = Mock()
+    mock_router_entry.router_name = "TestRouter"
+    
+    assert BaseDSProcessor._parse_custom_labels(test_input, mock_router_entry) == expected_output
+
+def test_parse_custom_labels_with_warning(capsys):
+    """
+    Tests that a warning is printed for malformed custom labels.
+    """
+    test_input = 'dc:london, invalid_entry, rack:a1'
+    expected_output = {'dc': 'london', 'rack': 'a1'}
+    
+    # Create a mock router_entry for the method call
+    mock_router_entry = Mock()
+    mock_router_entry.router_name = "TestRouter"
+    
+    # Mock config_handler to enable verbose mode so warnings are printed
+    from unittest.mock import patch
+    with patch('mktxp.datasource.base_ds.config_handler') as mock_config_handler:
+        mock_config_handler.system_entry.verbose_mode = True
+        assert BaseDSProcessor._parse_custom_labels(test_input, mock_router_entry) == expected_output
+        
+    captured = capsys.readouterr()
+    assert "Warning: Configuration for TestRouter contains a malformed custom label ' invalid_entry'. It should be in 'key:value' or 'key=value' format. Ignoring." in captured.out
+
+def test_parse_custom_labels_with_none_string():
+    """
+    Tests that the string 'None' is handled correctly.
+    """
+    # Create a mock router_entry for the method call
+    mock_router_entry = Mock()
+    mock_router_entry.router_name = "TestRouter"
+    
+    assert BaseDSProcessor._parse_custom_labels('None', mock_router_entry) == {}
 

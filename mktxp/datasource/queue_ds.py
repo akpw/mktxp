@@ -37,7 +37,10 @@ class QueueMetricsDataSource:
         for queue_record in queue_records:
             splitted_queue_record = {}
             for key, value in queue_record.items():
-                split_values = value.split('/')
+                if isinstance(value, str):
+                    split_values = value.split('/')
+                else:
+                    split_values = [value]
                 if split_values and len(split_values) > 1:
                     splitted_queue_record[f'{key}_up'] = split_values[0]
                     splitted_queue_record[f'{key}_down'] = split_values[1]

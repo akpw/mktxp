@@ -12,6 +12,7 @@
 ## GNU General Public License for more details.
 
 from mktxp.cli.config.config import MKTXPConfigKeys
+from mktxp.cli.config.config import config_handler
 
 class BaseDSProcessor:
     ''' Base Metrics DataSource processing
@@ -35,7 +36,7 @@ class BaseDSProcessor:
                 translated_record.update(router_entry.router_id)
             
             if router_entry.config_entry.custom_labels:
-                custom_labels = BaseDSProcessor._parse_custom_labels(router_entry.config_entry.custom_labels)
+                custom_labels = BaseDSProcessor._parse_custom_labels(router_entry.config_entry.custom_labels, router_entry)
                 if custom_labels:
                     translated_record[MKTXPConfigKeys.CUSTOM_LABELS_METADATA_ID] = custom_labels
 
@@ -68,8 +69,8 @@ class BaseDSProcessor:
         return key
 
     @staticmethod
-    def _parse_custom_labels(custom_labels):
-        if not custom_labels:
+    def _parse_custom_labels(custom_labels, router_entry):
+        if not custom_labels or custom_labels == 'None':
             return {}
 
         labels_list = []
@@ -80,9 +81,15 @@ class BaseDSProcessor:
         else:
             return {}
 
-        return {
-            key.strip(): value.strip()
-            for item in labels_list
-            if isinstance(item, str) and (':' in item or '=' in item)
-            for key, value in [item.split(':', 1) if ':' in item else item.split('=', 1)]
-        }
+        labels_dict = {}
+        for item in labels_list:
+            try:
+                if isinstance(item, str) and (':' in item or '=' in item):
+                    key, value = item.split(':', 1) if ':' in item else item.split('=', 1)
+                    labels_dict[key.strip()] = value.strip()
+                else:
+                    if config_handler.system_entry.verbose_mode:
+                        print(f"Warning: Configuration for {router_entry.router_name} contains a malformed custom label '{item}'. It should be in 'key:value' or 'key=value' format. Ignoring.")
+            except Exception as e:
+                print(f"Warning: Could not parse custom label '{item} for {router_entry.router_name}'. Error: {e}. Ignoring.")
+        return labels_dict        

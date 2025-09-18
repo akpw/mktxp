@@ -50,7 +50,15 @@ class RouterEntriesHandler:
     def _set_child_entries(router_entry):
         if router_entry.config_entry.remote_dhcp_entry and config_handler.registered_entry(router_entry.config_entry.remote_dhcp_entry):
             router_entry.dhcp_entry = RouterEntry(router_entry.config_entry.remote_dhcp_entry)        
+        else:
+            remote_dhcp_entry_name = router_entry.config_entry.remote_dhcp_entry
+            if remote_dhcp_entry_name != 'None':
+                print(f"Error in configuration for {router_entry.router_name}: remote_dhcp_entry must a name of another router entry or 'None', but it is '{remote_dhcp_entry_name}'. Ignoring.")
 
         if router_entry.config_entry.remote_capsman_entry and config_handler.registered_entry(router_entry.config_entry.remote_capsman_entry):
             router_entry.capsman_entry = RouterEntry(router_entry.config_entry.remote_capsman_entry)       
+        else:
+            remote_capsman_entry_name = router_entry.config_entry.remote_capsman_entry
+            if remote_capsman_entry_name != 'None':
+                print(f"Error in configuration for {router_entry.router_name}: remote_capsman_entry must a name of another router entry or 'None', but it is '{remote_capsman_entry_name}'. Ignoring.")
 

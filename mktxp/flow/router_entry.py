@@ -196,7 +196,8 @@ class RouterEntry:
             if self._capsman_entry:
                 self._capsman_entry.api_connection.disconnect()
 
-        self._dhcp_records = {}
+        if not config_handler.system_entry.persistent_dhcp_cache:
+            self._dhcp_records = {}
         self._wireless_type = RouterEntryWirelessType.NONE
 
 DHCPCacheEntry = namedtuple('DHCPCacheEntry', ['type', 'record'])

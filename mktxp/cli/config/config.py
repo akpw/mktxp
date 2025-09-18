@@ -152,6 +152,7 @@ class MKTXPConfigKeys:
     MKTXP_COMPACT_CONFIG = 'compact_default_conf_values'
     MKTXP_PROMETHEUS_HEADERS_DEDUPLICATION = 'prometheus_headers_deduplication'
     MKTXP_PERSISTENT_ROUTER_CONNECTION_POOL = 'persistent_router_connection_pool'
+    MKTXP_PERSISTENT_DHCP_CACHE = 'persistent_dhcp_cache'
 
     # UnRegistered entries placeholder
     NO_ENTRIES_REGISTERED = 'NoEntriesRegistered'
@@ -203,7 +204,7 @@ class MKTXPConfigKeys:
                         FE_WIRELESS_KEY, FE_WIRELESS_CLIENTS_KEY, FE_CAPSMAN_KEY, FE_CAPSMAN_CLIENTS_KEY, FE_POE_KEY,
                         FE_NETWATCH_KEY, FE_PUBLIC_IP_KEY, FE_USER_KEY, FE_QUEUE_KEY}
 
-    SYSTEM_BOOLEAN_KEYS_YES = {MKTXP_PERSISTENT_ROUTER_CONNECTION_POOL}
+    SYSTEM_BOOLEAN_KEYS_YES = {MKTXP_PERSISTENT_ROUTER_CONNECTION_POOL, MKTXP_PERSISTENT_DHCP_CACHE}
     SYSTEM_BOOLEAN_KEYS_NO = {MKTXP_BANDWIDTH_KEY, MKTXP_VERBOSE_MODE, MKTXP_FETCH_IN_PARALLEL, MKTXP_COMPACT_CONFIG, MKTXP_PROMETHEUS_HEADERS_DEDUPLICATION}
 
     STR_KEYS = (HOST_KEY, USER_KEY, PASSWD_KEY, CREDENTIALS_FILE_KEY, SSL_CA_FILE, FE_REMOTE_DHCP_ENTRY, FE_REMOTE_CAPSMAN_ENTRY, FE_ADDRESS_LIST_KEY, FE_IPV6_ADDRESS_LIST_KEY, FE_CUSTOM_LABELS_KEY)
@@ -241,7 +242,8 @@ class ConfigEntry:
                                                        MKTXPConfigKeys.MKTXP_MIN_COLLECT_INTERVAL, MKTXPConfigKeys.MKTXP_FETCH_IN_PARALLEL,
                                                        MKTXPConfigKeys.MKTXP_MAX_WORKER_THREADS, MKTXPConfigKeys.MKTXP_MAX_SCRAPE_DURATION, 
                                                        MKTXPConfigKeys.MKTXP_TOTAL_MAX_SCRAPE_DURATION, MKTXPConfigKeys.MKTXP_COMPACT_CONFIG, 
-                                                       MKTXPConfigKeys.MKTXP_PROMETHEUS_HEADERS_DEDUPLICATION, MKTXPConfigKeys.MKTXP_PERSISTENT_ROUTER_CONNECTION_POOL]) 
+                                                       MKTXPConfigKeys.MKTXP_PROMETHEUS_HEADERS_DEDUPLICATION, MKTXPConfigKeys.MKTXP_PERSISTENT_ROUTER_CONNECTION_POOL,
+                                                       MKTXPConfigKeys.MKTXP_PERSISTENT_DHCP_CACHE])
 
 
 class OSConfig(metaclass=ABCMeta):
@@ -319,7 +321,8 @@ mockSystemEntry = ConfigEntry.MKTXPSystemEntry(
             total_max_scrape_duration=MKTXPConfigKeys.DEFAULT_MKTXP_TOTAL_MAX_SCRAPE_DURATION,
             compact_default_conf_values=False,
             prometheus_headers_deduplication=False,
-            persistent_router_connection_pool=True
+            persistent_router_connection_pool=True,
+            persistent_dhcp_cache=True
         )
 
 class MKTXPConfigHandler:
@@ -597,6 +600,7 @@ class MKTXPConfigHandler:
             MKTXPConfigKeys.MKTXP_MAX_WORKER_THREADS: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_MAX_WORKER_THREADS,
             MKTXPConfigKeys.MKTXP_MAX_SCRAPE_DURATION: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_MAX_SCRAPE_DURATION,
             MKTXPConfigKeys.MKTXP_TOTAL_MAX_SCRAPE_DURATION: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_TOTAL_MAX_SCRAPE_DURATION,
+            MKTXPConfigKeys.MKTXP_PERSISTENT_DHCP_CACHE: lambda _: True,
         }[key](value)
 
 
