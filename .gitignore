@@ -130,3 +130,11 @@ dmypy.json
 
 # PyCharm IDE
 .idea/
+
+# Ignore compressed archives
+*.tgz
+*.tar.gz
+*.tar
+*.zip
+*.gz
+*.rar
