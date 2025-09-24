@@ -149,6 +149,10 @@ Selected metrics info can be printed on the command line. For more information, 
                 help = "IP connections stats",
                 action = 'store_true')
 
+        optional_args_group.add_argument('-kc', '--kid_control', dest='kid_control',
+                help = "Kid Control device metrics",
+                action = 'store_true')
+
 
     # Options checking
     def _check_args(self, args, parser):

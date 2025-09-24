@@ -101,6 +101,9 @@ class MKTXPDispatcher:
         elif args['conn_stats']:
             OutputProcessor.conn_stats(args['entry_name'])
 
+        elif args['kid_control']:
+            OutputProcessor.kid_control(args['entry_name'])
+
         else:
             print("Select metric option(s) to print out, or run 'mktxp print -h' to find out more")
 

@@ -39,6 +39,9 @@ class BaseOutputProcessor:
     OutputConnStatsEntry = namedtuple('OutputConnStatsEntry', ['dhcp_name', 'src_address', 'connection_count', 'dst_addresses'])
     OutputConnStatsEntry.__new__.__defaults__ = ('',) * len(OutputConnStatsEntry._fields)
 
+    OutputKidControlEntry = namedtuple('OutputKidControlEntry', ['dhcp_name', 'name', 'user', 'dhcp_address', 'mac_address', 'ip_address', 'rate_up', 'rate_down', 'idle_time'])
+    OutputKidControlEntry.__new__.__defaults__ = ('',) * len(OutputKidControlEntry._fields)
+
 
     @staticmethod
     def augment_record(router_entry, registration_record, id_key = 'mac_address'):
@@ -110,6 +113,11 @@ class BaseOutputProcessor:
             rate = int(rate)
         except:
             return BaseOutputProcessor.parse_rates(rate)
+        
+        # Handle zero rate
+        if rate <= 0:
+            return "0 bps"
+        
         power = floor(log(rate, 1000))
         return f"{int(rate / 1000 ** power)} {['bps', 'Kbps', 'Mbps', 'Gbps'][int(power)]}"
 
@@ -141,6 +149,43 @@ class BaseOutputProcessor:
             wifi_signal_strength_rgx = re.compile(r'(-?\d+(?:\.\d+)?)')           
             config_handler.re_compiled['wifi_signal_strength_rgx'] = wifi_signal_strength_rgx
         return wifi_signal_strength_rgx.search(signal_strength).group()
+
+    @staticmethod
+    def parse_numeric_rate(rate_str):
+        """Extract numeric value from rate strings for sorting/comparison purposes.
+        Handles both raw numeric strings and parsed rate strings like '1 Kbps', '53 Mbps'.
+        Returns the rate in bps (bits per second) as an integer.
+        """
+        if not rate_str or rate_str == '0':
+            return 0
+        
+        # Handle raw numeric strings first
+        try:
+            return int(rate_str)
+        except (ValueError, TypeError):
+            pass
+        
+        # Handle parsed rate strings like '1 Kbps', '53 Mbps', '1.5 Gbps'
+        if isinstance(rate_str, str):
+            parts = rate_str.strip().split()
+            if len(parts) >= 1:
+                try:
+                    num = float(parts[0])
+                    if len(parts) > 1:
+                        unit = parts[1].lower()
+                        if 'gbps' in unit:
+                            return int(num * 1000000000)
+                        elif 'mbps' in unit:
+                            return int(num * 1000000)
+                        elif 'kbps' in unit:
+                            return int(num * 1000)
+                        elif 'bps' in unit:
+                            return int(num)
+                    return int(num)  # Default to bps if no unit
+                except ValueError:
+                    pass
+        
+        return 0
 
     @staticmethod
     def parse_interface_rate(interface_rate):

@@ -20,14 +20,16 @@ class KidDeviceMetricsDataSource:
     """
 
     @staticmethod
-    def metric_records(router_entry, *, metric_labels=None, translation_table=None):
+    def metric_records(router_entry, *, metric_labels=None, translation_table=None, cli_output=False):
         if metric_labels is None:
             metric_labels = []
         try:
             device_records = []
             records = router_entry.api_connection.router_api().get_resource('/ip/kid-control/device').get()
             for record in records:
-                if record.get('user') or router_entry.config_entry.kid_control_dynamic:
+                # If cli_output is True (called from print command), show all devices
+                # Otherwise, respect the configuration settings
+                if cli_output or record.get('user') or router_entry.config_entry.kid_control_dynamic:
                     device_records.append(record)
             return BaseDSProcessor.trimmed_records(router_entry, router_records=device_records, metric_labels=metric_labels, translation_table=translation_table)
         except Exception as exc:

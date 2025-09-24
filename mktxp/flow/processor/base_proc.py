@@ -25,6 +25,7 @@ from mktxp.cli.output.capsman_out import CapsmanOutput
 from mktxp.cli.output.wifi_out import WirelessOutput
 from mktxp.cli.output.dhcp_out import DHCPOutput
 from mktxp.cli.output.conn_stats_out import ConnectionsStatsOutput
+from mktxp.cli.output.kid_control_out import KidControlOutput
 
 import gzip
 from waitress import serve
@@ -129,5 +130,11 @@ class OutputProcessor:
         router_entry = RouterEntriesHandler.router_entry(entry_name)
         if router_entry:
             ConnectionsStatsOutput.clients_summary(router_entry)
+
+    @staticmethod
+    def kid_control(entry_name):
+        router_entry = RouterEntriesHandler.router_entry(entry_name)
+        if router_entry:
+            KidControlOutput.clients_summary(router_entry)
 
             

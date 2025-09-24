@@ -350,6 +350,41 @@ Similar to remote DHCP resolution, mktxp allows collecting CAPsMAN-related metri
     remote_capsman_entry = RouterA  # Will collect the CAPsMAN-related info via router A
 ```
 
+### Kid Control device monitoring
+MKTXP supports Kid Control devices monitoring, to track network activity and bandwidth usage for all connected devices on a RouterOS network. This helps identify high-traffic devices and monitor network usage patterns in real-time.
+
+The Kid Control functionality offers two modes of operation:
+```
+kid_control_assigned = False    # Allow Kid Control metrics for connected devices with assigned users
+kid_control_dynamic = False     # Allow Kid Control metrics for all connected devices, including those without assigned user
+```
+
+When set up on the router, you can also view Kid Control device metrics directly from the command line:
+```
+❯ mktxp print -en MKT-GT -kc
+MKT-GT@10.70.0.1: OK to connect
+Connecting to router MKT-GT@10.70.0.1
+2025-09-24 12:08:42 Connection to router MKT-GT@10.70.0.1 has been established
++-------------------+-------------------+---------------+----------------+-------------------+------------------+---------+-----------+------------+
+|     dhcp_name     |       name        |     user      |  dhcp_address  |    mac_address    |    ip_address    | rate_up | rate_down | idle_time  |
++===================+===================+===============+================+===================+==================+=========+===========+============+
+| MacBook Pro       |    MacBookPro     | alice         |   10.10.0.15   | A1:B2:C3:D4:E5:F6 |   10.10.0.15     | 2 Mbps  |  15 Mbps  |  a second  |
+| Smart TV          |   Samsung TV      |               |   10.20.0.45   | C1:D2:E3:F4:A5:B6 |   10.20.0.45     | 1 Mbps  |  8 Mbps   | 10 seconds |
+| iPhone 15         |     iPhone        | alice         |   10.10.0.22   | A2:B3:C4:D5:E6:F7 |   10.10.0.22     | 512 Kbps|  3 Mbps   |  2 seconds |
+| Galaxy Tab        |  Samsung Galaxy   | bob           |   10.10.0.28   | B1:C2:D3:E4:F5:A6 |   10.10.0.28     | 256 Kbps|  1 Mbps   |  5 seconds |
+| Kitchen Display   |   Google Nest     |               |   10.20.0.52   | D1:E2:F3:A4:B5:C6 |   10.20.0.52     | 128 Kbps|  512 Kbps | 30 seconds |
+| Ring Doorbell     |   Ring Camera     |               |   10.20.0.67   | E1:F2:A3:B4:C5:D6 |   10.20.0.67     | 64 Kbps |  256 Kbps |  a minute  |
+| Smart Thermostat  |      Nest         |               |   10.20.0.73   | F1:A2:B3:C4:D5:E6 |   10.20.0.73     | 32 Kbps |  64 Kbps  |  2 minutes |
+| Alexa Echo        |   Amazon Echo     |               |   10.20.0.81   | A3:B4:C5:D6:E7:F8 |   10.20.0.81     |  0 bps  |   0 bps   |  5 minutes |
++-------------------+-------------------+---------------+----------------+-------------------+------------------+---------+-----------+------------+
+alice devices: 2
+bob devices: 1
+User-assigned devices: 3
+Dynamic devices (no user): 5
+Total Kid Control devices: 8
+```
+The devices are automatically sorted by total bandwidth usage (upload + download rates), making it easy to identify high-traffic devices at a glance.
+
 ### Connections stats
 With many connected devices everywhere, one can often only guess where do they go to and what they actually do with all the information from your network environment. MKTXP let's you easily track those with a single option, with results available both from [mktxp dashboard](https://grafana.com/grafana/dashboards/13679-mikrotik-mktxp-exporter/) and the command line:
 
