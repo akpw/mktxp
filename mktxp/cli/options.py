@@ -153,6 +153,10 @@ Selected metrics info can be printed on the command line. For more information, 
                 help = "Kid Control device metrics",
                 action = 'store_true')
 
+        optional_args_group.add_argument('-al', '--address_lists', dest='address_lists',
+                help = "Address List metrics (comma-separated list names)",
+                type = str)
+
 
     # Options checking
     def _check_args(self, args, parser):

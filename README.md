@@ -351,7 +351,7 @@ Similar to remote DHCP resolution, mktxp allows collecting CAPsMAN-related metri
 ```
 
 ### Kid Control device monitoring
-MKTXP supports Kid Control devices monitoring, to track network activity and bandwidth usage for all connected devices on a RouterOS network. This helps identify high-traffic devices and monitor network usage patterns in real-time.
+MKTXP Kid Control metrics help track network activity and bandwidth usage for all connected devices on a RouterOS network. This makes it easy to identify high-traffic devices and monitor network usage patterns in real-time.
 
 The Kid Control functionality offers two modes of operation:
 ```
@@ -359,7 +359,7 @@ kid_control_assigned = False    # Allow Kid Control metrics for connected device
 kid_control_dynamic = False     # Allow Kid Control metrics for all connected devices, including those without assigned user
 ```
 
-When set up on the router, you can also view Kid Control device metrics directly from the command line:
+When set up on the router, is is possible to view Kid Control device metrics directly from the command line:
 ```
 ❯ mktxp print -en MKT-GT -kc
 MKT-GT@10.70.0.1: OK to connect
@@ -384,6 +384,37 @@ Dynamic devices (no user): 5
 Total Kid Control devices: 8
 ```
 The devices are automatically sorted by total bandwidth usage (upload + download rates), making it easy to identify high-traffic devices at a glance.
+
+### Address List device monitoring
+Similarly to the above, MKTXP IPv4 / IPv6 firewall address lists can be inspected directly from the command line. The feature supports multiple address lists and automatically detects which IP versions contain which entries.
+
+```
+❯ mktxp print -en MKT-GT -al "blocklist, allowlist"
+MKT-GT@10.70.0.1: OK to connect
+Connecting to router MKT-GT@10.70.0.1
+2025-09-25 12:15:30 Connection to router MKT-GT@10.70.0.1 has been established
+
+Address Lists (IPv4):
++----------+---------------+------------------+---------+---------+----------+
+|   list   |    address    |     comment      | timeout | dynamic | disabled |
++==========+===============+==================+=========+=========+==========+
+| blocklist| 192.168.1.100 | Suspicious host  |         |   No    |   No     |
+| blocklist| 10.0.0.5      | Auto-blocked     | 2h      |   Yes   |   No     |
+| allowlist| 192.168.1.10  | Admin workstation|         |   No    |   No     |
++----------+---------------+------------------+---------+---------+----------+
+Total entries: 3
+Unique lists: 2
+
+Address Lists (IPv6):
++----------+----------------+------------------+---------+---------+----------+
+|   list   |    address     |     comment      | timeout | dynamic | disabled |
++==========+================+==================+=========+=========+==========+
+| blocklist| 2001:db8::bad  | IPv6 bad actor   |         |   No    |   No     |
++----------+----------------+------------------+---------+---------+----------+
+Total entries: 1
+Unique lists: 1
+```
+The command automatically queries both IPv4 and IPv6 address lists, displaying separate tables when entries exist in both IP versions. Missing lists are reported as warnings, and entries are sorted by list name and then by address for easy scanning.
 
 ### Connections stats
 With many connected devices everywhere, one can often only guess where do they go to and what they actually do with all the information from your network environment. MKTXP let's you easily track those with a single option, with results available both from [mktxp dashboard](https://grafana.com/grafana/dashboards/13679-mikrotik-mktxp-exporter/) and the command line:

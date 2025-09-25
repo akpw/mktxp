@@ -42,6 +42,9 @@ class BaseOutputProcessor:
     OutputKidControlEntry = namedtuple('OutputKidControlEntry', ['dhcp_name', 'name', 'user', 'dhcp_address', 'mac_address', 'ip_address', 'rate_up', 'rate_down', 'idle_time'])
     OutputKidControlEntry.__new__.__defaults__ = ('',) * len(OutputKidControlEntry._fields)
 
+    OutputAddressListEntry = namedtuple('OutputAddressListEntry', ['list', 'address', 'comment', 'timeout', 'dynamic', 'disabled'])
+    OutputAddressListEntry.__new__.__defaults__ = ('',) * len(OutputAddressListEntry._fields)
+
 
     @staticmethod
     def augment_record(router_entry, registration_record, id_key = 'mac_address'):

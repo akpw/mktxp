@@ -104,6 +104,9 @@ class MKTXPDispatcher:
         elif args['kid_control']:
             OutputProcessor.kid_control(args['entry_name'])
 
+        elif args['address_lists']:
+            OutputProcessor.address_lists(args['entry_name'], args['address_lists'])
+
         else:
             print("Select metric option(s) to print out, or run 'mktxp print -h' to find out more")
 
