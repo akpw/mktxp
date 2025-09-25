@@ -21,8 +21,8 @@ from mktxp.flow.processor.output import BaseOutputProcessor
 
 @pytest.fixture
 def mock_config_handler():
-    """ Create a mock config_handler with necessary attributes
-    """
+    ''' Create a mock config_handler with necessary attributes
+    '''
     config_handler = Mock()
     config_handler.re_compiled = {}
     return config_handler
@@ -30,8 +30,8 @@ def mock_config_handler():
 
 @pytest.fixture
 def mock_router_entry():
-    """ Create a mock router entry with necessary attributes
-    """
+    ''' Create a mock router entry with necessary attributes
+    '''
     router_entry = Mock()
     router_entry.config_entry.use_comments_over_names = False
     router_entry.dhcp_records = {}
@@ -81,9 +81,9 @@ device_sorting_test_cases = [
 
 @pytest.mark.parametrize("case_name, device_records, expected_order", device_sorting_test_cases)
 def test_kid_control_devices_sorting(case_name, device_records, expected_order, mock_router_entry, mock_config_handler, capsys):
-    """
+    '''
     Test that Kid Control devices are properly sorted by total bandwidth (rate_up + rate_down).
-    """
+    '''
     with patch('mktxp.datasource.kid_control_device_ds.KidDeviceMetricsDataSource.metric_records') as mock_metrics, \
          patch('mktxp.flow.processor.output.config_handler', mock_config_handler), \
          patch('mktxp.datasource.dhcp_ds.DHCPMetricsDataSource.metric_records'), \
@@ -135,9 +135,9 @@ def test_kid_control_devices_sorting(case_name, device_records, expected_order, 
     (None, "0 bps", 0),
 ])
 def test_rate_parsing_and_formatting(rate_input, expected_display, expected_numeric, mock_config_handler):
-    """
+    '''
     Test that rate parsing works correctly for both display formatting and numeric sorting.
-    """
+    '''
     with patch('mktxp.flow.processor.output.config_handler', mock_config_handler):
         # Mock regex patterns
         mock_config_handler.re_compiled = {
@@ -155,9 +155,9 @@ def test_rate_parsing_and_formatting(rate_input, expected_display, expected_nume
 
 
 def test_no_kid_control_records(mock_router_entry, capsys):
-    """
+    '''
     Test behavior when no Kid Control device records are available.
-    """
+    '''
     with patch('mktxp.datasource.kid_control_device_ds.KidDeviceMetricsDataSource.metric_records') as mock_metrics:
         mock_metrics.return_value = []
         
@@ -168,9 +168,9 @@ def test_no_kid_control_records(mock_router_entry, capsys):
 
 
 def test_no_kid_control_records(mock_router_entry, capsys):
-    """
+    '''
     Test behavior when no Kid Control device records are available.
-    """
+    '''
     with patch('mktxp.datasource.kid_control_device_ds.KidDeviceMetricsDataSource.metric_records') as mock_metrics:
         mock_metrics.return_value = []
         
@@ -181,9 +181,9 @@ def test_no_kid_control_records(mock_router_entry, capsys):
 
 
 def test_parse_numeric_rate_edge_cases():
-    """
+    '''
     Test parse_numeric_rate with various edge cases.
-    """
+    '''
     test_cases = [
         ('', 0),
         ('0', 0),
@@ -203,9 +203,9 @@ def test_parse_numeric_rate_edge_cases():
 
 
 def test_zero_rate_bitrates_formatting(mock_config_handler):
-    """
+    '''
     Test that zero rates are properly handled in parse_bitrates to avoid log domain errors.
-    """
+    '''
     with patch('mktxp.flow.processor.output.config_handler', mock_config_handler):
         mock_config_handler.re_compiled = {}
         
@@ -218,9 +218,9 @@ def test_zero_rate_bitrates_formatting(mock_config_handler):
 
 
 def test_combined_rate_calculation_sorting():
-    """
+    '''
     Test that the combined rate calculation (rate_up + rate_down) works correctly for sorting.
-    """
+    '''
     # Test case where download heavy device should rank higher than upload heavy
     device1_up = BaseOutputProcessor.parse_numeric_rate('1048576')    # 1MB up
     device1_down = BaseOutputProcessor.parse_numeric_rate('20971520') # 20MB down

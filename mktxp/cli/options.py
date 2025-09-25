@@ -157,6 +157,10 @@ Selected metrics info can be printed on the command line. For more information, 
                 help = "Address List metrics (comma-separated list names)",
                 type = str)
 
+        optional_args_group.add_argument('-nw', '--netwatch', dest='netwatch',
+                help = "Netwatch metrics",
+                action = 'store_true')
+
 
     # Options checking
     def _check_args(self, args, parser):

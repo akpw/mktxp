@@ -27,6 +27,7 @@ from mktxp.cli.output.dhcp_out import DHCPOutput
 from mktxp.cli.output.conn_stats_out import ConnectionsStatsOutput
 from mktxp.cli.output.kid_control_out import KidControlOutput
 from mktxp.cli.output.address_list_out import AddressListOutput
+from mktxp.cli.output.netwatch_out import NetwatchOutput
 
 import gzip
 from waitress import serve
@@ -143,5 +144,11 @@ class OutputProcessor:
         router_entry = RouterEntriesHandler.router_entry(entry_name)
         if router_entry:
             AddressListOutput.clients_summary(router_entry, address_lists_str)
+
+    @staticmethod
+    def netwatch(entry_name):
+        router_entry = RouterEntriesHandler.router_entry(entry_name)
+        if router_entry:
+            NetwatchOutput.clients_summary(router_entry)
 
             

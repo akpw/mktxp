@@ -45,6 +45,9 @@ class BaseOutputProcessor:
     OutputAddressListEntry = namedtuple('OutputAddressListEntry', ['list', 'address', 'comment', 'timeout', 'dynamic', 'disabled'])
     OutputAddressListEntry.__new__.__defaults__ = ('',) * len(OutputAddressListEntry._fields)
 
+    OutputNetwatchEntry = namedtuple('OutputNetwatchEntry', ['name', 'host', 'comment', 'status', 'type', 'since', 'timeout', 'interval'])
+    OutputNetwatchEntry.__new__.__defaults__ = ('',) * len(OutputNetwatchEntry._fields)
+
 
     @staticmethod
     def augment_record(router_entry, registration_record, id_key = 'mac_address'):

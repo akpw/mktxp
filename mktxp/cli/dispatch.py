@@ -107,6 +107,9 @@ class MKTXPDispatcher:
         elif args['address_lists']:
             OutputProcessor.address_lists(args['entry_name'], args['address_lists'])
 
+        elif args['netwatch']:
+            OutputProcessor.netwatch(args['entry_name'])
+
         else:
             print("Select metric option(s) to print out, or run 'mktxp print -h' to find out more")
 
