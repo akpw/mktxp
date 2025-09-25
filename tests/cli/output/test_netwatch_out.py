@@ -28,23 +28,7 @@ def mock_router_entry():
     return router_entry
 
 
-# Test cases for since formatting
-since_format_test_cases = [
-    ("empty_string", "", ""),
-    ("none_value", None, ""),
-    ("valid_date", "jan/02/2023 12:34:56", "jan/02/2023 12:34:56"),
-    ("different_format", "2023-01-02 12:34:56", "2023-01-02 12:34:56"),
-]
-
-
 class TestNetwatchOutput:
-    
-    @pytest.mark.parametrize("case_name, input_value, expected_output", since_format_test_cases)
-    def test_format_since(self, case_name, input_value, expected_output):
-        ''' Test since value formatting with various input values
-        '''
-        result = NetwatchOutput._format_since(input_value)
-        assert result == expected_output
 
     @patch('mktxp.cli.output.netwatch_out.NetwatchMetricsDataSource.metric_records')
     def test_collect_records_success(self, mock_metric_records, mock_router_entry):

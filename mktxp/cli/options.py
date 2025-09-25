@@ -155,7 +155,8 @@ Selected metrics info can be printed on the command line. For more information, 
 
         optional_args_group.add_argument('-al', '--address_lists', dest='address_lists',
                 help = "Address List metrics (comma-separated list names)",
-                type = str)
+                type = str,
+                metavar = 'LISTS')
 
         optional_args_group.add_argument('-nw', '--netwatch', dest='netwatch',
                 help = "Netwatch metrics",
