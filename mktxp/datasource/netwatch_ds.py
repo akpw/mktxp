@@ -25,8 +25,10 @@ class NetwatchMetricsDataSource:
         try:
             netwatch_records = router_entry.api_connection.router_api().get_resource('/tool/netwatch').get()
             netwatch_records = [entry for entry in netwatch_records if entry.get('disabled', 'false') != 'true']
-            if 'name' in metric_labels:
-                for netwatch_record in netwatch_records:
+
+            # since addition in ROS v7.14, name is supported natively
+            for netwatch_record in netwatch_records:
+                if not netwatch_record.get('name'):
                     comment = netwatch_record.get('comment')
                     host = netwatch_record.get('host')        
                     if comment:
