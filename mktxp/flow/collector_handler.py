@@ -39,28 +39,38 @@ class CollectorHandler:
                 # let's pick up on things in the next run
                 continue
 
-            for collector_ID, collect_func in self.collector_registry.registered_collectors.items():
-                start = default_timer()
-                yield from collect_func(router_entry)
-                router_entry.time_spent[collector_ID] += default_timer() - start
-            router_entry.is_done()
+            try:
+                for collector_ID, collect_func in self.collector_registry.registered_collectors.items():
+                    start = default_timer()
+                    yield from collect_func(router_entry)
+                    router_entry.time_spent[collector_ID] += default_timer() - start
+                router_entry.is_done()
+            except Exception as e:
+                if config_handler.system_entry.verbose_mode:
+                    print(f"Exception while scraping {router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_NAME]}: {e}")
+                continue
 
     def collect_router_entry_async(self, router_entry, scrape_timeout_event, total_scrape_timeout_event):
         results = []
-        for collector_ID, collect_func in self.collector_registry.registered_collectors.items():
-            if scrape_timeout_event.is_set():
-                print(f'Hit timeout while scraping router entry: {router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_NAME]}')
-                break
+        try:
+            for collector_ID, collect_func in self.collector_registry.registered_collectors.items():
+                if scrape_timeout_event.is_set():
+                    print(f'Hit timeout while scraping router entry: {router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_NAME]}')
+                    break
 
-            if total_scrape_timeout_event.is_set():
-                print(f'Hit overall timeout while scraping router entry: {router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_NAME]}')
-                break
+                if total_scrape_timeout_event.is_set():
+                    print(f'Hit overall timeout while scraping router entry: {router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_NAME]}')
+                    break
 
-            start = default_timer()
-            result = list(collect_func(router_entry))
-            results += result
-            router_entry.time_spent[collector_ID] += default_timer() - start        
-        router_entry.is_done()
+                start = default_timer()
+                result = list(collect_func(router_entry))
+                results += result
+                router_entry.time_spent[collector_ID] += default_timer() - start
+            router_entry.is_done()
+        except Exception as e:
+            if config_handler.system_entry.verbose_mode:
+                print(f"Exception while scraping {router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_NAME]}: {e}")
+
         return results
 
 
