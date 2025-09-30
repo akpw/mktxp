@@ -46,7 +46,6 @@ class W60gCollector(BaseCollector):
             'connected': lambda value: '1' if value == 'yes' else '0',
             'distance': lambda value: value.strip('m'),
             'name': lambda value: value if value else '',
-            'tx_phy_rate': lambda value: W60gCollector._rates(value) if value else '0',
             'tx_packet_error_rate': lambda value: value.strip('%')
         }
         monitor_records = InterfaceMonitorMetricsDataSource.metric_records(
@@ -164,21 +163,3 @@ class W60gCollector(BaseCollector):
             'tx_sector',
             ['name']
         )
-
-    @staticmethod
-    def _rates(rate_option):
-        # Rates are given with bps unit figures. Convert to Mbps.
-        rate_value = {
-                '10Mbps': '10',
-                '100Mbps': '100',
-                '1Gbps': '1000',
-                '2.5Gbps': '2500',
-                '5Gbps': '5000',
-                '10Gbps': '10000',
-                '40Gbps': '40000'
-                }.get(rate_option, None)
-        if rate_value:
-            return rate_value
-
-        # ...or just calculate in case it's not
-        return BaseOutputProcessor.parse_interface_rate(rate_option)
