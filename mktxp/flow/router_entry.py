@@ -40,7 +40,7 @@ class RouterEntryConnectionState(IntEnum):
 
 class RouterEntry:
     ''' RouterOS Entry
-    '''                 
+    '''
     def __init__(self, router_name):
         self.router_name = router_name
         self.config_entry = config_handler.config_entry(router_name)
@@ -49,7 +49,7 @@ class RouterEntry:
             MKTXPConfigKeys.ROUTERBOARD_NAME: self.router_name,
             MKTXPConfigKeys.ROUTERBOARD_ADDRESS: self.config_entry.hostname
             }
-        
+
         self.time_spent =  { CollectorKeys.IDENTITY_COLLECTOR: 0,
                             CollectorKeys.SYSTEM_RESOURCE_COLLECTOR: 0,
                             CollectorKeys.HEALTH_COLLECTOR: 0,
@@ -65,13 +65,14 @@ class RouterEntry:
                             CollectorKeys.INTERFACE_COLLECTOR: 0,
                             CollectorKeys.FIREWALL_COLLECTOR: 0,
                             CollectorKeys.MONITOR_COLLECTOR: 0,
+                            CollectorKeys.W60G_COLLECTOR: 0,
                             CollectorKeys.POE_COLLECTOR: 0,
                             CollectorKeys.NETWATCH_COLLECTOR: 0,
                             CollectorKeys.ROUTE_COLLECTOR: 0,
                             CollectorKeys.WLAN_COLLECTOR: 0,
                             CollectorKeys.CAPSMAN_COLLECTOR: 0,
                             CollectorKeys.QUEUE_TREE_COLLECTOR: 0,
-                            CollectorKeys.QUEUE_SIMPLE_COLLECTOR: 0,                            
+                            CollectorKeys.QUEUE_SIMPLE_COLLECTOR: 0,
                             CollectorKeys.KID_CONTROL_DEVICE_COLLECTOR: 0,
                             CollectorKeys.USER_COLLECTOR: 0,
                             CollectorKeys.BFD_COLLECTOR: 0,
@@ -85,11 +86,11 @@ class RouterEntry:
                             CollectorKeys.MKTXP_COLLECTOR: 0,
                             CollectorKeys.CERTIFICATE_COLLECTOR: 0,
                             CollectorKeys.CONTAINER_COLLECTOR: 0
-                            }         
-        self._dhcp_entry = None        
+                            }
+        self._dhcp_entry = None
         self._dhcp_records = {}
         self._capsman_entry = None
-        self._wireless_type = RouterEntryWirelessType.NONE                                    
+        self._wireless_type = RouterEntryWirelessType.NONE
 
     @property
     def wireless_type(self):
@@ -130,7 +131,7 @@ class RouterEntry:
     @property
     def dhcp_records(self):
         return [entry.record for key, entry in  self._dhcp_records.items() if entry.type == 'mac_address'] \
-                                                                                if self._dhcp_records else None   
+                                                                                if self._dhcp_records else None
     @dhcp_records.setter
     def dhcp_records(self, dhcp_records):
         for dhcp_record in dhcp_records:
@@ -164,8 +165,8 @@ class RouterEntry:
                 self.api_connection.connect()
             except RouterAPIConnectionError as exc:
                 print (f'{exc}')
-        
-        if self._dhcp_entry and not self._dhcp_entry.api_connection.is_connected():            
+
+        if self._dhcp_entry and not self._dhcp_entry.api_connection.is_connected():
             try:
                 self._dhcp_entry.api_connection.connect()
             except RouterAPIConnectionError as exc:
@@ -177,15 +178,15 @@ class RouterEntry:
             except RouterAPIConnectionError as exc:
                 print (f'{exc}')
 
-    def is_ready(self):           
+    def is_ready(self):
         # self.is_done() #flush caches, just in case
         is_ready = False
 
         if self.connection_status() in (RouterEntryConnectionState.NOT_CONNECTED, RouterEntryConnectionState.PARTIALLY_CONNECTED):
             self.connect()
-        if self.connection_status() in (RouterEntryConnectionState.CONNECTED, RouterEntryConnectionState.PARTIALLY_CONNECTED):            
-            is_ready = True        
-        
+        if self.connection_status() in (RouterEntryConnectionState.CONNECTED, RouterEntryConnectionState.PARTIALLY_CONNECTED):
+            is_ready = True
+
         return is_ready
 
     def is_done(self):

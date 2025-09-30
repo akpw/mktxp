@@ -138,3 +138,8 @@ dmypy.json
 *.zip
 *.gz
 *.rar
+
+# mktxp config
+
+/mktxp.conf
+_mktxp.conf
