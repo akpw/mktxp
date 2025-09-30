@@ -43,7 +43,7 @@ class W60gCollector(BaseCollector):
         ]
 
         translation_table = {
-            'connected': lambda value: '1' if value == 'yes' else '0',
+            'connected': lambda value: '1' if value == 'true' else '0',
             'distance': lambda value: value.strip('m'),
             'name': lambda value: value if value else '',
             'tx_packet_error_rate': lambda value: value.strip('%')
