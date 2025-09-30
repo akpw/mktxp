@@ -7,11 +7,11 @@
 
 ## Description
 MKTXP is a Prometheus Exporter for Mikrotik RouterOS devices.\
-It gathers and exports a rich set of metrics across multiple routers, all easily configurable via built-in CLI interface. 
+It gathers and exports a rich set of metrics across multiple routers, all easily configurable via built-in CLI interface.
 
 While simple to use, MKTXP supports [advanced features](https://github.com/akpw/mktxp#advanced-features) such as automatic IP address resolution with both local & remote DHCP servers, concurrent exports across multiple router devices, configurable data processing & transformations, injectable custom labels for easy device grouping, optional bandwidth testing, etc.
 
-Apart from exporting to Prometheus, MKTXP can print selected metrics directly on the command line (see examples below). 
+Apart from exporting to Prometheus, MKTXP can print selected metrics directly on the command line (see examples below).
 
 For effortless visualization of the RouterOS metrics exported to Prometheus, MKTXP comes with a dedicated [Grafana dashboard](https://grafana.com/grafana/dashboards/13679):
 
@@ -20,13 +20,13 @@ For effortless visualization of the RouterOS metrics exported to Prometheus, MKT
 
 #### Requirements:
 - Supported OSs:
-   * Linux   
+   * Linux
    * Mac OSX
    * FreeBSD
 
 - Mikrotik RouterOS device(s)
 
-- Optional: 
+- Optional:
    * [Prometheus](https://prometheus.io/docs/prometheus/latest/installation/)
    * [Grafana](https://grafana.com/docs/grafana/latest/installation/)
    * [Docker](https://docs.docker.com/) / [Docker Compose](https://docs.docker.com/compose/)
@@ -48,7 +48,7 @@ There are multiple ways to install this project, from a standalone app to a [ful
 
 
 ## Getting started
-To get started with MKTXP, you need to edit its main configuration file. This essentially involves filling in your Mikrotik devices IP addresses & authentication info, optionally modifying various settings to specific needs. 
+To get started with MKTXP, you need to edit its main configuration file. This essentially involves filling in your Mikrotik devices IP addresses & authentication info, optionally modifying various settings to specific needs.
 
 The default configuration file comes with a sample configuration, making it easy to copy / edit parameters for your RouterOS devices as needed:
 ```
@@ -67,12 +67,12 @@ The default configuration file comes with a sample configuration, making it easy
     enabled = True          # turns metrics collection for this RouterOS device on / off
     hostname = localhost    # RouterOS IP address
     port = 8728             # RouterOS IP Port
-    
+
     username = username     # RouterOS user, needs to have 'read' and 'api' permissions
     password = password
     credentials_file = ""   # To use an external file in YAML format for both username and password, specify the path here
-    
-    custom_labels = None    # Custom labels to be injected to all device metrics, comma-separated key:value (or key=value) pairs    
+
+    custom_labels = None    # Custom labels to be injected to all device metrics, comma-separated key:value (or key=value) pairs
                             # Example: 'dc:london, rack=a1, service:prod' (quotation marks are optional)
 
     use_ssl = False                 # enables connection via API-SSL servis
@@ -88,10 +88,10 @@ The default configuration file comes with a sample configuration, making it easy
     dhcp_lease = True               # DHCP lease metrics
 
     connections = True              # IP connections metrics
-    connection_stats = False        # Open IP connections metrics 
+    connection_stats = False        # Open IP connections metrics
 
     interface = True                # Interfaces traffic metrics
-    
+
     route = True                    # IPv4 Routes metrics
     pool = True                     # IPv4 Pool metrics
     firewall = True                 # IPv4 Firewall rules traffic metrics
@@ -99,7 +99,7 @@ The default configuration file comes with a sample configuration, making it easy
     address_list = None             # Firewall Address List metrics, a comma-separated list of names
     dns = False                     # DNS stats
 
-    ipv6_route = False              # IPv6 Routes metrics    
+    ipv6_route = False              # IPv6 Routes metrics
     ipv6_pool = False               # IPv6 Pool metrics
     ipv6_firewall = False           # IPv6 Firewall rules traffic metrics
     ipv6_neighbor = False           # IPv6 Reachable Neighbors
@@ -113,6 +113,7 @@ The default configuration file comes with a sample configuration, making it easy
     wireless_clients = True         # WLAN clients metrics
     capsman = True                  # CAPsMAN general metrics
     capsman_clients = True          # CAPsMAN clients metrics
+    w60g = False                    # W60G metrics
 
     eoip = False                    # EoIP status metrics
     gre = False                     # GRE status metrics
@@ -133,9 +134,9 @@ The default configuration file comes with a sample configuration, making it easy
     certificate = False             # Certificates metrics
 
     container = False               # Containers metrics
-    
+
     remote_dhcp_entry = None        # An MKTXP entry to provide for remote DHCP info / resolution
-    remote_capsman_entry = None     # An MKTXP entry to provide for remote capsman info 
+    remote_capsman_entry = None     # An MKTXP entry to provide for remote capsman info
 
     use_comments_over_names = True  # when available, forces using comments over the interfaces names
     check_for_updates = False       # check for available ROS updates
@@ -223,7 +224,7 @@ But let's get back on track and proceed with the business of exporting RouterOS 
 
 ## Exporting to Prometheus
 For getting your routers' metrics into an existing Prometheus installation, we basically just need to connect MKTXP to it. \
-Let's do just that via editing the Prometheus config file: 
+Let's do just that via editing the Prometheus config file:
 ```
 ❯ nano /etc/prometheus/prometheus.yml
 ```
@@ -248,7 +249,7 @@ Connecting to router MKT-LR@10.**.*.**
 ````
 
 ## MKTXP system configuration
-In case you need more control on how MKTXP is run, it can be done via editing the `_mktxp.conf` file. This allows things like changing the port <sup>💡</sup> and other impl-related parameters, enable parallel router fetching and configurable scrapes timeouts, etc. 
+In case you need more control on how MKTXP is run, it can be done via editing the `_mktxp.conf` file. This allows things like changing the port <sup>💡</sup> and other impl-related parameters, enable parallel router fetching and configurable scrapes timeouts, etc.
 As before, for local installation the editing can be done directly from mktxp:
 ```
 mktxp edit -i
@@ -258,27 +259,27 @@ mktxp edit -i
 [MKTXP]
     listen = '0.0.0.0:49090'         # Space separated list of socket addresses to listen to, both IPV4 and IPV6
     socket_timeout = 2
-    
+
     initial_delay_on_failure = 120
     max_delay_on_failure = 900
     delay_inc_div = 5
 
-    bandwidth = False               # Turns metrics bandwidth metrics collection on / off    
+    bandwidth = False               # Turns metrics bandwidth metrics collection on / off
     bandwidth_test_interval = 600   # Interval for collecting bandwidth metrics
     minimal_collect_interval = 5    # Minimal metric collection interval
 
     verbose_mode = False            # Set it on for troubleshooting
 
-    fetch_routers_in_parallel = False   # Fetch metrics from multiple routers in parallel / sequentially     
+    fetch_routers_in_parallel = False   # Fetch metrics from multiple routers in parallel / sequentially
     max_worker_threads = 5              # Max number of worker threads that can fetch routers (parallel fetch only)
     max_scrape_duration = 10            # Max duration of individual routers' metrics collection (parallel fetch only)
     total_max_scrape_duration = 30      # Max overall duration of all metrics collection (parallel fetch only)
 
     persistent_router_connection_pool = True  # Use a persistent router connections pool between scrapes
     persistent_dhcp_cache = True              # Persist DHCP cache between metric collections
-    compact_default_conf_values = False       # Compact mktxp.conf, so only specific values are kept on the individual routers' level    
-    prometheus_headers_deduplication = False  # Deduplicate Prometheus HELP / TYPE headers in the metrics output 
-```    
+    compact_default_conf_values = False       # Compact mktxp.conf, so only specific values are kept on the individual routers' level
+    prometheus_headers_deduplication = False  # Deduplicate Prometheus HELP / TYPE headers in the metrics output
+```
 <sup>💡</sup> *When changing the default mktxp port for [docker image installs](https://github.com/akpw/mktxp#docker-image-install), you'll need to adjust the `docker run ... -p 49090:49090 ...` command to reflect the new port*
 
 ## Grafana dashboard
@@ -289,7 +290,7 @@ Now with your RouterOS metrics being exported to Prometheus, it's easy to visual
 ### mktxp commands
        . MKTXP commands:
         .. info     Shows base MKTXP info
-        .. edit     Open MKTXP configuration file in your editor of choice        
+        .. edit     Open MKTXP configuration file in your editor of choice
         .. print    Displays selected metrics on the command line
         .. export   Starts collecting metrics for all enabled RouterOS configuration entries
         .. show     Shows MKTXP configuration entries on the command line
@@ -317,7 +318,7 @@ optional arguments:
   -en, --entry-name ['Sample-Router']
                         Config entry name
   -cfg, --config        Shows MKTXP config files paths
-````  
+````
 
 ## Advanced features
 While most of the [mktxp options](https://github.com/akpw/mktxp#getting-started) are self explanatory, some might require a bit of a context.
@@ -337,7 +338,7 @@ remote_dhcp_entry = None        # An MKTXP entry to provide for remote DHCP info
 ```
 
 ### Remote CAPsMAN info
-Similar to remote DHCP resolution, mktxp allows collecting CAPsMAN-related metrics via the following option: 
+Similar to remote DHCP resolution, mktxp allows collecting CAPsMAN-related metrics via the following option:
 ```
     remote_capsman_entry = None     # An MKTXP entry to provide for remote capsman info
 ```
@@ -420,7 +421,7 @@ The command automatically queries both IPv4 and IPv6 address lists, displaying s
 With many connected devices everywhere, one can often only guess where do they go to and what they actually do with all the information from your network environment. MKTXP let's you easily track those with a single option, with results available both from [mktxp dashboard](https://grafana.com/grafana/dashboards/13679-mikrotik-mktxp-exporter/) and the command line:
 
 ```
-connection_stats = False        # Open IP connections metrics 
+connection_stats = False        # Open IP connections metrics
 ```
 Setting this to `True` obviously enables the feature and allows to see something like that:
 
@@ -455,7 +456,7 @@ To keeps things within expected boundaries, the last two parameters allows for c
 You can add custom labels to your devices using the `custom_labels` option. These labels are attached to all the metrics for a specific device, allowing e.g. easy router grouping for detailed overview dashboards in Grafana. You can define default labels in the `[default]` section and override or extend them in the router-specific sections.
 
 ### mktxp endpoint listen addresses
-By default, mktxp runs it's HTTP metrics endpoint on any IPv4 address on port 49090. However, it is also able to listen on multiple socket addresses, both IPv4 and IPv6. 
+By default, mktxp runs it's HTTP metrics endpoint on any IPv4 address on port 49090. However, it is also able to listen on multiple socket addresses, both IPv4 and IPv6.
 You can configure this behaviour via the following [system option](https://github.com/akpw/mktxp/blob/main/README.md#mktxp-system-configuration), setting ```listen``` to a space-separated list of sockets to listen to, e.g.:
 ```
 listen = '0.0.0.0:49090 [::1]:49090'
@@ -531,7 +532,7 @@ Now copy and paste the following:
 . /etc/rc.subr
 
 name=mktxp
-rcvar=mktxp_enable 
+rcvar=mktxp_enable
 
 : ${mktxp_enable:="NO"}
 : ${mktxp_user:="root"}
@@ -543,7 +544,7 @@ mktxp_command="/usr/local/bin/mktxp export"
 procname="daemon"
 command_args=" -c -f -P ${pidfile} ${mktxp_command}"
 
-load_rc_config $name 
+load_rc_config $name
 run_rc_command "$1"
 ```
 
