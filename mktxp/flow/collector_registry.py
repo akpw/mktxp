@@ -25,6 +25,7 @@ from mktxp.collector.address_list_collector import AddressListCollector
 from mktxp.collector.public_ip_collector import PublicIPAddressCollector
 from mktxp.collector.neighbor_collector import NeighborCollector
 from mktxp.collector.monitor_collector import MonitorCollector
+from mktxp.collector.w60g_collector import W60gCollector
 from mktxp.collector.poe_collector import POECollector
 from mktxp.collector.netwatch_collector import NetwatchCollector
 from mktxp.collector.pool_collector import PoolCollector
@@ -78,6 +79,7 @@ class CollectorRegistry:
 
         self.register(CollectorKeys.FIREWALL_COLLECTOR, FirewallCollector.collect)
         self.register(CollectorKeys.MONITOR_COLLECTOR, MonitorCollector.collect)
+        self.register(CollectorKeys.W60G_COLLECTOR, W60gCollector.collect)
         self.register(CollectorKeys.POE_COLLECTOR, POECollector.collect)
         self.register(CollectorKeys.NETWATCH_COLLECTOR, NetwatchCollector.collect)
         self.register(CollectorKeys.ROUTE_COLLECTOR, RouteCollector.collect)
@@ -104,9 +106,7 @@ class CollectorRegistry:
         self.register(CollectorKeys.CERTIFICATE_COLLECTOR, CertificateCollector.collect)
 
         self.register(CollectorKeys.MKTXP_COLLECTOR, MKTXPCollector.collect)
-        
+
 
     def register(self, collector_ID, collect_func):
         self.registered_collectors[collector_ID] = collect_func
-
-

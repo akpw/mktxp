@@ -38,6 +38,7 @@ class CollectorKeys:
     INTERFACE_COLLECTOR = 'InterfaceCollector'
     FIREWALL_COLLECTOR = 'FirewallCollector'
     MONITOR_COLLECTOR = 'MonitorCollector'
+    W60G_COLLECTOR = 'W60gCollector'
     POE_COLLECTOR = 'POECollector'
     NETWATCH_COLLECTOR = 'NetwatchCollector'
     ROUTE_COLLECTOR = 'RouteCollector'
@@ -88,7 +89,7 @@ class MKTXPConfigKeys:
     FE_IP_CONNECTIONS_KEY = 'connections'
     FE_CONNECTION_STATS_KEY = 'connection_stats'
     FE_INTERFACE_KEY = 'interface'
-    
+
     FE_ROUTE_KEY = 'route'
     FE_DHCP_POOL_KEY = 'pool'
     FE_FIREWALL_KEY = 'firewall'
@@ -103,6 +104,7 @@ class MKTXPConfigKeys:
     FE_IPV6_NEIGHBOR_KEY = 'ipv6_neighbor'
 
     FE_MONITOR_KEY = 'monitor'
+    FE_W60G_KEY = 'w60g'
     FE_WIRELESS_KEY = 'wireless'
     FE_WIRELESS_CLIENTS_KEY = 'wireless_clients'
     FE_CAPSMAN_KEY = 'capsman'
@@ -163,10 +165,10 @@ class MKTXPConfigKeys:
     ROUTERBOARD_NAME = 'routerboard_name'
     ROUTERBOARD_ADDRESS = 'routerboard_address'
 
-    # Injected custom labels metadata ID 
+    # Injected custom labels metadata ID
     CUSTOM_LABELS_METADATA_ID = '__custom__labels__metadata_id__'
 
-    # Default values    
+    # Default values
     DEFAULT_HOST_KEY = 'localhost'
     DEFAULT_USER_KEY = 'user'
     DEFAULT_PASSWORD_KEY = 'password'
@@ -196,10 +198,10 @@ class MKTXPConfigKeys:
 
     BOOLEAN_KEYS_NO = {ENABLED_KEY, SSL_KEY, NO_SSL_CERTIFICATE, FE_CHECK_FOR_UPDATES, FE_KID_CONTROL_DEVICE, FE_KID_CONTROL_DYNAMIC,
                        SSL_CERTIFICATE_VERIFY, FE_IPV6_ROUTE_KEY, FE_IPV6_DHCP_POOL_KEY, FE_IPV6_FIREWALL_KEY, FE_IPV6_NEIGHBOR_KEY, FE_CONNECTION_STATS_KEY, FE_BFD_KEY, FE_BGP_KEY,
-                       FE_EOIP_KEY, FE_GRE_KEY, FE_IPIP_KEY, FE_IPSEC_KEY, FE_LTE_KEY, FE_SWITCH_PORT_KEY, FE_ROUTING_STATS_KEY, FE_CERTIFICATE_KEY, FE_DNS_KEY, FE_CONTAINER_KEY}
+                       FE_EOIP_KEY, FE_GRE_KEY, FE_IPIP_KEY, FE_IPSEC_KEY, FE_LTE_KEY, FE_SWITCH_PORT_KEY, FE_ROUTING_STATS_KEY, FE_CERTIFICATE_KEY, FE_DNS_KEY, FE_CONTAINER_KEY, FE_W60G_KEY}
 
     # Feature keys enabled by default
-    BOOLEAN_KEYS_YES = {PLAINTEXT_LOGIN_KEY, FE_DHCP_KEY, FE_HEALTH_KEY, FE_PACKAGE_KEY, FE_DHCP_LEASE_KEY, FE_IP_CONNECTIONS_KEY, FE_INTERFACE_KEY, 
+    BOOLEAN_KEYS_YES = {PLAINTEXT_LOGIN_KEY, FE_DHCP_KEY, FE_HEALTH_KEY, FE_PACKAGE_KEY, FE_DHCP_LEASE_KEY, FE_IP_CONNECTIONS_KEY, FE_INTERFACE_KEY,
                         FE_ROUTE_KEY, FE_DHCP_POOL_KEY, FE_FIREWALL_KEY, FE_NEIGHBOR_KEY, FE_MONITOR_KEY, SSL_CHECK_HOSTNAME, MKTXP_USE_COMMENTS_OVER_NAMES,
                         FE_WIRELESS_KEY, FE_WIRELESS_CLIENTS_KEY, FE_CAPSMAN_KEY, FE_CAPSMAN_CLIENTS_KEY, FE_POE_KEY,
                         FE_NETWATCH_KEY, FE_PUBLIC_IP_KEY, FE_USER_KEY, FE_QUEUE_KEY}
@@ -225,11 +227,11 @@ class ConfigEntry:
                                                        MKTXPConfigKeys.USER_KEY, MKTXPConfigKeys.PASSWD_KEY, MKTXPConfigKeys.CREDENTIALS_FILE_KEY,
                                                        MKTXPConfigKeys.SSL_KEY, MKTXPConfigKeys.NO_SSL_CERTIFICATE, MKTXPConfigKeys.SSL_CERTIFICATE_VERIFY, MKTXPConfigKeys.SSL_CHECK_HOSTNAME, MKTXPConfigKeys.SSL_CA_FILE, MKTXPConfigKeys.PLAINTEXT_LOGIN_KEY,
                                                        MKTXPConfigKeys.FE_DHCP_KEY, MKTXPConfigKeys.FE_HEALTH_KEY, MKTXPConfigKeys.FE_PACKAGE_KEY, MKTXPConfigKeys.FE_DHCP_LEASE_KEY, MKTXPConfigKeys.FE_INTERFACE_KEY,
-                                                       MKTXPConfigKeys.FE_MONITOR_KEY, MKTXPConfigKeys.FE_WIRELESS_KEY, MKTXPConfigKeys.FE_WIRELESS_CLIENTS_KEY,
-                                                       MKTXPConfigKeys.FE_IP_CONNECTIONS_KEY, MKTXPConfigKeys.FE_CONNECTION_STATS_KEY, MKTXPConfigKeys.FE_CAPSMAN_KEY, MKTXPConfigKeys.FE_CAPSMAN_CLIENTS_KEY, MKTXPConfigKeys.FE_POE_KEY, 
+                                                       MKTXPConfigKeys.FE_MONITOR_KEY, MKTXPConfigKeys.FE_W60G_KEY, MKTXPConfigKeys.FE_WIRELESS_KEY, MKTXPConfigKeys.FE_WIRELESS_CLIENTS_KEY,
+                                                       MKTXPConfigKeys.FE_IP_CONNECTIONS_KEY, MKTXPConfigKeys.FE_CONNECTION_STATS_KEY, MKTXPConfigKeys.FE_CAPSMAN_KEY, MKTXPConfigKeys.FE_CAPSMAN_CLIENTS_KEY, MKTXPConfigKeys.FE_POE_KEY,
                                                        MKTXPConfigKeys.FE_NETWATCH_KEY, MKTXPConfigKeys.MKTXP_USE_COMMENTS_OVER_NAMES, MKTXPConfigKeys.FE_PUBLIC_IP_KEY,
                                                        MKTXPConfigKeys.FE_ROUTE_KEY, MKTXPConfigKeys.FE_DHCP_POOL_KEY, MKTXPConfigKeys.FE_FIREWALL_KEY, MKTXPConfigKeys.FE_ADDRESS_LIST_KEY, MKTXPConfigKeys.FE_NEIGHBOR_KEY, MKTXPConfigKeys.FE_DNS_KEY,
-                                                       MKTXPConfigKeys.FE_IPV6_ROUTE_KEY, MKTXPConfigKeys.FE_IPV6_DHCP_POOL_KEY, MKTXPConfigKeys.FE_IPV6_FIREWALL_KEY, MKTXPConfigKeys.FE_IPV6_ADDRESS_LIST_KEY, MKTXPConfigKeys.FE_IPV6_NEIGHBOR_KEY,                                               
+                                                       MKTXPConfigKeys.FE_IPV6_ROUTE_KEY, MKTXPConfigKeys.FE_IPV6_DHCP_POOL_KEY, MKTXPConfigKeys.FE_IPV6_FIREWALL_KEY, MKTXPConfigKeys.FE_IPV6_ADDRESS_LIST_KEY, MKTXPConfigKeys.FE_IPV6_NEIGHBOR_KEY,
                                                        MKTXPConfigKeys.FE_USER_KEY, MKTXPConfigKeys.FE_QUEUE_KEY, MKTXPConfigKeys.FE_REMOTE_DHCP_ENTRY, MKTXPConfigKeys.FE_REMOTE_CAPSMAN_ENTRY, MKTXPConfigKeys.FE_CHECK_FOR_UPDATES, MKTXPConfigKeys.FE_BFD_KEY, MKTXPConfigKeys.FE_BGP_KEY,
                                                        MKTXPConfigKeys.FE_KID_CONTROL_DEVICE, MKTXPConfigKeys.FE_KID_CONTROL_DYNAMIC, MKTXPConfigKeys.FE_EOIP_KEY, MKTXPConfigKeys.FE_GRE_KEY, MKTXPConfigKeys.FE_IPIP_KEY, MKTXPConfigKeys.FE_LTE_KEY, MKTXPConfigKeys.FE_IPSEC_KEY, MKTXPConfigKeys.FE_SWITCH_PORT_KEY,
                                                        MKTXPConfigKeys.FE_ROUTING_STATS_KEY, MKTXPConfigKeys.FE_CERTIFICATE_KEY, MKTXPConfigKeys.FE_CONTAINER_KEY,
@@ -240,8 +242,8 @@ class ConfigEntry:
                                                        MKTXPConfigKeys.MKTXP_INC_DIV, MKTXPConfigKeys.MKTXP_BANDWIDTH_KEY,
                                                        MKTXPConfigKeys.MKTXP_VERBOSE_MODE, MKTXPConfigKeys.MKTXP_BANDWIDTH_TEST_INTERVAL,
                                                        MKTXPConfigKeys.MKTXP_MIN_COLLECT_INTERVAL, MKTXPConfigKeys.MKTXP_FETCH_IN_PARALLEL,
-                                                       MKTXPConfigKeys.MKTXP_MAX_WORKER_THREADS, MKTXPConfigKeys.MKTXP_MAX_SCRAPE_DURATION, 
-                                                       MKTXPConfigKeys.MKTXP_TOTAL_MAX_SCRAPE_DURATION, MKTXPConfigKeys.MKTXP_COMPACT_CONFIG, 
+                                                       MKTXPConfigKeys.MKTXP_MAX_WORKER_THREADS, MKTXPConfigKeys.MKTXP_MAX_SCRAPE_DURATION,
+                                                       MKTXPConfigKeys.MKTXP_TOTAL_MAX_SCRAPE_DURATION, MKTXPConfigKeys.MKTXP_COMPACT_CONFIG,
                                                        MKTXPConfigKeys.MKTXP_PROMETHEUS_HEADERS_DEDUPLICATION, MKTXPConfigKeys.MKTXP_PERSISTENT_ROUTER_CONNECTION_POOL,
                                                        MKTXPConfigKeys.MKTXP_PERSISTENT_DHCP_CACHE])
 
@@ -474,7 +476,7 @@ class MKTXPConfigHandler:
             if self.config[entry_name].get(key):
                 config_entry_reader[key] = self.config[entry_name].get(key)
                 if key is MKTXPConfigKeys.PASSWD_KEY and type(config_entry_reader[key]) is list:
-                    config_entry_reader[key] = ','.join(config_entry_reader[key])         
+                    config_entry_reader[key] = ','.join(config_entry_reader[key])
 
                 if compact_config and config_entry_reader[key] == self.default_config_entry_reader[key]:
                     drop_keys.append(key)
@@ -485,7 +487,7 @@ class MKTXPConfigHandler:
             if self.config[entry_name].get(key):
                 config_entry_reader[key] = self.config[entry_name].as_int(key)
                 if compact_config and config_entry_reader[key] == self.default_config_entry_reader[key]:
-                    drop_keys.append(key)                
+                    drop_keys.append(key)
             else:
                 config_entry_reader[key] = self.default_config_entry_reader[key]
 
@@ -493,7 +495,7 @@ class MKTXPConfigHandler:
         if self.config[entry_name].get(MKTXPConfigKeys.PORT_KEY):
             config_entry_reader[MKTXPConfigKeys.PORT_KEY] = self.config[entry_name].as_int(MKTXPConfigKeys.PORT_KEY)
             if compact_config and config_entry_reader[MKTXPConfigKeys.PORT_KEY] == self.default_config_entry_reader[MKTXPConfigKeys.PORT_KEY]:
-                drop_keys.append(MKTXPConfigKeys.PORT_KEY)    
+                drop_keys.append(MKTXPConfigKeys.PORT_KEY)
         else:
             config_entry_reader[MKTXPConfigKeys.PORT_KEY] = self.default_config_entry_reader[MKTXPConfigKeys.PORT_KEY]
 
@@ -504,7 +506,7 @@ class MKTXPConfigHandler:
             try:
                 self.config.write()
                 if self._config[MKTXPConfigKeys.MKTXP_CONFIG_ENTRY_NAME].as_bool(MKTXPConfigKeys.MKTXP_VERBOSE_MODE):
-                    print(f'compacted router entry {entry_name} for default values of the feature keys {drop_keys}')                    
+                    print(f'compacted router entry {entry_name} for default values of the feature keys {drop_keys}')
             except Exception as exc:
                 print(f'Error compacting router entry {entry_name} for default values of feature keys {drop_keys}: {exc}')
                 print(f'Error compacting router entry {entry_name} for default values of feature keys {drop_keys}: {exc}')
