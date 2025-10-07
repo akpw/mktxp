@@ -29,11 +29,11 @@ class CollectorHandler:
 
 
     def collect_sync(self):
-        """
+        '''
         Collect the metrics of all router entries defined in the current users configuration synchronously.
         This function iterates over each router entry one-by-one.
         Thus, the total runtime of this function scales linearly with the number of registered routers.
-        """
+        '''
         for router_entry in self.entries_handler.router_entries:
             if not router_entry.is_ready():
                 # let's pick up on things in the next run
@@ -46,8 +46,8 @@ class CollectorHandler:
                     router_entry.time_spent[collector_ID] += default_timer() - start
                 router_entry.is_done()
             except Exception as e:
-                if config_handler.system_entry.verbose_mode:
-                    print(f"Exception while scraping {router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_NAME]}: {e}")
+                print(f"Exception while scraping {router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_NAME]}: {e}")
+                router_entry.is_done()
                 continue
 
     def collect_router_entry_async(self, router_entry, scrape_timeout_event, total_scrape_timeout_event):
@@ -68,18 +68,17 @@ class CollectorHandler:
                 router_entry.time_spent[collector_ID] += default_timer() - start
             router_entry.is_done()
         except Exception as e:
-            if config_handler.system_entry.verbose_mode:
-                print(f"Exception while scraping {router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_NAME]}: {e}")
-
+            print(f"Exception while scraping {router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_NAME]}: {e}")
+            router_entry.is_done()
         return results
 
 
     def collect_async(self, max_worker_threads=5):
-        """
+        '''
         Collect the metrics of all router entries defined in the current users configuration in parallel.
         This function iterates over multiple routers in parallel (depending on the value of max_worker_threads).
         Thus, the total runtime scales sub linearly (number_of_routers / max_worker_threads).
-        """
+        '''
 
         def timeout(timeout_event):
             timeout_event.set()
