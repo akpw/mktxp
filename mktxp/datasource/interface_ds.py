@@ -119,9 +119,7 @@ class InterfaceMonitorMetricsDataSource:
                     # combines names with comments
                     interface_monitor_record['name'] = interface['comment'] if router_entry.config_entry.use_comments_over_names else \
                                                                                                         f"{interface['name']} ({interface['comment']})"
-                elif interface_monitor_record.get('name') is None:
-                    interface_monitor_record['name'] = interface['name']
-
+                interface_monitor_record.setdefault('name', interface['name'])
                 interface_monitor_records.append(interface_monitor_record)
 
             # With wifiwave2, Mikrotik renamed the field 'registered-clients' to 'registered-peers'
