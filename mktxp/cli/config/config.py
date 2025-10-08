@@ -38,6 +38,7 @@ class CollectorKeys:
     INTERFACE_COLLECTOR = 'InterfaceCollector'
     FIREWALL_COLLECTOR = 'FirewallCollector'
     MONITOR_COLLECTOR = 'MonitorCollector'
+    W60G_COLLECTOR = 'W60gCollector'
     POE_COLLECTOR = 'POECollector'
     NETWATCH_COLLECTOR = 'NetwatchCollector'
     ROUTE_COLLECTOR = 'RouteCollector'
@@ -103,6 +104,7 @@ class MKTXPConfigKeys:
     FE_IPV6_NEIGHBOR_KEY = 'ipv6_neighbor'
 
     FE_MONITOR_KEY = 'monitor'
+    FE_W60G_KEY = 'w60g'
     FE_WIRELESS_KEY = 'wireless'
     FE_WIRELESS_CLIENTS_KEY = 'wireless_clients'
     FE_CAPSMAN_KEY = 'capsman'
@@ -196,7 +198,7 @@ class MKTXPConfigKeys:
 
     BOOLEAN_KEYS_NO = {ENABLED_KEY, SSL_KEY, NO_SSL_CERTIFICATE, FE_CHECK_FOR_UPDATES, FE_KID_CONTROL_DEVICE, FE_KID_CONTROL_DYNAMIC,
                        SSL_CERTIFICATE_VERIFY, FE_IPV6_ROUTE_KEY, FE_IPV6_DHCP_POOL_KEY, FE_IPV6_FIREWALL_KEY, FE_IPV6_NEIGHBOR_KEY, FE_CONNECTION_STATS_KEY, FE_BFD_KEY, FE_BGP_KEY,
-                       FE_EOIP_KEY, FE_GRE_KEY, FE_IPIP_KEY, FE_IPSEC_KEY, FE_LTE_KEY, FE_SWITCH_PORT_KEY, FE_ROUTING_STATS_KEY, FE_CERTIFICATE_KEY, FE_DNS_KEY, FE_CONTAINER_KEY}
+                       FE_EOIP_KEY, FE_GRE_KEY, FE_IPIP_KEY, FE_IPSEC_KEY, FE_LTE_KEY, FE_SWITCH_PORT_KEY, FE_ROUTING_STATS_KEY, FE_CERTIFICATE_KEY, FE_DNS_KEY, FE_CONTAINER_KEY, FE_W60G_KEY}
 
     # Feature keys enabled by default
     BOOLEAN_KEYS_YES = {PLAINTEXT_LOGIN_KEY, FE_DHCP_KEY, FE_HEALTH_KEY, FE_PACKAGE_KEY, FE_DHCP_LEASE_KEY, FE_IP_CONNECTIONS_KEY, FE_INTERFACE_KEY, 
@@ -225,7 +227,7 @@ class ConfigEntry:
                                                        MKTXPConfigKeys.USER_KEY, MKTXPConfigKeys.PASSWD_KEY, MKTXPConfigKeys.CREDENTIALS_FILE_KEY,
                                                        MKTXPConfigKeys.SSL_KEY, MKTXPConfigKeys.NO_SSL_CERTIFICATE, MKTXPConfigKeys.SSL_CERTIFICATE_VERIFY, MKTXPConfigKeys.SSL_CHECK_HOSTNAME, MKTXPConfigKeys.SSL_CA_FILE, MKTXPConfigKeys.PLAINTEXT_LOGIN_KEY,
                                                        MKTXPConfigKeys.FE_DHCP_KEY, MKTXPConfigKeys.FE_HEALTH_KEY, MKTXPConfigKeys.FE_PACKAGE_KEY, MKTXPConfigKeys.FE_DHCP_LEASE_KEY, MKTXPConfigKeys.FE_INTERFACE_KEY,
-                                                       MKTXPConfigKeys.FE_MONITOR_KEY, MKTXPConfigKeys.FE_WIRELESS_KEY, MKTXPConfigKeys.FE_WIRELESS_CLIENTS_KEY,
+                                                       MKTXPConfigKeys.FE_MONITOR_KEY, MKTXPConfigKeys.FE_W60G_KEY, MKTXPConfigKeys.FE_WIRELESS_KEY, MKTXPConfigKeys.FE_WIRELESS_CLIENTS_KEY,
                                                        MKTXPConfigKeys.FE_IP_CONNECTIONS_KEY, MKTXPConfigKeys.FE_CONNECTION_STATS_KEY, MKTXPConfigKeys.FE_CAPSMAN_KEY, MKTXPConfigKeys.FE_CAPSMAN_CLIENTS_KEY, MKTXPConfigKeys.FE_POE_KEY, 
                                                        MKTXPConfigKeys.FE_NETWATCH_KEY, MKTXPConfigKeys.MKTXP_USE_COMMENTS_OVER_NAMES, MKTXPConfigKeys.FE_PUBLIC_IP_KEY,
                                                        MKTXPConfigKeys.FE_ROUTE_KEY, MKTXPConfigKeys.FE_DHCP_POOL_KEY, MKTXPConfigKeys.FE_FIREWALL_KEY, MKTXPConfigKeys.FE_ADDRESS_LIST_KEY, MKTXPConfigKeys.FE_NEIGHBOR_KEY, MKTXPConfigKeys.FE_DNS_KEY,

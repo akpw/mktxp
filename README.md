@@ -113,6 +113,7 @@ The default configuration file comes with a sample configuration, making it easy
     wireless_clients = True         # WLAN clients metrics
     capsman = True                  # CAPsMAN general metrics
     capsman_clients = True          # CAPsMAN clients metrics
+    w60g = False                    # W60G metrics
 
     eoip = False                    # EoIP status metrics
     gre = False                     # GRE status metrics
