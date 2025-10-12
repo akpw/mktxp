@@ -210,3 +210,39 @@ def test_info_collector_with_custom_labels():
     # The labels should include original + router ID + custom labels
     expected_labels = ['interface', 'status', 'routerboard_name', 'routerboard_address', 'location', 'owner']
     assert set(collector._labelnames) == set(expected_labels)
+
+def test_gauge_collector_with_generator_input():
+    """
+    Test that gauge_collector handles generator input correctly without crashing.
+    """
+    def record_generator(data):
+        yield from data
+
+    router_records_data = [{
+        'interface': 'eth0',
+        'bytes': 1000,
+        MKTXPConfigKeys.ROUTERBOARD_NAME: 'router1',
+        MKTXPConfigKeys.ROUTERBOARD_ADDRESS: '192.168.1.1',
+        MKTXPConfigKeys.CUSTOM_LABELS_METADATA_ID: {'dc': 'london'}
+    }]
+
+    # Test with a non-empty generator
+    generator = record_generator(router_records_data)
+    collector = BaseCollector.gauge_collector(
+        'test_metric_gen',
+        'Test metric with generator',
+        generator,
+        'bytes'
+    )
+    # The main check is that this doesn't raise an exception.
+    assert len(collector.samples) == 1
+
+    # Test with an empty generator
+    empty_generator = record_generator([])
+    collector_empty = BaseCollector.gauge_collector(
+        'test_metric_empty_gen',
+        'Test metric with empty generator',
+        empty_generator,
+        'bytes'
+    )
+    assert len(collector_empty.samples) == 0

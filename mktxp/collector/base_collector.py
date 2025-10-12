@@ -11,7 +11,7 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
-
+import itertools
 from prometheus_client.core import GaugeMetricFamily, CounterMetricFamily, InfoMetricFamily
 from mktxp.cli.config.config import MKTXPConfigKeys, config_handler
 
@@ -19,6 +19,16 @@ class BaseCollector:
     """ Base Collector methods
         For use by custom collector
     """
+    @staticmethod
+    def _smart_tee(router_records):
+        # Check if it's already subscriptable (list/tuple)
+        if hasattr(router_records, '__getitem__'):
+            # It's subscriptable - safe to use multiple times
+            return router_records, router_records
+        else:
+            # It's not subscriptable - need to tee it
+            return itertools.tee(router_records)
+
     @staticmethod
     def _de_duplicate_records(router_records, metric_labels, verbose_reporting = None):
         unique_records = {}
@@ -40,14 +50,16 @@ class BaseCollector:
         metric_labels = metric_labels or []
         router_records = router_records or []
 
+        records_for_labels, records_for_processing = BaseCollector._smart_tee(router_records)
+
         if add_id_labels:
             metric_labels = BaseCollector._add_id_labels(metric_labels)
         if add_custom_labels:
-            metric_labels = BaseCollector._add_custom_labels(metric_labels, router_records)
+            metric_labels = BaseCollector._add_custom_labels(metric_labels, records_for_labels)
         
         collector = InfoMetricFamily(f'mktxp_{name}', documentation=documentation, labels=metric_labels)
 
-        deduplicated_records = BaseCollector._de_duplicate_records(router_records, metric_labels, verbose_reporting)
+        deduplicated_records = BaseCollector._de_duplicate_records(records_for_processing, metric_labels, verbose_reporting)
         for router_record in deduplicated_records:
             label_values = {}
             custom_labels_dict = router_record.get(MKTXPConfigKeys.CUSTOM_LABELS_METADATA_ID, {})
@@ -62,14 +74,16 @@ class BaseCollector:
         metric_labels = metric_labels or []
         router_records = router_records or []
 
+        records_for_labels, records_for_processing = BaseCollector._smart_tee(router_records)
+
         if add_id_labels:
             metric_labels = BaseCollector._add_id_labels(metric_labels)
         if add_custom_labels:
-            metric_labels = BaseCollector._add_custom_labels(metric_labels, router_records, metric_key)
+            metric_labels = BaseCollector._add_custom_labels(metric_labels, records_for_labels, metric_key)
 
         collector = CounterMetricFamily(f'mktxp_{name}', documentation=documentation, labels=metric_labels)
 
-        deduplicated_records = BaseCollector._de_duplicate_records(router_records, metric_labels, verbose_reporting)
+        deduplicated_records = BaseCollector._de_duplicate_records(records_for_processing, metric_labels, verbose_reporting)
         for router_record in deduplicated_records:
             label_values = []
             custom_labels_dict = router_record.get(MKTXPConfigKeys.CUSTOM_LABELS_METADATA_ID, {})
@@ -84,14 +98,16 @@ class BaseCollector:
         metric_labels = metric_labels or []
         router_records = router_records or []
 
+        records_for_labels, records_for_processing = BaseCollector._smart_tee(router_records)
+
         if add_id_labels:
             metric_labels = BaseCollector._add_id_labels(metric_labels)
         if add_custom_labels:
-            metric_labels = BaseCollector._add_custom_labels(metric_labels, router_records, metric_key)
+            metric_labels = BaseCollector._add_custom_labels(metric_labels, records_for_labels, metric_key)
 
         collector = GaugeMetricFamily(f'mktxp_{name}', documentation=documentation, labels=metric_labels)
 
-        deduplicated_records = BaseCollector._de_duplicate_records(router_records, metric_labels, verbose_reporting)
+        deduplicated_records = BaseCollector._de_duplicate_records(records_for_processing, metric_labels, verbose_reporting)
         for router_record in deduplicated_records:
             label_values = []
             custom_labels_dict = router_record.get(MKTXPConfigKeys.CUSTOM_LABELS_METADATA_ID, {})
@@ -104,17 +120,21 @@ class BaseCollector:
     # Helpers
     @staticmethod
     def _add_custom_labels(metric_labels, router_records, metric_key = None):
-        if not router_records:
-            return metric_labels
+        try:
+            first_record = next(iter(router_records), None)
+        except TypeError:
+            return list(metric_labels)
 
-        first_record = router_records[0]
-        extended_labels = list(metric_labels) 
+        if not first_record:
+            return list(metric_labels)
+
+        extended_labels = list(metric_labels)
 
         if MKTXPConfigKeys.CUSTOM_LABELS_METADATA_ID in first_record and isinstance(first_record.get(MKTXPConfigKeys.CUSTOM_LABELS_METADATA_ID), dict):
             for key in first_record[MKTXPConfigKeys.CUSTOM_LABELS_METADATA_ID].keys():
                 if key not in extended_labels:
                     extended_labels.append(key)
-        
+
         return extended_labels
 
     @staticmethod
