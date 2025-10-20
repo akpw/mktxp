@@ -6,14 +6,14 @@
 
 
 ## Description
-MKTXP is a Prometheus Exporter for Mikrotik RouterOS devices.\
+RouterOS_Exporter is a Prometheus Exporter for Mikrotik RouterOS devices.\
 It gathers and exports a rich set of metrics across multiple routers, all easily configurable via built-in CLI interface. 
 
-While simple to use, MKTXP supports [advanced features](https://github.com/akpw/mktxp#advanced-features) such as automatic IP address resolution with both local & remote DHCP servers, concurrent exports across multiple router devices, configurable data processing & transformations, injectable custom labels for easy device grouping, optional bandwidth testing, etc.
+While simple to use, RouterOS_Exporter supports [advanced features](https://github.com/online2311/RouterOS_Exporter#advanced-features) such as automatic IP address resolution with both local & remote DHCP servers, concurrent exports across multiple router devices, configurable data processing & transformations, injectable custom labels for easy device grouping, optional bandwidth testing, etc.
 
-Apart from exporting to Prometheus, MKTXP can print selected metrics directly on the command line (see examples below). 
+Apart from exporting to Prometheus, RouterOS_Exporter can print selected metrics directly on the command line (see examples below). 
 
-For effortless visualization of the RouterOS metrics exported to Prometheus, MKTXP comes with a dedicated [Grafana dashboard](https://grafana.com/grafana/dashboards/13679):
+For effortless visualization of the RouterOS metrics exported to Prometheus, RouterOS_Exporter comes with a dedicated [Grafana dashboard](https://grafana.com/grafana/dashboards/13679):
 
 <img width="32%" alt="1" src="https://user-images.githubusercontent.com/5028474/217029083-3c2f561e-853f-45a7-b9f1-d818a830daf5.png"> <img width="32%" alt="2" src="https://user-images.githubusercontent.com/5028474/217029092-2b86b41b-1f89-4383-ac48-16652e820f7e.png"> <img width="32%" alt="3" src="https://user-images.githubusercontent.com/5028474/217029096-dbf6b46c-3ed7-4c76-a57b-8cebfb3b671c.png">
 
@@ -33,22 +33,22 @@ For effortless visualization of the RouterOS metrics exported to Prometheus, MKT
 
 
 ## Install:
-There are multiple ways to install this project, from a standalone app to a [fully dockerized monitoring stack](https://github.com/akpw/mktxp-stack). The supported options include:
-- [MKTXP Stack](https://github.com/akpw/mktxp-stack): a mktxp companion project, that provides ready-to-go MKTXP monitoring stack along with added Mikrotik centralized log processing:
+There are multiple ways to install this project, from a standalone app to a [fully dockerized monitoring stack](https://github.com/online2311/RouterOS_Exporter-stack). The supported options include:
+- [RouterOS_Exporter Stack](https://github.com/online2311/RouterOS_Exporter-stack): a RouterOS_Exporter companion project, that provides ready-to-go RouterOS_Exporter monitoring stack along with added Mikrotik centralized log processing:
 
   <img width="48%" alt="loki" src="https://user-images.githubusercontent.com/5028474/210771516-06a3e6ab-8eab-458c-9f38-5d44f95d23d4.png">
 
-- from [Docker image](https://github.com/akpw/mktxp/pkgs/container/mktxp) : `❯ docker pull ghcr.io/akpw/mktxp:latest`
+- from [Docker image](https://github.com/online2311/RouterOS_Exporter/pkgs/container/RouterOS_Exporter) : `❯ docker pull ghcr.io/akpw/RouterOS_Exporter:latest`
 
-- from [PyPI](https://pypi.org/project/mktxp/): `❯ pip install mktxp`
+- from [PyPI](https://pypi.org/project/RouterOS_Exporter/): `❯ pip install RouterOS_Exporter`
 
-- latest from source repository: `❯ pip install git+https://github.com/akpw/mktxp`
+- latest from source repository: `❯ pip install git+https://github.com/online2311/RouterOS_Exporter`
 
 - with the [sample Kubernetes deployment](deploy/kubernetes/deployment.yaml)
 
 
 ## Getting started
-To get started with MKTXP, you need to edit its main configuration file. This essentially involves filling in your Mikrotik devices IP addresses & authentication info, optionally modifying various settings to specific needs. 
+To get started with RouterOS_Exporter, you need to edit its main configuration file. This essentially involves filling in your Mikrotik devices IP addresses & authentication info, optionally modifying various settings to specific needs. 
 
 The default configuration file comes with a sample configuration, making it easy to copy / edit parameters for your RouterOS devices as needed:
 ```
@@ -135,63 +135,67 @@ The default configuration file comes with a sample configuration, making it easy
 
     container = False               # Containers metrics
     
-    remote_dhcp_entry = None        # An MKTXP entry to provide for remote DHCP info / resolution
-    remote_capsman_entry = None     # An MKTXP entry to provide for remote capsman info 
+    remote_dhcp_entry = None        # An RouterOS_Exporter entry to provide for remote DHCP info / resolution
+    remote_capsman_entry = None     # An RouterOS_Exporter entry to provide for remote capsman info 
 
     use_comments_over_names = True  # when available, forces using comments over the interfaces names
     check_for_updates = False       # check for available ROS updates
 ```
 
-Most options are easy to understand at first glance, and some are described in more details [later](https://github.com/akpw/mktxp#advanced-features).
+Most options are easy to understand at first glance, and some are described in more details [later](https://github.com/online2311/RouterOS_Exporter#advanced-features).
 
-<sup>💡</sup> To automatically migrate from the older `mktxp.conf` format in the existing installs, just set `compact_default_conf_values = True` in [the mktxp system config](https://github.com/akpw/mktxp#mktxp-system-configuration)
+<sup>💡</sup> To automatically migrate from the older `routeros_exporter.conf` format in the existing installs, just set `compact_default_conf_values = True` in [the RouterOS_Exporter system config](https://github.com/online2311/RouterOS_Exporter#RouterOS_Exporter-system-configuration)
 
 #### Local install
-If you have a local MKTXP installation, you can edit the configuration file with your default system editor directly from mktxp:
+If you have a local routeros_exporter installation, you can edit the configuration file with your default system editor directly from routeros_exporter:
 ```bash
-❯ mktxp edit
+❯ routeros_exporter edit
 ```
 In case you prefer a different editor, run the ```edit``` command with its optional `-ed` parameter:
 ```
-❯ mktxp edit -ed nano
+❯ routeros_exporter edit -ed nano
 ```
 Obviously, you can do the same via just opening the config file directly:
 ```
-❯ nano ~/mktxp/mktxp.conf
+❯ nano ~/routeros_exporter/routeros_exporter.conf
 
 ```
 
 #### Docker image install
-For Docker instances, one way is to use a configured `mktxp.conf` file from a local installation. Alternatively you can create a standalone one in a dedicated folder:
+For Docker instances, the configuration files are located in `/app/` inside the container:
+- `/app/device.conf` - Router device configurations
+- `/app/exporter.conf` - System runtime configurations
+
+You can create standalone configuration files in a dedicated folder:
 ```
-mkdir mktxp
-nano mktxp/mktxp.conf # copy&edit sample entry(ies) from above
+mkdir -p app
+nano app/device.conf # copy&edit sample entry(ies) from above
 ```
 Now you can mount this folder and run your docker instance with:
 ```
-docker run -v "$(pwd)/mktxp:/home/mktxp/mktxp/" -p 49090:49090 -it --rm ghcr.io/akpw/mktxp:latest
+docker run -v "$(pwd)/app:/app" -p 49090:49090 -it --rm ghcr.io/akpw/routeros_exporter:latest
 ```
 
-#### MKTXP stack install
-[MKTXP Stack Getting Started](https://github.com/akpw/mktxp-stack#install--getting-started) provides similar instructions around editing the mktxp.conf file and, if needed, adding a dedicated API user to your Mikrotik RouterOS devices as mentioned below.
+#### RouterOS_Exporter stack install
+[RouterOS_Exporter Stack Getting Started](https://github.com/online2311/RouterOS_Exporter-stack#install--getting-started) provides similar instructions around editing the routeros_exporter.conf file and, if needed, adding a dedicated API user to your Mikrotik RouterOS devices as mentioned below.
 
-<sup>💡</sup> *In the case of usage within a [Docker Swarm](https://docs.docker.com/engine/swarm/), please do make sure to have all settings explicitly set in both the `mktxp.conf` and `_mktxp.conf` files.  Not doing this may cause [issues](https://github.com/akpw/mktxp/issues/55#issuecomment-1346693843) regarding a `read-only` filesystem.*
+<sup>💡</sup> *In the case of usage within a [Docker Swarm](https://docs.docker.com/engine/swarm/), please do make sure to have all settings explicitly set in both the `routeros_exporter.conf` and `_routeros_exporter.conf` files.  Not doing this may cause [issues](https://github.com/online2311/RouterOS_Exporter/issues/55#issuecomment-1346693843) regarding a `read-only` filesystem.*
 
 ## Mikrotik Device Config
 For the purpose of RouterOS device monitoring, it's best to create a dedicated user with minimal required permissions. \
-MKTXP only needs ```API``` and ```Read```<sup>💡</sup>, so at that point you can go to your router's terminal and type:
+RouterOS_Exporter only needs ```API``` and ```Read```<sup>💡</sup>, so at that point you can go to your router's terminal and type:
 ```
-/user group add name=mktxp_group policy=api,read
-/user add name=mktxp_user group=mktxp_group password=mktxp_user_password
+/user group add name=routeros_exporter_group policy=api,read
+/user add name=routeros_exporter_user group=routeros_exporter_group password=routeros_exporter_user_password
 ```
 
-<sup>💡</sup> *For the LTE metrics on RouterOS v6, the mktxp user will also need the `test` permission policy.*
+<sup>💡</sup> *For the LTE metrics on RouterOS v6, the RouterOS_Exporter user will also need the `test` permission policy.*
 
 ## A check on reality
-Now let's put some Mikrotik device address / user credentials in the above MKTXP configuration file, and at that point we should already be able to check out on our progress so far. Since MKTXP can output selected metrics directly on the command line with the ````mktxp print```` command, it's easy to do it even without Prometheus or Grafana. \
+Now let's put some Mikrotik device address / user credentials in the above RouterOS_Exporter configuration file, and at that point we should already be able to check out on our progress so far. Since RouterOS_Exporter can output selected metrics directly on the command line with the ````routeros_exporter print```` command, it's easy to do it even without Prometheus or Grafana. \
 For example, let's go take a look at some of my smart home CAPsMAN clients:
 ```
- ❯ mktxp print -en MKT-GT -cc
+ ❯ routeros_exporter print -en MKT-GT -cc
 Connecting to router MKT-GT@10.**.*.**
 2021-01-24 12:04:29 Connection to router MKT-GT@10.**.*.** has been established
 
@@ -223,7 +227,7 @@ But let's get back on track and proceed with the business of exporting RouterOS 
 
 
 ## Exporting to Prometheus
-For getting your routers' metrics into an existing Prometheus installation, we basically just need to connect MKTXP to it. \
+For getting your routers' metrics into an existing Prometheus installation, we basically just need to connect RouterOS_Exporter to it. \
 Let's do just that via editing the Prometheus config file: 
 ```
 ❯ nano /etc/prometheus/prometheus.yml
@@ -232,15 +236,15 @@ Let's do just that via editing the Prometheus config file:
 and simply add:
 
 ```
-  - job_name: 'mktxp'
+  - job_name: 'RouterOS_Exporter'
     static_configs:
-      - targets: ['mktxp_machine_IP:49090']
+      - targets: ['routeros_exporter_machine_IP:49090']
 
 ```
 
-At that point, we should be all ready for running the main `mktxp export` command that will be gathering router(s) metrics as configured above and serving them to Prometheus via a http server on the default port 49090. \
+At that point, we should be all ready for running the main `routeros_exporter export` command that will be gathering router(s) metrics as configured above and serving them to Prometheus via a http server on the default port 49090. \
 ````
-❯ mktxp export
+❯ routeros_exporter export
 Connecting to router MKT-GT@10.**.*.**
 2021-01-24 14:16:22 Connection to router MKT-GT@10.**.*.** has been established
 Connecting to router MKT-LR@10.**.*.**
@@ -248,15 +252,15 @@ Connecting to router MKT-LR@10.**.*.**
 2021-01-24 14:16:23 Running HTTP metrics server on port 49090
 ````
 
-## MKTXP system configuration
-In case you need more control on how MKTXP is run, it can be done via editing the `_mktxp.conf` file. This allows things like changing the port <sup>💡</sup> and other impl-related parameters, enable parallel router fetching and configurable scrapes timeouts, etc. 
-As before, for local installation the editing can be done directly from mktxp:
+## RouterOS_Exporter system configuration
+In case you need more control on how RouterOS_Exporter is run, it can be done via editing the `exporter.conf` file. This allows things like changing the port <sup>💡</sup> and other impl-related parameters, enable parallel router fetching and configurable scrapes timeouts, etc.
+As before, for local installation the editing can be done directly from RouterOS_Exporter:
 ```
-mktxp edit -i
+routeros_exporter edit -i
 ```
 
 ```
-[MKTXP]
+[RouterOS_Exporter]
     listen = '0.0.0.0:49090'         # Space separated list of socket addresses to listen to, both IPV4 and IPV6
     socket_timeout = 2
     
@@ -277,58 +281,80 @@ mktxp edit -i
 
     persistent_router_connection_pool = True  # Use a persistent router connections pool between scrapes
     persistent_dhcp_cache = True              # Persist DHCP cache between metric collections
-    compact_default_conf_values = False       # Compact mktxp.conf, so only specific values are kept on the individual routers' level    
+    compact_default_conf_values = False       # Compact RouterOS_Exporter.conf, so only specific values are kept on the individual routers' level    
     prometheus_headers_deduplication = False  # Deduplicate Prometheus HELP / TYPE headers in the metrics output 
 ```    
-<sup>💡</sup> *When changing the default mktxp port for [docker image installs](https://github.com/akpw/mktxp#docker-image-install), you'll need to adjust the `docker run ... -p 49090:49090 ...` command to reflect the new port*
+<sup>💡</sup> *When changing the default RouterOS_Exporter port for [docker image installs](https://github.com/online2311/RouterOS_Exporter#docker-image-install), you'll need to adjust the `docker run ... -p 49090:49090 ...` command to reflect the new port*
 
 ## Grafana dashboard
 Now with your RouterOS metrics being exported to Prometheus, it's easy to visualize them with this [Grafana dashboard](https://grafana.com/grafana/dashboards/13679)
 
 
 ## Description of CLI Commands
-### mktxp commands
-       . MKTXP commands:
-        .. info     Shows base MKTXP info
-        .. edit     Open MKTXP configuration file in your editor of choice        
+### routeros_exporter commands
+       . routeros_exporter commands:
+        .. info     Shows base routeros_exporter info
+        .. edit     Open routeros_exporter configuration file in your editor of choice
+        .. entry    Creates a new router configuration entry
         .. print    Displays selected metrics on the command line
         .. export   Starts collecting metrics for all enabled RouterOS configuration entries
-        .. show     Shows MKTXP configuration entries on the command line
+        .. show     Shows routeros_exporter configuration entries on the command line
 
 ````
-❯ mktxp -h
-usage: MKTXP [-h] [--cfg-dir CFG_DIR] {info, edit, export, print, show, } ...
+❯ routeros_exporter -h
+usage: routeros_exporter [-h] [--cfg-dir CFG_DIR] {info, edit, entry, export, print, show} ...
 
 Prometheus Exporter for Mikrotik RouterOS
 
 optional arguments:
   -h, --help            show this help message and exit
-  --cfg-dir CFG_DIR     MKTXP config files directory (optional)
+  --cfg-dir CFG_DIR     routeros_exporter config files directory (optional)
 ````
 To learn more about individual commands, just run it with ```-h```:
-For example, to learn everything about ````mktxp show````:
+For example, to learn everything about ````routeros_exporter show````:
 ````
-❯ mktxp show -h
-usage: MKTXP show [-h]
+❯ routeros_exporter show -h
+usage: routeros_exporter show [-h]
                   [-en ['Sample-Router']]
                   [-cfg]
-Displays MKTXP config router entries
+Displays routeros_exporter config router entries
 optional arguments:
   -h, --help            show this help message and exit
   -en, --entry-name ['Sample-Router']
                         Config entry name
-  -cfg, --config        Shows MKTXP config files paths
-````  
+  -cfg, --config        Shows routeros_exporter config files paths
+````
+
+### Creating a new router entry
+You can quickly create a new router configuration entry using the `entry` command:
+````
+❯ routeros_exporter entry -n MyRouter -hn 192.168.88.1 -u admin -pw mypassword
+成功创建配置条目 [MyRouter]
+配置文件位置: /app/device.conf  # Docker 环境
+# 或 ~/routeros_exporter/routeros_exporter.conf  # 本地安装
+
+使用以下命令编辑完整配置:
+  routeros_exporter edit
+````
+This creates a new `[MyRouter]` section in your configuration file with the specified hostname, username, and password. You can then use `routeros_exporter edit` to customize additional settings like SSL, metrics collection options, custom labels, etc.
+
+**Configuration Files:**
+- **Docker/Linux**:
+  - Device config: `/app/device.conf`
+  - System config: `/app/exporter.conf`
+- **macOS/FreeBSD**:
+  - Device config: `~/routeros_exporter/routeros_exporter.conf`
+  - System config: `~/routeros_exporter/exporter.conf`
 
 ## Advanced features
-While most of the [mktxp options](https://github.com/akpw/mktxp#getting-started) are self explanatory, some might require a bit of a context.
+While most of the [RouterOS_Exporter options](https://github.com/online2311/RouterOS_Exporter#getting-started) are self explanatory, some might require a bit of a context.
 
 ### Remote DHCP resolution
-When gathering various IP address-related metrics, MKTXP automatically resolves IP addresses whenever DHCP info is available. In many cases however, the exported devices do not have this information locally and instead rely on central DHCP servers. To improve readability / usefulness of the exported metrics, MKTXP supports remote DHCP server calls via the following option:
+When gathering various IP address-related metrics, RouterOS_Exporter automatically resolves IP addresses whenever DHCP info is available. In many cases however, the exported devices do not have this information locally and instead rely on central DHCP servers. To improve readability / usefulness of the exported metrics, RouterOS_Exporter supports remote DHCP server calls via the following option:
 ```
-remote_dhcp_entry = None        # An MKTXP entry to provide for remote DHCP info / resolution
+remote_dhcp_entry = None        # An RouterOS_Exporter entry to provide for remote DHCP info / resolution
 ```
-`MKTXP entry` in this context can be any other mktxp.conf entry, and for the sole purpose of providing DHCP info it does not even need to be enabled.  An example:
+`routeros_exporter entry` in this context can be any other RouterOS_Exporter.conf entry, and for the sole purpose of providing DHCP info it does not even need to be enabled.  An example:
 ```
 [RouterA]
     ...  # RouterA settings as normal
@@ -338,11 +364,11 @@ remote_dhcp_entry = None        # An MKTXP entry to provide for remote DHCP info
 ```
 
 ### Remote CAPsMAN info
-Similar to remote DHCP resolution, mktxp allows collecting CAPsMAN-related metrics via the following option: 
+Similar to remote DHCP resolution, RouterOS_Exporter allows collecting CAPsMAN-related metrics via the following option: 
 ```
-    remote_capsman_entry = None     # An MKTXP entry to provide for remote capsman info
+    remote_capsman_entry = None     # An RouterOS_Exporter entry to provide for remote capsman info
 ```
-`MKTXP entry` in this context can be any other mktxp.conf entry, and for the sole purpose of collecting CAPsMAN-related metrics it does not even need to be enabled.  An example:
+`routeros_exporter entry` in this context can be any other routeros_exporter.conf entry, and for the sole purpose of collecting CAPsMAN-related metrics it does not even need to be enabled.  An example:
 ```
 [RouterA]
     ...  # RouterA settings as normal
@@ -352,7 +378,7 @@ Similar to remote DHCP resolution, mktxp allows collecting CAPsMAN-related metri
 ```
 
 ### Kid Control device monitoring
-MKTXP Kid Control metrics help track network activity and bandwidth usage for all connected devices on a RouterOS network. This makes it easy to identify high-traffic devices and monitor network usage patterns in real-time.
+RouterOS_Exporter Kid Control metrics help track network activity and bandwidth usage for all connected devices on a RouterOS network. This makes it easy to identify high-traffic devices and monitor network usage patterns in real-time.
 
 The Kid Control functionality offers two modes of operation:
 ```
@@ -362,7 +388,7 @@ kid_control_dynamic = False     # Allow Kid Control metrics for all connected de
 
 When set up on the router, is is possible to view Kid Control device metrics directly from the command line:
 ```
-❯ mktxp print -en MKT-GT -kc
+❯ routeros_exporter print -en MKT-GT -kc
 MKT-GT@10.70.0.1: OK to connect
 Connecting to router MKT-GT@10.70.0.1
 2025-09-24 12:08:42 Connection to router MKT-GT@10.70.0.1 has been established
@@ -387,10 +413,10 @@ Total Kid Control devices: 8
 The devices are automatically sorted by total bandwidth usage (upload + download rates), making it easy to identify high-traffic devices at a glance.
 
 ### Address List device monitoring
-Similarly to the above, MKTXP IPv4 / IPv6 firewall address lists can be inspected directly from the command line. The feature supports multiple address lists and automatically detects which IP versions contain which entries.
+Similarly to the above, RouterOS_Exporter IPv4 / IPv6 firewall address lists can be inspected directly from the command line. The feature supports multiple address lists and automatically detects which IP versions contain which entries.
 
 ```
-❯ mktxp print -en MKT-GT -al "blocklist, allowlist"
+❯ routeros_exporter print -en MKT-GT -al "blocklist, allowlist"
 MKT-GT@10.70.0.1: OK to connect
 Connecting to router MKT-GT@10.70.0.1
 2025-09-25 12:15:30 Connection to router MKT-GT@10.70.0.1 has been established
@@ -418,7 +444,7 @@ Unique lists: 1
 The command automatically queries both IPv4 and IPv6 address lists, displaying separate tables when entries exist in both IP versions. Missing lists are reported as warnings, and entries are sorted by list name and then by address for easy scanning.
 
 ### Connections stats
-With many connected devices everywhere, one can often only guess where do they go to and what they actually do with all the information from your network environment. MKTXP let's you easily track those with a single option, with results available both from [mktxp dashboard](https://grafana.com/grafana/dashboards/13679-mikrotik-mktxp-exporter/) and the command line:
+With many connected devices everywhere, one can often only guess where do they go to and what they actually do with all the information from your network environment. RouterOS_Exporter let's you easily track those with a single option, with results available both from [RouterOS_Exporter dashboard](https://grafana.com/grafana/dashboards/13679-mikrotik-RouterOS_Exporter-exporter/) and the command line:
 
 ```
 connection_stats = False        # Open IP connections metrics 
@@ -431,7 +457,7 @@ Hey, what is this Temp&Humidity sensor has to do with a bunch of open network co
 Let's go check on that in the dashboard, or just get the info right from the command line:
 
 ```
-❯ mktxp print -en MKT-GT -cn
+❯ routeros_exporter print -en MKT-GT -cn
 +-------------------+--------------+------------------+-----------------------------------------------------------------------+
 |     dhcp_name     | src_address  | connection_count |                             dst_addresses                             |
 +===================+==============+==================+=======================================================================+
@@ -442,7 +468,7 @@ Let's go check on that in the dashboard, or just get the info right from the com
 
 
 ### Parallel routers fetch
-Concurrent exports across multiple devices can considerably speed up things for slow network connections. This feature can be turned on and configured with the following [system options](https://github.com/akpw/mktxp/blob/main/README.md#mktxp-system-configuration):
+Concurrent exports across multiple devices can considerably speed up things for slow network connections. This feature can be turned on and configured with the following [system options](https://github.com/online2311/RouterOS_Exporter/blob/main/README.md#RouterOS_Exporter-system-configuration):
 ```
 fetch_routers_in_parallel = False   # Set to True if you want to fetch multiple routers parallel
 max_worker_threads = 5              # Max number of worker threads that can fetch routers (parallel fetch only)
@@ -455,21 +481,21 @@ To keeps things within expected boundaries, the last two parameters allows for c
 ### Injectable router-level custom labels
 You can add custom labels to your devices using the `custom_labels` option. These labels are attached to all the metrics for a specific device, allowing e.g. easy router grouping for detailed overview dashboards in Grafana. You can define default labels in the `[default]` section and override or extend them in the router-specific sections.
 
-### mktxp endpoint listen addresses
-By default, mktxp runs it's HTTP metrics endpoint on any IPv4 address on port 49090. However, it is also able to listen on multiple socket addresses, both IPv4 and IPv6. 
-You can configure this behaviour via the following [system option](https://github.com/akpw/mktxp/blob/main/README.md#mktxp-system-configuration), setting ```listen``` to a space-separated list of sockets to listen to, e.g.:
+### RouterOS_Exporter endpoint listen addresses
+By default, RouterOS_Exporter runs it's HTTP metrics endpoint on any IPv4 address on port 49090. However, it is also able to listen on multiple socket addresses, both IPv4 and IPv6. 
+You can configure this behaviour via the following [system option](https://github.com/online2311/RouterOS_Exporter/blob/main/README.md#RouterOS_Exporter-system-configuration), setting ```listen``` to a space-separated list of sockets to listen to, e.g.:
 ```
 listen = '0.0.0.0:49090 [::1]:49090'
 ```
 A wildcard for the hostname is supported as well, and binding to both IPv4/IPv6 as available.
 
-## Setting up MKTXP to run as a Linux Service
-If you've installed MKTXP on a Linux system, you can run it with system boot via adding a service. \
+## Setting up RouterOS_Exporter to run as a Linux Service
+If you've installed RouterOS_Exporter on a Linux system, you can run it with system boot via adding a service. \
 Let's start with:
 
 
 ```
-❯ nano /etc/systemd/system/mktxp.service
+❯ nano /etc/systemd/system/routeros_exporter.service
 
 ```
 
@@ -477,11 +503,11 @@ Now copy and paste the following:
 
 ```
 [Unit]
-Description=MKTXP Exporter
+Description=RouterOS_Exporter Exporter
 
 [Service]
-User=user # the user under which mktxp was installed
-ExecStart=mktxp export # if mktxp is not at your $PATH, you might need to provide a full path
+User=user # the user under which RouterOS_Exporter was installed
+ExecStart=routeros_exporter export # if RouterOS_Exporter is not at your $PATH, you might need to provide a full path
 
 [Install]
 WantedBy=default.target
@@ -491,24 +517,24 @@ WantedBy=default.target
 Let's save and then start the service as well as check on its' status:
 ```
 ❯ sudo systemctl daemon-reload
-❯ sudo systemctl start mktxp
-❯ sudo systemctl enable mktxp
+❯ sudo systemctl start routeros_exporter
+❯ sudo systemctl enable routeros_exporter
 
-❯ systemctl status mktxp
-● mktxp.service - MKTXP Mikrotik Exporter to Prometheus
-     Loaded: loaded (/etc/systemd/system/mktxp.service; disabled; vendor preset: enabled)
+❯ systemctl status RouterOS_Exporter
+● routeros_exporter.service - RouterOS_Exporter Mikrotik Exporter to Prometheus
+     Loaded: loaded (/etc/systemd/system/routeros_exporter.service; disabled; vendor preset: enabled)
      Active: active (running) since Sun 2021-01-24 09:16:44 CET; 2h 44min ago
      ...
 ```
 
 
-## Setting up MKTXP to run as a FreeBSD Service
-If you've installed MKTXP on a FreeBSD system, you can run it with system boot via adding a service. \
+## Setting up RouterOS_Exporter to run as a FreeBSD Service
+If you've installed RouterOS_Exporter on a FreeBSD system, you can run it with system boot via adding a service. \
 Let's start with:
 
 
 ```
-❯ nano /usr/local/etc/rc.d/mktxp
+❯ nano /usr/local/etc/rc.d/routeros_exporter
 ```
 
 Now copy and paste the following:
@@ -516,33 +542,33 @@ Now copy and paste the following:
 ```
 #!/bin/sh
 
-# PROVIDE: mktxp
+# PROVIDE: RouterOS_Exporter
 # REQUIRE: DAEMON NETWORKING
 # BEFORE: LOGIN
 # KEYWORD: shutdown
 
-# Add the following lines to /etc/rc.conf to enable mktxp:
-# mktxp_enable="YES"
+# Add the following lines to /etc/rc.conf to enable RouterOS_Exporter:
+# routeros_exporter_enable="YES"
 #
-# mktxp_enable (bool):    Set to YES to enable mktxp
+# routeros_exporter_enable (bool):    Set to YES to enable RouterOS_Exporter
 #                Default: NO
-# mktxp_user (str):       mktxp daemon user
+# routeros_exporter_user (str):       RouterOS_Exporter daemon user
 #                Default: root
 
 . /etc/rc.subr
 
-name=mktxp
-rcvar=mktxp_enable 
+name=routeros_exporter
+rcvar=routeros_exporter_enable 
 
-: ${mktxp_enable:="NO"}
-: ${mktxp_user:="root"}
+: ${routeros_exporter_enable:="NO"}
+: ${routeros_exporter_user:="root"}
 
 # daemon
 pidfile="/var/run/${name}.pid"
 command="/usr/sbin/daemon"
-mktxp_command="/usr/local/bin/mktxp export"
+routeros_exporter_command="/usr/local/bin/routeros_exporter export"
 procname="daemon"
-command_args=" -c -f -P ${pidfile} ${mktxp_command}"
+command_args=" -c -f -P ${pidfile} ${routeros_exporter_command}"
 
 load_rc_config $name 
 run_rc_command "$1"
@@ -550,12 +576,12 @@ run_rc_command "$1"
 
 Let's save and then start the service as well as check on its' status:
 ```
-❯ sudo sysrc mktxp_enable="YES"
-❯ service mktxp start
-❯ service mktxp status
+❯ sudo sysrc routeros_exporter_enable="YES"
+❯ service routeros_exporter start
+❯ service routeros_exporter status
 
-❯ service mktxp status
-mktxp is running as pid 36704
+❯ service routeros_exporter status
+routeros_exporter is running as pid 36704
 ```
 
 ## Installing Development version
