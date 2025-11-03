@@ -155,6 +155,7 @@ class MKTXPConfigKeys:
     MKTXP_PROMETHEUS_HEADERS_DEDUPLICATION = 'prometheus_headers_deduplication'
     MKTXP_PERSISTENT_ROUTER_CONNECTION_POOL = 'persistent_router_connection_pool'
     MKTXP_PERSISTENT_DHCP_CACHE = 'persistent_dhcp_cache'
+    MKTXP_LATENCY_TEST_DNS_SERVER = 'latency_test_dns_server'
 
     # UnRegistered entries placeholder
     NO_ENTRIES_REGISTERED = 'NoEntriesRegistered'
@@ -194,6 +195,7 @@ class MKTXPConfigKeys:
     DEFAULT_MKTXP_MAX_WORKER_THREADS = 5
     DEFAULT_MKTXP_MAX_SCRAPE_DURATION = 10
     DEFAULT_MKTXP_TOTAL_MAX_SCRAPE_DURATION = 30
+    DEFAULT_MKTXP_LATENCY_TEST_DNS_SERVER = "8.8.8.8"
 
 
     BOOLEAN_KEYS_NO = {ENABLED_KEY, SSL_KEY, NO_SSL_CERTIFICATE, FE_CHECK_FOR_UPDATES, FE_KID_CONTROL_DEVICE, FE_KID_CONTROL_DYNAMIC,
@@ -210,6 +212,7 @@ class MKTXPConfigKeys:
     SYSTEM_BOOLEAN_KEYS_NO = {MKTXP_BANDWIDTH_KEY, MKTXP_VERBOSE_MODE, MKTXP_FETCH_IN_PARALLEL, MKTXP_COMPACT_CONFIG, MKTXP_PROMETHEUS_HEADERS_DEDUPLICATION}
 
     STR_KEYS = (HOST_KEY, USER_KEY, PASSWD_KEY, CREDENTIALS_FILE_KEY, SSL_CA_FILE, FE_REMOTE_DHCP_ENTRY, FE_REMOTE_CAPSMAN_ENTRY, FE_ADDRESS_LIST_KEY, FE_IPV6_ADDRESS_LIST_KEY, FE_CUSTOM_LABELS_KEY)
+    MKTXP_STR_KEYS = (MKTXP_LATENCY_TEST_DNS_SERVER,)
     INT_KEYS =  ()
     MKTXP_INT_KEYS = (PORT_KEY, MKTXP_SOCKET_TIMEOUT, MKTXP_INITIAL_DELAY, MKTXP_MAX_DELAY,
                       MKTXP_INC_DIV, MKTXP_BANDWIDTH_TEST_INTERVAL, MKTXP_MIN_COLLECT_INTERVAL,
@@ -245,7 +248,7 @@ class ConfigEntry:
                                                        MKTXPConfigKeys.MKTXP_MAX_WORKER_THREADS, MKTXPConfigKeys.MKTXP_MAX_SCRAPE_DURATION, 
                                                        MKTXPConfigKeys.MKTXP_TOTAL_MAX_SCRAPE_DURATION, MKTXPConfigKeys.MKTXP_COMPACT_CONFIG, 
                                                        MKTXPConfigKeys.MKTXP_PROMETHEUS_HEADERS_DEDUPLICATION, MKTXPConfigKeys.MKTXP_PERSISTENT_ROUTER_CONNECTION_POOL,
-                                                       MKTXPConfigKeys.MKTXP_PERSISTENT_DHCP_CACHE])
+                                                       MKTXPConfigKeys.MKTXP_PERSISTENT_DHCP_CACHE, MKTXPConfigKeys.MKTXP_LATENCY_TEST_DNS_SERVER])
 
 
 class OSConfig(metaclass=ABCMeta):
@@ -324,7 +327,8 @@ mockSystemEntry = ConfigEntry.MKTXPSystemEntry(
             compact_default_conf_values=False,
             prometheus_headers_deduplication=False,
             persistent_router_connection_pool=True,
-            persistent_dhcp_cache=True
+            persistent_dhcp_cache=True,
+            latency_test_dns_server=MKTXPConfigKeys.DEFAULT_MKTXP_LATENCY_TEST_DNS_SERVER
         )
 
 class MKTXPConfigHandler:
@@ -430,6 +434,16 @@ class MKTXPConfigHandler:
                 system_entry_reader[key] = self._config[MKTXPConfigKeys.MKTXP_LATEST_SYSTEM_ENTRY_KEY].as_bool(key)
             else:
                 system_entry_reader[key] = True if key in MKTXPConfigKeys.SYSTEM_BOOLEAN_KEYS_YES else False
+                new_keys.append(key) # read from disk next time
+                new_keys_values[key] = system_entry_reader[key]
+
+        for key in MKTXPConfigKeys.MKTXP_STR_KEYS:
+            if self._config[entry_name].get(key):
+                system_entry_reader[key] = self._config[entry_name].get(key)
+            elif self._config[MKTXPConfigKeys.MKTXP_LATEST_SYSTEM_ENTRY_KEY].get(key):
+                system_entry_reader[key] = self._config[MKTXPConfigKeys.MKTXP_LATEST_SYSTEM_ENTRY_KEY].get(key)
+            else:
+                system_entry_reader[key] = self._default_value_for_key(key)
                 new_keys.append(key) # read from disk next time
                 new_keys_values[key] = system_entry_reader[key]
 
@@ -603,6 +617,7 @@ class MKTXPConfigHandler:
             MKTXPConfigKeys.MKTXP_MAX_SCRAPE_DURATION: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_MAX_SCRAPE_DURATION,
             MKTXPConfigKeys.MKTXP_TOTAL_MAX_SCRAPE_DURATION: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_TOTAL_MAX_SCRAPE_DURATION,
             MKTXPConfigKeys.MKTXP_PERSISTENT_DHCP_CACHE: lambda _: True,
+            MKTXPConfigKeys.MKTXP_LATENCY_TEST_DNS_SERVER: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_LATENCY_TEST_DNS_SERVER,
         }[key](value)
 
 

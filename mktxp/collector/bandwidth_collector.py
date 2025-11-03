@@ -73,7 +73,8 @@ class BandwidthCollector(BaseCollector):
             return {'download': 0, 'upload': 0, 'ping': 0}
 
     @staticmethod
-    def inet_connected(host="8.8.8.8", port=53, timeout=3):
+    def inet_connected(host=None, port=53, timeout=3):
+        host = host or config_handler.system_entry.latency_test_dns_server
         try:
             socket.setdefaulttimeout(timeout)
             socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((host, port))

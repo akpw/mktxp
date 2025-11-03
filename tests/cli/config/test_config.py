@@ -101,6 +101,8 @@ def test_system_config_no_new_keys(tmpdir):
     config['MKTXP'] = {}
     for key in MKTXPConfigKeys.MKTXP_INT_KEYS:
         config['MKTXP'][key] = '123'
+    for key in MKTXPConfigKeys.MKTXP_STR_KEYS:
+        config['MKTXP'][key] = '1.1.1.1'
     for key in MKTXPConfigKeys.SYSTEM_BOOLEAN_KEYS_YES.union(MKTXPConfigKeys.SYSTEM_BOOLEAN_KEYS_NO):
         config['MKTXP'][key] = 'False'
     config['MKTXP'][MKTXPConfigKeys.LISTEN_KEY] = "0.0.0.0:1234"
