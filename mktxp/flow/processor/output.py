@@ -86,7 +86,7 @@ class BaseOutputProcessor:
         if drop_comment:
             del dhcp_lease_record['comment']
 
-        return dhcp_name
+        return dhcp_name if dhcp_name else ''
 
     @staticmethod
     def resolve_dhcp(router_entry, registration_record, id_key = 'mac_address', resolve_address = True):
