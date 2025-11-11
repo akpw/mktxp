@@ -172,6 +172,39 @@ Now you can mount this folder and run your docker instance with:
 docker run -v "$(pwd)/mktxp:/home/mktxp/mktxp/" -p 49090:49090 -it --rm ghcr.io/akpw/mktxp:latest
 ```
 
+#### Docker compose install
+For docker compose, a baseline compose file can look like this:
+```
+docker-compose.yml
+
+services:
+  mktxp:
+    image: ghcr.io/akpw/mktxp:latest
+    container_name: mktxp
+    network_mode: host
+#    networks:
+#      - traefik
+    ports:
+      - "49090:49090"
+    volumes:
+      - /path/to/docker-compose.yml/mktxp:/home/mktxp/mktxp
+#    labels:
+#      - "traefik.enable=true"
+#      - "traefik.http.routers.mktxp.rule=Host(`mktxp.your.domain`)"
+#      - "traefik.http.routers.mktxp.entrypoints=websecure"
+#     - "traefik.http.routers.mktxp.service=mktxp"
+#      - "traefik.http.services.mktxp.loadbalancer.server.port=49090"
+```
+Traefik labels would of course require your Traefik to be setup for a websecure entrypoint etc. Alternatively use the network_mode host and ports.
+Big caveat here is that at the moment, the user&usergroup in the container is set as 100:101, so often we fail with the error that there are unsufficient permissions to view/edit the config file.
+A workaround is to chown the two config files 
+```
+mktxp/mktxp.conf & mktxp/_mktxp.conf
+sudo chown 100:101 mktxp.conf
+sudo chown 100:101 _mktxp.conf
+```
+Afterwards I as able to run the exporter
+
 #### MKTXP stack install
 [MKTXP Stack Getting Started](https://github.com/akpw/mktxp-stack#install--getting-started) provides similar instructions around editing the mktxp.conf file and, if needed, adding a dedicated API user to your Mikrotik RouterOS devices as mentioned below.
 
