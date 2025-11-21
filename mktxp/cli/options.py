@@ -245,10 +245,13 @@ Selected metrics info can be printed on the command line. For more information, 
 
         commands = ['which nano', 'which vi', 'which vim']
         for command in commands:
-            editor = run_cmd(command, quiet = True).rstrip()
+            try:
+                editor = run_cmd(command, quiet = True).rstrip()
+            except FileNotFoundError:
+                break
             if editor:
-                break               
-        return editor
+                return editor
+        return "None"
 
 
 class MKTXPHelpFormatter(HelpFormatter):
