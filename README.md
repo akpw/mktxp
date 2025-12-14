@@ -162,14 +162,46 @@ Obviously, you can do the same via just opening the config file directly:
 ```
 
 #### Docker image install
-For Docker instances, one way is to use a configured `mktxp.conf` file from a local installation. Alternatively you can create a standalone one in a dedicated folder:
+The MKTXP Docker image runs as UID 1000 (standard user ID on most Linux distributions) to simplify file permissions when bind-mounting configuration files.
+
+For Docker instances, you have several options for managing configuration:
+
+**Option 1: Using `/etc/mktxp` (Recommended)**
+```bash
+# Create config directory and files
+mkdir mktxp-config
+nano mktxp-config/mktxp.conf     # copy&edit sample entry(ies) from above
+nano mktxp-config/_mktxp.conf    # optional: system configuration
+
+# Run with dedicated config directory
+docker run -v "$(pwd)/mktxp-config:/etc/mktxp" -p 49090:49090 -it --rm \
+  ghcr.io/akpw/mktxp:latest mktxp --cfg-dir /etc/mktxp export
 ```
+
+**Option 2: Mount individual files**
+```bash
+# Create config files
+nano mktxp.conf  # copy&edit sample entry(ies) from above
+
+# Mount only the config file (internal _mktxp.conf will be auto-created)
+docker run -v "$(pwd)/mktxp.conf:/etc/mktxp/mktxp.conf" -p 49090:49090 -it --rm \
+  ghcr.io/akpw/mktxp:latest mktxp --cfg-dir /etc/mktxp export
+```
+
+**Option 3: Legacy home directory method (backward compatible)**
+```bash
 mkdir mktxp
-nano mktxp/mktxp.conf # copy&edit sample entry(ies) from above
+nano mktxp/mktxp.conf  # copy&edit sample entry(ies) from above
+
+# Traditional mounting to home directory
+docker run -v "$(pwd)/mktxp:/home/mktxp/mktxp/" -p 49090:49090 -it --rm \
+  ghcr.io/akpw/mktxp:latest
 ```
-Now you can mount this folder and run your docker instance with:
-```
-docker run -v "$(pwd)/mktxp:/home/mktxp/mktxp/" -p 49090:49090 -it --rm ghcr.io/akpw/mktxp:latest
+
+**Getting shell access for debugging:**
+```bash
+# Easy shell access (no --entrypoint needed)
+docker run -v "$(pwd)/mktxp-config:/etc/mktxp" -it --rm ghcr.io/akpw/mktxp:latest sh
 ```
 
 #### MKTXP stack install
