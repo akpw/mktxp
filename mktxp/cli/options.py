@@ -13,6 +13,7 @@
 
 
 import os
+import shutil
 from argparse import ArgumentParser, HelpFormatter
 from mktxp.cli.config.config import config_handler, MKTXPConfigKeys, CustomConfig
 from mktxp.utils.utils import FSHelper, UniquePartialMatchList, run_cmd
@@ -113,12 +114,12 @@ Selected metrics info can be printed on the command line. For more information, 
                                         formatter_class=MKTXPHelpFormatter)
         optional_args_group = edit_parser.add_argument_group('Optional Arguments')
         optional_args_group.add_argument('-ed', '--editor', dest='editor',
-                help = f"Command line editor to use ({self._system_editor()} by default)",
-                default = self._system_editor(),
+                help = "Command line editor to use (auto-detected by default)",
+                default = None,
                 type = str)        
         optional_args_group.add_argument('-i', '--internal', dest='internal',
                 help = f"Edit MKTXP internal configuration (advanced)",
-                action = 'store_true')        
+                action = 'store_true')
 
         # Export command
         export_parser = subparsers.add_parser(MKTXPCommands.EXPORT,
@@ -239,16 +240,19 @@ Selected metrics info can be printed on the command line. For more information, 
 
     @staticmethod
     def _system_editor():
+        """Detect system editor. Returns None if no editor can be found."""
+        # Respect EDITOR environment variable first
         editor = os.environ.get('EDITOR')
         if editor:
             return editor
 
-        commands = ['which nano', 'which vi', 'which vim']
-        for command in commands:
-            editor = run_cmd(command, quiet = True).rstrip()
-            if editor:
-                break               
-        return editor
+        # Check common editors in PATH without calling external 'which'
+        for name in ('nano', 'vi', 'vim'):
+            path = shutil.which(name)
+            if path:
+                return path
+
+        return None
 
 
 class MKTXPHelpFormatter(HelpFormatter):

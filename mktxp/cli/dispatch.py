@@ -14,6 +14,7 @@
 
 
 import subprocess
+import shlex
 from mktxp.cli.config.config import config_handler
 from mktxp.cli.options import MKTXPOptionsParser, MKTXPCommands
 from mktxp.flow.processor.base_proc import ExportProcessor, OutputProcessor
@@ -79,11 +80,21 @@ class MKTXPDispatcher:
     def edit_entry(self, args):        
         editor = args['editor']
         if not editor:
-            print(f'No editor to edit the following file with: {config_handler.usr_conf_data_path}')
+            # Try to detect editor if not provided
+            editor = self.option_parser._system_editor()
+        
+        if not editor:
+            print(f'No editor found to edit configuration files.')
+            print(f'Please set the EDITOR environment variable or specify an editor with --editor')
+            return
+        
+        # Parse editor command to handle arguments (e.g., "subl -w" or "'path with spaces' -w")
+        editor_cmd = shlex.split(editor)
+        
         if args['internal']:
-            subprocess.check_call([editor, config_handler.mktxp_conf_path])
+            subprocess.check_call(editor_cmd + [config_handler.mktxp_conf_path])
         else:
-            subprocess.check_call([editor, config_handler.usr_conf_data_path])
+            subprocess.check_call(editor_cmd + [config_handler.usr_conf_data_path])
        
     def start_export(self, args):
         ExportProcessor.start()

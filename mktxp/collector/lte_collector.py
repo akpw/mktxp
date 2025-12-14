@@ -55,8 +55,7 @@ class LTECollector(BaseCollector):
             if rssi_records:
                 yield BaseCollector.gauge_collector('lte_rssi', 'Received Signal Strength Indicator', rssi_records, 'rssi', [])
 
-            # 5G NR signal metrics (Issue #269)
-            # RouterOS: nr-rsrp/nr-rsrq/nr-sinr -> MKTXP normalised: nr_rsrp/nr_rsrq/nr_sinr
+            # 5G NR signal metrics
             nr_rsrp_records = [monitor_record for monitor_record in monitor_records if monitor_record.get('nr_rsrp') ]
             nr_rsrq_records = [monitor_record for monitor_record in monitor_records if monitor_record.get('nr_rsrq') ]
             nr_sinr_records = [monitor_record for monitor_record in monitor_records if monitor_record.get('nr_sinr') ]
