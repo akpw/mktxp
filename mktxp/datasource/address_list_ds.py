@@ -24,9 +24,10 @@ class AddressListMetricsDataSource:
         
         all_records = []
         try:
-            path = f"/{ip_version}/firewall/address-list"
-            resource = router_entry.api_connection.router_api().get_resource(path)
+            api_path = f"/{ip_version}/firewall/address-list"
+            resource = router_entry.api_connection.router_api().get_resource(api_path)
             for list_name in address_lists:
+                # Use memory-safe fetching by querying specific list
                 records = resource.get(list=list_name)
                 all_records.extend(records)
 
