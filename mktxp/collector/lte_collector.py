@@ -24,7 +24,7 @@ class LTECollector(BaseCollector):
         if not router_entry.config_entry.lte:
             return
 
-        monitor_labels = ['pin_status', 'registration_status', 'functionality', 'current_operator', 'access_technology', 'session_uptime', 'subscriber_number', 'rsrp', 'rsrq']
+        monitor_labels = ['pin_status', 'registration_status', 'functionality', 'current_operator', 'access_technology', 'session_uptime', 'subscriber_number', 'rsrp', 'rsrq', 'nr_rsrp', 'nr_rsrq', 'nr_sinr']
         translation_table = {
                 'pin_status': lambda value: '1' if value=='ok' else '0',
                 'registration_status': lambda value: '1' if value=='registered' else '0',
@@ -54,3 +54,16 @@ class LTECollector(BaseCollector):
                 yield BaseCollector.gauge_collector('lte_sinr', 'LTE signal to noise ratio value', sinr_records, 'sinr', [])
             if rssi_records:
                 yield BaseCollector.gauge_collector('lte_rssi', 'Received Signal Strength Indicator', rssi_records, 'rssi', [])
+
+            # 5G NR signal metrics (Issue #269)
+            # RouterOS: nr-rsrp/nr-rsrq/nr-sinr -> MKTXP normalised: nr_rsrp/nr_rsrq/nr_sinr
+            nr_rsrp_records = [monitor_record for monitor_record in monitor_records if monitor_record.get('nr_rsrp') ]
+            nr_rsrq_records = [monitor_record for monitor_record in monitor_records if monitor_record.get('nr_rsrq') ]
+            nr_sinr_records = [monitor_record for monitor_record in monitor_records if monitor_record.get('nr_sinr') ]
+    
+            if nr_rsrp_records:
+                yield BaseCollector.gauge_collector('lte_nr_rsrp', '5G NR Reference Signal Received Power value', nr_rsrp_records, 'nr_rsrp', [])
+            if nr_rsrq_records:
+                yield BaseCollector.gauge_collector('lte_nr_rsrq', '5G NR Reference Signal Received Quality value', nr_rsrq_records, 'nr_rsrq', [])
+            if nr_sinr_records:
+                yield BaseCollector.gauge_collector('lte_nr_sinr', '5G NR signal to noise ratio value', nr_sinr_records, 'nr_sinr', [])
