@@ -160,7 +160,8 @@ class MKTXPConfigKeys:
     # UnRegistered entries placeholder
     NO_ENTRIES_REGISTERED = 'NoEntriesRegistered'
 
-    MKTXP_USE_COMMENTS_OVER_NAMES = 'use_comments_over_names'
+    MKTXP_USE_COMMENTS_OVER_NAMES = 'use_comments_over_names'  # Legacy option, deprecated
+    FE_INTERFACE_NAME_FORMAT = 'interface_name_format'
 
     # Base router id labels
     ROUTERBOARD_NAME = 'routerboard_name'
@@ -184,6 +185,7 @@ class MKTXPConfigKeys:
     DEFAULT_FE_ADDRESS_LIST_KEY = 'None'
     DEFAULT_FE_IPV6_ADDRESS_LIST_KEY = 'None'
     DEFAULT_FE_CUSTOM_LABELS_KEY = 'None'
+    DEFAULT_FE_INTERFACE_NAME_FORMAT = 'name'
 
     DEFAULT_MKTXP_PORT = 49090
     DEFAULT_MKTXP_SOCKET_TIMEOUT = 2
@@ -204,14 +206,14 @@ class MKTXPConfigKeys:
 
     # Feature keys enabled by default
     BOOLEAN_KEYS_YES = {PLAINTEXT_LOGIN_KEY, FE_DHCP_KEY, FE_HEALTH_KEY, FE_PACKAGE_KEY, FE_DHCP_LEASE_KEY, FE_IP_CONNECTIONS_KEY, FE_INTERFACE_KEY, 
-                        FE_ROUTE_KEY, FE_DHCP_POOL_KEY, FE_FIREWALL_KEY, FE_NEIGHBOR_KEY, FE_MONITOR_KEY, SSL_CHECK_HOSTNAME, MKTXP_USE_COMMENTS_OVER_NAMES,
+                        FE_ROUTE_KEY, FE_DHCP_POOL_KEY, FE_FIREWALL_KEY, FE_NEIGHBOR_KEY, FE_MONITOR_KEY, SSL_CHECK_HOSTNAME,
                         FE_WIRELESS_KEY, FE_WIRELESS_CLIENTS_KEY, FE_CAPSMAN_KEY, FE_CAPSMAN_CLIENTS_KEY, FE_POE_KEY,
                         FE_NETWATCH_KEY, FE_PUBLIC_IP_KEY, FE_USER_KEY, FE_QUEUE_KEY}
 
     SYSTEM_BOOLEAN_KEYS_YES = {MKTXP_PERSISTENT_ROUTER_CONNECTION_POOL, MKTXP_PERSISTENT_DHCP_CACHE}
     SYSTEM_BOOLEAN_KEYS_NO = {MKTXP_BANDWIDTH_KEY, MKTXP_VERBOSE_MODE, MKTXP_FETCH_IN_PARALLEL, MKTXP_COMPACT_CONFIG, MKTXP_PROMETHEUS_HEADERS_DEDUPLICATION}
 
-    STR_KEYS = (HOST_KEY, USER_KEY, PASSWD_KEY, CREDENTIALS_FILE_KEY, SSL_CA_FILE, FE_REMOTE_DHCP_ENTRY, FE_REMOTE_CAPSMAN_ENTRY, FE_ADDRESS_LIST_KEY, FE_IPV6_ADDRESS_LIST_KEY, FE_CUSTOM_LABELS_KEY)
+    STR_KEYS = (HOST_KEY, USER_KEY, PASSWD_KEY, CREDENTIALS_FILE_KEY, SSL_CA_FILE, FE_REMOTE_DHCP_ENTRY, FE_REMOTE_CAPSMAN_ENTRY, FE_ADDRESS_LIST_KEY, FE_IPV6_ADDRESS_LIST_KEY, FE_CUSTOM_LABELS_KEY, FE_INTERFACE_NAME_FORMAT)
     MKTXP_STR_KEYS = (MKTXP_BANDWIDTH_TEST_DNS_SERVER,)
     INT_KEYS =  ()
     MKTXP_INT_KEYS = (PORT_KEY, MKTXP_SOCKET_TIMEOUT, MKTXP_INITIAL_DELAY, MKTXP_MAX_DELAY,
@@ -232,7 +234,7 @@ class ConfigEntry:
                                                        MKTXPConfigKeys.FE_DHCP_KEY, MKTXPConfigKeys.FE_HEALTH_KEY, MKTXPConfigKeys.FE_PACKAGE_KEY, MKTXPConfigKeys.FE_DHCP_LEASE_KEY, MKTXPConfigKeys.FE_INTERFACE_KEY,
                                                        MKTXPConfigKeys.FE_MONITOR_KEY, MKTXPConfigKeys.FE_W60G_KEY, MKTXPConfigKeys.FE_WIRELESS_KEY, MKTXPConfigKeys.FE_WIRELESS_CLIENTS_KEY,
                                                        MKTXPConfigKeys.FE_IP_CONNECTIONS_KEY, MKTXPConfigKeys.FE_CONNECTION_STATS_KEY, MKTXPConfigKeys.FE_CAPSMAN_KEY, MKTXPConfigKeys.FE_CAPSMAN_CLIENTS_KEY, MKTXPConfigKeys.FE_POE_KEY, 
-                                                       MKTXPConfigKeys.FE_NETWATCH_KEY, MKTXPConfigKeys.MKTXP_USE_COMMENTS_OVER_NAMES, MKTXPConfigKeys.FE_PUBLIC_IP_KEY,
+                                                       MKTXPConfigKeys.FE_NETWATCH_KEY, MKTXPConfigKeys.FE_INTERFACE_NAME_FORMAT, MKTXPConfigKeys.FE_PUBLIC_IP_KEY,
                                                        MKTXPConfigKeys.FE_ROUTE_KEY, MKTXPConfigKeys.FE_DHCP_POOL_KEY, MKTXPConfigKeys.FE_FIREWALL_KEY, MKTXPConfigKeys.FE_ADDRESS_LIST_KEY, MKTXPConfigKeys.FE_NEIGHBOR_KEY, MKTXPConfigKeys.FE_DNS_KEY,
                                                        MKTXPConfigKeys.FE_IPV6_ROUTE_KEY, MKTXPConfigKeys.FE_IPV6_DHCP_POOL_KEY, MKTXPConfigKeys.FE_IPV6_FIREWALL_KEY, MKTXPConfigKeys.FE_IPV6_ADDRESS_LIST_KEY, MKTXPConfigKeys.FE_IPV6_NEIGHBOR_KEY,                                               
                                                        MKTXPConfigKeys.FE_USER_KEY, MKTXPConfigKeys.FE_QUEUE_KEY, MKTXPConfigKeys.FE_REMOTE_DHCP_ENTRY, MKTXPConfigKeys.FE_REMOTE_CAPSMAN_ENTRY, MKTXPConfigKeys.FE_CHECK_FOR_UPDATES, MKTXPConfigKeys.FE_BFD_KEY, MKTXPConfigKeys.FE_BGP_KEY,
@@ -531,11 +533,43 @@ class MKTXPConfigHandler:
     def _default_config_entry_reader(self):
         default_config_entry_reader = {}
         new_keys, new_keys_values = [], {}
+        
+        # Track if the section was created in this run
+        created_latest_section = False
 
         if not self.config.get(MKTXPConfigKeys.DEFAULT_ENTRY_KEY):
             self.config[MKTXPConfigKeys.DEFAULT_ENTRY_KEY] = {}
         if not self.config.get(MKTXPConfigKeys.MKTXP_LATEST_DEFAULT_ENTRY_KEY):
             self.config[MKTXPConfigKeys.MKTXP_LATEST_DEFAULT_ENTRY_KEY] = {}
+            created_latest_section = True
+
+        # Migrate legacy use_comments_over_names to interface_name_format FIRST
+        # This ensures the migrated value is available for the normal config processing below
+        migrated_entries = []
+        for entry_name in list(self.config.keys()):
+            if entry_name == MKTXPConfigKeys.MKTXP_LATEST_DEFAULT_ENTRY_KEY:
+                continue
+            if self.config[entry_name].get(MKTXPConfigKeys.MKTXP_USE_COMMENTS_OVER_NAMES) is not None:
+                # Migrate the legacy option
+                legacy_value = self.config[entry_name].as_bool(MKTXPConfigKeys.MKTXP_USE_COMMENTS_OVER_NAMES)
+                new_value = 'comment' if legacy_value else 'name'
+                self.config[entry_name][MKTXPConfigKeys.FE_INTERFACE_NAME_FORMAT] = new_value
+                # Remove the legacy key
+                self.config[entry_name].pop(MKTXPConfigKeys.MKTXP_USE_COMMENTS_OVER_NAMES, None)
+                migrated_entries.append(entry_name)
+        
+        if migrated_entries:
+            # Remove empty new_default_parameters section if it exists
+            if self.config.get(MKTXPConfigKeys.MKTXP_LATEST_DEFAULT_ENTRY_KEY) and \
+               len(self.config[MKTXPConfigKeys.MKTXP_LATEST_DEFAULT_ENTRY_KEY]) == 0:
+                del self.config[MKTXPConfigKeys.MKTXP_LATEST_DEFAULT_ENTRY_KEY]
+            
+            try:
+                self.config.write()
+                print(f'Migrated use_comments_over_names to interface_name_format for entries: {", ".join(migrated_entries)}')
+            except Exception as exc:
+                print(f'Error migrating use_comments_over_names to interface_name_format: {exc}')
+                print('Please update mktxp.conf manually')
 
         for key in MKTXPConfigKeys.BOOLEAN_KEYS_NO.union(MKTXPConfigKeys.BOOLEAN_KEYS_YES):
             if self.config[MKTXPConfigKeys.DEFAULT_ENTRY_KEY].get(key) is not None:
@@ -590,6 +624,12 @@ class MKTXPConfigHandler:
             except Exception as exc:
                 print(f'Error updating default router entry with new feature keys {new_keys}: {exc}')
                 print('Please update mktxp.conf to its latest version manually')
+        else:
+            # Only clean up if the section was created and is now empty after migration
+            if created_latest_section and \
+               self.config.get(MKTXPConfigKeys.MKTXP_LATEST_DEFAULT_ENTRY_KEY) is not None and \
+               len(self.config[MKTXPConfigKeys.MKTXP_LATEST_DEFAULT_ENTRY_KEY]) == 0:
+                del self.config[MKTXPConfigKeys.MKTXP_LATEST_DEFAULT_ENTRY_KEY]
 
         return default_config_entry_reader
 
@@ -607,6 +647,7 @@ class MKTXPConfigHandler:
             MKTXPConfigKeys.FE_REMOTE_CAPSMAN_ENTRY:  lambda _: MKTXPConfigKeys.DEFAULT_FE_REMOTE_CAPSMAN_ENTRY,
             MKTXPConfigKeys.FE_ADDRESS_LIST_KEY: lambda _: MKTXPConfigKeys.DEFAULT_FE_ADDRESS_LIST_KEY,
             MKTXPConfigKeys.FE_IPV6_ADDRESS_LIST_KEY: lambda _: MKTXPConfigKeys.DEFAULT_FE_IPV6_ADDRESS_LIST_KEY,
+            MKTXPConfigKeys.FE_INTERFACE_NAME_FORMAT: lambda _: MKTXPConfigKeys.DEFAULT_FE_INTERFACE_NAME_FORMAT,
             MKTXPConfigKeys.MKTXP_SOCKET_TIMEOUT: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_SOCKET_TIMEOUT,
             MKTXPConfigKeys.MKTXP_INITIAL_DELAY: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_INITIAL_DELAY,
             MKTXPConfigKeys.MKTXP_MAX_DELAY: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_MAX_DELAY,

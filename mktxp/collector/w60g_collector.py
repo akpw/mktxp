@@ -53,7 +53,6 @@ class W60gCollector(BaseCollector):
             metric_labels=monitor_labels,
             translation_table=translation_table,
             kind='w60g',
-            include_comments=True,
             running_only=False
         )
 

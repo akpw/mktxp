@@ -48,6 +48,46 @@ class BaseOutputProcessor:
     OutputNetwatchEntry = namedtuple('OutputNetwatchEntry', ['name', 'host', 'comment', 'status', 'type', 'since', 'timeout', 'interval'])
     OutputNetwatchEntry.__new__.__defaults__ = ('',) * len(OutputNetwatchEntry._fields)
 
+    @staticmethod
+    def format_interface_name(name, comment, interface_name_format, max_length=20):
+        """Formats interface/resource name based on interface_name_format configuration.
+        
+        Args:
+            name: The base name (e.g., 'ether1', '10.0.0.1', MAC address)
+            comment: Optional comment/description
+            interface_name_format: One of 'name', 'comment', 'combined'
+            max_length: Maximum length for truncation
+        
+        Returns:
+            Formatted name string
+        """
+        # Handle None/empty values
+        if not name:
+            name = ''
+        if not comment:
+            comment = ''
+        
+        # Apply truncation to comment if specified
+        if max_length and comment:
+            comment = comment[0:max_length]
+        
+        # Format based on interface_name_format
+        if interface_name_format == 'name':
+            # Use name only, ignore comment
+            return name
+        elif interface_name_format == 'comment':
+            # Use comment if available, fallback to name
+            return comment if comment else name
+        elif interface_name_format == 'combined':
+            # Use "name (comment)" if comment exists, else just name
+            if comment:
+                return f'{name} ({comment})'
+            else:
+                return name
+        else:
+            # Invalid format, fallback to name with warning
+            print(f'Warning: Invalid interface_name_format "{interface_name_format}". Using "name" format.')
+            return name
 
     @staticmethod
     def augment_record(router_entry, registration_record, id_key = 'mac_address'):
@@ -76,17 +116,21 @@ class BaseOutputProcessor:
         dhcp_name = dhcp_lease_record.get('host_name')
         dhcp_comment = dhcp_lease_record.get('comment')
         
-        if dhcp_name and dhcp_comment:
-            dhcp_name = f'{dhcp_name[0:20]} ({dhcp_comment[0:20]})' if not router_entry.config_entry.use_comments_over_names else dhcp_comment
-        elif dhcp_comment:
-            dhcp_name = dhcp_comment
-        else:
-            dhcp_name = dhcp_lease_record.get('mac_address') if not dhcp_name else dhcp_name        
-
+        # If no hostname, use MAC address as the base name
+        if not dhcp_name:
+            dhcp_name = dhcp_lease_record.get('mac_address', '')
+        
+        # Format using the centralized function 
+        formatted_name = BaseOutputProcessor.format_interface_name(
+            dhcp_name, 
+            dhcp_comment, 
+            router_entry.config_entry.interface_name_format
+        )
+        
         if drop_comment:
             del dhcp_lease_record['comment']
 
-        return dhcp_name if dhcp_name else ''
+        return formatted_name if formatted_name else ''
 
     @staticmethod
     def resolve_dhcp(router_entry, registration_record, id_key = 'mac_address', resolve_address = True):

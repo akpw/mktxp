@@ -62,8 +62,7 @@ class MonitorCollector(BaseCollector):
         monitor_records = InterfaceMonitorMetricsDataSource.metric_records(
             router_entry,
             metric_labels=monitor_labels,
-            translation_table=translation_table,
-            include_comments=True
+            translation_table=translation_table
         )
 
         if not monitor_records:

@@ -13,13 +13,14 @@
 
 
 from mktxp.datasource.base_ds import BaseDSProcessor
+from mktxp.flow.processor.output import BaseOutputProcessor
 
 
 class POEMetricsDataSource:
     ''' POE Metrics data provider
     '''             
     @staticmethod
-    def metric_records(router_entry, *, include_comments = False, metric_labels = None):
+    def metric_records(router_entry, *, metric_labels = None):
         if metric_labels is None:
             metric_labels = []                
         try:
@@ -40,15 +41,18 @@ class POEMetricsDataSource:
                 if poe_monitor_records[0].get('poe_out_power'):
                     poe_record['poe_out_power'] = poe_monitor_records[0]['poe_out_power']
 
-            if include_comments:
-                interfaces = router_entry.api_connection.router_api().get_resource('/interface/ethernet').call('print', {'proplist':'name,comment'})
-                comment_fn = lambda interface: interface['comment'] if interface.get('comment') else ''
-                for poe_record in poe_records:
-                    comment = [comment_fn(interface) for interface in interfaces if interface['name'] == poe_record['name']][0]       
-                    if comment:
-                        # combines name with comment
-                        poe_record['name'] = comment if router_entry.config_entry.use_comments_over_names else \
-                                                                                                    f"{poe_record['name']} ({comment})"                                
+            # Apply interface name formatting based on config
+            interfaces = router_entry.api_connection.router_api().get_resource('/interface/ethernet').call('print', {'proplist':'name,comment'})
+            comment_fn = lambda interface: interface['comment'] if interface.get('comment') else ''
+            for poe_record in poe_records:
+                comment = [comment_fn(interface) for interface in interfaces if interface['name'] == poe_record['name']][0]       
+                if comment:
+                    # Format name with comment using centralized function
+                    poe_record['name'] = BaseOutputProcessor.format_interface_name(
+                        poe_record['name'],
+                        comment,
+                        router_entry.config_entry.interface_name_format
+                    )
             return BaseDSProcessor.trimmed_records(router_entry, router_records = poe_records, metric_labels = metric_labels)
         except Exception as exc:
             print(f'Error getting PoE info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')

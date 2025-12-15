@@ -33,7 +33,7 @@ def mock_router_entry():
     ''' Create a mock router entry with necessary attributes
     '''
     router_entry = Mock()
-    router_entry.config_entry.use_comments_over_names = False
+    router_entry.config_entry.interface_name_format = 'combined'
     router_entry.dhcp_records = {}
     router_entry.dhcp_record = Mock(return_value=None)
     return router_entry

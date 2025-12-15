@@ -25,7 +25,7 @@ class POECollector(BaseCollector):
             return
 
         poe_labels = ['name', 'poe_out', 'poe_priority', 'poe_voltage', 'poe_out_status', 'poe_out_voltage', 'poe_out_current', 'poe_out_power']
-        poe_records = POEMetricsDataSource.metric_records(router_entry, include_comments = True, metric_labels = poe_labels)  
+        poe_records = POEMetricsDataSource.metric_records(router_entry, metric_labels = poe_labels)
 
         if poe_records:
             poe_info_labels = ['name', 'poe_out', 'poe_priority', 'poe_voltage', 'poe_out_status']

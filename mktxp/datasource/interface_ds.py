@@ -15,16 +15,18 @@
 from mktxp.datasource.base_ds import BaseDSProcessor
 from mktxp.datasource.system_resource_ds import SystemResourceMetricsDataSource
 from mktxp.utils.utils import routerOS7_version
+from mktxp.flow.processor.output import BaseOutputProcessor
 
 class BaseInterfaceDataSource:
     @staticmethod
     def rewrite_interface_names(router_entry, metric_records):
         for metric_record in metric_records:
             if metric_record.get('comment'):
-                if router_entry.config_entry.use_comments_over_names:
-                    metric_record['name'] = metric_record['comment']
-                else:
-                    metric_record['name'] = f"{metric_record['name']} ({metric_record['comment']})"
+                metric_record['name'] = BaseOutputProcessor.format_interface_name(
+                    metric_record['name'],
+                    metric_record['comment'],
+                    router_entry.config_entry.interface_name_format
+                )
 
         return metric_records
 
@@ -94,7 +96,7 @@ class InterfaceMonitorMetricsDataSource:
     """ Interface Monitor Metrics data provider
     """
     @staticmethod
-    def metric_records(router_entry, *, metric_labels = None, translation_table = None, kind = 'ethernet', include_comments = False, running_only = True):
+    def metric_records(router_entry, *, metric_labels = None, translation_table = None, kind = 'ethernet', running_only = True):
         if metric_labels is None:
             metric_labels = []
 
@@ -115,10 +117,14 @@ class InterfaceMonitorMetricsDataSource:
                     # unless explicitly requested, no need to do a monitor call for not running interfaces
                     interface_monitor_record = {'name': interface['name'], 'status': 'no-link'}
 
-                if include_comments and interface.get('comment'):
-                    # combines names with comments
-                    interface_monitor_record['name'] = interface['comment'] if router_entry.config_entry.use_comments_over_names else \
-                                                                                                        f"{interface['name']} ({interface['comment']})"
+                # Apply interface name formatting based on config
+                if interface.get('comment'):
+                    # Format name with comment using centralized function
+                    interface_monitor_record['name'] = BaseOutputProcessor.format_interface_name(
+                        interface['name'],
+                        interface['comment'],
+                        router_entry.config_entry.interface_name_format
+                    )
                 interface_monitor_record.setdefault('name', interface['name'])
                 interface_monitor_records.append(interface_monitor_record)
 

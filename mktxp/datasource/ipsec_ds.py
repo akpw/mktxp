@@ -13,6 +13,7 @@
 
 
 from mktxp.datasource.base_ds import BaseDSProcessor
+from mktxp.flow.processor.output import BaseOutputProcessor
 
 
 class IPSecMetricsDataSource:
@@ -25,9 +26,13 @@ class IPSecMetricsDataSource:
         try:
             ipsec_records = router_entry.api_connection.router_api().get_resource('/ip/ipsec/active-peers').call('print', {'stats': ''})
             for record in ipsec_records:
-                # The comment for active peers is the name from the peer
+                # Format name with comment using centralized function
                 if 'comment' in record:
-                    record['name'] = record['comment']
+                    record['name'] = BaseOutputProcessor.format_interface_name(
+                        record['name'],
+                        record['comment'],
+                        router_entry.config_entry.interface_name_format
+                    )
 
             return BaseDSProcessor.trimmed_records(router_entry, router_records=ipsec_records,
                                                    metric_labels=metric_labels, translation_table=translation_table)

@@ -13,6 +13,7 @@
 
 
 from mktxp.datasource.base_ds import BaseDSProcessor
+from mktxp.flow.processor.output import BaseOutputProcessor
 
 
 class NetwatchMetricsDataSource:
@@ -31,10 +32,12 @@ class NetwatchMetricsDataSource:
                 if not netwatch_record.get('name'):
                     comment = netwatch_record.get('comment')
                     host = netwatch_record.get('host')        
-                    if comment:
-                        netwatch_record['name'] = f'{host} ({comment[0:20]})' if not router_entry.config_entry.use_comments_over_names else comment
-                    else:
-                        netwatch_record['name'] = host
+                    # Format name with comment using centralized function
+                    netwatch_record['name'] = BaseOutputProcessor.format_interface_name(
+                        host,
+                        comment,
+                        router_entry.config_entry.interface_name_format
+                    )
 
             return BaseDSProcessor.trimmed_records(router_entry, router_records = netwatch_records, translation_table = translation_table, metric_labels = metric_labels)
         except Exception as exc:
