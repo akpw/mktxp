@@ -29,18 +29,17 @@ class NetwatchMetricsDataSource:
 
             # since addition in ROS v7.14, name is supported natively
             for netwatch_record in netwatch_records:
-                if not netwatch_record.get('name'):
-                    comment = netwatch_record.get('comment')
-                    host = netwatch_record.get('host')        
-                    # Format name with comment using centralized function
-                    netwatch_record['name'] = BaseOutputProcessor.format_interface_name(
-                        host,
-                        comment,
-                        router_entry.config_entry.interface_name_format
-                    )
+                # Determine the primary identifier: use 'name' if set, fallback to 'host'
+                name = netwatch_record.get('name') or netwatch_record.get('host')
+                comment = netwatch_record.get('comment')
 
+                # Apply the centralized formatting
+                netwatch_record['name'] = BaseOutputProcessor.format_interface_name(
+                    name,
+                    comment,
+                    router_entry.config_entry.interface_name_format
+                )
             return BaseDSProcessor.trimmed_records(router_entry, router_records = netwatch_records, translation_table = translation_table, metric_labels = metric_labels)
         except Exception as exc:
             print(f'Error getting Netwatch info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None
-
