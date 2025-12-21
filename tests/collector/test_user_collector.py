@@ -15,25 +15,26 @@ import pytest
 from unittest.mock import Mock, patch
 from mktxp.collector.user_collector import UserCollector
 
+# Use valid date strings for 'when' so they can be parsed
 # Case 1: Records with duplicates
 records_with_duplicates = [
-    {'name': 'user1', 'when': 't1', 'address': 'a1', 'via': 'v1', 'group': 'g1'},
-    {'name': 'user2', 'when': 't2', 'address': 'a2', 'via': 'v2', 'group': 'g2'},
-    {'name': 'user1', 'when': 't1', 'address': 'a1', 'via': 'v1', 'group': 'g1'},  # Duplicate
+    {'name': 'user1', 'when': 'dec/18/2024 10:54:02', 'address': 'a1', 'via': 'v1', 'group': 'g1'},
+    {'name': 'user2', 'when': 'dec/18/2024 10:55:02', 'address': 'a2', 'via': 'v2', 'group': 'g2'},
+    {'name': 'user1', 'when': 'dec/18/2024 10:54:02', 'address': 'a1', 'via': 'v1', 'group': 'g1'},  # Duplicate
 ]
 expected_names_1 = {'user1', 'user2'}
 
 # Case 2: No duplicates
 records_without_duplicates = [
-    {'name': 'user1', 'when': 't1', 'address': 'a1', 'via': 'v1', 'group': 'g1'},
-    {'name': 'user2', 'when': 't2', 'address': 'a2', 'via': 'v2', 'group': 'g2'},
+    {'name': 'user1', 'when': 'dec/18/2024 10:54:02', 'address': 'a1', 'via': 'v1', 'group': 'g1'},
+    {'name': 'user2', 'when': 'dec/18/2024 10:55:02', 'address': 'a2', 'via': 'v2', 'group': 'g2'},
 ]
 expected_names_2 = {'user1', 'user2'}
 
 # Case 3: All duplicates
 records_all_duplicates = [
-    {'name': 'user1', 'when': 't1', 'address': 'a1', 'via': 'v1', 'group': 'g1'},
-    {'name': 'user1', 'when': 't1', 'address': 'a1', 'via': 'v1', 'group': 'g1'},
+    {'name': 'user1', 'when': 'dec/18/2024 10:54:02', 'address': 'a1', 'via': 'v1', 'group': 'g1'},
+    {'name': 'user1', 'when': 'dec/18/2024 10:54:02', 'address': 'a1', 'via': 'v1', 'group': 'g1'},
 ]
 expected_names_3 = {'user1'}
 
@@ -61,7 +62,7 @@ def test_user_collector_deduplicates_records(mock_metric_records, input_records,
     assert len(metrics) == 1
     
     user_metric = metrics[0]
-    assert user_metric.name == 'mktxp_active_users'
+    assert user_metric.name == 'mktxp_active_users_info'
     assert len(user_metric.samples) == expected_sample_count
 
     # Check that the correct samples are present

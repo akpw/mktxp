@@ -11,7 +11,7 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
-
+from datetime import datetime
 from mktxp.collector.base_collector import BaseCollector
 from mktxp.datasource.user_ds import UserMetricsDataSource
 
@@ -24,7 +24,25 @@ class UserCollector(BaseCollector):
 
         user_labels = ['name', 'when', 'address', 'via', 'group']
         user_records = UserMetricsDataSource.metric_records(router_entry, metric_labels=user_labels)        
+
         if user_records:
-            # Auto de-duplicate the records from the scrapes via API silently
-            user_metrics = BaseCollector.info_collector('active_users', 'Active Users', user_records, user_labels, verbose_reporting = False)
+            # Parse 'when' to timestamp and use it as metric value
+            valid_records = []
+            for record in user_records:
+                if 'when' in record:
+                    try:
+                        dt = datetime.strptime(record['when'], "%b/%d/%Y %H:%M:%S")
+                        record['timestamp'] = int(dt.timestamp())
+                        valid_records.append(record)
+                    except ValueError:
+                         # Log error or skip if format is unexpected
+                         pass
+
+            # Remove 'when' from labels as it is now the value
+            # Create a new list excluding 'when'
+            metric_labels = [l for l in user_labels if l != 'when']
+
+            # Use gauge collector with 'timestamp' as the value key
+            # Pass 'active_users_info' as name so it becomes 'mktxp_active_users_info'
+            user_metrics = BaseCollector.gauge_collector('active_users_info', 'Active Users', valid_records, 'timestamp', metric_labels, verbose_reporting = False)
             yield user_metrics
