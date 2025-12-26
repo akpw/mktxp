@@ -14,6 +14,7 @@ spec:
       containers:
       - name: mktxp-exporter
         image: ghcr.io/akpw/mktxp:latest
+        command: ["mktxp"]
         args:
           - --cfg-dir
           - /mktxp_config
