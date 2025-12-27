@@ -138,6 +138,7 @@ class MKTXPConfigKeys:
     FE_CERTIFICATE_KEY = 'certificate'
     FE_ROUTING_STATS_KEY = 'routing_stats'
     FE_CUSTOM_LABELS_KEY = 'custom_labels'
+    FE_MODULE_ONLY_KEY = 'module_only'
 
     MKTXP_SOCKET_TIMEOUT = 'socket_timeout'
     MKTXP_INITIAL_DELAY = 'initial_delay_on_failure'
@@ -156,6 +157,9 @@ class MKTXPConfigKeys:
     MKTXP_PERSISTENT_ROUTER_CONNECTION_POOL = 'persistent_router_connection_pool'
     MKTXP_PERSISTENT_DHCP_CACHE = 'persistent_dhcp_cache'
     MKTXP_BANDWIDTH_TEST_DNS_SERVER = 'bandwidth_test_dns_server'
+    MKTXP_PROBE_CONNECTION_POOL = 'probe_connection_pool'
+    MKTXP_PROBE_CONNECTION_POOL_TTL = 'probe_connection_pool_ttl'
+    MKTXP_PROBE_CONNECTION_POOL_MAX_SIZE = 'probe_connection_pool_max_size'
 
     # UnRegistered entries placeholder
     NO_ENTRIES_REGISTERED = 'NoEntriesRegistered'
@@ -198,11 +202,13 @@ class MKTXPConfigKeys:
     DEFAULT_MKTXP_MAX_SCRAPE_DURATION = 10
     DEFAULT_MKTXP_TOTAL_MAX_SCRAPE_DURATION = 30
     DEFAULT_MKTXP_BANDWIDTH_TEST_DNS_SERVER = "8.8.8.8"
+    DEFAULT_MKTXP_PROBE_CONNECTION_POOL_TTL = 300
+    DEFAULT_MKTXP_PROBE_CONNECTION_POOL_MAX_SIZE = 128
 
 
     BOOLEAN_KEYS_NO = {ENABLED_KEY, SSL_KEY, NO_SSL_CERTIFICATE, FE_CHECK_FOR_UPDATES, FE_KID_CONTROL_DEVICE, FE_KID_CONTROL_DYNAMIC,
                        SSL_CERTIFICATE_VERIFY, FE_IPV6_ROUTE_KEY, FE_IPV6_DHCP_POOL_KEY, FE_IPV6_FIREWALL_KEY, FE_IPV6_NEIGHBOR_KEY, FE_CONNECTION_STATS_KEY, FE_BFD_KEY, FE_BGP_KEY,
-                       FE_EOIP_KEY, FE_GRE_KEY, FE_IPIP_KEY, FE_IPSEC_KEY, FE_LTE_KEY, FE_SWITCH_PORT_KEY, FE_ROUTING_STATS_KEY, FE_CERTIFICATE_KEY, FE_DNS_KEY, FE_CONTAINER_KEY, FE_W60G_KEY}
+                       FE_EOIP_KEY, FE_GRE_KEY, FE_IPIP_KEY, FE_IPSEC_KEY, FE_LTE_KEY, FE_SWITCH_PORT_KEY, FE_ROUTING_STATS_KEY, FE_CERTIFICATE_KEY, FE_DNS_KEY, FE_CONTAINER_KEY, FE_W60G_KEY, FE_MODULE_ONLY_KEY}
 
     # Feature keys enabled by default
     BOOLEAN_KEYS_YES = {PLAINTEXT_LOGIN_KEY, FE_DHCP_KEY, FE_HEALTH_KEY, FE_PACKAGE_KEY, FE_DHCP_LEASE_KEY, FE_IP_CONNECTIONS_KEY, FE_INTERFACE_KEY, 
@@ -211,14 +217,16 @@ class MKTXPConfigKeys:
                         FE_NETWATCH_KEY, FE_PUBLIC_IP_KEY, FE_USER_KEY, FE_QUEUE_KEY}
 
     SYSTEM_BOOLEAN_KEYS_YES = {MKTXP_PERSISTENT_ROUTER_CONNECTION_POOL, MKTXP_PERSISTENT_DHCP_CACHE}
-    SYSTEM_BOOLEAN_KEYS_NO = {MKTXP_BANDWIDTH_KEY, MKTXP_VERBOSE_MODE, MKTXP_FETCH_IN_PARALLEL, MKTXP_COMPACT_CONFIG, MKTXP_PROMETHEUS_HEADERS_DEDUPLICATION}
+    SYSTEM_BOOLEAN_KEYS_NO = {MKTXP_BANDWIDTH_KEY, MKTXP_VERBOSE_MODE, MKTXP_FETCH_IN_PARALLEL, MKTXP_COMPACT_CONFIG, MKTXP_PROMETHEUS_HEADERS_DEDUPLICATION,
+                              MKTXP_PROBE_CONNECTION_POOL}
 
     STR_KEYS = (HOST_KEY, USER_KEY, PASSWD_KEY, CREDENTIALS_FILE_KEY, SSL_CA_FILE, FE_REMOTE_DHCP_ENTRY, FE_REMOTE_CAPSMAN_ENTRY, FE_ADDRESS_LIST_KEY, FE_IPV6_ADDRESS_LIST_KEY, FE_CUSTOM_LABELS_KEY, FE_INTERFACE_NAME_FORMAT)
     MKTXP_STR_KEYS = (MKTXP_BANDWIDTH_TEST_DNS_SERVER,)
     INT_KEYS =  ()
     MKTXP_INT_KEYS = (PORT_KEY, MKTXP_SOCKET_TIMEOUT, MKTXP_INITIAL_DELAY, MKTXP_MAX_DELAY,
                       MKTXP_INC_DIV, MKTXP_BANDWIDTH_TEST_INTERVAL, MKTXP_MIN_COLLECT_INTERVAL,
-                      MKTXP_MAX_WORKER_THREADS, MKTXP_MAX_SCRAPE_DURATION, MKTXP_TOTAL_MAX_SCRAPE_DURATION)
+                      MKTXP_MAX_WORKER_THREADS, MKTXP_MAX_SCRAPE_DURATION, MKTXP_TOTAL_MAX_SCRAPE_DURATION,
+                      MKTXP_PROBE_CONNECTION_POOL_TTL, MKTXP_PROBE_CONNECTION_POOL_MAX_SIZE)
 
     # MKTXP configs entry names
     DEFAULT_ENTRY_KEY = 'default'
@@ -240,7 +248,7 @@ class ConfigEntry:
                                                        MKTXPConfigKeys.FE_USER_KEY, MKTXPConfigKeys.FE_QUEUE_KEY, MKTXPConfigKeys.FE_REMOTE_DHCP_ENTRY, MKTXPConfigKeys.FE_REMOTE_CAPSMAN_ENTRY, MKTXPConfigKeys.FE_CHECK_FOR_UPDATES, MKTXPConfigKeys.FE_BFD_KEY, MKTXPConfigKeys.FE_BGP_KEY,
                                                        MKTXPConfigKeys.FE_KID_CONTROL_DEVICE, MKTXPConfigKeys.FE_KID_CONTROL_DYNAMIC, MKTXPConfigKeys.FE_EOIP_KEY, MKTXPConfigKeys.FE_GRE_KEY, MKTXPConfigKeys.FE_IPIP_KEY, MKTXPConfigKeys.FE_LTE_KEY, MKTXPConfigKeys.FE_IPSEC_KEY, MKTXPConfigKeys.FE_SWITCH_PORT_KEY,
                                                        MKTXPConfigKeys.FE_ROUTING_STATS_KEY, MKTXPConfigKeys.FE_CERTIFICATE_KEY, MKTXPConfigKeys.FE_CONTAINER_KEY,
-                                                       MKTXPConfigKeys.FE_CUSTOM_LABELS_KEY
+                                                       MKTXPConfigKeys.FE_CUSTOM_LABELS_KEY, MKTXPConfigKeys.FE_MODULE_ONLY_KEY
                                                        ])
     MKTXPSystemEntry = namedtuple('MKTXPSystemEntry', [MKTXPConfigKeys.PORT_KEY, MKTXPConfigKeys.LISTEN_KEY, MKTXPConfigKeys.MKTXP_SOCKET_TIMEOUT,
                                                        MKTXPConfigKeys.MKTXP_INITIAL_DELAY, MKTXPConfigKeys.MKTXP_MAX_DELAY,
@@ -250,7 +258,9 @@ class ConfigEntry:
                                                        MKTXPConfigKeys.MKTXP_MAX_WORKER_THREADS, MKTXPConfigKeys.MKTXP_MAX_SCRAPE_DURATION, 
                                                        MKTXPConfigKeys.MKTXP_TOTAL_MAX_SCRAPE_DURATION, MKTXPConfigKeys.MKTXP_COMPACT_CONFIG, 
                                                        MKTXPConfigKeys.MKTXP_PROMETHEUS_HEADERS_DEDUPLICATION, MKTXPConfigKeys.MKTXP_PERSISTENT_ROUTER_CONNECTION_POOL,
-                                                       MKTXPConfigKeys.MKTXP_PERSISTENT_DHCP_CACHE, MKTXPConfigKeys.MKTXP_BANDWIDTH_TEST_DNS_SERVER])
+                                                       MKTXPConfigKeys.MKTXP_PERSISTENT_DHCP_CACHE, MKTXPConfigKeys.MKTXP_BANDWIDTH_TEST_DNS_SERVER,
+                                                       MKTXPConfigKeys.MKTXP_PROBE_CONNECTION_POOL, MKTXPConfigKeys.MKTXP_PROBE_CONNECTION_POOL_TTL,
+                                                       MKTXPConfigKeys.MKTXP_PROBE_CONNECTION_POOL_MAX_SIZE])
 
 
 class OSConfig(metaclass=ABCMeta):
@@ -330,7 +340,10 @@ mockSystemEntry = ConfigEntry.MKTXPSystemEntry(
             prometheus_headers_deduplication=False,
             persistent_router_connection_pool=True,
             persistent_dhcp_cache=True,
-            bandwidth_test_dns_server=MKTXPConfigKeys.DEFAULT_MKTXP_BANDWIDTH_TEST_DNS_SERVER
+            bandwidth_test_dns_server=MKTXPConfigKeys.DEFAULT_MKTXP_BANDWIDTH_TEST_DNS_SERVER,
+            probe_connection_pool=False,
+            probe_connection_pool_ttl=MKTXPConfigKeys.DEFAULT_MKTXP_PROBE_CONNECTION_POOL_TTL,
+            probe_connection_pool_max_size=MKTXPConfigKeys.DEFAULT_MKTXP_PROBE_CONNECTION_POOL_MAX_SIZE
         )
 
 class MKTXPConfigHandler:
@@ -659,6 +672,8 @@ class MKTXPConfigHandler:
             MKTXPConfigKeys.MKTXP_TOTAL_MAX_SCRAPE_DURATION: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_TOTAL_MAX_SCRAPE_DURATION,
             MKTXPConfigKeys.MKTXP_PERSISTENT_DHCP_CACHE: lambda _: True,
             MKTXPConfigKeys.MKTXP_BANDWIDTH_TEST_DNS_SERVER: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_BANDWIDTH_TEST_DNS_SERVER,
+            MKTXPConfigKeys.MKTXP_PROBE_CONNECTION_POOL_TTL: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_PROBE_CONNECTION_POOL_TTL,
+            MKTXPConfigKeys.MKTXP_PROBE_CONNECTION_POOL_MAX_SIZE: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_PROBE_CONNECTION_POOL_MAX_SIZE,
         }[key](value)
 
 

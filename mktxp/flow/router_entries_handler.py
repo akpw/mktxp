@@ -17,18 +17,41 @@ from mktxp.flow.router_connection import RouterAPIConnectionError
 
 class RouterEntriesHandler:
     ''' Handles RouterOS entries defined in MKTXP config 
-    '''         
-    def __init__(self):
-        self._router_entries = {}            
-        for router_name in config_handler.registered_entries():            
-            router_entry = RouterEntry(router_name)
+    '''
+    def __init__(self, module_names=None, config_overrides=None, connection_overrides=None):
+        self._router_entries = {}
+        self._module_names = module_names
+        config_overrides = config_overrides or {}
+        connection_overrides = connection_overrides or {}
+        if isinstance(module_names, str):
+            module_names = [module_names]
+
+        entry_names = module_names if module_names is not None else config_handler.registered_entries()
+        for router_name in entry_names:
+            if not config_handler.registered_entry(router_name):
+                continue
+            if module_names is None and config_handler.config_entry(router_name).module_only:
+                continue
+            connection_override = connection_overrides.get(router_name)
+            router_entry = RouterEntry(
+                router_name,
+                config_overrides.get(router_name),
+                connection_override,
+                keep_connection=bool(connection_override),
+            )
             RouterEntriesHandler._set_child_entries(router_entry)
             self._router_entries[router_name] = router_entry
 
     @property
     def router_entries(self):
-        return (entry for key, entry in  self._router_entries.items() if entry.config_entry.enabled) \
-                                                                                if self._router_entries else None   
+        if not self._router_entries:
+            return None
+
+        if self._module_names is None:
+            return (entry for key, entry in self._router_entries.items()
+                    if entry.config_entry.enabled and not entry.config_entry.module_only)
+
+        return (entry for key, entry in self._router_entries.items() if entry.config_entry.enabled)
 
     @staticmethod
     def router_entry(entry_name, enabled_only = False):
@@ -61,4 +84,3 @@ class RouterEntriesHandler:
             remote_capsman_entry_name = router_entry.config_entry.remote_capsman_entry
             if remote_capsman_entry_name != 'None':
                 print(f"Error in configuration for {router_entry.router_name}: remote_capsman_entry must a name of another router entry or 'None', but it is '{remote_capsman_entry_name}'. Ignoring.")
-
