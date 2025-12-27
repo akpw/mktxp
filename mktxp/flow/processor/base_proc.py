@@ -14,11 +14,11 @@
 
 from datetime import datetime
 from prometheus_client.core import REGISTRY
-from prometheus_client import make_wsgi_app
+from prometheus_client import make_wsgi_app, CollectorRegistry as PrometheusCollectorRegistry
 
 from mktxp.cli.config.config import config_handler
 from mktxp.flow.collector_handler import CollectorHandler
-from mktxp.flow.collector_registry import CollectorRegistry
+from mktxp.flow.collector_registry import CollectorRegistry as MKTXPCollectorRegistry
 from mktxp.flow.router_entries_handler import RouterEntriesHandler
 
 from mktxp.cli.output.capsman_out import CapsmanOutput
@@ -31,6 +31,7 @@ from mktxp.cli.output.netwatch_out import NetwatchOutput
 
 import gzip
 from waitress import serve
+from urllib.parse import parse_qs
 
 class PrometheusHeadersDeduplicatingMiddleware:
     def __init__(self, app):
@@ -93,11 +94,12 @@ class ExportProcessor:
     '''    
     @staticmethod
     def start():
-        REGISTRY.register(CollectorHandler(RouterEntriesHandler(), CollectorRegistry()))
+        REGISTRY.register(CollectorHandler(RouterEntriesHandler(), MKTXPCollectorRegistry()))
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         print(f'{current_time} Running HTTP metrics server on: {config_handler.system_entry.listen}')
 
-        app = make_wsgi_app()
+        metrics_app = make_wsgi_app()
+        app = MetricsRouter(metrics_app)
         if config_handler.system_entry.prometheus_headers_deduplication:
             if config_handler.system_entry.verbose_mode:
                 print(f"Prometheus HELP / TYPE headers de-deplucation is On")
@@ -105,6 +107,49 @@ class ExportProcessor:
             serve(middleware, listen = config_handler.system_entry.listen)
         else:
             serve(app, listen = config_handler.system_entry.listen)
+
+
+class MetricsRouter:
+    def __init__(self, metrics_app):
+        self.metrics_app = metrics_app
+
+    def __call__(self, environ, start_response):
+        path = environ.get('PATH_INFO', '')
+        if path == '/probe':
+            return self._handle_probe(environ, start_response)
+        return self.metrics_app(environ, start_response)
+
+    def _handle_probe(self, environ, start_response):
+        query = parse_qs(environ.get('QUERY_STRING', ''))
+        modules = query.get('module', [])
+        if len(modules) != 1 or not modules[0].strip():
+            return self._error(start_response, "Missing or invalid 'module' parameter")
+
+        module = modules[0].strip()
+        if not config_handler.registered_entry(module):
+            return self._error(start_response, f"Unknown module '{module}'")
+        config_entry = config_handler.config_entry(module)
+        if not config_entry or not config_entry.enabled:
+            return self._error(start_response, f"Module '{module}' is disabled")
+
+        registry = PrometheusCollectorRegistry()
+        registry.register(
+            CollectorHandler(RouterEntriesHandler([module]), MKTXPCollectorRegistry())
+        )
+        probe_app = make_wsgi_app(registry=registry)
+        return probe_app(environ, start_response)
+
+    @staticmethod
+    def _error(start_response, message):
+        body = f'Error: {message}\n'.encode('utf-8')
+        start_response(
+            '503 Service Unavailable',
+            [
+                ('Content-Type', 'text/plain; charset=utf-8'),
+                ('Content-Length', str(len(body))),
+            ],
+        )
+        return [body]
 
 class OutputProcessor:
     ''' Base CLI Processing

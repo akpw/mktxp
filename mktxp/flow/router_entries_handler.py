@@ -17,10 +17,16 @@ from mktxp.flow.router_connection import RouterAPIConnectionError
 
 class RouterEntriesHandler:
     ''' Handles RouterOS entries defined in MKTXP config 
-    '''         
-    def __init__(self):
-        self._router_entries = {}            
-        for router_name in config_handler.registered_entries():            
+    '''
+    def __init__(self, module_names=None):
+        self._router_entries = {}
+        if isinstance(module_names, str):
+            module_names = [module_names]
+
+        entry_names = module_names if module_names is not None else config_handler.registered_entries()
+        for router_name in entry_names:
+            if not config_handler.registered_entry(router_name):
+                continue
             router_entry = RouterEntry(router_name)
             RouterEntriesHandler._set_child_entries(router_entry)
             self._router_entries[router_name] = router_entry
