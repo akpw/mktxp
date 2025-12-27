@@ -18,10 +18,11 @@ from mktxp.flow.router_connection import RouterAPIConnectionError
 class RouterEntriesHandler:
     ''' Handles RouterOS entries defined in MKTXP config 
     '''
-    def __init__(self, module_names=None, config_overrides=None):
+    def __init__(self, module_names=None, config_overrides=None, connection_overrides=None):
         self._router_entries = {}
         self._module_names = module_names
         config_overrides = config_overrides or {}
+        connection_overrides = connection_overrides or {}
         if isinstance(module_names, str):
             module_names = [module_names]
 
@@ -31,7 +32,13 @@ class RouterEntriesHandler:
                 continue
             if module_names is None and config_handler.config_entry(router_name).module_only:
                 continue
-            router_entry = RouterEntry(router_name, config_overrides.get(router_name))
+            connection_override = connection_overrides.get(router_name)
+            router_entry = RouterEntry(
+                router_name,
+                config_overrides.get(router_name),
+                connection_override,
+                keep_connection=bool(connection_override),
+            )
             RouterEntriesHandler._set_child_entries(router_entry)
             self._router_entries[router_name] = router_entry
 
@@ -77,4 +84,3 @@ class RouterEntriesHandler:
             remote_capsman_entry_name = router_entry.config_entry.remote_capsman_entry
             if remote_capsman_entry_name != 'None':
                 print(f"Error in configuration for {router_entry.router_name}: remote_capsman_entry must a name of another router entry or 'None', but it is '{remote_capsman_entry_name}'. Ignoring.")
-

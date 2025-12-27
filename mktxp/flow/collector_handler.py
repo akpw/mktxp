@@ -22,9 +22,10 @@ class CollectorHandler:
     ''' MKTXP Collectors Handler
     '''
 
-    def __init__(self, entries_handler, collector_registry):
+    def __init__(self, entries_handler, collector_registry, include_bandwidth=True):
         self.entries_handler = entries_handler
         self.collector_registry = collector_registry
+        self.include_bandwidth = include_bandwidth
         self.last_collect_timestamp = 0
 
 
@@ -121,7 +122,8 @@ class CollectorHandler:
             return
 
         # bandwidth collector
-        yield from self.collector_registry.bandwidthCollector.collect()
+        if self.include_bandwidth:
+            yield from self.collector_registry.bandwidthCollector.collect()
 
         # all other collectors
         # Check whether to run in parallel by looking at the mktxp system configuration
@@ -131,7 +133,6 @@ class CollectorHandler:
             yield from self.collect_async(max_worker_threads=max_worker_threads)
         else:
             yield from self.collect_sync()
-
 
     def _valid_collect_interval(self):
         now = datetime.now().timestamp()
@@ -146,7 +147,29 @@ class CollectorHandler:
         return True
 
 
+class ProbeCollectorHandler(CollectorHandler):
+    def __init__(self, entries_handler, collector_registry):
+        super().__init__(entries_handler, collector_registry, include_bandwidth=False)
 
+    def collect(self):
+        if not self._valid_collect_interval():
+            raise RuntimeError('Probe deferred by minimal_collect_interval')
+
+        for router_entry in self.entries_handler.router_entries:
+            if not router_entry.is_ready():
+                raise RuntimeError(
+                    f"Probe failed to connect to router: {router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_NAME]}"
+                )
+
+            try:
+                for collector_ID, collect_func in self.collector_registry.registered_collectors.items():
+                    start = default_timer()
+                    yield from collect_func(router_entry)
+                    router_entry.time_spent[collector_ID] += default_timer() - start
+            except Exception:
+                raise
+            finally:
+                router_entry.is_done()
 
 
 

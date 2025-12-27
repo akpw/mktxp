@@ -104,7 +104,14 @@ def test_probe_missing_module_returns_503():
 def test_probe_unknown_module_returns_503(monkeypatch):
     from mktxp.flow.processor import base_proc
 
+    class DummySystemEntry:
+        probe_connection_pool = False
+        probe_connection_pool_ttl = 0
+        probe_connection_pool_max_size = 0
+
     class DummyConfigHandler:
+        system_entry = DummySystemEntry()
+
         def registered_entry(self, name):
             return None
 
@@ -125,11 +132,18 @@ def test_probe_unknown_module_returns_503(monkeypatch):
 def test_probe_disabled_module_returns_503(monkeypatch):
     from mktxp.flow.processor import base_proc
 
+    class DummySystemEntry:
+        probe_connection_pool = False
+        probe_connection_pool_ttl = 0
+        probe_connection_pool_max_size = 0
+
     class DummyEntry:
         enabled = False
         module_only = False
 
     class DummyConfigHandler:
+        system_entry = DummySystemEntry()
+
         def registered_entry(self, name):
             return True
 
@@ -153,6 +167,11 @@ def test_probe_disabled_module_returns_503(monkeypatch):
 def test_probe_valid_module_uses_probe_app(monkeypatch):
     from mktxp.flow.processor import base_proc
 
+    class DummySystemEntry:
+        probe_connection_pool = False
+        probe_connection_pool_ttl = 0
+        probe_connection_pool_max_size = 0
+
     class DummyEntry:
         enabled = True
         hostname = 'original'
@@ -165,6 +184,8 @@ def test_probe_valid_module_uses_probe_app(monkeypatch):
             return entry
 
     class DummyConfigHandler:
+        system_entry = DummySystemEntry()
+
         def registered_entry(self, name):
             return True
 
@@ -178,15 +199,16 @@ def test_probe_valid_module_uses_probe_app(monkeypatch):
         def register(self, collector):
             self.registered.append(collector)
 
-    class DummyCollectorHandler:
+    class DummyProbeCollectorHandler:
         def __init__(self, entries_handler, collector_registry):
             self.entries_handler = entries_handler
             self.collector_registry = collector_registry
 
     class DummyEntriesHandler:
-        def __init__(self, modules=None, config_overrides=None):
+        def __init__(self, modules=None, config_overrides=None, connection_overrides=None):
             self.modules = modules
             self.config_overrides = config_overrides or {}
+            self.connection_overrides = connection_overrides or {}
 
     class DummyCollectorRegistry:
         pass
@@ -203,7 +225,7 @@ def test_probe_valid_module_uses_probe_app(monkeypatch):
 
     monkeypatch.setattr(base_proc, 'config_handler', DummyConfigHandler())
     monkeypatch.setattr(base_proc, 'PrometheusCollectorRegistry', DummyRegistry)
-    monkeypatch.setattr(base_proc, 'CollectorHandler', DummyCollectorHandler)
+    monkeypatch.setattr(base_proc, 'ProbeCollectorHandler', DummyProbeCollectorHandler)
     monkeypatch.setattr(base_proc, 'RouterEntriesHandler', DummyEntriesHandler)
     monkeypatch.setattr(base_proc, 'MKTXPCollectorRegistry', DummyCollectorRegistry)
     monkeypatch.setattr(base_proc, 'make_wsgi_app', fake_make_wsgi_app)
@@ -220,12 +242,18 @@ def test_probe_valid_module_uses_probe_app(monkeypatch):
     assert body == b'ok'
     assert captured['registry'].registered
     handler = captured['registry'].registered[0]
+    assert isinstance(handler, DummyProbeCollectorHandler)
     assert handler.entries_handler.modules == ['router1']
     assert handler.entries_handler.config_overrides == {}
 
 
 def test_probe_target_override_applies_hostname(monkeypatch):
     from mktxp.flow.processor import base_proc
+
+    class DummySystemEntry:
+        probe_connection_pool = False
+        probe_connection_pool_ttl = 0
+        probe_connection_pool_max_size = 0
 
     class DummyEntry:
         enabled = True
@@ -239,6 +267,8 @@ def test_probe_target_override_applies_hostname(monkeypatch):
             return entry
 
     class DummyConfigHandler:
+        system_entry = DummySystemEntry()
+
         def registered_entry(self, name):
             return True
 
@@ -252,15 +282,16 @@ def test_probe_target_override_applies_hostname(monkeypatch):
         def register(self, collector):
             self.registered.append(collector)
 
-    class DummyCollectorHandler:
+    class DummyProbeCollectorHandler:
         def __init__(self, entries_handler, collector_registry):
             self.entries_handler = entries_handler
             self.collector_registry = collector_registry
 
     class DummyEntriesHandler:
-        def __init__(self, modules=None, config_overrides=None):
+        def __init__(self, modules=None, config_overrides=None, connection_overrides=None):
             self.modules = modules
             self.config_overrides = config_overrides or {}
+            self.connection_overrides = connection_overrides or {}
 
     class DummyCollectorRegistry:
         pass
@@ -277,7 +308,7 @@ def test_probe_target_override_applies_hostname(monkeypatch):
 
     monkeypatch.setattr(base_proc, 'config_handler', DummyConfigHandler())
     monkeypatch.setattr(base_proc, 'PrometheusCollectorRegistry', DummyRegistry)
-    monkeypatch.setattr(base_proc, 'CollectorHandler', DummyCollectorHandler)
+    monkeypatch.setattr(base_proc, 'ProbeCollectorHandler', DummyProbeCollectorHandler)
     monkeypatch.setattr(base_proc, 'RouterEntriesHandler', DummyEntriesHandler)
     monkeypatch.setattr(base_proc, 'MKTXPCollectorRegistry', DummyCollectorRegistry)
     monkeypatch.setattr(base_proc, 'make_wsgi_app', fake_make_wsgi_app)
@@ -299,11 +330,18 @@ def test_probe_target_override_applies_hostname(monkeypatch):
 def test_probe_module_only_requires_target(monkeypatch):
     from mktxp.flow.processor import base_proc
 
+    class DummySystemEntry:
+        probe_connection_pool = False
+        probe_connection_pool_ttl = 0
+        probe_connection_pool_max_size = 0
+
     class DummyEntry:
         enabled = True
         module_only = True
 
     class DummyConfigHandler:
+        system_entry = DummySystemEntry()
+
         def registered_entry(self, name):
             return True
 
@@ -327,11 +365,18 @@ def test_probe_module_only_requires_target(monkeypatch):
 def test_probe_empty_target_returns_503(monkeypatch):
     from mktxp.flow.processor import base_proc
 
+    class DummySystemEntry:
+        probe_connection_pool = False
+        probe_connection_pool_ttl = 0
+        probe_connection_pool_max_size = 0
+
     class DummyEntry:
         enabled = True
         module_only = False
 
     class DummyConfigHandler:
+        system_entry = DummySystemEntry()
+
         def registered_entry(self, name):
             return True
 
