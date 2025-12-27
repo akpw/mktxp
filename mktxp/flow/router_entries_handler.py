@@ -18,8 +18,10 @@ from mktxp.flow.router_connection import RouterAPIConnectionError
 class RouterEntriesHandler:
     ''' Handles RouterOS entries defined in MKTXP config 
     '''
-    def __init__(self, module_names=None):
+    def __init__(self, module_names=None, config_overrides=None):
         self._router_entries = {}
+        self._module_names = module_names
+        config_overrides = config_overrides or {}
         if isinstance(module_names, str):
             module_names = [module_names]
 
@@ -27,14 +29,22 @@ class RouterEntriesHandler:
         for router_name in entry_names:
             if not config_handler.registered_entry(router_name):
                 continue
-            router_entry = RouterEntry(router_name)
+            if module_names is None and config_handler.config_entry(router_name).module_only:
+                continue
+            router_entry = RouterEntry(router_name, config_overrides.get(router_name))
             RouterEntriesHandler._set_child_entries(router_entry)
             self._router_entries[router_name] = router_entry
 
     @property
     def router_entries(self):
-        return (entry for key, entry in  self._router_entries.items() if entry.config_entry.enabled) \
-                                                                                if self._router_entries else None   
+        if not self._router_entries:
+            return None
+
+        if self._module_names is None:
+            return (entry for key, entry in self._router_entries.items()
+                    if entry.config_entry.enabled and not entry.config_entry.module_only)
+
+        return (entry for key, entry in self._router_entries.items() if entry.config_entry.enabled)
 
     @staticmethod
     def router_entry(entry_name, enabled_only = False):

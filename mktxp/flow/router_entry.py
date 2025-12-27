@@ -41,9 +41,9 @@ class RouterEntryConnectionState(IntEnum):
 class RouterEntry:
     ''' RouterOS Entry
     '''                 
-    def __init__(self, router_name):
+    def __init__(self, router_name, config_entry_override=None):
         self.router_name = router_name
-        self.config_entry = config_handler.config_entry(router_name)
+        self.config_entry = config_entry_override or config_handler.config_entry(router_name)
         self.api_connection = RouterAPIConnection(router_name, self.config_entry)
         self.router_id = {
             MKTXPConfigKeys.ROUTERBOARD_NAME: self.router_name,

@@ -138,6 +138,7 @@ class MKTXPConfigKeys:
     FE_CERTIFICATE_KEY = 'certificate'
     FE_ROUTING_STATS_KEY = 'routing_stats'
     FE_CUSTOM_LABELS_KEY = 'custom_labels'
+    FE_MODULE_ONLY_KEY = 'module_only'
 
     MKTXP_SOCKET_TIMEOUT = 'socket_timeout'
     MKTXP_INITIAL_DELAY = 'initial_delay_on_failure'
@@ -202,7 +203,7 @@ class MKTXPConfigKeys:
 
     BOOLEAN_KEYS_NO = {ENABLED_KEY, SSL_KEY, NO_SSL_CERTIFICATE, FE_CHECK_FOR_UPDATES, FE_KID_CONTROL_DEVICE, FE_KID_CONTROL_DYNAMIC,
                        SSL_CERTIFICATE_VERIFY, FE_IPV6_ROUTE_KEY, FE_IPV6_DHCP_POOL_KEY, FE_IPV6_FIREWALL_KEY, FE_IPV6_NEIGHBOR_KEY, FE_CONNECTION_STATS_KEY, FE_BFD_KEY, FE_BGP_KEY,
-                       FE_EOIP_KEY, FE_GRE_KEY, FE_IPIP_KEY, FE_IPSEC_KEY, FE_LTE_KEY, FE_SWITCH_PORT_KEY, FE_ROUTING_STATS_KEY, FE_CERTIFICATE_KEY, FE_DNS_KEY, FE_CONTAINER_KEY, FE_W60G_KEY}
+                       FE_EOIP_KEY, FE_GRE_KEY, FE_IPIP_KEY, FE_IPSEC_KEY, FE_LTE_KEY, FE_SWITCH_PORT_KEY, FE_ROUTING_STATS_KEY, FE_CERTIFICATE_KEY, FE_DNS_KEY, FE_CONTAINER_KEY, FE_W60G_KEY, FE_MODULE_ONLY_KEY}
 
     # Feature keys enabled by default
     BOOLEAN_KEYS_YES = {PLAINTEXT_LOGIN_KEY, FE_DHCP_KEY, FE_HEALTH_KEY, FE_PACKAGE_KEY, FE_DHCP_LEASE_KEY, FE_IP_CONNECTIONS_KEY, FE_INTERFACE_KEY, 
@@ -240,7 +241,7 @@ class ConfigEntry:
                                                        MKTXPConfigKeys.FE_USER_KEY, MKTXPConfigKeys.FE_QUEUE_KEY, MKTXPConfigKeys.FE_REMOTE_DHCP_ENTRY, MKTXPConfigKeys.FE_REMOTE_CAPSMAN_ENTRY, MKTXPConfigKeys.FE_CHECK_FOR_UPDATES, MKTXPConfigKeys.FE_BFD_KEY, MKTXPConfigKeys.FE_BGP_KEY,
                                                        MKTXPConfigKeys.FE_KID_CONTROL_DEVICE, MKTXPConfigKeys.FE_KID_CONTROL_DYNAMIC, MKTXPConfigKeys.FE_EOIP_KEY, MKTXPConfigKeys.FE_GRE_KEY, MKTXPConfigKeys.FE_IPIP_KEY, MKTXPConfigKeys.FE_LTE_KEY, MKTXPConfigKeys.FE_IPSEC_KEY, MKTXPConfigKeys.FE_SWITCH_PORT_KEY,
                                                        MKTXPConfigKeys.FE_ROUTING_STATS_KEY, MKTXPConfigKeys.FE_CERTIFICATE_KEY, MKTXPConfigKeys.FE_CONTAINER_KEY,
-                                                       MKTXPConfigKeys.FE_CUSTOM_LABELS_KEY
+                                                       MKTXPConfigKeys.FE_CUSTOM_LABELS_KEY, MKTXPConfigKeys.FE_MODULE_ONLY_KEY
                                                        ])
     MKTXPSystemEntry = namedtuple('MKTXPSystemEntry', [MKTXPConfigKeys.PORT_KEY, MKTXPConfigKeys.LISTEN_KEY, MKTXPConfigKeys.MKTXP_SOCKET_TIMEOUT,
                                                        MKTXPConfigKeys.MKTXP_INITIAL_DELAY, MKTXPConfigKeys.MKTXP_MAX_DELAY,

@@ -120,7 +120,7 @@ class MetricsRouter:
         return self.metrics_app(environ, start_response)
 
     def _handle_probe(self, environ, start_response):
-        query = parse_qs(environ.get('QUERY_STRING', ''))
+        query = parse_qs(environ.get('QUERY_STRING', ''), keep_blank_values=True)
         modules = query.get('module', [])
         if len(modules) != 1 or not modules[0].strip():
             return self._error(start_response, "Missing or invalid 'module' parameter")
@@ -132,9 +132,23 @@ class MetricsRouter:
         if not config_entry or not config_entry.enabled:
             return self._error(start_response, f"Module '{module}' is disabled")
 
+        targets = query.get('target', [])
+        if len(targets) > 1:
+            return self._error(start_response, "Multiple 'target' parameters are not supported")
+        if len(targets) == 1 and not targets[0].strip():
+            return self._error(start_response, "Invalid 'target' parameter")
+
+        target = targets[0].strip() if len(targets) == 1 else None
+        if config_entry.module_only and not target:
+            return self._error(start_response, f"Module '{module}' requires a target override")
+
+        config_override = config_entry._replace(hostname=target) if target else None
         registry = PrometheusCollectorRegistry()
         registry.register(
-            CollectorHandler(RouterEntriesHandler([module]), MKTXPCollectorRegistry())
+            CollectorHandler(
+                RouterEntriesHandler([module], {module: config_override} if config_override else None),
+                MKTXPCollectorRegistry(),
+            )
         )
         probe_app = make_wsgi_app(registry=registry)
         return probe_app(environ, start_response)
