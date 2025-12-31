@@ -22,10 +22,9 @@ class CollectorHandler:
     ''' MKTXP Collectors Handler
     '''
 
-    def __init__(self, entries_handler, collector_registry, include_bandwidth=True):
+    def __init__(self, entries_handler, collector_registry):
         self.entries_handler = entries_handler
         self.collector_registry = collector_registry
-        self.include_bandwidth = include_bandwidth
         self.last_collect_timestamp = 0
 
 
@@ -122,8 +121,7 @@ class CollectorHandler:
             return
 
         # bandwidth collector
-        if self.include_bandwidth:
-            yield from self.collector_registry.bandwidthCollector.collect()
+        yield from self.collector_registry.bandwidthCollector.collect()
 
         # all other collectors
         # Check whether to run in parallel by looking at the mktxp system configuration
@@ -149,7 +147,7 @@ class CollectorHandler:
 
 class ProbeCollectorHandler(CollectorHandler):
     def __init__(self, entries_handler, collector_registry):
-        super().__init__(entries_handler, collector_registry, include_bandwidth=False)
+        super().__init__(entries_handler, collector_registry)
 
     def collect(self):
         if not self._valid_collect_interval():

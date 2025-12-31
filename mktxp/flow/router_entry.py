@@ -41,11 +41,10 @@ class RouterEntryConnectionState(IntEnum):
 class RouterEntry:
     ''' RouterOS Entry
     '''                 
-    def __init__(self, router_name, config_entry_override=None, api_connection_override=None, keep_connection=False):
+    def __init__(self, router_name):
         self.router_name = router_name
-        self.config_entry = config_entry_override or config_handler.config_entry(router_name)
-        self.api_connection = api_connection_override or RouterAPIConnection(router_name, self.config_entry)
-        self._keep_connection = keep_connection
+        self.config_entry = config_handler.config_entry(router_name)
+        self.api_connection = RouterAPIConnection(router_name, self.config_entry)
         self.router_id = {
             MKTXPConfigKeys.ROUTERBOARD_NAME: self.router_name,
             MKTXPConfigKeys.ROUTERBOARD_ADDRESS: self.config_entry.hostname
@@ -191,7 +190,7 @@ class RouterEntry:
         return is_ready
 
     def is_done(self):
-        if not config_handler.system_entry.persistent_router_connection_pool and not self._keep_connection:
+        if not config_handler.system_entry.persistent_router_connection_pool:
             self.api_connection.disconnect()
             if self._dhcp_entry:
                 self._dhcp_entry.api_connection.disconnect()

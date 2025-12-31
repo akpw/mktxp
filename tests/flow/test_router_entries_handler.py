@@ -55,7 +55,7 @@ def test_module_only_entries_skipped_in_default_collection(monkeypatch):
                 return DummyEntry(name, module_only=True)
             return DummyEntry(name, module_only=False)
 
-    def fake_router_entry(name, override=None, api_connection_override=None, keep_connection=False):
+    def fake_router_entry(name):
         return Mock(config_entry=Mock(enabled=True, module_only=False), router_name=name)
 
     monkeypatch.setattr(reh, 'config_handler', DummyConfigHandler())

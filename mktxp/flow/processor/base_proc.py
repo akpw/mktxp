@@ -21,6 +21,7 @@ from mktxp.flow.collector_handler import CollectorHandler, ProbeCollectorHandler
 from mktxp.flow.collector_registry import CollectorRegistry as MKTXPCollectorRegistry
 from mktxp.flow.router_entries_handler import RouterEntriesHandler
 from mktxp.flow.probe_connection_pool import ProbeConnectionPool
+from mktxp.flow.probe_entries_provider import ProbeEntriesProvider
 
 from mktxp.cli.output.capsman_out import CapsmanOutput
 from mktxp.cli.output.wifi_out import WirelessOutput
@@ -150,18 +151,15 @@ class MetricsRouter:
             return self._error(start_response, f"Module '{module}' requires a target override")
 
         config_override = config_entry._replace(hostname=target) if target else None
-        connection_overrides = None
-        if self.probe_connection_pool:
-            conn = self.probe_connection_pool.get(module, config_override or config_entry)
-            connection_overrides = {module: conn}
+        probe_entries = ProbeEntriesProvider(
+            module,
+            config_override or config_entry,
+            connection_pool=self.probe_connection_pool,
+        )
         registry = PrometheusCollectorRegistry()
         registry.register(
             ProbeCollectorHandler(
-                RouterEntriesHandler(
-                    [module],
-                    {module: config_override} if config_override else None,
-                    connection_overrides,
-                ),
+                probe_entries,
                 MKTXPCollectorRegistry(),
             )
         )

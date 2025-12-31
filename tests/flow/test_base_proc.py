@@ -204,11 +204,11 @@ def test_probe_valid_module_uses_probe_app(monkeypatch):
             self.entries_handler = entries_handler
             self.collector_registry = collector_registry
 
-    class DummyEntriesHandler:
-        def __init__(self, modules=None, config_overrides=None, connection_overrides=None):
-            self.modules = modules
-            self.config_overrides = config_overrides or {}
-            self.connection_overrides = connection_overrides or {}
+    class DummyProbeEntriesProvider:
+        def __init__(self, module_name, config_entry, connection_pool=None):
+            self.module_name = module_name
+            self.config_entry = config_entry
+            self.connection_pool = connection_pool
 
     class DummyCollectorRegistry:
         pass
@@ -226,7 +226,7 @@ def test_probe_valid_module_uses_probe_app(monkeypatch):
     monkeypatch.setattr(base_proc, 'config_handler', DummyConfigHandler())
     monkeypatch.setattr(base_proc, 'PrometheusCollectorRegistry', DummyRegistry)
     monkeypatch.setattr(base_proc, 'ProbeCollectorHandler', DummyProbeCollectorHandler)
-    monkeypatch.setattr(base_proc, 'RouterEntriesHandler', DummyEntriesHandler)
+    monkeypatch.setattr(base_proc, 'ProbeEntriesProvider', DummyProbeEntriesProvider)
     monkeypatch.setattr(base_proc, 'MKTXPCollectorRegistry', DummyCollectorRegistry)
     monkeypatch.setattr(base_proc, 'make_wsgi_app', fake_make_wsgi_app)
 
@@ -243,8 +243,9 @@ def test_probe_valid_module_uses_probe_app(monkeypatch):
     assert captured['registry'].registered
     handler = captured['registry'].registered[0]
     assert isinstance(handler, DummyProbeCollectorHandler)
-    assert handler.entries_handler.modules == ['router1']
-    assert handler.entries_handler.config_overrides == {}
+    assert handler.entries_handler.module_name == 'router1'
+    assert handler.entries_handler.config_entry.hostname == 'original'
+    assert handler.entries_handler.connection_pool is None
 
 
 def test_probe_target_override_applies_hostname(monkeypatch):
@@ -287,11 +288,11 @@ def test_probe_target_override_applies_hostname(monkeypatch):
             self.entries_handler = entries_handler
             self.collector_registry = collector_registry
 
-    class DummyEntriesHandler:
-        def __init__(self, modules=None, config_overrides=None, connection_overrides=None):
-            self.modules = modules
-            self.config_overrides = config_overrides or {}
-            self.connection_overrides = connection_overrides or {}
+    class DummyProbeEntriesProvider:
+        def __init__(self, module_name, config_entry, connection_pool=None):
+            self.module_name = module_name
+            self.config_entry = config_entry
+            self.connection_pool = connection_pool
 
     class DummyCollectorRegistry:
         pass
@@ -309,7 +310,7 @@ def test_probe_target_override_applies_hostname(monkeypatch):
     monkeypatch.setattr(base_proc, 'config_handler', DummyConfigHandler())
     monkeypatch.setattr(base_proc, 'PrometheusCollectorRegistry', DummyRegistry)
     monkeypatch.setattr(base_proc, 'ProbeCollectorHandler', DummyProbeCollectorHandler)
-    monkeypatch.setattr(base_proc, 'RouterEntriesHandler', DummyEntriesHandler)
+    monkeypatch.setattr(base_proc, 'ProbeEntriesProvider', DummyProbeEntriesProvider)
     monkeypatch.setattr(base_proc, 'MKTXPCollectorRegistry', DummyCollectorRegistry)
     monkeypatch.setattr(base_proc, 'make_wsgi_app', fake_make_wsgi_app)
 
@@ -324,7 +325,7 @@ def test_probe_target_override_applies_hostname(monkeypatch):
     assert status_headers[0][0] == '200 OK'
     assert body == b'ok'
     handler = captured['registry'].registered[0]
-    assert handler.entries_handler.config_overrides['router1'].hostname == '1.2.3.4'
+    assert handler.entries_handler.config_entry.hostname == '1.2.3.4'
 
 
 def test_probe_module_only_requires_target(monkeypatch):
