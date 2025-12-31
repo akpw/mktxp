@@ -65,6 +65,7 @@ The default configuration file comes with a sample configuration, making it easy
     # this affects configuration of all routers, unless overloaded on their specific levels
 
     enabled = True          # turns metrics collection for this RouterOS device on / off
+    module_only = False     # use this entry only as a probe module (skip /metrics collection)
     hostname = localhost    # RouterOS IP address
     port = 8728             # RouterOS IP Port
     
@@ -285,6 +286,50 @@ Connecting to router MKT-LR@10.**.*.**
 2021-01-24 14:16:23 Running HTTP metrics server on port 49090
 ````
 
+### Multi-target exporter pattern (/probe)
+MKTXP supports the Prometheus multi-target exporter pattern via the `/probe` endpoint. This allows using a module (a regular mktxp.conf entry) and optionally overriding the hostname with a `target` parameter for the scrape request. \
+The multi-target pattern is designed for large deployments and service discovery. To keep Grafana dashboard compatibility, use relabeling as described in the reference guide or in the provided example.
+
+Reference: https://prometheus.io/docs/guides/multi-target-exporter/#the-multi-target-exporter-pattern
+
+In the following example we override the username/password and disable POE collection while enabling routing stats. The entry is marked as probe-only with `module_only = True`.
+
+```
+[router-module]
+    # for specific configuration on the router/module level, overload the defaults here
+    module_only = True
+    routing_stats = True
+    poe = False
+    username = some_user
+    password = secret_password
+```
+
+
+Example of a multi-target Prometheus job:
+```
+  - job_name: 'mktxp-multi-target'
+    metrics_path: /probe
+    params:
+      module: [router-module] # a regular mktxp.conf entry
+    static_configs:
+      - targets:
+        - router01.example.com
+        - router2
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - source_labels: [__param_target]
+        target_label: routerboard_name # this replaces the label routerboard_name with the "target"
+      - target_label: __address__
+        replacement: mktxp_machine_IP:49090
+```
+
+Notes:
+- `module` refers to an mktxp.conf entry for the `/probe` endpoint; if `module_only = True`, it will only work via `/probe` and requires `target`.
+- `target` is optional for non-module-only entries; when set, it overrides the module hostname for that request.
+
 ## MKTXP system configuration
 In case you need more control on how MKTXP is run, it can be done via editing the `_mktxp.conf` file. This allows things like changing the port <sup>💡</sup> and other impl-related parameters, enable parallel router fetching and configurable scrapes timeouts, etc. 
 As before, for local installation the editing can be done directly from mktxp:
@@ -317,6 +362,10 @@ mktxp edit -i
     persistent_dhcp_cache = True              # Persist DHCP cache between metric collections
     compact_default_conf_values = False       # Compact mktxp.conf, so only specific values are kept on the individual routers' level    
     prometheus_headers_deduplication = False  # Deduplicate Prometheus HELP / TYPE headers in the metrics output 
+
+    probe_connection_pool = False             # Enable probe-only connection reuse keyed by module+target
+    probe_connection_pool_ttl = 300           # Probe connection TTL in seconds
+    probe_connection_pool_max_size = 128      # Max number of probe connections to keep
 ```    
 <sup>💡</sup> *When changing the default mktxp port for [docker image installs](https://github.com/akpw/mktxp#docker-image-install), you'll need to adjust the `docker run ... -p 49090:49090 ...` command to reflect the new port*
 

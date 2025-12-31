@@ -132,7 +132,6 @@ class CollectorHandler:
         else:
             yield from self.collect_sync()
 
-
     def _valid_collect_interval(self):
         now = datetime.now().timestamp()
         diff = now - self.last_collect_timestamp
@@ -146,7 +145,29 @@ class CollectorHandler:
         return True
 
 
+class ProbeCollectorHandler(CollectorHandler):
+    def __init__(self, entries_handler, collector_registry):
+        super().__init__(entries_handler, collector_registry)
 
+    def collect(self):
+        if not self._valid_collect_interval():
+            raise RuntimeError('Probe deferred by minimal_collect_interval')
+
+        for router_entry in self.entries_handler.router_entries:
+            if not router_entry.is_ready():
+                raise RuntimeError(
+                    f"Probe failed to connect to router: {router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_NAME]}"
+                )
+
+            try:
+                for collector_ID, collect_func in self.collector_registry.registered_collectors.items():
+                    start = default_timer()
+                    yield from collect_func(router_entry)
+                    router_entry.time_spent[collector_ID] += default_timer() - start
+            except Exception:
+                raise
+            finally:
+                router_entry.is_done()
 
 
 
