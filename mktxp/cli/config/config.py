@@ -157,6 +157,7 @@ class MKTXPConfigKeys:
     MKTXP_PERSISTENT_ROUTER_CONNECTION_POOL = 'persistent_router_connection_pool'
     MKTXP_PERSISTENT_DHCP_CACHE = 'persistent_dhcp_cache'
     MKTXP_BANDWIDTH_TEST_DNS_SERVER = 'bandwidth_test_dns_server'
+    MKTXP_HTTP_SERVER_THREADS = 'http_server_threads'
     MKTXP_PROBE_CONNECTION_POOL = 'probe_connection_pool'
     MKTXP_PROBE_CONNECTION_POOL_TTL = 'probe_connection_pool_ttl'
     MKTXP_PROBE_CONNECTION_POOL_MAX_SIZE = 'probe_connection_pool_max_size'
@@ -202,6 +203,7 @@ class MKTXPConfigKeys:
     DEFAULT_MKTXP_MAX_SCRAPE_DURATION = 10
     DEFAULT_MKTXP_TOTAL_MAX_SCRAPE_DURATION = 30
     DEFAULT_MKTXP_BANDWIDTH_TEST_DNS_SERVER = "8.8.8.8"
+    DEFAULT_MKTXP_HTTP_SERVER_THREADS = 16
     DEFAULT_MKTXP_PROBE_CONNECTION_POOL_TTL = 300
     DEFAULT_MKTXP_PROBE_CONNECTION_POOL_MAX_SIZE = 128
 
@@ -226,7 +228,8 @@ class MKTXPConfigKeys:
     MKTXP_INT_KEYS = (PORT_KEY, MKTXP_SOCKET_TIMEOUT, MKTXP_INITIAL_DELAY, MKTXP_MAX_DELAY,
                       MKTXP_INC_DIV, MKTXP_BANDWIDTH_TEST_INTERVAL, MKTXP_MIN_COLLECT_INTERVAL,
                       MKTXP_MAX_WORKER_THREADS, MKTXP_MAX_SCRAPE_DURATION, MKTXP_TOTAL_MAX_SCRAPE_DURATION,
-                      MKTXP_PROBE_CONNECTION_POOL_TTL, MKTXP_PROBE_CONNECTION_POOL_MAX_SIZE)
+                      MKTXP_PROBE_CONNECTION_POOL_TTL, MKTXP_PROBE_CONNECTION_POOL_MAX_SIZE,
+                      MKTXP_HTTP_SERVER_THREADS)
 
     # MKTXP configs entry names
     DEFAULT_ENTRY_KEY = 'default'
@@ -260,7 +263,8 @@ class ConfigEntry:
                                                        MKTXPConfigKeys.MKTXP_PROMETHEUS_HEADERS_DEDUPLICATION, MKTXPConfigKeys.MKTXP_PERSISTENT_ROUTER_CONNECTION_POOL,
                                                        MKTXPConfigKeys.MKTXP_PERSISTENT_DHCP_CACHE, MKTXPConfigKeys.MKTXP_BANDWIDTH_TEST_DNS_SERVER,
                                                        MKTXPConfigKeys.MKTXP_PROBE_CONNECTION_POOL, MKTXPConfigKeys.MKTXP_PROBE_CONNECTION_POOL_TTL,
-                                                       MKTXPConfigKeys.MKTXP_PROBE_CONNECTION_POOL_MAX_SIZE])
+                                                       MKTXPConfigKeys.MKTXP_PROBE_CONNECTION_POOL_MAX_SIZE,
+                                                       MKTXPConfigKeys.MKTXP_HTTP_SERVER_THREADS])
 
 
 class OSConfig(metaclass=ABCMeta):
@@ -343,7 +347,8 @@ mockSystemEntry = ConfigEntry.MKTXPSystemEntry(
             bandwidth_test_dns_server=MKTXPConfigKeys.DEFAULT_MKTXP_BANDWIDTH_TEST_DNS_SERVER,
             probe_connection_pool=False,
             probe_connection_pool_ttl=MKTXPConfigKeys.DEFAULT_MKTXP_PROBE_CONNECTION_POOL_TTL,
-            probe_connection_pool_max_size=MKTXPConfigKeys.DEFAULT_MKTXP_PROBE_CONNECTION_POOL_MAX_SIZE
+            probe_connection_pool_max_size=MKTXPConfigKeys.DEFAULT_MKTXP_PROBE_CONNECTION_POOL_MAX_SIZE,
+            http_server_threads=MKTXPConfigKeys.DEFAULT_MKTXP_HTTP_SERVER_THREADS
         )
 
 class MKTXPConfigHandler:
@@ -674,6 +679,7 @@ class MKTXPConfigHandler:
             MKTXPConfigKeys.MKTXP_BANDWIDTH_TEST_DNS_SERVER: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_BANDWIDTH_TEST_DNS_SERVER,
             MKTXPConfigKeys.MKTXP_PROBE_CONNECTION_POOL_TTL: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_PROBE_CONNECTION_POOL_TTL,
             MKTXPConfigKeys.MKTXP_PROBE_CONNECTION_POOL_MAX_SIZE: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_PROBE_CONNECTION_POOL_MAX_SIZE,
+            MKTXPConfigKeys.MKTXP_HTTP_SERVER_THREADS: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_HTTP_SERVER_THREADS,
         }[key](value)
 
 
