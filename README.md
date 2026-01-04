@@ -9,7 +9,7 @@
 MKTXP is a Prometheus Exporter for Mikrotik RouterOS devices.\
 It gathers and exports a rich set of metrics across multiple routers, all easily configurable via built-in CLI interface. 
 
-While simple to use, MKTXP supports [advanced features](https://github.com/akpw/mktxp#advanced-features) such as automatic IP address resolution with both local & remote DHCP servers, concurrent exports across multiple router devices, configurable data processing & transformations, injectable custom labels for easy device grouping, optional bandwidth testing, support for prometheus dynamic discovery, etc.
+While simple to use, MKTXP supports [advanced features](https://github.com/akpw/mktxp#advanced-features) such as automatic IP address resolution with both local & remote DHCP servers, concurrent exports across multiple router devices, configurable data processing & transformations, injectable custom labels for easy device grouping, optional bandwidth testing, support for Prometheus multi-target dynamic discovery, etc.
 
 Apart from exporting to Prometheus, MKTXP can print selected metrics directly on the command line (see examples below). 
 
