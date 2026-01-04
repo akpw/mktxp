@@ -21,8 +21,6 @@ class RouterEntriesHandler:
     def __init__(self):
         self._router_entries = {}
         for router_name in config_handler.registered_entries():
-            if not config_handler.registered_entry(router_name):
-                continue
             if config_handler.config_entry(router_name).module_only:
                 continue
             router_entry = RouterEntry(router_name)
