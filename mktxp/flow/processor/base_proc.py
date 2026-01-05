@@ -106,9 +106,17 @@ class ExportProcessor:
             if config_handler.system_entry.verbose_mode:
                 print(f"Prometheus HELP / TYPE headers de-deplucation is On")
             middleware = PrometheusHeadersDeduplicatingMiddleware(app)
-            serve(middleware, listen = config_handler.system_entry.listen)
+            serve(
+                middleware,
+                listen = config_handler.system_entry.listen,
+                threads = config_handler.system_entry.http_server_threads
+            )
         else:
-            serve(app, listen = config_handler.system_entry.listen)
+            serve(
+                app,
+                listen = config_handler.system_entry.listen,
+                threads = config_handler.system_entry.http_server_threads
+            )
 
 
 class MetricsRouter:
