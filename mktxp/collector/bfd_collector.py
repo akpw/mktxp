@@ -15,7 +15,8 @@
 from mktxp.collector.base_collector import BaseCollector
 from mktxp.flow.processor.output import BaseOutputProcessor
 from mktxp.datasource.bfd_ds import BFDMetricsDataSource
-
+from mktxp.datasource.system_resource_ds import SystemResourceMetricsDataSource
+from mktxp.utils.utils import routerOS7_version
 
 class BFDCollector(BaseCollector):
     """
@@ -35,6 +36,10 @@ class BFDCollector(BaseCollector):
         }
 
         default_labels = ["local_address", "remote_address"]
+        ver = SystemResourceMetricsDataSource.os_version(router_entry)
+        if not routerOS7_version(ver):
+            default_labels = ["interface", "address"]
+
         metric_records = BFDMetricsDataSource.metric_records(
             router_entry,
             translation_table=translation_table,

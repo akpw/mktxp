@@ -14,16 +14,28 @@
 
 from mktxp.datasource.base_ds import BaseDSProcessor
 from mktxp.datasource.system_resource_ds import SystemResourceMetricsDataSource
+from mktxp.utils.utils import routerOS7_version
 
 
 class BFDMetricsDataSource:
     """Bidirectional Forwarding Detection (BFD) data provider"""
     @staticmethod
-    def metric_records(router_entry, *, metric_labels = None, translation_table = None):
+    def metric_records(router_entry, *, metric_labels=None, translation_table=None):
         if metric_labels is None:
             metric_labels = []
         try:
-            bfd_records = router_entry.api_connection.router_api().get_resource("/routing/bfd/session").get()
+            bfd_routing_path = "/routing/bfd/session"
+
+            # legacy 6.x versions use a different path
+            ver = SystemResourceMetricsDataSource.os_version(router_entry)
+            if not routerOS7_version(ver):
+                bfd_routing_path = "/routing/bfd/neighbor"
+
+            bfd_records = (
+                router_entry.api_connection.router_api()
+                .get_resource(bfd_routing_path)
+                .get()
+            )
             return BaseDSProcessor.trimmed_records(
                 router_entry,
                 router_records=bfd_records,
