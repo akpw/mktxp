@@ -64,7 +64,7 @@ class BandwidthCollector(BaseCollector):
     @staticmethod
     def bandwidth_worker():
         if BandwidthCollector.inet_connected():
-            bandwidth_test = speedtest.Speedtest()
+            bandwidth_test = speedtest.Speedtest(secure=True)
             bandwidth_test.get_best_server()
             bandwidth_test.download()
             bandwidth_test.upload()
