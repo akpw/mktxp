@@ -137,3 +137,43 @@ class InterfaceMonitorMetricsDataSource:
         except Exception as exc:
             print(f'Error getting {kind} interface monitor info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None
+
+
+class BridgeVlanMetricsDataSource(BaseInterfaceDataSource):
+    @staticmethod
+    def metric_records(router_entry, *, metric_labels=None, additional_proplist=None, translation_table=None):
+        # Ensure metric_labels is a list of strings
+        if metric_labels is None:
+            metric_labels = ['name', 'bridge', 'vlan-ids', 'current-tagged', 'current-untagged']
+
+        proplist = ['bridge', 'vlan-ids', 'current-tagged', 'current-untagged']
+
+        try:
+            resource = router_entry.api_connection.router_api().get_resource('/interface/bridge/vlan')
+            vlan_records = resource.call('print', {'proplist': ','.join(proplist)})
+
+            processed = []
+            for record in vlan_records:
+                # Create a flat dictionary with only string values
+                vid = str(record.get('vlan-ids', ''))
+                br = str(record.get('bridge', ''))
+
+                new_rec = {
+                    'name': f"{br}-vlan-{vid}",
+                    'bridge': br,
+                    'vlan_ids': vid,
+                    'current_tagged': str(record.get('current-tagged', '')),
+                    'current_untagged': str(record.get('current-untagged', ''))
+                }
+                processed.append(new_rec)
+
+            # Return using the base processor
+            return BaseDSProcessor.trimmed_records(
+                router_entry,
+                router_records=processed,
+                metric_labels=metric_labels,
+                translation_table=translation_table,
+            )
+        except Exception as exc:
+            print(f'Error in BridgeVlanMetricsDataSource: {exc}')
+            return None
