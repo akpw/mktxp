@@ -26,16 +26,22 @@ class BFDMetricsDataSource:
         try:
             bfd_routing_path = "/routing/bfd/session"
 
+            is_ros7 = routerOS7_version(SystemResourceMetricsDataSource.os_version(router_entry))
+
             # legacy 6.x versions use a different path
-            ver = SystemResourceMetricsDataSource.os_version(router_entry)
-            if not routerOS7_version(ver):
+            if not is_ros7:
                 bfd_routing_path = "/routing/bfd/neighbor"
 
-            bfd_records = (
-                router_entry.api_connection.router_api()
-                .get_resource(bfd_routing_path)
-                .get()
-            )
+            bfd_records = router_entry.api_connection.router_api().get_resource(bfd_routing_path).get()
+
+            if not is_ros7:
+                # Normalize ROS 6 records to match ROS 7 keys
+                for record in bfd_records:
+                    if 'address' in record:
+                        record['remote-address'] = record['address']
+                    if 'interface' in record:
+                        record['local-address'] = record['interface']
+
             return BaseDSProcessor.trimmed_records(
                 router_entry,
                 router_records=bfd_records,
