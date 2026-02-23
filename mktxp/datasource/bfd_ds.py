@@ -39,8 +39,6 @@ class BFDMetricsDataSource:
                 for record in bfd_records:
                     if 'address' in record:
                         record['remote-address'] = record['address']
-                    if 'interface' in record:
-                        record['local-address'] = record['interface']
 
             return BaseDSProcessor.trimmed_records(
                 router_entry,

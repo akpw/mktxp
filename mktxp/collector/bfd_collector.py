@@ -34,7 +34,7 @@ class BFDCollector(BaseCollector):
             "uptime": lambda value: BaseOutputProcessor.parse_timedelta_milliseconds(value) if value else "0",
         }
 
-        default_labels = ["local_address", "remote_address"]
+        default_labels = ["local_address", "remote_address", "interface"]
         metric_records = BFDMetricsDataSource.metric_records(
             router_entry,
             translation_table=translation_table,
