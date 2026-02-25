@@ -32,6 +32,9 @@ class BFDCollector(BaseCollector):
             "hold_time": lambda value: BaseOutputProcessor.parse_timedelta_milliseconds(value, ms_span=True) if value else "0",
             "up": lambda value: "1" if value == "true" else "0",
             "uptime": lambda value: BaseOutputProcessor.parse_timedelta_milliseconds(value) if value else "0",
+            "remote_address": lambda value: value if value else '',
+            "local_address": lambda value: value if value else '',
+            "interface": lambda value: value if value else '',
         }
 
         default_labels = ["local_address", "remote_address", "interface"]
