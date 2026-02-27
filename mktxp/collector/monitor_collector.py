@@ -54,8 +54,8 @@ class MonitorCollector(BaseCollector):
             'rate': lambda value: MonitorCollector._rates(value) if value else '0',
             'sfp_module_present': lambda value: '1' if value == 'true' else '0',
             'sfp_rx_loss': lambda value: '1' if value == 'true' else '0',
-            'sfp_temperature': lambda value: value if value else '0',
-            'sfp_tx_bias_current': lambda value: float(value) / 1000 if value else '0',
+            'sfp_temperature': lambda value: value if value else None,
+            'sfp_tx_bias_current': lambda value: float(value) / 1000 if value else None,
             'sfp_tx_fault': lambda value: '1' if value == 'true' else '0',
             'status': lambda value: '1' if value == 'link-ok' else '0',
         }
@@ -112,46 +112,30 @@ class MonitorCollector(BaseCollector):
                     'sfp_vendor_serial',
                 ]
             )
-            yield BaseCollector.gauge_collector(
-                'interface_sfp_supply_voltage',
-                'The transceivers current supply voltage',
-                sfp_metrics,
-                metric_key='sfp_supply_voltage',
-                metric_labels=['name']
-            )
+
+            # For numeric SFP DOM metrics, only include records that actually report a value.
+            # DAC / copper SFPs do not support optical DOM measurements and should not expose these metrics.
+            sfp_dom_metrics = [
+                ('interface_sfp_supply_voltage', 'The transceivers current supply voltage', 'sfp_supply_voltage'),
+                ('interface_sfp_rx_power', 'Current SFP RX Power', 'sfp_rx_power'),
+                ('interface_sfp_tx_power', 'Current SFP TX Power', 'sfp_tx_power'),
+                ('interface_sfp_temperature', 'Current SFP Temperature', 'sfp_temperature'),
+                ('interface_sfp_tx_bias_current', 'The transceivers current tx bias current', 'sfp_tx_bias_current'),
+                ('interface_sfp_wavelength', 'Current SFP Wavelength', 'sfp_wavelength'),
+            ]
+            for metric_name, metric_doc, metric_key in sfp_dom_metrics:
+                filtered = [r for r in sfp_metrics if MonitorCollector._has_numeric_value(r, metric_key)]
+                if filtered:
+                    yield BaseCollector.gauge_collector(
+                        metric_name, metric_doc, filtered,
+                        metric_key=metric_key, metric_labels=['name']
+                    )
+
             yield BaseCollector.gauge_collector(
                 'interface_sfp_rx_loss',
                 'The receiver signal is lost',
                 sfp_metrics,
                 metric_key='sfp_rx_loss',
-                metric_labels=['name']
-            )
-            yield BaseCollector.gauge_collector(
-                'interface_sfp_rx_power',
-                'Current SFP RX Power',
-                sfp_metrics,
-                metric_key='sfp_rx_power',
-                metric_labels=['name']
-            )
-            yield BaseCollector.gauge_collector(
-                'interface_sfp_temperature',
-                'Current SFP Temperature',
-                sfp_metrics,
-                metric_key='sfp_temperature',
-                metric_labels=['name']
-            )
-            yield BaseCollector.gauge_collector(
-                'interface_sfp_tx_bias_current',
-                'The transceivers current tx bias current',
-                sfp_metrics,
-                metric_key='sfp_tx_bias_current',
-                metric_labels=['name']
-            )
-            yield BaseCollector.gauge_collector(
-                'interface_sfp_tx_power',
-                'Current SFP TX Power',
-                sfp_metrics,
-                metric_key='sfp_tx_power',
                 metric_labels=['name']
             )
             yield BaseCollector.gauge_collector(
@@ -161,13 +145,20 @@ class MonitorCollector(BaseCollector):
                 metric_key='sfp_tx_fault',
                 metric_labels=['name']
             )
-            yield BaseCollector.gauge_collector(
-                'interface_sfp_wavelength',
-                'Current SFP Wavelength',
-                sfp_metrics,
-                metric_key='sfp_wavelength',
-                metric_labels=['name']
-            )
+
+    @staticmethod
+    def _has_numeric_value(record, key):
+        ''' Check if a record has a meaningful numeric value for the given key.
+            Used to filter out SFP records for transceivers that do not support specific DOM metrics.
+        '''
+        value = record.get(key)
+        if value is None or value == '':
+            return False
+        try:
+            float(value)
+            return True
+        except (ValueError, TypeError):
+            return False
 
     @staticmethod
     def _rates(rate_option):
