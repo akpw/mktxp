@@ -45,7 +45,7 @@ class AddressListCollector(BaseCollector):
     @staticmethod
     def _collect_and_yield_metrics(router_entry, address_list_names, ip_version, metric_labels, reduced_metric_labels, translation_table):
         ipv6_suffix = '_ipv6' if ip_version == 'ipv6' else ''
-        
+
         # Collect and yield address list entries
         records = AddressListMetricsDataSource.metric_records(
             router_entry,

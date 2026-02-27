@@ -21,7 +21,7 @@ from mktxp.datasource.wireless_ds import WirelessMetricsDataSource
 
 class CapsmanCollector(BaseCollector):
     ''' CAPsMAN Metrics collector
-    '''    
+    '''
     @staticmethod
     def collect(router_entry):
         if not router_entry.config_entry.capsman:
@@ -54,7 +54,7 @@ class CapsmanCollector(BaseCollector):
                 # translate / trim / augment registration records
                 for registration_record in registration_records:
                     BaseOutputProcessor.augment_record(router_entry, registration_record)
-                    
+
                 tx_byte_metrics = BaseCollector.counter_collector('capsman_clients_tx_bytes', 'Number of sent packet bytes', registration_records, 'tx_bytes', ['dhcp_name', 'mac_address'])
                 yield tx_byte_metrics
 
@@ -64,7 +64,7 @@ class CapsmanCollector(BaseCollector):
                 signal_strength_metrics = BaseCollector.gauge_collector('capsman_clients_signal_strength', 'Client devices signal strength', registration_records, 'rx_signal', ['dhcp_name', 'mac_address'])
                 yield signal_strength_metrics
 
-                registration_metrics = BaseCollector.info_collector('capsman_clients_devices', 'Registered client devices info', 
+                registration_metrics = BaseCollector.info_collector('capsman_clients_devices', 'Registered client devices info',
                                         registration_records, ['dhcp_name', 'dhcp_address', 'rx_signal', 'ssid', 'tx_rate', 'rx_rate', 'interface', 'mac_address', 'uptime'])
                 yield registration_metrics
 

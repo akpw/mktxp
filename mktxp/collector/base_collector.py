@@ -38,7 +38,7 @@ class BaseCollector:
         for record in router_records:
             custom_labels_dict = record.get(MKTXPConfigKeys.CUSTOM_LABELS_METADATA_ID, {})
             label_values_tuple = tuple(record.get(label, custom_labels_dict.get(label, '')) for label in metric_labels)
-            
+
             if label_values_tuple in unique_records:
                 if verbose_reporting:
                     print(f"Warning: Duplicate metric record found for labels {dict(zip(metric_labels, label_values_tuple))}. Keeping last.")
@@ -56,7 +56,7 @@ class BaseCollector:
             metric_labels = BaseCollector._add_id_labels(metric_labels)
         if add_custom_labels:
             metric_labels = BaseCollector._add_custom_labels(metric_labels, records_for_labels)
-        
+
         collector = InfoMetricFamily(f'mktxp_{name}', documentation=documentation, labels=metric_labels)
 
         deduplicated_records = BaseCollector._de_duplicate_records(records_for_processing, metric_labels, verbose_reporting)

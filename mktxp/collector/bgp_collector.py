@@ -30,7 +30,7 @@ class BGPCollector(BaseCollector):
                 'uptime': lambda value: BaseOutputProcessor.parse_timedelta_milliseconds(value) if value else '0'
                 }
         bgp_records = BGPMetricsDataSource.metric_records(router_entry, metric_labels=bgp_labels, translation_table = translation_table)
-        
+
         if bgp_records:
             session_info_labes = ['name', 'remote_address', 'remote_as', 'local_as', 'remote_afi', 'local_afi']
             bgp_sessions_metrics = BaseCollector.info_collector('bgp_sessions', 'BGP sessions info', bgp_records, session_info_labes)

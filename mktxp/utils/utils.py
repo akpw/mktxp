@@ -56,7 +56,7 @@ def run_cmd(cmd, shell = False, quiet = False):
 
 def parse_mkt_uptime(time):
     time_dict = re.match(r'((?P<weeks>\d+)w)?((?P<days>\d+)d)?((?P<hours>\d+)h)?((?P<minutes>\d+)m)?((?P<seconds>\d+)s)?', time).groupdict()
-    delta = timedelta(**{key: int(value) for key, value in time_dict.items() if value}).total_seconds() 
+    delta = timedelta(**{key: int(value) for key, value in time_dict.items() if value}).total_seconds()
     return int(delta) if delta else 0
 
 def str2bool(str_value, default = None):
@@ -71,7 +71,7 @@ def str2bool(str_value, default = None):
         return default
     else:
         raise ValueError(f'Invalid truth value: {str_value}')
-        
+
 class FSHelper:
     ''' File System ops helper
     '''
@@ -229,15 +229,15 @@ class RepeatableTimer:
         self.process_name = process_name
         self.interval = interval
         self.restartable = restartable
-        
+
         self.func = func
         self.args = args
         self.kwargs = kwargs
-        
+
         self.finished = Event()
         self.run_once = Event()
         if not repeatable:
-            self.run_once.set()            
+            self.run_once.set()
         self.process = Process(name = self.process_name, target=self._execute)
 
     def start(self):
@@ -256,7 +256,7 @@ class RepeatableTimer:
             self.func(*self.args, **self.kwargs)
             if self.finished.is_set() or self.run_once.is_set():
                 break
-            self.finished.wait(self.interval)     
+            self.finished.wait(self.interval)
 
 class Benchmark:
     def __enter__(self):
@@ -281,29 +281,43 @@ def get_ttl_hash(seconds=3600):
     return round(time.time() / seconds)
 
 
+# Timeout for fetching update RSS feeds (in seconds)
+UPDATE_CHECK_TIMEOUT = 10
+
 @lru_cache(maxsize=5)
 def get_available_updates(channel, ttl_hash=get_ttl_hash()):
     """Check the RSS feed for available updates for a given update channel.
     This method fetches the RSS feed and returns all version from the parsed XML.
-    Version numbers are parsed into version.Version instances (part of setuptools)."""
+    Version numbers are parsed into version.Version instances (part of setuptools).
+
+    Errors are handled internally so that lru_cache caches the (empty) result,
+    preventing repeated blocking retries on transient failures."""
     del ttl_hash
-    rss_feed = CHANNEL_RSS_FEED_MAPPING[channel]
+    rss_feed = CHANNEL_RSS_FEED_MAPPING.get(channel)
+    if not rss_feed:
+        print(f'Unknown update channel: {channel}')
+        return []
 
     print(f'Fetching available ROS releases from {rss_feed}')
     versions = []
-    with urllib.request.urlopen(rss_feed) as response:
-        result = response.read()
-        root = ET.fromstring(result)
-        channel = root[0]
+    try:
+        with urllib.request.urlopen(rss_feed, timeout=UPDATE_CHECK_TIMEOUT) as response:
+            result = response.read()
+            root = ET.fromstring(result)
+            rss_channel = root[0]
 
-        for child in channel:
-            # iterate over all updates
-            if child.tag == 'item':
-                title = child[0]
-                # extract and parse the version number from title
-                version_text = re.findall(r'[\d+\.]+', title.text)[0]
-                version_number = parse(version_text)
-                versions.append(version_number)
+            for child in rss_channel:
+                # iterate over all updates
+                if child.tag == 'item':
+                    title = child[0]
+                    # extract and parse the version number from title
+                    version_text = re.findall(r'[\d+\.]+', title.text)[0]
+                    version_number = parse(version_text)
+                    versions.append(version_number)
+    except urllib.error.HTTPError as err:
+        print(f'Update feed returned: {err}')
+    except Exception as err:
+        print(f'Could not check for updates, because: {err}')
     return versions
 
 
@@ -315,7 +329,7 @@ def parse_ros_version(string):
     1.2.3, stable
 
     >>> parse_ros_version('7.14.3 (long-term)')
-    7.14.3, long-term    
+    7.14.3, long-term
     """
 
     match = re.findall(r'([\d\.]+).*?\(([\w-]+)\)', string)
@@ -355,22 +369,13 @@ def check_for_updates(cur_version):
     """Try to check if there is a newer version available.
     If anything goes wrong, it returns the same version.
     Returns a tuple: (<current version>, <newest version>)"""
-    error = False
     try:
         cur_version, channel = parse_ros_version(cur_version)
         available_versions = get_available_updates(channel)
-        newest_version = sorted(available_versions)[-1]
-    except KeyError:
-        print(f'unknown update channel {channel}')
-        error = True
-    except urllib.error.HTTPError as err:
-        print(f'update feed returned: {err}')
-        error = True
+        if available_versions:
+            newest_version = sorted(available_versions)[-1]
+            return cur_version, newest_version
     except Exception as err:
-        print(f'could not check for updates, because: {err}')
-        error = True
+        print(f'Could not check for updates, because: {err}')
 
-    if error:
-        return cur_version, cur_version
-
-    return cur_version, newest_version
+    return cur_version, cur_version

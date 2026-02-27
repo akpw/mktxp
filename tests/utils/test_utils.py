@@ -12,6 +12,8 @@
 ## GNU General Public License for more details.
 
 from datetime import timedelta
+from unittest.mock import patch, MagicMock
+import urllib.error
 import pytest
 from mktxp.utils import utils
 from packaging.version import parse
@@ -94,3 +96,79 @@ def test_str2bool_raise_value_error(str_value):
 
     assert utils.str2bool(str_value, False) == False
     assert utils.str2bool(str_value, True) == True
+
+
+class TestGetAvailableUpdates:
+    """Tests for get_available_updates and check_for_updates."""
+
+    def setup_method(self):
+        # Clear lru_cache between tests
+        utils.get_available_updates.cache_clear()
+
+    def test_urlopen_called_with_timeout(self):
+        """urlopen must be called with an explicit timeout."""
+        mock_response = MagicMock()
+        mock_response.read.return_value = b'''<?xml version="1.0"?>
+            <rss><channel>
+                <item><title>7.16 changelog</title></item>
+            </channel></rss>'''
+        mock_response.__enter__ = lambda s: s
+        mock_response.__exit__ = MagicMock(return_value=False)
+
+        with patch('urllib.request.urlopen', return_value=mock_response) as mock_urlopen:
+            utils.get_available_updates('stable', ttl_hash=0)
+            mock_urlopen.assert_called_once_with(
+                'https://mikrotik.com/current.rss',
+                timeout=utils.UPDATE_CHECK_TIMEOUT,
+            )
+
+    def test_timeout_returns_empty_list(self):
+        """A timeout should return an empty list (not raise), so lru_cache caches it."""
+        with patch('urllib.request.urlopen', side_effect=TimeoutError('timed out')):
+            result = utils.get_available_updates('stable', ttl_hash=1)
+            assert result == []
+
+    def test_http_error_returns_empty_list(self):
+        """An HTTP error should return an empty list."""
+        with patch('urllib.request.urlopen', side_effect=urllib.error.HTTPError(
+            url=None, code=503, msg='Service Unavailable', hdrs=None, fp=None
+        )):
+            result = utils.get_available_updates('stable', ttl_hash=2)
+            assert result == []
+
+    def test_unknown_channel_returns_empty_list(self):
+        """An unknown channel should return an empty list without attempting a fetch."""
+        with patch('urllib.request.urlopen') as mock_urlopen:
+            result = utils.get_available_updates('nonexistent', ttl_hash=3)
+            assert result == []
+            mock_urlopen.assert_not_called()
+
+    def test_failure_result_is_cached(self):
+        """After a failure, the empty list result should be cached by lru_cache."""
+        with patch('urllib.request.urlopen', side_effect=TimeoutError('timed out')) as mock_urlopen:
+            utils.get_available_updates('stable', ttl_hash=4)
+            utils.get_available_updates('stable', ttl_hash=4)
+            # urlopen should only be called once; second call uses cache
+            mock_urlopen.assert_called_once()
+
+    def test_check_for_updates_on_fetch_failure(self):
+        """check_for_updates should return cur == newest when the feed fetch fails."""
+        with patch('urllib.request.urlopen', side_effect=TimeoutError('timed out')):
+            cur, newest = utils.check_for_updates('7.15 (stable)')
+            assert cur == newest == parse('7.15')
+
+    def test_check_for_updates_success(self):
+        """check_for_updates should return the newest version on success."""
+        mock_response = MagicMock()
+        mock_response.read.return_value = b'''<?xml version="1.0"?>
+            <rss><channel>
+                <item><title>7.16 changelog</title></item>
+                <item><title>7.15.3 changelog</title></item>
+            </channel></rss>'''
+        mock_response.__enter__ = lambda s: s
+        mock_response.__exit__ = MagicMock(return_value=False)
+
+        with patch('urllib.request.urlopen', return_value=mock_response):
+            cur, newest = utils.check_for_updates('7.15 (stable)')
+            assert cur == parse('7.15')
+            assert newest == parse('7.16')

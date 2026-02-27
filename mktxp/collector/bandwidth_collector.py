@@ -27,11 +27,11 @@ def get_result(bandwidth_dict):
 
 class BandwidthCollector(BaseCollector):
     ''' MKTXP collector
-    '''    
+    '''
     def __init__(self):
         self.pool = None
-        self.last_call_timestamp = 0        
-    
+        self.last_call_timestamp = 0
+
     def collect(self):
         if not config_handler.system_entry.bandwidth:
             return
@@ -39,21 +39,21 @@ class BandwidthCollector(BaseCollector):
         if self.pool is None:
             self.pool = get_context("spawn").Pool()
 
-        if result_list:      
+        if result_list:
             result_dict = result_list[0]
-            bandwidth_records = [{'direction': key, 'bandwidth': str(result_dict[key])} for key in ('download', 'upload')]     
-            bandwidth_metrics = BaseCollector.gauge_collector('internet_bandwidth', 'Internet bandwidth in bits per second', 
+            bandwidth_records = [{'direction': key, 'bandwidth': str(result_dict[key])} for key in ('download', 'upload')]
+            bandwidth_metrics = BaseCollector.gauge_collector('internet_bandwidth', 'Internet bandwidth in bits per second',
                                                                             bandwidth_records, 'bandwidth', ['direction'], add_id_labels = False)
             yield bandwidth_metrics
 
             latency_records = [{'latency': str(result_dict['ping'])}]
-            latency_metrics = BaseCollector.gauge_collector('internet_latency', 'Internet latency in milliseconds', 
+            latency_metrics = BaseCollector.gauge_collector('internet_latency', 'Internet latency in milliseconds',
                                                                             latency_records, 'latency', [], add_id_labels = False)
             yield latency_metrics
 
-        ts =  datetime.now().timestamp()       
+        ts =  datetime.now().timestamp()
         if (ts - self.last_call_timestamp) > config_handler.system_entry.bandwidth_test_interval:
-            self.pool.apply_async(BandwidthCollector.bandwidth_worker, callback=get_result)            
+            self.pool.apply_async(BandwidthCollector.bandwidth_worker, callback=get_result)
             self.last_call_timestamp = ts
 
     def __del__(self):
