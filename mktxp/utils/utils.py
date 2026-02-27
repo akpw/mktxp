@@ -269,10 +269,11 @@ class Benchmark:
 
 # mapping of channels to RSS feeds
 CHANNEL_RSS_FEED_MAPPING = {
-    'development': 'https://mikrotik.com/development.rss',
-    'long-term': 'https://mikrotik.com/bugfix.rss',
-    'stable': 'https://mikrotik.com/current.rss',
-    'testing': 'https://download.mikrotik.com/routeros/latest-testing.rss',
+    'development': 'https://cdn.mikrotik.com/routeros/latest-development.rss',
+    'long-term': 'https://cdn.mikrotik.com/routeros/latest-long-term.rss',
+    'stable': 'https://cdn.mikrotik.com/routeros/latest-stable.rss',
+    'testing': 'https://cdn.mikrotik.com/routeros/latest-testing.rss',
+    'stable+long-term': 'https://cdn.mikrotik.com/routeros/latest-stable-and-long-term.rss',
 }
 
 
