@@ -17,14 +17,14 @@ from mktxp.datasource.base_ds import BaseDSProcessor
 
 class SwitchPortMetricsDataSource:
     ''' Switch Port Metrics data provider
-    '''             
-    @staticmethod    
+    '''
+    @staticmethod
     def metric_records(router_entry, *, metric_labels = None, translation_table = None):
         if metric_labels is None:
-            metric_labels = []                
+            metric_labels = []
         try:
             active_users_records = router_entry.api_connection.router_api().get_resource('/interface/ethernet/switch/port').call('print', {'stats': 'detail'})
-            return BaseDSProcessor.trimmed_records(router_entry, router_records = active_users_records, 
+            return BaseDSProcessor.trimmed_records(router_entry, router_records = active_users_records,
                                                             metric_labels = metric_labels, translation_table = translation_table)
         except Exception as exc:
             print(f'Error getting system resource info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
