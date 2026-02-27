@@ -118,7 +118,7 @@ class TestGetAvailableUpdates:
         with patch('urllib.request.urlopen', return_value=mock_response) as mock_urlopen:
             utils.get_available_updates('stable', ttl_hash=0)
             mock_urlopen.assert_called_once_with(
-                'https://mikrotik.com/current.rss',
+                'https://cdn.mikrotik.com/routeros/latest-stable.rss',
                 timeout=utils.UPDATE_CHECK_TIMEOUT,
             )
 
