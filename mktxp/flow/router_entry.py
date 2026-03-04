@@ -52,6 +52,7 @@ class RouterEntry:
         
         self.time_spent =  { CollectorKeys.IDENTITY_COLLECTOR: 0,
                             CollectorKeys.SYSTEM_RESOURCE_COLLECTOR: 0,
+                            CollectorKeys.ROUTERBOARD_COLLECTOR: 0,
                             CollectorKeys.HEALTH_COLLECTOR: 0,
                             CollectorKeys.PUBLIC_IP_ADDRESS_COLLECTOR: 0,
                             CollectorKeys.NEIGHBOR_COLLECTOR: 0,

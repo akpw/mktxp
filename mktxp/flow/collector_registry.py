@@ -51,6 +51,7 @@ from mktxp.collector.switch_collector import SwitchPortCollector
 from mktxp.collector.certificate_collector import CertificateCollector
 from mktxp.collector.dns_collector import DNSCollector
 from mktxp.collector.container_collector import ContainerCollector
+from mktxp.collector.routerboard_collector import RouterboardCollector
 
 class CollectorRegistry:
     ''' MKTXP Collectors Registry
@@ -63,6 +64,7 @@ class CollectorRegistry:
 
         self.register(CollectorKeys.IDENTITY_COLLECTOR, IdentityCollector.collect)
         self.register(CollectorKeys.SYSTEM_RESOURCE_COLLECTOR, SystemResourceCollector.collect)
+        self.register(CollectorKeys.ROUTERBOARD_COLLECTOR, RouterboardCollector.collect)
         self.register(CollectorKeys.HEALTH_COLLECTOR, HealthCollector.collect)
         self.register(CollectorKeys.PUBLIC_IP_ADDRESS_COLLECTOR, PublicIPAddressCollector.collect)
 

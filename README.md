@@ -83,6 +83,7 @@ The default configuration file comes with a sample configuration, making it easy
     ssl_ca_file = ""                # path to the certificate authority file to validate against, leave empty to use system store
     plaintext_login = True          # for legacy RouterOS versions below 6.43 use False
 
+    routerboard = True              # RouterBOARD metrics
     health = True                   # System Health metrics
     installed_packages = True       # Installed packages
     dhcp = True                     # DHCP general metrics
