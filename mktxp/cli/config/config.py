@@ -27,6 +27,7 @@ from mktxp.utils.utils import FSHelper
 class CollectorKeys:
     IDENTITY_COLLECTOR = 'IdentityCollector'
     SYSTEM_RESOURCE_COLLECTOR = 'SystemResourceCollector'
+    ROUTERBOARD_COLLECTOR = 'RouterboardCollector'
     HEALTH_COLLECTOR = 'HealthCollector'
     PUBLIC_IP_ADDRESS_COLLECTOR = 'PublicIPAddressCollector'
     NEIGHBOR_COLLECTOR = 'NeighborCollector'
@@ -82,6 +83,7 @@ class MKTXPConfigKeys:
     SSL_CA_FILE = 'ssl_ca_file'
     PLAINTEXT_LOGIN_KEY = 'plaintext_login'
 
+    FE_ROUTERBOARD_KEY = 'routerboard'
     FE_HEALTH_KEY = 'health'
     FE_PACKAGE_KEY = 'installed_packages'
     FE_DHCP_KEY = 'dhcp'
@@ -213,7 +215,7 @@ class MKTXPConfigKeys:
                        FE_EOIP_KEY, FE_GRE_KEY, FE_IPIP_KEY, FE_IPSEC_KEY, FE_LTE_KEY, FE_SWITCH_PORT_KEY, FE_ROUTING_STATS_KEY, FE_CERTIFICATE_KEY, FE_DNS_KEY, FE_CONTAINER_KEY, FE_W60G_KEY, FE_MODULE_ONLY_KEY}
 
     # Feature keys enabled by default
-    BOOLEAN_KEYS_YES = {PLAINTEXT_LOGIN_KEY, FE_DHCP_KEY, FE_HEALTH_KEY, FE_PACKAGE_KEY, FE_DHCP_LEASE_KEY, FE_IP_CONNECTIONS_KEY, FE_INTERFACE_KEY, 
+    BOOLEAN_KEYS_YES = {PLAINTEXT_LOGIN_KEY, FE_DHCP_KEY, FE_ROUTERBOARD_KEY, FE_HEALTH_KEY, FE_PACKAGE_KEY, FE_DHCP_LEASE_KEY, FE_IP_CONNECTIONS_KEY, FE_INTERFACE_KEY, 
                         FE_ROUTE_KEY, FE_DHCP_POOL_KEY, FE_FIREWALL_KEY, FE_NEIGHBOR_KEY, FE_MONITOR_KEY, SSL_CHECK_HOSTNAME,
                         FE_WIRELESS_KEY, FE_WIRELESS_CLIENTS_KEY, FE_CAPSMAN_KEY, FE_CAPSMAN_CLIENTS_KEY, FE_POE_KEY,
                         FE_NETWATCH_KEY, FE_PUBLIC_IP_KEY, FE_USER_KEY, FE_QUEUE_KEY}
@@ -242,7 +244,7 @@ class ConfigEntry:
     MKTXPConfigEntry = namedtuple('MKTXPConfigEntry', [MKTXPConfigKeys.ENABLED_KEY, MKTXPConfigKeys.HOST_KEY, MKTXPConfigKeys.PORT_KEY,
                                                        MKTXPConfigKeys.USER_KEY, MKTXPConfigKeys.PASSWD_KEY, MKTXPConfigKeys.CREDENTIALS_FILE_KEY,
                                                        MKTXPConfigKeys.SSL_KEY, MKTXPConfigKeys.NO_SSL_CERTIFICATE, MKTXPConfigKeys.SSL_CERTIFICATE_VERIFY, MKTXPConfigKeys.SSL_CHECK_HOSTNAME, MKTXPConfigKeys.SSL_CA_FILE, MKTXPConfigKeys.PLAINTEXT_LOGIN_KEY,
-                                                       MKTXPConfigKeys.FE_DHCP_KEY, MKTXPConfigKeys.FE_HEALTH_KEY, MKTXPConfigKeys.FE_PACKAGE_KEY, MKTXPConfigKeys.FE_DHCP_LEASE_KEY, MKTXPConfigKeys.FE_INTERFACE_KEY,
+                                                       MKTXPConfigKeys.FE_DHCP_KEY, MKTXPConfigKeys.FE_ROUTERBOARD_KEY, MKTXPConfigKeys.FE_HEALTH_KEY, MKTXPConfigKeys.FE_PACKAGE_KEY, MKTXPConfigKeys.FE_DHCP_LEASE_KEY, MKTXPConfigKeys.FE_INTERFACE_KEY,
                                                        MKTXPConfigKeys.FE_MONITOR_KEY, MKTXPConfigKeys.FE_W60G_KEY, MKTXPConfigKeys.FE_WIRELESS_KEY, MKTXPConfigKeys.FE_WIRELESS_CLIENTS_KEY,
                                                        MKTXPConfigKeys.FE_IP_CONNECTIONS_KEY, MKTXPConfigKeys.FE_CONNECTION_STATS_KEY, MKTXPConfigKeys.FE_CAPSMAN_KEY, MKTXPConfigKeys.FE_CAPSMAN_CLIENTS_KEY, MKTXPConfigKeys.FE_POE_KEY, 
                                                        MKTXPConfigKeys.FE_NETWATCH_KEY, MKTXPConfigKeys.FE_INTERFACE_NAME_FORMAT, MKTXPConfigKeys.FE_PUBLIC_IP_KEY,
