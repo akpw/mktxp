@@ -89,10 +89,11 @@ The default configuration file comes with a sample configuration, making it easy
     dhcp_lease = True               # DHCP lease metrics
 
     connections = True              # IP connections metrics
-    connection_stats = False        # Open IP connections metrics 
+    connection_stats = False        # Open IP connections metrics
 
     interface = True                # Interfaces traffic metrics
-    
+    bridge_vlan = False             # Bridge VLAN metrics
+
     route = True                    # IPv4 Routes metrics
     pool = True                     # IPv4 Pool metrics
     firewall = True                 # IPv4 Firewall rules traffic metrics
