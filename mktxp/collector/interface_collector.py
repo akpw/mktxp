@@ -13,12 +13,12 @@
 
 
 from mktxp.collector.base_collector import BaseCollector
-from mktxp.datasource.interface_ds import InterfaceTrafficMetricsDataSource
+from mktxp.datasource.interface_ds import InterfaceTrafficMetricsDataSource, BridgeVlanMetricsDataSource
 
 
 class InterfaceCollector(BaseCollector):
     ''' Router Interface Metrics collector
-    '''        
+    '''
     @staticmethod
     def collect(router_entry):
         if not router_entry.config_entry.interface:
@@ -141,3 +141,19 @@ class InterfaceCollector(BaseCollector):
             'link_downs',
             ['name']
         )
+
+        if getattr(router_entry.config_entry, 'bridge_vlan', False):
+            vlan_labels = ['name', 'bridge', 'vlan_ids', 'current_tagged', 'current_untagged']
+
+            vlan_records = BridgeVlanMetricsDataSource.metric_records(
+                router_entry,
+                metric_labels=vlan_labels
+            )
+
+            if vlan_records:
+                yield BaseCollector.info_collector(
+                    'interface_bridge_vlan',
+                    'Bridge VLAN membership information',
+                    vlan_records,
+                    metric_labels=vlan_labels
+                )
