@@ -1,7 +1,9 @@
 import pytest
 from unittest.mock import Mock
+from unittest.mock import patch
 from mktxp.datasource.base_ds import BaseDSProcessor
 from mktxp.cli.config.config import MKTXPConfigKeys
+from mktxp.datasource.interface_ds import BaseInterfaceDataSource, BridgeVlanMetricsDataSource
 
 @pytest.mark.parametrize(
     "custom_labels_input, should_have_metadata, expected_custom_labels",
@@ -120,6 +122,62 @@ def test_parse_custom_labels_with_none_string():
     # Create a mock router_entry for the method call
     mock_router_entry = Mock()
     mock_router_entry.router_name = "TestRouter"
-    
+
     assert BaseDSProcessor._parse_custom_labels('None', mock_router_entry) == {}
 
+def test_bridge_vlan_metric_records():
+    """
+    Tests that BridgeVlanMetricsDataSource correctly fetches, flattens,
+    and formats bridge VLAN records.
+    """
+    mock_router_entry = Mock()
+    mock_resource = Mock()
+
+    # Mock the API chain: router_entry -> api_connection -> router_api() -> get_resource()
+    mock_router_entry.api_connection.router_api.return_value.get_resource.return_value = mock_resource
+
+    # Define raw MikroTik API return data
+    mock_resource.call.return_value = [
+        {
+            'bridge': 'bridge-local',
+            'vlan-ids': '10',
+            'current-tagged': 'sfp-sfpplus1',
+            'current-untagged': 'ether1'
+        }
+    ]
+
+    # Patch the BaseDSProcessor.trimmed_records method to capture what is passed to it
+    with patch('mktxp.datasource.base_ds.BaseDSProcessor.trimmed_records') as mock_trimmed:
+
+        BridgeVlanMetricsDataSource.metric_records(mock_router_entry)
+
+        # Ensure the API was called with the correct proplist
+        mock_resource.call.assert_called_once_with('print', {'proplist': 'bridge,vlan-ids,current-tagged,current-untagged'})
+
+        # Inspect the records sent to the final processor
+        args, kwargs = mock_trimmed.call_args
+        processed_records = kwargs['router_records']
+
+        assert len(processed_records) == 1
+        record = processed_records[0]
+
+        # Verify your custom formatting logic
+        assert record['name'] == 'bridge-local-vlan-10'
+        assert record['bridge'] == 'bridge-local'
+        assert record['vlan_ids'] == '10'
+        assert record['current_tagged'] == 'sfp-sfpplus1'
+        assert record['current_untagged'] == 'ether1'
+
+def test_bridge_vlan_metric_records_exception(capsys):
+    """
+    Tests that exceptions in the BridgeVlanMetricsDataSource are caught and logged.
+    """
+    mock_router_entry = Mock()
+    # Force an exception when calling the API
+    mock_router_entry.api_connection.router_api.side_effect = Exception("Connection Timeout")
+
+    result = BridgeVlanMetricsDataSource.metric_records(mock_router_entry)
+
+    assert result is None
+    captured = capsys.readouterr()
+    assert "Error in BridgeVlanMetricsDataSource: Connection Timeout" in captured.out
