@@ -92,6 +92,7 @@ The default configuration file comes with a sample configuration, making it easy
     connection_stats = False        # Open IP connections metrics 
 
     interface = True                # Interfaces traffic metrics
+    wireguard_peers = False         # Wireguard peers metrics
     
     route = True                    # IPv4 Routes metrics
     pool = True                     # IPv4 Pool metrics

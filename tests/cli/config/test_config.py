@@ -158,3 +158,6 @@ def test_system_config_key_in_new_section(tmpdir):
     assert 'verbose_mode' in final_config[MKTXPConfigKeys.MKTXP_LATEST_SYSTEM_ENTRY_KEY]
     assert final_config[MKTXPConfigKeys.MKTXP_LATEST_SYSTEM_ENTRY_KEY].as_bool('verbose_mode') is False
 
+def test_wireguard_peer_key_registration():
+    assert MKTXPConfigKeys.FE_WG_PEER_KEY == 'wireguard_peers'
+    assert MKTXPConfigKeys.FE_WG_PEER_KEY in MKTXPConfigKeys.BOOLEAN_KEYS_NO
