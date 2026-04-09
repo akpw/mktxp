@@ -15,6 +15,7 @@
 from collections import OrderedDict
 from mktxp.cli.config.config import CollectorKeys
 from mktxp.collector.dhcp_collector import DHCPCollector
+from mktxp.collector.bridge_vlan_collector import BridgeVlanCollector
 from mktxp.collector.package_collector import PackageCollector
 from mktxp.collector.connection_collector import IPConnectionCollector
 from mktxp.collector.interface_collector import InterfaceCollector
@@ -76,6 +77,7 @@ class CollectorRegistry:
         self.register(CollectorKeys.IPSEC_COLLECTOR, IPSecCollector.collect)
         self.register(CollectorKeys.ADDRESS_LIST_COLLECTOR, AddressListCollector.collect)
         self.register(CollectorKeys.POOL_COLLECTOR, PoolCollector.collect)
+        self.register(CollectorKeys.BRIDGE_VLAN_COLLECTOR, BridgeVlanCollector.collect)
         self.register(CollectorKeys.INTERFACE_COLLECTOR, InterfaceCollector.collect)
         self.register(CollectorKeys.WG_PEER_COLLECTOR, WireGuardPeerCollector.collect)
 
@@ -112,5 +114,4 @@ class CollectorRegistry:
 
     def register(self, collector_ID, collect_func):
         self.registered_collectors[collector_ID] = collect_func
-
 

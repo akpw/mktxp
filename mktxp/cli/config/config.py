@@ -35,6 +35,7 @@ class CollectorKeys:
     DHCP_COLLECTOR = 'DHCPCollector'
     POOL_COLLECTOR = 'PoolCollector'
     IP_CONNECTION_COLLECTOR = 'IPConnectionCollector'
+    BRIDGE_VLAN_COLLECTOR = 'BridgeVlanCollector'
     INTERFACE_COLLECTOR = 'InterfaceCollector'
     WG_PEER_COLLECTOR = 'WireGuardPeerCollector'
     FIREWALL_COLLECTOR = 'FirewallCollector'
