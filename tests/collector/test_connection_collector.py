@@ -12,55 +12,161 @@
 # GNU General Public License for more details.
 
 import pytest
-from unittest.mock import MagicMock
-from mktxp.datasource.connection_ds import IPConnectionStatsDatasource
+from unittest.mock import MagicMock, patch
+
+from mktxp.collector.connection_collector import IPConnectionCollector
+from mktxp.datasource.connection_ds import IPConnectionStatsDatasource, IPConnectionTrafficDatasource
 from mktxp.flow.router_entry import RouterEntry
 
-@pytest.mark.parametrize("connection_count_str, should_make_stats_call", [
-    ('0', False),   # Scenario with zero connections
-    ('123', True),  # Scenario with non-zero connections
-])
-def test_ip_connection_stats_datasource_checks_count_first(connection_count_str, should_make_stats_call):
-    """
-    Verifies that IPConnectionStatsDatasource checks the connection count and avoids fetching the full stats list if the count is 0
-    """
-    # Mocking the router_entry and its components
+
+def _build_mock_router_entry():
     mock_router_entry = MagicMock(spec=RouterEntry)
     mock_router_entry.router_name = "TestRouter"
     mock_router_entry.config_entry = MagicMock()
     mock_router_entry.config_entry.hostname = "testhost"
+    mock_router_entry.config_entry.connections = False
+    mock_router_entry.config_entry.connection_stats = False
+    mock_router_entry.config_entry.connection_traffic = False
     mock_router_entry.api_connection = MagicMock()
     mock_router_entry.router_id = {'routerboard_name': 'test_router'}
+    return mock_router_entry
 
-    # Mock the API call & responces
+
+def _configure_connection_api(mock_router_entry, *, ipv4_count = '0', ipv6_count = '0',
+                              ipv4_records = None, ipv6_records = None, proplist = ''):
     mock_api = MagicMock()
     mock_router_entry.api_connection.router_api.return_value = mock_api
-    call_mock = mock_api.get_resource.return_value.call
-    count_response = MagicMock()
-    count_response.done_message = {'ret': connection_count_str}
-    
-    stats_response = [{'src-address': '1.1.1.1:123', 'dst-address': '2.2.2.2:80', 'protocol': 'tcp'}]
 
-    # Side effect function to route calls based on arguments
-    def api_call_router(*args, **kwargs):
-        params = args[1]
-        if params.get('count-only') == '':
-            return count_response
-        elif params.get('proplist') == 'src-address,dst-address,protocol':
-            return stats_response
-        return MagicMock()
+    if ipv4_records is None:
+        ipv4_records = []
+    if ipv6_records is None:
+        ipv6_records = []
 
-    call_mock.side_effect = api_call_router
+    def get_resource_side_effect(path):
+        mock_resource = MagicMock()
 
-    # Test the method of focus
+        def call_side_effect(command, params):
+            assert command == 'print'
+            if params.get('count-only') == '':
+                count_response = MagicMock()
+                count_response.done_message = {'ret': ipv4_count if path == '/ip/firewall/connection/' else ipv6_count}
+                return count_response
+
+            assert params.get('proplist') == proplist
+            return ipv4_records if path == '/ip/firewall/connection/' else ipv6_records
+
+        mock_resource.call.side_effect = call_side_effect
+        return mock_resource
+
+    mock_api.get_resource.side_effect = get_resource_side_effect
+    return mock_api
+
+
+@pytest.mark.parametrize("ipv4_count, ipv6_count, should_make_stats_call", [
+    ('0', '0', False),
+    ('123', '0', True),
+    ('0', '7', True),
+])
+def test_ip_connection_stats_datasource_checks_count_first(ipv4_count, ipv6_count, should_make_stats_call):
+    """
+    Verifies that IPConnectionStatsDatasource checks both IPv4 and IPv6 connection counters and
+    avoids fetching the full stats list if both are empty.
+    """
+    mock_router_entry = _build_mock_router_entry()
+    mock_api = _configure_connection_api(
+        mock_router_entry,
+        ipv4_count = ipv4_count,
+        ipv6_count = ipv6_count,
+        ipv4_records = [{'src-address': '1.1.1.1:123', 'src-port': '123', 'dst-address': '2.2.2.2:80', 'dst-port': '80', 'protocol': 'tcp'}],
+        ipv6_records = [{'src-address': '[2001:db8::10]:5353', 'src-port': '5353', 'dst-address': '[2001:db8::20]:443', 'dst-port': '443', 'protocol': 'tcp'}],
+        proplist = 'src-address,src-port,dst-address,dst-port,protocol'
+    )
+
     result = IPConnectionStatsDatasource.metric_records(mock_router_entry)
+
     if should_make_stats_call:
-        # This one should have been called twice, once for count and once for the stats
-        assert call_mock.call_count == 2
+        assert mock_api.get_resource.call_count == 4
         assert result is not None
         assert len(result) > 0
-        assert result[0]['src_address'] == '1.1.1.1'
     else:
-        # And this just once for the count
-        call_mock.assert_called_once()
+        assert mock_api.get_resource.call_count == 2
         assert result == []
+
+
+def test_ip_connection_stats_datasource_supports_ipv4_and_ipv6():
+    """
+    Verifies that IPConnectionStatsDatasource keeps IPv6 addresses intact while still stripping
+    transport ports from both IPv4 and IPv6 source addresses.
+    """
+    mock_router_entry = _build_mock_router_entry()
+    _configure_connection_api(
+        mock_router_entry,
+        ipv4_count = '1',
+        ipv6_count = '1',
+        ipv4_records = [{'src-address': '1.1.1.1:123', 'src-port': '123', 'dst-address': '2.2.2.2:80', 'dst-port': '80', 'protocol': 'tcp'}],
+        ipv6_records = [{'src-address': '[2001:db8::10]:5353', 'src-port': '5353',
+                         'dst-address': '[2001:db8::20]:443', 'dst-port': '443', 'protocol': 'tcp'}],
+        proplist = 'src-address,src-port,dst-address,dst-port,protocol'
+    )
+
+    result = IPConnectionStatsDatasource.metric_records(mock_router_entry)
+    records_by_src = {record['src_address']: record for record in result}
+
+    assert records_by_src['1.1.1.1']['dst_addresses'] == '2.2.2.2:80(tcp)'
+    assert records_by_src['2001:db8::10']['dst_addresses'] == '[2001:db8::20]:443(tcp)'
+
+
+def test_ip_connection_traffic_datasource_supports_ipv4_and_ipv6():
+    """
+    Verifies that IPConnectionTrafficDatasource aggregates active connection byte counters for both
+    IPv4 and IPv6 records.
+    """
+    mock_router_entry = _build_mock_router_entry()
+    _configure_connection_api(
+        mock_router_entry,
+        ipv4_count = '2',
+        ipv6_count = '1',
+        ipv4_records = [
+            {'src-address': '1.1.1.1:123', 'src-port': '123', 'dst-address': '2.2.2.2:80', 'dst-port': '80',
+             'protocol': 'tcp', 'orig-bytes': '10', 'repl-bytes': '20'},
+            {'src-address': '1.1.1.1:123', 'src-port': '123', 'dst-address': '2.2.2.2:80', 'dst-port': '80',
+             'protocol': 'tcp', 'orig-bytes': '1', 'repl-bytes': '2'},
+        ],
+        ipv6_records = [
+            {'src-address': '[2001:db8::10]:5353', 'src-port': '5353', 'dst-address': '[2001:db8::20]:443', 'dst-port': '443',
+             'protocol': 'tcp', 'orig-bytes': '100', 'repl-bytes': '200'},
+        ],
+        proplist = 'src-address,src-port,dst-address,dst-port,protocol,orig-bytes,repl-bytes'
+    )
+
+    result = IPConnectionTrafficDatasource.metric_records(mock_router_entry)
+    records_by_key = {(record['src_address'], record['dst_address'], record['protocol']): record for record in result}
+
+    assert records_by_key[('1.1.1.1', '2.2.2.2', 'tcp')]['upload_bytes'] == 11
+    assert records_by_key[('1.1.1.1', '2.2.2.2', 'tcp')]['download_bytes'] == 22
+    assert records_by_key[('1.1.1.1', '2.2.2.2', 'tcp')]['total_bytes'] == 33
+    assert records_by_key[('2001:db8::10', '2001:db8::20', 'tcp')]['total_bytes'] == 300
+
+
+def test_ip_connection_collector_collects_connection_traffic_metrics():
+    """
+    Verifies that IPConnectionCollector emits the per-connection traffic metrics only when the
+    dedicated feature flag is enabled.
+    """
+    mock_router_entry = _build_mock_router_entry()
+    mock_router_entry.config_entry.connection_traffic = True
+
+    connection_traffic_records = [{'src_address': '1.1.1.1',
+                                   'dst_address': '2.2.2.2',
+                                   'protocol': 'tcp',
+                                   'upload_bytes': 10,
+                                   'download_bytes': 20,
+                                   'total_bytes': 30}]
+
+    with patch('mktxp.collector.connection_collector.IPConnectionTrafficDatasource.metric_records',
+               return_value = connection_traffic_records), \
+         patch('mktxp.collector.connection_collector.BaseOutputProcessor.augment_record'):
+        metrics = list(IPConnectionCollector.collect(mock_router_entry))
+
+    metric_names = [metric.name for metric in metrics]
+    assert metric_names == ['mktxp_connection_upload_bytes', 'mktxp_connection_download_bytes', 'mktxp_connection_total_bytes']
