@@ -530,6 +530,12 @@ Let's go check on that in the dashboard, or just get the info right from the com
 ```
 *A few quick checks show all of the destination IPs relate to AWS instances, so supposedly it's legit... but let's remain vigilant, to know better :)*
 
+The exporter reports these connection totals:
+
+- `mktxp_ip_connections_total` for combined IPv4 and IPv6 totals
+- `mktxp_ipv4_connections_total` for IPv4-only totals
+- `mktxp_ipv6_connections_total` for IPv6-only totals
+
 If you need per-connection byte counters for currently active src/dst/protocol tuples, enable the following option:
 
 ```

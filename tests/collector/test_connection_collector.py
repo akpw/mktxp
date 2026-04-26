@@ -15,7 +15,7 @@ import pytest
 from unittest.mock import MagicMock, patch
 
 from mktxp.collector.connection_collector import IPConnectionCollector
-from mktxp.datasource.connection_ds import IPConnectionStatsDatasource, IPConnectionTrafficDatasource
+from mktxp.datasource.connection_ds import IPConnectionDatasource, IPConnectionStatsDatasource, IPConnectionTrafficDatasource
 from mktxp.flow.router_entry import RouterEntry
 
 
@@ -116,6 +116,24 @@ def test_ip_connection_stats_datasource_supports_ipv4_and_ipv6():
     assert records_by_src['2001:db8::10']['dst_addresses'] == '[2001:db8::20]:443(tcp)'
 
 
+def test_ip_connection_datasource_exposes_total_ipv4_and_ipv6_counts():
+    """
+    Verifies that IPConnectionDatasource returns combined and per-family connection totals.
+    """
+    mock_router_entry = _build_mock_router_entry()
+    _configure_connection_api(
+        mock_router_entry,
+        ipv4_count = '123',
+        ipv6_count = '7',
+    )
+
+    result = IPConnectionDatasource.metric_records(mock_router_entry, include_stack_counts = True)
+
+    assert result[0]['count'] == '130'
+    assert result[0]['ipv4_count'] == '123'
+    assert result[0]['ipv6_count'] == '7'
+
+
 def test_ip_connection_traffic_datasource_supports_ipv4_and_ipv6():
     """
     Verifies that IPConnectionTrafficDatasource aggregates active connection byte counters for both
@@ -170,3 +188,20 @@ def test_ip_connection_collector_collects_connection_traffic_metrics():
 
     metric_names = [metric.name for metric in metrics]
     assert metric_names == ['mktxp_connection_upload_bytes', 'mktxp_connection_download_bytes', 'mktxp_connection_total_bytes']
+
+
+def test_ip_connection_collector_collects_total_ipv4_and_ipv6_metrics():
+    """
+    Verifies that IPConnectionCollector emits combined and per-family connection totals.
+    """
+    mock_router_entry = _build_mock_router_entry()
+    mock_router_entry.config_entry.connections = True
+
+    connection_records = [{'count': '130', 'ipv4_count': '123', 'ipv6_count': '7'}]
+
+    with patch('mktxp.collector.connection_collector.IPConnectionDatasource.metric_records',
+               return_value = connection_records):
+        metrics = list(IPConnectionCollector.collect(mock_router_entry))
+
+    metric_names = [metric.name for metric in metrics]
+    assert metric_names == ['mktxp_ip_connections_total', 'mktxp_ipv4_connections_total', 'mktxp_ipv6_connections_total']

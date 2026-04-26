@@ -23,10 +23,16 @@ class IPConnectionCollector(BaseCollector):
     @staticmethod
     def collect(router_entry):
         if router_entry.config_entry.connections:       
-            connection_records = IPConnectionDatasource.metric_records(router_entry)
+            connection_records = IPConnectionDatasource.metric_records(router_entry, include_stack_counts = True)
             if connection_records:
-                connection_metrics = BaseCollector.gauge_collector('ip_connections_total', 'Number of IP connections', connection_records, 'count',)
-                yield connection_metrics
+                connection_metrics = (
+                    ('ip_connections_total', 'Number of IP connections', 'count'),
+                    ('ipv4_connections_total', 'Number of IPv4 connections', 'ipv4_count'),
+                    ('ipv6_connections_total', 'Number of IPv6 connections', 'ipv6_count'),
+                )
+
+                for metric_name, metric_desc, metric_key in connection_metrics:
+                    yield BaseCollector.gauge_collector(metric_name, metric_desc, connection_records, metric_key,)
 
         if router_entry.config_entry.connection_stats:
             connection_stats_records = IPConnectionStatsDatasource.metric_records(router_entry)

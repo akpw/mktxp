@@ -17,7 +17,7 @@ from mktxp.datasource.base_ds import BaseDSProcessor
 
 
 def _connection_resource_paths():
-    return ('/ip/firewall/connection/', '/ipv6/firewall/connection/')
+    return (('ipv4', '/ip/firewall/connection/'), ('ipv6', '/ipv6/firewall/connection/'))
 
 
 def _normalize_address(address, port = None):
@@ -49,18 +49,18 @@ def _format_address(address, port = None):
     return f'{address}:{port}'
 
 
-def _count_connection_records(router_entry):
+def _count_connection_records_by_family(router_entry):
     router_api = router_entry.api_connection.router_api()
-    count = 0
+    count_by_family = {'ipv4': 0, 'ipv6': 0}
     last_exc = None
     has_success = False
 
-    for resource_path in _connection_resource_paths():
+    for family, resource_path in _connection_resource_paths():
         try:
             res = router_api.get_resource(resource_path).call('print', {'count-only': ''})
             cnt_str = res.done_message.get('ret')
             try:
-                count += int(cnt_str)
+                count_by_family[family] = int(cnt_str)
             except (ValueError, TypeError):
                 pass
             has_success = True
@@ -70,7 +70,11 @@ def _count_connection_records(router_entry):
     if not has_success:
         raise last_exc if last_exc else RuntimeError('Unable to read connection counters')
 
-    return count
+    return count_by_family
+
+
+def _count_connection_records(router_entry):
+    return sum(_count_connection_records_by_family(router_entry).values())
 
 
 def _read_connection_records(router_entry, *, proplist):
@@ -79,7 +83,7 @@ def _read_connection_records(router_entry, *, proplist):
     last_exc = None
     has_success = False
 
-    for resource_path in _connection_resource_paths():
+    for _, resource_path in _connection_resource_paths():
         try:
             connection_records = router_api.get_resource(resource_path).call('print', {'proplist': proplist})
             records.extend(connection_records)
@@ -97,12 +101,15 @@ class IPConnectionDatasource:
     ''' IP connections data provider
     '''             
     @staticmethod
-    def metric_records(router_entry, *, metric_labels = None):
+    def metric_records(router_entry, *, metric_labels = None, include_stack_counts = False):
         if metric_labels is None:
             metric_labels = []        
         try:
-            count = _count_connection_records(router_entry)
-            records = [{'count': str(count)}]
+            count_by_family = _count_connection_records_by_family(router_entry)
+            records = [{'count': str(sum(count_by_family.values()))}]
+            if include_stack_counts:
+                records[0]['ipv4_count'] = str(count_by_family['ipv4'])
+                records[0]['ipv6_count'] = str(count_by_family['ipv6'])
             return BaseDSProcessor.trimmed_records(router_entry, router_records = records, metric_labels = metric_labels)
         except Exception as exc:
             print(f'Error getting IP connection info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
