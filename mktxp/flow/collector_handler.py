@@ -14,7 +14,7 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from timeit import default_timer
 from datetime import datetime
-from threading import Event, Timer
+from threading import Event, Lock, Timer
 from mktxp.cli.config.config import config_handler
 from mktxp.cli.config.config import MKTXPConfigKeys
 
@@ -26,6 +26,8 @@ class CollectorHandler:
         self.entries_handler = entries_handler
         self.collector_registry = collector_registry
         self.last_collect_timestamp = 0
+        self._metrics_cache = []
+        self._cache_lock = Lock()
 
 
     def collect_sync(self):
@@ -118,19 +120,32 @@ class CollectorHandler:
 
     def collect(self):
         if not self._valid_collect_interval():
+            # Within minimal_collect_interval: replay the last successful collection
+            # so concurrent or closely-spaced scrapers do not see an empty registry
+            # (which would otherwise drop every mktxp_* series for that scrape and
+            # surface as phantom "down" gaps in dashboards).
+            with self._cache_lock:
+                cached = list(self._metrics_cache)
+            yield from cached
             return
 
         # bandwidth collector
-        yield from self.collector_registry.bandwidthCollector.collect()
+        collected = list(self.collector_registry.bandwidthCollector.collect())
 
         # all other collectors
         # Check whether to run in parallel by looking at the mktxp system configuration
         parallel = config_handler.system_entry.fetch_routers_in_parallel
         max_worker_threads = config_handler.system_entry.max_worker_threads
         if parallel:
-            yield from self.collect_async(max_worker_threads=max_worker_threads)
+            collected.extend(self.collect_async(max_worker_threads=max_worker_threads))
         else:
-            yield from self.collect_sync()
+            collected.extend(self.collect_sync())
+
+        if collected:
+            with self._cache_lock:
+                self._metrics_cache = collected
+
+        yield from collected
 
     def _valid_collect_interval(self):
         now = datetime.now().timestamp()

@@ -90,6 +90,7 @@ The default configuration file comes with a sample configuration, making it easy
 
     connections = True              # IP connections metrics
     connection_stats = False        # Open IP connections metrics
+    connection_traffic = False      # Open IP connections traffic metrics (high cardinality)
 
     interface = True                # Interfaces traffic metrics
     wireguard_peers = False         # Wireguard peers metrics
@@ -512,7 +513,7 @@ With many connected devices everywhere, one can often only guess where do they g
 ```
 connection_stats = False        # Open IP connections metrics 
 ```
-Setting this to `True` obviously enables the feature and allows to see something like that:
+Setting this to `True` obviously enables the feature and allows to see something like that. Both IPv4 and IPv6 connections are included:
 
 <img width="2346" alt="conns" src="https://user-images.githubusercontent.com/5028474/217042107-bffa0a81-a6a0-4474-87d4-1597cdd80735.png">
 
@@ -528,6 +529,24 @@ Let's go check on that in the dashboard, or just get the info right from the com
 |                   |              |                  |                       54.254.90.185:32100(udp)
 ```
 *A few quick checks show all of the destination IPs relate to AWS instances, so supposedly it's legit... but let's remain vigilant, to know better :)*
+
+The exporter reports these connection totals:
+
+- `mktxp_ip_connections_total` for combined IPv4 and IPv6 totals
+- `mktxp_ipv4_connections_total` for IPv4-only totals
+- `mktxp_ipv6_connections_total` for IPv6-only totals
+
+If you need per-connection byte counters for currently active src/dst/protocol tuples, enable the following option:
+
+```
+connection_traffic = False      # Open IP connections traffic metrics (high cardinality)
+```
+
+This produces the following metrics for both IPv4 and IPv6 connection tracking tables:
+
+- `mktxp_connection_upload_bytes`
+- `mktxp_connection_download_bytes`
+- `mktxp_connection_total_bytes`
 
 
 ### Parallel routers fetch
