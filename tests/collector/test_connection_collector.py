@@ -64,3 +64,45 @@ def test_ip_connection_stats_datasource_checks_count_first(connection_count_str,
         # And this just once for the count
         call_mock.assert_called_once()
         assert result == []
+
+def test_ip_connection_stats_datasource_without_destinations():
+    """
+    Verifies that IPConnectionStatsDatasource uses the optimized proplist and correctly processes 
+    results when connection_stats_destinations is False.
+    """
+    mock_router_entry = MagicMock(spec=RouterEntry)
+    mock_router_entry.router_name = "TestRouter"
+    mock_router_entry.config_entry = MagicMock()
+    mock_router_entry.config_entry.hostname = "testhost"
+    mock_router_entry.config_entry.connection_stats_destinations = False
+    mock_router_entry.api_connection = MagicMock()
+    mock_router_entry.router_id = {'routerboard_name': 'test_router'}
+
+    mock_api = MagicMock()
+    mock_router_entry.api_connection.router_api.return_value = mock_api
+    call_mock = mock_api.get_resource.return_value.call
+    
+    count_response = MagicMock()
+    count_response.done_message = {'ret': '123'}
+    
+    # Notice dst-address and protocol are missing as they wouldn't be returned by the router
+    stats_response = [{'src-address': '1.1.1.1:123'}, {'src-address': '1.1.1.1:456'}]
+
+    def api_call_router(*args, **kwargs):
+        params = args[1]
+        if params.get('count-only') == '':
+            return count_response
+        elif params.get('proplist') == 'src-address':
+            return stats_response
+        return MagicMock()
+
+    call_mock.side_effect = api_call_router
+
+    result = IPConnectionStatsDatasource.metric_records(mock_router_entry)
+    
+    assert call_mock.call_count == 2
+    assert result is not None
+    assert len(result) == 1
+    assert result[0]['src_address'] == '1.1.1.1'
+    assert result[0]['connection_count'] == 2
+    assert result[0]['dst_addresses'] == ''

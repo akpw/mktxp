@@ -90,6 +90,7 @@ The default configuration file comes with a sample configuration, making it easy
 
     connections = True              # IP connections metrics
     connection_stats = False        # Open IP connections metrics
+    connection_stats_destinations = False   # Set to True to track individual destination IPs/ports (Warning: High Cardinality)
 
     interface = True                # Interfaces traffic metrics
     wireguard_peers = False         # Wireguard peers metrics
@@ -511,6 +512,7 @@ With many connected devices everywhere, one can often only guess where do they g
 
 ```
 connection_stats = False        # Open IP connections metrics 
+connection_stats_destinations = False   # Set to True to track individual destination IPs/ports (Warning: High Cardinality)
 ```
 Setting this to `True` obviously enables the feature and allows to see something like that:
 
