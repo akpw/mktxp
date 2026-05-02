@@ -31,4 +31,11 @@ class ProbeRouterEntry(RouterEntry):
             self._wireless_type = RouterEntryWirelessType.NONE
             return
 
+        # Force disconnect for non-pooled probe connections to prevent leaking active user sessions
+        self.api_connection.disconnect()
+        if self._dhcp_entry:
+            self._dhcp_entry.api_connection.disconnect()
+        if self._capsman_entry:
+            self._capsman_entry.api_connection.disconnect()
+
         super().is_done()
