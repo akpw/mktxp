@@ -83,6 +83,7 @@ The default configuration file comes with a sample configuration, making it easy
     ssl_ca_file = ""                # path to the certificate authority file to validate against, leave empty to use system store
     plaintext_login = True          # for legacy RouterOS versions below 6.43 use False
 
+    routerboard = False             # RouterBOARD inventory / firmware metrics
     health = True                   # System Health metrics
     installed_packages = True       # Installed packages
     dhcp = True                     # DHCP general metrics
@@ -530,6 +531,20 @@ Let's go check on that in the dashboard, or just get the info right from the com
 |                   |              |                  |                       54.254.90.185:32100(udp)
 ```
 *A few quick checks show all of the destination IPs relate to AWS instances, so supposedly it's legit... but let's remain vigilant, to know better :)*
+
+### RouterBOARD inventory and firmware
+RouterBOARD inventory and firmware status can be exported with:
+
+```
+routerboard = False             # RouterBOARD inventory / firmware metrics
+```
+
+This enables:
+
+- `mktxp_routerboard_info`
+- `mktxp_routerboard_firmware_upgrade_available`
+
+The option is disabled by default. On devices without `/system/routerboard` support, enabling it may result in no data or scrape errors.
 
 
 ### Parallel routers fetch

@@ -161,3 +161,7 @@ def test_system_config_key_in_new_section(tmpdir):
 def test_wireguard_peer_key_registration():
     assert MKTXPConfigKeys.FE_WG_PEER_KEY == 'wireguard_peers'
     assert MKTXPConfigKeys.FE_WG_PEER_KEY in MKTXPConfigKeys.BOOLEAN_KEYS_NO
+
+def test_routerboard_key_registration():
+    assert MKTXPConfigKeys.FE_ROUTERBOARD_KEY == 'routerboard'
+    assert MKTXPConfigKeys.FE_ROUTERBOARD_KEY in MKTXPConfigKeys.BOOLEAN_KEYS_NO
