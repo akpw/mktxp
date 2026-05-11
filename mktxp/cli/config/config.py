@@ -372,7 +372,9 @@ class MKTXPConfigHandler:
             sys.exit(1)
 
         # mktxp user config folder
+        print(f'MKTXP configuration directory: {self.os_config.mktxp_user_dir_path}')
         if not os.path.exists(self.os_config.mktxp_user_dir_path):
+            print(f'Creating MKTXP configuration directory: {self.os_config.mktxp_user_dir_path}')
             os.makedirs(self.os_config.mktxp_user_dir_path)
 
         # if needed, stage the user config data
@@ -430,6 +432,7 @@ class MKTXPConfigHandler:
     def _create_os_path(self, os_path, resource_path):
         if not os.path.exists(os_path):
             # stage from the conf templates
+            print(f'Creating default MKTXP configuration file: {os_path}')
             ref = importlib.resources.files('mktxp') / resource_path
             with importlib.resources.as_file(ref) as path:
                 shutil.copy(path, os_path)
