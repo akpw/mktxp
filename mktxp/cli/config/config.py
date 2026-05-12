@@ -19,6 +19,48 @@ from configobj import ConfigObj
 from abc import ABCMeta, abstractmethod
 import importlib.resources
 from mktxp.utils.utils import FSHelper
+import collections
+from datetime import datetime
+
+class LogBuffer:
+    def __init__(self, maxlen=1000):
+        self.buffer = collections.deque(maxlen=maxlen)
+        self.original_stdout = sys.stdout
+        self.original_stderr = sys.stderr
+        self.add_log("MKTXP Logging System Started")
+
+    def write(self, data):
+        self.original_stdout.write(data)
+        if data.strip():
+            self.add_log(data.strip())
+
+    def flush(self):
+        self.original_stdout.flush()
+
+    def add_log(self, message):
+        ts = datetime.now().strftime("%H:%M:%S")
+        line = message
+        if not (line.startswith('202') or line.startswith('[')):
+            line = f"[{ts}] {line}"
+        self.buffer.append(line)
+
+    def get_logs(self):
+        return "\n".join(self.buffer)
+
+    def fileno(self):
+        return self.original_stdout.fileno()
+
+    @property
+    def encoding(self):
+        return self.original_stdout.encoding
+
+    def isatty(self):
+        return self.original_stdout.isatty()
+
+# Global capture instance
+log_capture = LogBuffer()
+sys.stdout = log_capture
+sys.stderr = log_capture
 
 
 ''' MKTXP conf file handling
