@@ -48,7 +48,10 @@ class LogBuffer:
         return "\n".join(self.buffer)
 
     def fileno(self):
-        return self.original_stdout.fileno()
+        # We return a duplicate to prevent external libraries 
+        # (like speedtest-cli) from closing the real stdout
+        import os
+        return os.dup(self.original_stdout.fileno())
 
     @property
     def encoding(self):
@@ -56,6 +59,12 @@ class LogBuffer:
 
     def isatty(self):
         return self.original_stdout.isatty()
+
+    def flush(self):
+        self.original_stdout.flush()
+
+    def close(self):
+        pass  # Never close the real stdout/stderr
 
 # Global capture instance
 log_capture = LogBuffer()
