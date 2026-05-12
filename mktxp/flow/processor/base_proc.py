@@ -101,7 +101,14 @@ class ExportProcessor:
         print(f'{current_time} Running HTTP metrics server on: {config_handler.system_entry.listen}')
 
         metrics_app = make_wsgi_app()
-        app = MetricsRouter(metrics_app)
+        
+        # Web UI Hook
+        try:
+            from mktxp.web_handler import WebUIHandler
+            app = WebUIHandler(MetricsRouter(metrics_app))
+        except ImportError:
+            app = MetricsRouter(metrics_app)
+
         if config_handler.system_entry.prometheus_headers_deduplication:
             if config_handler.system_entry.verbose_mode:
                 print(f"Prometheus HELP / TYPE headers de-deplucation is On")
@@ -246,5 +253,3 @@ class OutputProcessor:
         router_entry = RouterEntriesHandler.router_entry(entry_name)
         if router_entry:
             NetwatchOutput.clients_summary(router_entry)
-
-            

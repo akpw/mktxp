@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MKTXP | Config Manager</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <span>MKTXP</span> WEB UI
+            </div>
+            <nav class="nav-links">
+                <button class="nav-item active" id="tab-mktxp" onclick="switchTab('mktxp')">Router Config</button>
+                <button class="nav-item" id="tab-_mktxp" onclick="switchTab('_mktxp')">System Config</button>
+                <button class="nav-item" id="tab-logs" onclick="switchTab('logs')">MKTXP Logs</button>
+            </nav>
+            <div class="footer-info">
+                v1.2.18
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header>
+                <div class="title-area">
+                    <h1 id="page-title">Router Configuration</h1>
+                    <p class="subtitle" id="page-subtitle">Manage your Mikrotik device entries and metrics</p>
+                </div>
+                <div class="actions">
+                    <button id="restart-btn" class="btn btn-secondary" onclick="restartMKTXP()" title="Reload MKTXP Configuration">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                        Reload Config
+                    </button>
+                    <button id="save-btn" class="btn btn-primary" onclick="saveConfig()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                            <polyline points="7 3 7 8 15 8"></polyline>
+                        </svg>
+                        Save Config
+                    </button>
+                </div>
+            </header>
+
+            <div class="content-stack animate-fade">
+                <!-- Visual Cards Section -->
+                <section id="visual-section" class="view-section">
+                    <div class="section-header">
+                        <h2>Visual Configuration</h2>
+                        <button class="btn btn-secondary" title="Add New Device" onclick="addDevice()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            Add New Device
+                        </button>
+                    </div>
+                    <div id="router-cards" class="visual-grid">
+                        <!-- Cards injected here -->
+                    </div>
+                </section>
+
+                <!-- Raw Editor Section -->
+                <section id="raw-section" class="view-section">
+                    <div class="section-header">
+                        <h2>Raw Configuration</h2>
+                        <span class="filename" id="filename-label">mktxp.conf</span>
+                    </div>
+                    <div class="editor-box">
+                        <form id="config-form" method="POST" action="/save"
+                            style="flex-grow: 1; display: flex; flex-direction: column;">
+                            <input type="hidden" name="config_type" id="config_type" value="mktxp">
+                            <textarea id="config-editor" name="config_content" spellcheck="false"
+                                oninput="onRawInput()">{{MKTXP_CONF}}</textarea>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- Logs Section -->
+                <section id="logs-section" class="view-section" style="display: none;">
+                    <div class="section-header">
+                        <h2>MKTXP Logs</h2>
+                        <button class="btn btn-secondary" onclick="fetchLogs()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                            Refresh
+                        </button>
+                    </div>
+                    <div class="logs-container">
+                        <pre id="log-content">Initializing logs...</pre>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <div id="toast">Changes saved</div>
+
+    <script>
+        const MKTXP_DATA = {{MKTXP_DATA_JSON}};
+        const mktxp_raw = `{{MKTXP_CONF_ESCAPED}}`;
+        const system_raw = `{{SYSTEM_CONF_ESCAPED}}`;
+    </script>
+    <script src="/static/script.js"></script>
+</body>
+
+</html>
