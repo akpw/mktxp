@@ -54,26 +54,11 @@ def check_connected(func):
 
 class RouterAPIConnection:
     ''' Base wrapper interface for the routeros_api library
-    '''            
+    '''
     def __init__(self, router_name, config_entry):
         self.router_name = router_name
         self.config_entry = config_entry
         self.last_failure_timestamp = self.successive_failure_count = 0
-        
-        ctx = None
-        if self.config_entry.use_ssl:
-            ctx = ssl.create_default_context(
-                cafile=self.config_entry.ssl_ca_file if self.config_entry.ssl_ca_file else None
-            )
-            if self.config_entry.no_ssl_certificate:
-                ctx.check_hostname = False
-                ctx.set_ciphers('ADH:@SECLEVEL=0')
-            elif not self.config_entry.ssl_certificate_verify:
-                ctx.check_hostname = False
-                ctx.verify_mode = ssl.CERT_NONE
-            else:
-                ctx.check_hostname = self.config_entry.ssl_check_hostname
-                ctx.verify_mode = ssl.CERT_REQUIRED
 
         username = self.config_entry.username
         password = self.config_entry.password
@@ -85,7 +70,7 @@ class RouterAPIConnection:
                         raise yaml.YAMLError("Credentials file is not a valid key-value map.")
                 except yaml.YAMLError as e:
                     print(f"Error parsing credentials file: {e}\nCheck that it is valid YAML (e.g., 'username: user').")
-                    exit(1)                    
+                    exit(1)
                 username = credentials.get('username', username)
                 password = credentials.get('password', password)
 
@@ -95,11 +80,30 @@ class RouterAPIConnection:
                 password = password,
                 port = self.config_entry.port,
                 plaintext_login = True,
-                ssl_context = ctx)
-        
+                ssl_context = None)
+
         self.connection.socket_timeout = config_handler.system_entry.socket_timeout
         self.api = None
-    
+
+    def _build_ssl_context(self):
+        if not self.config_entry.use_ssl:
+            return None
+
+        ctx = ssl.create_default_context(
+            cafile = self.config_entry.ssl_ca_file if self.config_entry.ssl_ca_file else None
+        )
+        if self.config_entry.no_ssl_certificate:
+            ctx.check_hostname = False
+            ctx.set_ciphers('ADH:@SECLEVEL=0')
+        elif not self.config_entry.ssl_certificate_verify:
+            ctx.check_hostname = False
+            ctx.verify_mode = ssl.CERT_NONE
+        else:
+            ctx.check_hostname = self.config_entry.ssl_check_hostname
+            ctx.verify_mode = ssl.CERT_REQUIRED
+
+        return ctx
+
     def is_connected(self):
         if self.connection and self.connection.connected and self.api:
             return True
@@ -113,6 +117,8 @@ class RouterAPIConnection:
             print(f'Connecting to router {self.router_name}@{self.config_entry.hostname}')
             if self.config_entry.use_ssl and self.config_entry.no_ssl_certificate:
                 print(f'Warning: API_SSL connect without router SSL certificate is insecure and should not be used in production environments!')
+            if self.config_entry.use_ssl:
+                self.connection.ssl_context = self._build_ssl_context()
             self.connection.plaintext_login = self.config_entry.plaintext_login
             self.api = self.connection.get_api()
             self._set_connect_state(success = True, connect_time = connect_time)
@@ -132,11 +138,11 @@ class RouterAPIConnection:
     def _in_connect_timeout(self, connect_timestamp):
         connect_delay = self._connect_delay()
         if (connect_timestamp - self.last_failure_timestamp) < connect_delay:
-            if config_handler.system_entry.verbose_mode: 
+            if config_handler.system_entry.verbose_mode:
                 print(f'{self.router_name}@{self.config_entry.hostname}: in connect timeout, {int(connect_delay - (connect_timestamp - self.last_failure_timestamp))}secs remaining')
                 print(f'Successive failure count: {self.successive_failure_count}')
             return True
-        if config_handler.system_entry.verbose_mode: 
+        if config_handler.system_entry.verbose_mode:
             print(f'{self.router_name}@{self.config_entry.hostname}: OK to connect')
             if self.last_failure_timestamp > 0:
                 print(f'Seconds since last failure: {connect_timestamp - self.last_failure_timestamp}')
@@ -157,5 +163,5 @@ class RouterAPIConnection:
         else:
             self.api = None
             self.successive_failure_count += 1
-            self.last_failure_timestamp = connect_time.timestamp() 
+            self.last_failure_timestamp = connect_time.timestamp()
             print(f'{connect_time.strftime("%Y-%m-%d %H:%M:%S")} Connection to router {self.router_name}@{self.config_entry.hostname} has failed: {exc}')
