@@ -13,6 +13,7 @@
 ## GNU General Public License for more details.
 
 
+import mktxp.cli.checks.chk_pv  # Force version check before other imports
 import subprocess
 import shlex
 from mktxp.cli.config.config import config_handler
