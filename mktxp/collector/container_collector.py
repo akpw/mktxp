@@ -18,7 +18,7 @@ from mktxp.datasource.package_ds import PackageMetricsDataSource
 
 
 class ContainerCollector(BaseCollector):
-    '''Neighbor Collector'''
+    '''Container Collector'''
 
     @staticmethod
     def collect(router_entry):

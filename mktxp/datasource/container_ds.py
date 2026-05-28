@@ -19,10 +19,10 @@ from mktxp.flow.processor.output import BaseOutputProcessor
 class ContainerDataSource:
     @staticmethod
     def metric_records(router_entry, metric_labels):
-        
-        metric_labels = metric_labels or []                        
-        router_records = []        
-        
+
+        metric_labels = metric_labels or []
+        router_records = []
+
         try:
             router_records = router_entry.api_connection.router_api().get_resource(f'/container').get()
             for record in router_records:
