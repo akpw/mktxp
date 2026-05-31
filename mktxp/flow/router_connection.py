@@ -21,7 +21,7 @@ import functools
 import yaml
 
 # Fix UTF-8 decode error and memory leak from upstream RouterOS-api
-(# Ref: https://github.com/akpw/mktxp/issues/47)
+# Ref: https://github.com/akpw/mktxp/issues/47
 
 # 1. The RouterOS-api implicitly assumes that the API response is UTF-8 encoded,
 #    but Mikrotik often uses latin-1, so monkey-patching StringField to fallback to latin-1
