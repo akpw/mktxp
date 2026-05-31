@@ -20,12 +20,14 @@ from mktxp.cli.config.config import config_handler
 import functools
 import yaml
 
-# Fix UTF-8 decode error
-# See: https://github.com/akpw/mktxp/issues/47
-# The RouterOS-api implicitly assumes that the API response is UTF-8 encoded.
-# But Mikrotik uses latin-1.
-# Because the upstream dependency is currently abandoned, this is a quick hack to solve the issue
+# Fix UTF-8 decode error and memory leak from upstream RouterOS-api
+(# Ref: https://github.com/akpw/mktxp/issues/47)
 
+# 1. The RouterOS-api implicitly assumes that the API response is UTF-8 encoded,
+#    but Mikrotik often uses latin-1, so monkey-patching StringField to fallback to latin-1
+
+# 2. The upstream library uses `collections.defaultdict(StringField)` which caches every unique
+#    key returned by the router, causing an unbounded memory leak. Monkey-patching it with LeaklessDefaultDict
 MIKROTIK_ENCODING = 'latin-1'
 import routeros_api.api_structure
 
@@ -36,7 +38,13 @@ def _decode_bytes(bytes_to_decode):
         return bytes_to_decode.decode(MIKROTIK_ENCODING)
 
 routeros_api.api_structure.StringField.get_python_value = lambda _, bytes:  _decode_bytes(bytes)
-routeros_api.api_structure.default_structure = collections.defaultdict(routeros_api.api_structure.StringField)
+
+class LeaklessDefaultDict(dict):
+    def __missing__(self, key):
+        return routeros_api.api_structure.StringField()
+
+routeros_api.api_structure.default_structure = LeaklessDefaultDict()
+
 
 from routeros_api import RouterOsApiPool
 

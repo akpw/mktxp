@@ -91,3 +91,17 @@ def test_router_connection_skips_ssl_context_building_when_ssl_disabled():
 
     create_context.assert_not_called()
     assert routeros_pool.call_args.kwargs['ssl_context'] is None
+
+
+def test_leakless_default_dict_monkey_patch():
+    # Verify the monkey patch is in place
+    assert type(routeros_api.api_structure.default_structure).__name__ == 'LeaklessDefaultDict'
+
+    # Verify it returns a StringField for missing keys
+    struct = routeros_api.api_structure.default_structure
+    field = struct['some_random_key_123']
+    assert isinstance(field, routeros_api.api_structure.StringField)
+
+    # Verify it does NOT cache the key, preventing the memory leak
+    assert 'some_random_key_123' not in struct
+    assert len(struct) == 0
