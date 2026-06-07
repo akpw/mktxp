@@ -53,7 +53,11 @@ class BandwidthCollector(BaseCollector):
 
         ts =  datetime.now().timestamp()
         if (ts - self.last_call_timestamp) > config_handler.system_entry.bandwidth_test_interval:
-            self.pool.apply_async(BandwidthCollector.bandwidth_worker, callback=get_result)
+            if getattr(self, '_current_job', None) and not self._current_job.ready():
+                if config_handler.system_entry.verbose_mode:
+                    print("Previous bandwidth test is still running. Skipping to prevent queue growth.")
+            else:
+                self._current_job = self.pool.apply_async(BandwidthCollector.bandwidth_worker, callback=get_result)
             self.last_call_timestamp = ts
 
     def __del__(self):

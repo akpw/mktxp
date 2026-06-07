@@ -105,3 +105,31 @@ def test_leakless_default_dict_monkey_patch():
     # Verify it does NOT cache the key, preventing the memory leak
     assert 'some_random_key_123' not in struct
     assert len(struct) == 0
+
+def test_routeros_api_receive_monkey_patch():
+    # Test that response_buffor_manager.clean() is called even if an exception occurs
+    import routeros_api.api_communicator.base
+
+    # Create a dummy base communicator
+    class DummyBase:
+        pass
+
+    communicator = routeros_api.api_communicator.base.ApiCommunicatorBase(DummyBase())
+    tag = b'123'
+
+    # Pre-populate the buffer with a dummy response
+    class DummyResponse:
+        def __init__(self):
+            self.done = False
+            self.error = None
+
+    communicator.response_buffor[tag] = DummyResponse()
+
+    # Mock process_single_response to raise an exception
+    communicator.process_single_response = MagicMock(side_effect=Exception('Test Exception'))
+
+    with pytest.raises(Exception, match='Test Exception'):
+        communicator.receive(tag)
+
+    # Verify the tag was cleaned from the buffer despite the exception
+    assert tag not in communicator.response_buffor

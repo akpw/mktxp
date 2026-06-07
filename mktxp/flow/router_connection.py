@@ -20,32 +20,46 @@ from mktxp.cli.config.config import config_handler
 import functools
 import yaml
 
-# Fix UTF-8 decode error and memory leak from upstream RouterOS-api
-# Ref: https://github.com/akpw/mktxp/issues/47
-
+# 🐒🐒 MONKEY PATCH ZONE 🐒🐒
 # 1. The RouterOS-api implicitly assumes that the API response is UTF-8 encoded,
-#    but Mikrotik often uses latin-1, so monkey-patching StringField to fallback to latin-1
-
-# 2. The upstream library uses `collections.defaultdict(StringField)` which caches every unique
-#    key returned by the router, causing an unbounded memory leak. Monkey-patching it with LeaklessDefaultDict
+#    but Mikrotik often uses latin-1, so monkey-patching StringField to fallback to latin-1 as needed
 MIKROTIK_ENCODING = 'latin-1'
 import routeros_api.api_structure
-
 def _decode_bytes(bytes_to_decode):
     try:
         return bytes_to_decode.decode('utf-8')
     except UnicodeDecodeError:
         return bytes_to_decode.decode(MIKROTIK_ENCODING)
-
 routeros_api.api_structure.StringField.get_python_value = lambda _, bytes:  _decode_bytes(bytes)
 
+# 2. The upstream library uses `collections.defaultdict(StringField)` which caches every unique
+#    key returned by the router, causing an unbounded memory leak. Monkey-patching it with LeaklessDefaultDict
 class LeaklessDefaultDict(dict):
     def __missing__(self, key):
         return routeros_api.api_structure.StringField()
-
 routeros_api.api_structure.default_structure = LeaklessDefaultDict()
 
+# 3. The upstream library's ApiCommunicatorBase.receive method does not seem to clean up the
+#    asynchronous response buffer if an exception (like a parsing error) occurs.
+#    Monkey-patching it to ensure clean() is called in a finally block to prevent memory leaks.
+import routeros_api.api_communicator.base
+original_receive = routeros_api.api_communicator.base.ApiCommunicatorBase.receive
+def _patched_receive(self, tag):
+    response_buffor_manager = routeros_api.api_communicator.base.AsynchronousResponseBufforManager(self, tag)
+    try:
+        while not response_buffor_manager.done:
+            response_buffor_manager.step_to_finish_response()
+    finally:
+        response_buffor_manager.clean()
 
+    response = response_buffor_manager.response
+    if response.error:
+        raise response.error_as_exception
+    else:
+        return response
+routeros_api.api_communicator.base.ApiCommunicatorBase.receive = _patched_receive
+
+# done with patching hopefully, moving on
 from routeros_api import RouterOsApiPool
 
 class RouterAPIConnectionError(Exception):
