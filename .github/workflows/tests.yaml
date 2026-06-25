@@ -24,7 +24,6 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
           allow-prereleases: true
-          # We need a requirements.txt or pyproject.toml
-          # cache: pip
+          cache: pip
       - run: pip install tox
       - run: tox run -e ${{ matrix.tox }}
