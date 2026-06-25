@@ -665,9 +665,23 @@ mktxp is running as pid 36704
 ```
 
 ## Installing Development version
-- Clone the repo, then run: `$ python setup.py develop`
-
+- Clone the repo, create a virtual environment, and activate it: 
+  ```bash
+  $ python3 -m venv .venv
+  $ source .venv/bin/activate
+  ```
+- Install the project in editable mode:
+  ```bash
+  $ pip install -e .
+  ```
 
 **Running Tests**
-- To run the test suite, first install the development dependencies: `pip install -e .[test]`
-- Then run the tests using `tox`: `$ tox`
+- To run the test suite, first ensure you have installed the development dependencies:
+  ```bash
+  $ pip install -e ".[test]"
+  ```
+- Then run the tests using `pytest`:
+  ```bash
+  $ pytest -v --tb=short
+  ```
+*(Note: If you have `tox` installed, you can still run `$ tox` for multi-environment testing)*
