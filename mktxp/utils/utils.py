@@ -55,6 +55,8 @@ def run_cmd(cmd, shell = False, quiet = False):
     return output
 
 def parse_mkt_uptime(time):
+    if not time:
+        return 0
     time_dict = re.match(r'((?P<weeks>\d+)w)?((?P<days>\d+)d)?((?P<hours>\d+)h)?((?P<minutes>\d+)m)?((?P<seconds>\d+)s)?', time).groupdict()
     delta = timedelta(**{key: int(value) for key, value in time_dict.items() if value}).total_seconds()
     return int(delta) if delta else 0
