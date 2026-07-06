@@ -18,4 +18,5 @@ EXPOSE 49090
 
 USER mktxp
 ENV PYTHONUNBUFFERED=1
+ENV XDG_CONFIG_HOME=/etc
 CMD ["mktxp", "export"]

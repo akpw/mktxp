@@ -38,7 +38,7 @@ There are multiple ways to install this project, from a standalone app to a [ful
 
   <img width="48%" alt="loki" src="https://user-images.githubusercontent.com/5028474/210771516-06a3e6ab-8eab-458c-9f38-5d44f95d23d4.png">
 
-- from [Docker image](https://github.com/akpw/mktxp/pkgs/container/mktxp) : `❯ docker pull ghcr.io/akpw/mktxp:latest`
+- from [Docker image](https://github.com/akpw/mktxp/pkgs/container/mktxp) : `❯ docker pull ghcr.io/akpw/mktxp:main`
 
 - from [PyPI](https://pypi.org/project/mktxp/): `❯ pip install mktxp`
 
@@ -169,6 +169,8 @@ Obviously, you can do the same via just opening the config file directly:
 
 ```
 
+> 💡 **Tip:** `mktxp` now fully supports the XDG Base Directory standard. To migrate an existing legacy installation, simply move your configuration folder: `mv ~/mktxp ~/.config/mktxp`
+
 #### Docker image install
 The MKTXP Docker image runs as UID 1000 (standard user ID on most Linux distributions) to simplify file permissions when bind-mounting configuration files.
 
@@ -185,7 +187,7 @@ nano mktxp-config/_mktxp.conf    # optional: system configuration
 
 # Run with dedicated config directory
 docker run -v "$(pwd)/mktxp-config:/etc/mktxp" -p 49090:49090 -it --rm \
-  ghcr.io/akpw/mktxp:main mktxp --cfg-dir /etc/mktxp export
+  ghcr.io/akpw/mktxp:main
 ```
 
 **Option 2: Mount individual files**
@@ -195,7 +197,7 @@ nano mktxp.conf  # copy&edit sample entry(ies) from above
 
 # Mount only the config file (internal _mktxp.conf will be auto-created)
 docker run -v "$(pwd)/mktxp.conf:/etc/mktxp/mktxp.conf" -p 49090:49090 -it --rm \
-  ghcr.io/akpw/mktxp:main mktxp --cfg-dir /etc/mktxp export
+  ghcr.io/akpw/mktxp:main
 ```
 
 **Option 3: Legacy home directory method (backward compatible)**

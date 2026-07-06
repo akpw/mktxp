@@ -293,9 +293,13 @@ class OSConfig(metaclass=ABCMeta):
             return None
 
     @property
-    @abstractmethod
     def mktxp_user_dir_path(self):
-        pass
+        legacy_path = FSHelper.full_path('~/mktxp')
+        if os.path.exists(legacy_path):
+            return legacy_path
+
+        xdg_config = os.environ.get('XDG_CONFIG_HOME') or FSHelper.full_path('~/.config')
+        return os.path.join(xdg_config, 'mktxp')
 
 
 class FreeBSDConfig(OSConfig):
@@ -303,7 +307,7 @@ class FreeBSDConfig(OSConfig):
     '''
     @property
     def mktxp_user_dir_path(self):
-        return FSHelper.full_path('~/mktxp')
+        return super().mktxp_user_dir_path
 
 
 class OSXConfig(OSConfig):
@@ -311,7 +315,7 @@ class OSXConfig(OSConfig):
     '''
     @property
     def mktxp_user_dir_path(self):
-        return FSHelper.full_path('~/mktxp')
+        return super().mktxp_user_dir_path
 
 
 class LinuxConfig(OSConfig):
@@ -319,7 +323,7 @@ class LinuxConfig(OSConfig):
     '''
     @property
     def mktxp_user_dir_path(self):
-        return FSHelper.full_path('~/mktxp')
+        return super().mktxp_user_dir_path
 
 
 class CustomConfig(OSConfig):

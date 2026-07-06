@@ -1,3 +1,60 @@
 [build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "mktxp"
+version = "1.2.19"
+description = "Prometheus Exporter for Mikrotik RouterOS devices"
+readme = "README.md"
+authors = [
+    { name = "Arseniy Kuznetsov" }
+]
+license = { text = "GNU General Public License v2 (GPLv2)" }
+requires-python = ">=3.9"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3 :: Only",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Customer Service",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: BSD :: FreeBSD",
+    "Operating System :: POSIX :: Linux",
+    "Topic :: System",
+    "Topic :: System :: Systems Administration",
+    "Topic :: Utilities"
+]
+keywords = ["Mikrotik", "RouterOS", "Prometheus", "Exporter"]
+dependencies = [
+    "prometheus-client>=0.9.0",
+    "RouterOS-api>=0.19.0",
+    "configobj>=5.0.6",
+    "humanize>=3.2.0",
+    "texttable>=1.6.3",
+    "speedtest-cli>=2.1.2",
+    "waitress>=3.0.0",
+    "packaging>=24.0",
+    "pyyaml>=5.1"
+]
+
+[project.urls]
+Homepage = "https://github.com/akpw/mktxp"
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-mock"
+]
+
+[project.scripts]
+mktxp = "mktxp.cli.dispatch:main"
+
+[tool.setuptools.packages.find]
+exclude = ["test*"]
+
+[tool.setuptools.package-data]
+"*" = ["config/*.conf"]
