@@ -29,7 +29,7 @@ class IPSecMetricsDataSource:
                 # Format name with comment using centralized function
                 if 'comment' in record:
                     record['name'] = BaseOutputProcessor.format_interface_name(
-                        record['name'],
+                        record.get('name', ''),
                         record['comment'],
                         router_entry.config_entry.interface_name_format
                     )
