@@ -13,7 +13,7 @@
 
 
 from mktxp.collector.base_collector import BaseCollector
-from mktxp.datasource.interface_ds import InterfaceTrafficMetricsDataSource
+from mktxp.datasource.interface_ds import InterfaceTrafficMetricsDataSource, InterfaceMetricsDataSource
 
 
 class InterfaceCollector(BaseCollector):
@@ -25,7 +25,8 @@ class InterfaceCollector(BaseCollector):
             return
 
         interface_traffic_labels = ['disabled', 'name', 'comment', 'rx_byte', 'tx_byte', 'rx_packet', 'tx_packet',
-                                    'rx_error', 'tx_error', 'rx_drop', 'tx_drop', 'link_downs', 'running', 'type']
+                                    'rx_error', 'tx_error', 'rx_drop', 'tx_drop', 'link_downs', 'running', 'type',
+                                    'actual_mtu', 'default_name', 'mac_address']
         interface_traffic_translation_table = {
             'running': lambda value: '1' if value == 'true' else '0',
             'disabled': lambda value: '1' if value == 'true' else '0'
@@ -141,3 +142,40 @@ class InterfaceCollector(BaseCollector):
             'link_downs',
             ['name']
         )
+
+        yield BaseCollector.gauge_collector(
+            'interface_actual_mtu',
+            'Actual Maximum Transmission Unit of the interface',
+            interface_traffic_records,
+            metric_key='actual_mtu',
+            metric_labels=['name']
+        )
+
+        yield BaseCollector.info_collector(
+            'interface_mac_address',
+            'MAC address of the interface',
+            interface_traffic_records,
+            metric_labels=['name', 'mac_address']
+        )
+
+        yield BaseCollector.info_collector(
+            'interface_default_name',
+            'Default name of the interface',
+            interface_traffic_records,
+            metric_labels=['name', 'default_name']
+        )
+
+        interface_vlan_records = InterfaceMetricsDataSource.metric_records(
+            router_entry,
+            metric_labels=['name', 'vlan_id', 'interface'],
+            kind='vlan',
+            additional_proplist=['vlan-id', 'interface']
+        )
+
+        if interface_vlan_records:
+            yield BaseCollector.info_collector(
+                'interface_vlan_info',
+                'VLAN interface information',
+                interface_vlan_records,
+                metric_labels=['name', 'vlan_id', 'interface']
+            )
