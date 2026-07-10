@@ -55,14 +55,14 @@ def test_ip_connection_stats_datasource_checks_count_first(connection_count_str,
     # Test the method of focus
     result = IPConnectionStatsDatasource.metric_records(mock_router_entry)
     if should_make_stats_call:
-        # This one should have been called twice, once for count and once for the stats
-        assert call_mock.call_count == 2
+        # This one should have been called four times, twice for count (IPv4+IPv6) and twice for the stats (IPv4+IPv6)
+        assert call_mock.call_count == 4
         assert result is not None
         assert len(result) > 0
         assert result[0]['src_address'] == '1.1.1.1'
     else:
-        # And this just once for the count
-        call_mock.assert_called_once()
+        # And this twice for the count (IPv4+IPv6)
+        assert call_mock.call_count == 2
         assert result == []
 
 def test_ip_connection_stats_datasource_without_destinations():
@@ -100,9 +100,19 @@ def test_ip_connection_stats_datasource_without_destinations():
 
     result = IPConnectionStatsDatasource.metric_records(mock_router_entry)
     
-    assert call_mock.call_count == 2
+    assert call_mock.call_count == 4
     assert result is not None
     assert len(result) == 1
     assert result[0]['src_address'] == '1.1.1.1'
-    assert result[0]['connection_count'] == 2
+    assert result[0]['connection_count'] == 4
     assert result[0]['dst_addresses'] == ''
+
+def test_strip_port_ipv4_and_ipv6():
+    """
+    Verifies that IPConnectionStatsDatasource.strip_port correctly parses IPv4 and IPv6 addresses.
+    """
+    assert IPConnectionStatsDatasource.strip_port('192.168.1.1:80') == '192.168.1.1'
+    assert IPConnectionStatsDatasource.strip_port('192.168.1.1') == '192.168.1.1'
+    assert IPConnectionStatsDatasource.strip_port('[2001:db8::1]:443') == '2001:db8::1'
+    assert IPConnectionStatsDatasource.strip_port('2001:db8::1') == '2001:db8::1'
+    assert IPConnectionStatsDatasource.strip_port('') == ''

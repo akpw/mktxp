@@ -24,14 +24,38 @@ class IPConnectionDatasource:
         if metric_labels is None:
             metric_labels = []
         try:
-            res = router_entry.api_connection.router_api().get_resource('/ip/firewall/connection/').call('print', {'count-only': ''})
-            # result processing as described at: https://github.com/socialwifi/RouterOS-api/issues/79#issuecomment-2089744809
+            api = router_entry.api_connection.router_api()
+            ipv4_cnt_str = '0'
+            ipv6_cnt_str = '0'
+
+            res = api.get_resource('/ip/firewall/connection/').call('print', {'count-only': ''})
             cnt_str = res.done_message.get('ret')
+            if cnt_str is not None:
+                ipv4_cnt_str = cnt_str
+
             try:
-                count = int(cnt_str)
+                res_v6 = api.get_resource('/ipv6/firewall/connection/').call('print', {'count-only': ''})
+                cnt_str_v6 = res_v6.done_message.get('ret')
+                if cnt_str_v6 is not None:
+                    ipv6_cnt_str = cnt_str_v6
+            except Exception:
+                pass
+
+            try:
+                ipv4_count = int(ipv4_cnt_str)
             except (ValueError, TypeError):
-                cnt_str = '0'
-            records = [{'count': cnt_str}]
+                ipv4_count = 0
+
+            try:
+                ipv6_count = int(ipv6_cnt_str)
+            except (ValueError, TypeError):
+                ipv6_count = 0
+
+            records = [{
+                'count': str(ipv4_count + ipv6_count),
+                'ipv4_count': str(ipv4_count),
+                'ipv6_count': str(ipv6_count)
+            }]
             return BaseDSProcessor.trimmed_records(router_entry, router_records = records, metric_labels = metric_labels)
         except Exception as exc:
             print(f'Error getting IP connection info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
@@ -41,6 +65,15 @@ class IPConnectionDatasource:
 class IPConnectionStatsDatasource:
     ''' IP connections stats data provider
     '''
+    @staticmethod
+    def strip_port(address):
+        if address.startswith('['):
+            return address[1:address.find(']')]
+        colons = address.count(':')
+        if colons == 1:
+            return address.split(':')[0]
+        return address
+
     @staticmethod
     def metric_records(router_entry, *, metric_labels = None, add_router_id = True):
         if metric_labels is None:
@@ -56,12 +89,18 @@ class IPConnectionStatsDatasource:
             else:
                 proplist = 'src-address'
 
-            connection_records = router_entry.api_connection.router_api().get_resource('/ip/firewall/connection/').call('print', \
-                                                                                            {'proplist': proplist})
+            api = router_entry.api_connection.router_api()
+            connection_records = api.get_resource('/ip/firewall/connection/').call('print', {'proplist': proplist})
+            try:
+                connection_records_v6 = api.get_resource('/ipv6/firewall/connection/').call('print', {'proplist': proplist})
+                connection_records.extend(connection_records_v6)
+            except Exception:
+                pass
+
              # calculate number of connections per src-address
             connections_per_src_address = {}
             for connection_record in connection_records:
-                address = connection_record['src-address'].split(':')[0]
+                address = IPConnectionStatsDatasource.strip_port(connection_record.get('src-address', ''))
 
                 count, destinations = 0, set()
                 if connections_per_src_address.get(address):

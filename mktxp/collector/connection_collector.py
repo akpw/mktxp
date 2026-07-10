@@ -27,6 +27,10 @@ class IPConnectionCollector(BaseCollector):
             if connection_records:
                 connection_metrics = BaseCollector.gauge_collector('ip_connections_total', 'Number of IP connections', connection_records, 'count',)
                 yield connection_metrics
+                ipv4_connection_metrics = BaseCollector.gauge_collector('ipv4_connections_total', 'Number of IPv4 connections', connection_records, 'ipv4_count',)
+                yield ipv4_connection_metrics
+                ipv6_connection_metrics = BaseCollector.gauge_collector('ipv6_connections_total', 'Number of IPv6 connections', connection_records, 'ipv6_count',)
+                yield ipv6_connection_metrics
 
         if router_entry.config_entry.connection_stats:
             connection_stats_records = IPConnectionStatsDatasource.metric_records(router_entry)
