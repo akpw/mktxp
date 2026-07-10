@@ -38,7 +38,7 @@ There are multiple ways to install this project, from a standalone app to a [ful
 
   <img width="48%" alt="loki" src="https://user-images.githubusercontent.com/5028474/210771516-06a3e6ab-8eab-458c-9f38-5d44f95d23d4.png">
 
-- from [Docker image](https://github.com/akpw/mktxp/pkgs/container/mktxp) : `❯ docker pull ghcr.io/akpw/mktxp:main`
+- from [Docker image](https://github.com/akpw/mktxp/pkgs/container/mktxp) : `❯ docker pull ghcr.io/akpw/mktxp:latest`
 
 - from [PyPI](https://pypi.org/project/mktxp/): `❯ pip install mktxp`
 
@@ -187,7 +187,7 @@ nano mktxp-config/_mktxp.conf    # optional: system configuration
 
 # Run with dedicated config directory
 docker run -v "$(pwd)/mktxp-config:/etc/mktxp" -p 49090:49090 -it --rm \
-  ghcr.io/akpw/mktxp:main
+  ghcr.io/akpw/mktxp:latest
 ```
 
 **Option 2: Mount individual files**
@@ -197,7 +197,7 @@ nano mktxp.conf  # copy&edit sample entry(ies) from above
 
 # Mount only the config file (internal _mktxp.conf will be auto-created)
 docker run -v "$(pwd)/mktxp.conf:/etc/mktxp/mktxp.conf" -p 49090:49090 -it --rm \
-  ghcr.io/akpw/mktxp:main
+  ghcr.io/akpw/mktxp:latest
 ```
 
 **Option 3: Legacy home directory method (backward compatible)**
@@ -207,13 +207,13 @@ nano mktxp/mktxp.conf  # copy&edit sample entry(ies) from above
 
 # Traditional mounting to home directory
 docker run -v "$(pwd)/mktxp:/home/mktxp/mktxp/" -p 49090:49090 -it --rm \
-  ghcr.io/akpw/mktxp:main
+  ghcr.io/akpw/mktxp:latest
 ```
 
 **Getting shell access for debugging:**
 ```bash
 # Easy shell access (no --entrypoint needed)
-docker run -v "$(pwd)/mktxp-config:/etc/mktxp" -it --rm ghcr.io/akpw/mktxp:main sh
+docker run -v "$(pwd)/mktxp-config:/etc/mktxp" -it --rm ghcr.io/akpw/mktxp:latest sh
 ```
 
 #### MKTXP stack install

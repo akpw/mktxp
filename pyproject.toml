@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mktxp"
-version = "1.2.19"
+version = "1.2.20"
 description = "Prometheus Exporter for Mikrotik RouterOS devices"
 readme = "README.md"
 authors = [
