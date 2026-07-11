@@ -19,7 +19,7 @@ from mktxp.datasource.pool_ds import PoolMetricsDataSource, PoolUsedMetricsDataS
 
 class PoolCollector(BaseCollector):
     ''' IP Pool Metrics collector
-    '''    
+    '''
     @staticmethod
     def collect(router_entry):
         # ~*~*~*~*~*~ IPv4 ~*~*~*~*~*~
@@ -36,13 +36,14 @@ class PoolCollector(BaseCollector):
         ip_stack = 'ipv6' if ipv6 else 'ipv4'
 
         # initialize all pool counts, including those currently not used
-        pool_records = PoolMetricsDataSource.metric_records(router_entry, metric_labels = ['name'], ipv6=ipv6)   
+        pool_records = PoolMetricsDataSource.metric_records(router_entry, metric_labels = ['name', 'ranges', 'total'], ipv6=ipv6)
         if pool_records:
             pool_used_labels = ['pool']
             pool_used_counts = {pool_record['name']: 0 for pool_record in pool_records}
+            pool_size_counts = {pool_record['name']: int(pool_record.get('total', PoolCollector._calculate_pool_size(pool_record.get('ranges', '')))) for pool_record in pool_records}
 
             # for pools in usage, calculate the current numbers
-            pool_used_records = PoolUsedMetricsDataSource.metric_records(router_entry, metric_labels = pool_used_labels, ipv6=ipv6)   
+            pool_used_records = PoolUsedMetricsDataSource.metric_records(router_entry, metric_labels = pool_used_labels, ipv6=ipv6)
             for pool_used_record in pool_used_records:
                 pool_used_counts[pool_used_record['pool']] = pool_used_counts.get(pool_used_record['pool'], 0) + 1
 
@@ -50,7 +51,45 @@ class PoolCollector(BaseCollector):
             used_per_pool_records = [{ MKTXPConfigKeys.ROUTERBOARD_NAME: router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_NAME],
                                        MKTXPConfigKeys.ROUTERBOARD_ADDRESS: router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_ADDRESS],
                                        'pool': key, 'count': value} for key, value in pool_used_counts.items()]
-            
+
             # yield used-per-pool metrics
             used_per_pool_metrics = BaseCollector.gauge_collector(f'ip_pool_used{"_ipv6" if ipv6 else ""}', f'Number of used addresses per IP pool ({ip_stack.upper()})', used_per_pool_records, 'count', ['pool'])
             yield used_per_pool_metrics
+
+            # compile total-per-pool records
+            total_per_pool_records = [{ MKTXPConfigKeys.ROUTERBOARD_NAME: router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_NAME],
+                                       MKTXPConfigKeys.ROUTERBOARD_ADDRESS: router_entry.router_id[MKTXPConfigKeys.ROUTERBOARD_ADDRESS],
+                                       'pool': key, 'count': value} for key, value in pool_size_counts.items()]
+
+            # yield total-per-pool metrics
+            total_per_pool_metrics = BaseCollector.gauge_collector(f'ip_pool_total{"_ipv6" if ipv6 else ""}', f'Total capacity of IP pool ({ip_stack.upper()})', total_per_pool_records, 'count', ['pool'])
+            yield total_per_pool_metrics
+
+    @staticmethod
+    def _calculate_pool_size(ranges_str):
+        import ipaddress
+        total = 0
+        if not ranges_str:
+            return total
+        for r in ranges_str.split(','):
+            r = r.strip()
+            if not r:
+                continue
+            if '-' in r:
+                start, end = r.split('-', 1)
+                try:
+                    total += int(ipaddress.ip_address(end.strip())) - int(ipaddress.ip_address(start.strip())) + 1
+                except Exception:
+                    pass
+            elif '/' in r:
+                try:
+                    total += ipaddress.ip_network(r, strict=False).num_addresses
+                except Exception:
+                    pass
+            else:
+                try:
+                    ipaddress.ip_address(r)
+                    total += 1
+                except Exception:
+                    pass
+        return total
