@@ -74,7 +74,7 @@ def test_default_config_key_in_new_section(tmpdir):
     for key in MKTXPConfigKeys.STR_KEYS:
         config['default'][key] = "some_value"
     config['default'][MKTXPConfigKeys.PORT_KEY] = '1234'
-    
+
     config[MKTXPConfigKeys.MKTXP_LATEST_DEFAULT_ENTRY_KEY] = {
         'health': 'True'
     }
@@ -165,3 +165,65 @@ def test_wireguard_peer_key_registration():
 def test_routerboard_key_registration():
     assert MKTXPConfigKeys.FE_ROUTERBOARD_KEY == 'routerboard'
     assert MKTXPConfigKeys.FE_ROUTERBOARD_KEY in MKTXPConfigKeys.BOOLEAN_KEYS_NO
+
+def test_config_entry_reader_fallback(tmpdir):
+    """Test edge cases"""
+    mktxp_conf_path = tmpdir.join("mktxp.conf")
+    _mktxp_conf_path = tmpdir.join("_mktxp.conf")
+
+    mktxp_conf_path.write("""
+[default]
+""")
+    # Missing compact_default_conf_values from [MKTXP], placed in [new_system_parameters]
+    _mktxp_conf_path.write("""
+[MKTXP]
+verbose_mode = False
+
+[new_system_parameters]
+compact_default_conf_values = False
+""")
+
+    handler = MKTXPConfigHandler()
+    handler(os_config=CustomConfig(str(tmpdir)))
+
+    entry = handler.config_entry('default')
+    assert entry is not None
+
+def test_config_entry_compaction(tmpdir):
+    """Test that config compaction successfully removes redundant default keys
+    from router entries when compact_default_conf_values is True."""
+    mktxp_conf_path = tmpdir.join("mktxp.conf")
+    _mktxp_conf_path = tmpdir.join("_mktxp.conf")
+
+    mktxp_conf_path.write("""
+[default]
+    hostname = localhost
+    health = True
+
+[Router1]
+    hostname = 10.0.0.1
+    health = True
+    installed_packages = False
+""")
+
+    # Enable compaction
+    _mktxp_conf_path.write("""
+[MKTXP]
+compact_default_conf_values = True
+""")
+
+    handler = MKTXPConfigHandler()
+    handler(os_config=CustomConfig(str(tmpdir)))
+
+    # Parsing the entry triggers compaction
+    handler.config_entry('Router1')
+
+    # Read the updated config from disk
+    final_config = ConfigObj(str(mktxp_conf_path))
+
+    # 'health' should be removed from Router1 because it matches the default (True)
+    assert 'health' not in final_config['Router1']
+
+    # 'installed_packages' should be kept because it differs from the default (True)
+    assert 'installed_packages' in final_config['Router1']
+    assert final_config['Router1'].as_bool('installed_packages') is False

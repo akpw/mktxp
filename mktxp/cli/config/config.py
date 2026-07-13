@@ -507,7 +507,7 @@ class MKTXPConfigHandler:
 
     def _config_entry_reader(self, entry_name):
         config_entry_reader = {}
-        compact_config = self._config[MKTXPConfigKeys.MKTXP_CONFIG_ENTRY_NAME].as_bool(MKTXPConfigKeys.MKTXP_COMPACT_CONFIG)
+        compact_config = self.system_entry.compact_default_conf_values
         drop_keys = []
 
         for key in MKTXPConfigKeys.BOOLEAN_KEYS_NO.union(MKTXPConfigKeys.BOOLEAN_KEYS_YES):
