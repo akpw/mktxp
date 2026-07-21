@@ -38,7 +38,7 @@ There are multiple ways to install this project, from a standalone app to a [ful
 
   <img width="48%" alt="loki" src="https://user-images.githubusercontent.com/5028474/210771516-06a3e6ab-8eab-458c-9f38-5d44f95d23d4.png">
 
-- with brew: `❯ brew install mktxp`
+- with [Homebrew](https://brew.sh): `❯ brew install mktxp`
 
 - from [Docker image](https://github.com/akpw/mktxp/pkgs/container/mktxp) : `❯ docker pull ghcr.io/akpw/mktxp:latest`
 
