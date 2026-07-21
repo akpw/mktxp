@@ -36,10 +36,11 @@ class FirewallMetricsDataSource:
                 'mangle': f'/{ip_stack}/firewall/mangle'
             }
             filter_path = filter_paths[filter_path]
+            proplist = ','.join(label.replace('_', '-') for label in metric_labels)
             firewall_records = FirewallMetricsDataSource._get_records(
                 router_entry,
                 filter_path,
-                {'stats': ''},
+                {'stats': '', '.proplist': proplist},
                 matching_only=matching_only
             )
 
