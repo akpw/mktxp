@@ -46,7 +46,7 @@ def test_ip_connection_stats_datasource_checks_count_first(connection_count_str,
         params = args[1]
         if params.get('count-only') == '':
             return count_response
-        elif params.get('proplist') == 'src-address,dst-address,protocol':
+        elif params.get('.proplist') == 'src-address,dst-address,protocol':
             return stats_response
         return MagicMock()
 
@@ -67,7 +67,7 @@ def test_ip_connection_stats_datasource_checks_count_first(connection_count_str,
 
 def test_ip_connection_stats_datasource_without_destinations():
     """
-    Verifies that IPConnectionStatsDatasource uses the optimized proplist and correctly processes 
+    Verifies that IPConnectionStatsDatasource uses the optimized .proplist and correctly processes 
     results when connection_stats_destinations is False.
     """
     mock_router_entry = MagicMock(spec=RouterEntry)
@@ -92,7 +92,7 @@ def test_ip_connection_stats_datasource_without_destinations():
         params = args[1]
         if params.get('count-only') == '':
             return count_response
-        elif params.get('proplist') == 'src-address':
+        elif params.get('.proplist') == 'src-address':
             return stats_response
         return MagicMock()
 

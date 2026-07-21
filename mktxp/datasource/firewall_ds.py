@@ -39,7 +39,7 @@ class FirewallMetricsDataSource:
             firewall_records = FirewallMetricsDataSource._get_records(
                 router_entry,
                 filter_path,
-                {'stats': ''} if ipv6 else {'stats': '', 'all': ''},
+                {'stats': ''},
                 matching_only=matching_only
             )
 

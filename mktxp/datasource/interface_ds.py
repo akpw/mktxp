@@ -44,7 +44,7 @@ class InterfaceMetricsDataSource(BaseInterfaceDataSource):
             additional_proplist = []
 
         call_params = {
-            'proplist': ','.join(['name', 'running', 'disabled'] + additional_proplist)
+            '.proplist': ','.join(['name', 'running', 'disabled'] + additional_proplist)
         }
 
         try:
@@ -106,7 +106,7 @@ class InterfaceMonitorMetricsDataSource:
         monitor_numbers_key = 'number' if kind == 'lte' and not routerOS7_version(ver) else 'numbers'
 
         try:
-            interfaces = router_entry.api_connection.router_api().get_resource(f'/interface/{kind}').call('print', {'proplist':'name,comment,running'})
+            interfaces = router_entry.api_connection.router_api().get_resource(f'/interface/{kind}').call('print', {'.proplist':'name,comment,running'})
 
             interface_monitor_records = []
             for int_num, interface in enumerate(interfaces):
@@ -149,7 +149,7 @@ class BridgeVlanMetricsDataSource(BaseInterfaceDataSource):
 
         try:
             resource = router_entry.api_connection.router_api().get_resource('/interface/bridge/vlan')
-            vlan_records = resource.call('print', {'proplist': ','.join(proplist)})
+            vlan_records = resource.call('print', {'.proplist': ','.join(proplist)})
 
             processed = []
             for record in vlan_records:

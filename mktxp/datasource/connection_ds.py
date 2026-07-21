@@ -90,9 +90,9 @@ class IPConnectionStatsDatasource:
                 proplist = 'src-address'
 
             api = router_entry.api_connection.router_api()
-            connection_records = api.get_resource('/ip/firewall/connection/').call('print', {'proplist': proplist})
+            connection_records = api.get_resource('/ip/firewall/connection/').call('print', {'.proplist': proplist})
             try:
-                connection_records_v6 = api.get_resource('/ipv6/firewall/connection/').call('print', {'proplist': proplist})
+                connection_records_v6 = api.get_resource('/ipv6/firewall/connection/').call('print', {'.proplist': proplist})
                 connection_records.extend(connection_records_v6)
             except Exception:
                 pass

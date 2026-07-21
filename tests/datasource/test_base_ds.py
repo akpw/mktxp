@@ -152,7 +152,7 @@ def test_bridge_vlan_metric_records():
         BridgeVlanMetricsDataSource.metric_records(mock_router_entry)
 
         # Ensure the API was called with the correct proplist
-        mock_resource.call.assert_called_once_with('print', {'proplist': 'bridge,vlan-ids,current-tagged,current-untagged'})
+        mock_resource.call.assert_called_once_with('print', {'.proplist': 'bridge,vlan-ids,current-tagged,current-untagged'})
 
         # Inspect the records sent to the final processor
         args, kwargs = mock_trimmed.call_args

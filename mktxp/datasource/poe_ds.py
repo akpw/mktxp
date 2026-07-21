@@ -42,7 +42,7 @@ class POEMetricsDataSource:
                     poe_record['poe_out_power'] = poe_monitor_records[0]['poe_out_power']
 
             # Apply interface name formatting based on config
-            interfaces = router_entry.api_connection.router_api().get_resource('/interface/ethernet').call('print', {'proplist':'name,comment'})
+            interfaces = router_entry.api_connection.router_api().get_resource('/interface/ethernet').call('print', {'.proplist':'name,comment'})
             comment_fn = lambda interface: interface['comment'] if interface.get('comment') else ''
             for poe_record in poe_records:
                 comment = [comment_fn(interface) for interface in interfaces if interface['name'] == poe_record['name']][0]       

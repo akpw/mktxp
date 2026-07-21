@@ -33,7 +33,7 @@ class SystemResourceMetricsDataSource:
     @staticmethod
     def os_version(router_entry):
         try:
-            system_version_records = router_entry.api_connection.router_api().get_resource('/system/resource').call('print', {'proplist':'version'})
+            system_version_records = router_entry.api_connection.router_api().get_resource('/system/resource').call('print', {'.proplist':'version'})
             for record in system_version_records:
                 ver = record.get('version', None)
                 if ver:
