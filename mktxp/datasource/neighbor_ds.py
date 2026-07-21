@@ -26,6 +26,13 @@ class NeighborDataSource:
                 router_records = router_entry.api_connection.router_api().get_resource(f'/ipv6/neighbor').get(status='reachable')
             else:
                 router_records = router_entry.api_connection.router_api().get_resource(f'/ip/neighbor').get()
+            
+            # Sanitize null bytes from all string fields (e.g. padded identity strings)
+            for record in router_records:
+                for key, value in record.items():
+                    if isinstance(value, str):
+                        record[key] = value.split('\x00', 1)[0].strip()
+
             return BaseDSProcessor.trimmed_records(router_entry, router_records=router_records, metric_labels=metric_labels)
         except Exception as exc:
             print(f'Error getting Neighbors info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
