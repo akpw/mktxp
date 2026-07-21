@@ -16,17 +16,17 @@ from mktxp.cli.config.config import config_handler
 
 class BaseDSProcessor:
     ''' Base Metrics DataSource processing
-    '''             
+    '''
 
     @staticmethod
     def trimmed_records(router_entry, *, router_records = None, metric_labels = None, add_router_id = True, translation_table = None, translate_if_no_value = True):
         metric_labels = metric_labels or []
-        router_records = router_records or []            
-        translation_table = translation_table or {}         
+        router_records = router_records or []
+        translation_table = translation_table or {}
 
         if len(metric_labels) == 0 and len(router_records) > 0:
             metric_labels = [BaseDSProcessor._normalise_keys(key) for key in router_records[0].keys()]
-        metric_labels = set(metric_labels)      
+        metric_labels = set(metric_labels)
 
         labeled_records = []
         for router_record in router_records:
@@ -34,7 +34,7 @@ class BaseDSProcessor:
 
             if add_router_id:
                 translated_record.update(router_entry.router_id)
-            
+
             if router_entry.config_entry.custom_labels:
                 custom_labels = BaseDSProcessor._parse_custom_labels(router_entry.config_entry.custom_labels, router_entry)
                 if custom_labels:
@@ -44,7 +44,7 @@ class BaseDSProcessor:
             for key, func in translation_table.items():
                 if translate_if_no_value or translated_record.get(key) is not None:
                     translated_record[key] = func(translated_record.get(key))
-            labeled_records.append(translated_record)            
+            labeled_records.append(translated_record)
         return labeled_records
 
     @staticmethod
@@ -65,7 +65,7 @@ class BaseDSProcessor:
         chars = ".-"
         for chr in chars:
             if chr in key:
-                key = key.replace(chr, "_")     
+                key = key.replace(chr, "_")
         return key
 
     @staticmethod
@@ -92,4 +92,4 @@ class BaseDSProcessor:
                         print(f"Warning: Configuration for {router_entry.router_name} contains a malformed custom label '{item}'. It should be in 'key:value' or 'key=value' format. Ignoring.")
             except Exception as e:
                 print(f"Warning: Could not parse custom label '{item} for {router_entry.router_name}'. Error: {e}. Ignoring.")
-        return labels_dict        
+        return labels_dict

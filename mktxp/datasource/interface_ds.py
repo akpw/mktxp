@@ -21,6 +21,9 @@ class BaseInterfaceDataSource:
     @staticmethod
     def rewrite_interface_names(router_entry, metric_records):
         for metric_record in metric_records:
+            if not metric_record.get('default-name'):
+                metric_record['default-name'] = metric_record.get('name', '')
+
             if metric_record.get('comment'):
                 metric_record['name'] = BaseOutputProcessor.format_interface_name(
                     metric_record['name'],

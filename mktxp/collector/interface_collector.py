@@ -41,6 +41,8 @@ class InterfaceCollector(BaseCollector):
         if not interface_traffic_records:
             return
 
+        base_labels = ['name', 'default_name'] if router_entry.config_entry.interface_with_default_name else ['name']
+
         yield BaseCollector.info_collector(
             'interface_comment',
             'The interface comment',
@@ -60,7 +62,7 @@ class InterfaceCollector(BaseCollector):
             'Current running status of the interface',
             interface_traffic_records,
             metric_key='running',
-            metric_labels=['name']
+            metric_labels=base_labels
         )
 
         yield BaseCollector.gauge_collector(
@@ -68,7 +70,7 @@ class InterfaceCollector(BaseCollector):
             'Current disabled status of the interface',
             interface_traffic_records,
             metric_key='disabled',
-            metric_labels=['name']
+            metric_labels=base_labels
         )
 
         yield BaseCollector.counter_collector(
@@ -76,7 +78,7 @@ class InterfaceCollector(BaseCollector):
             'Number of received bytes',
             interface_traffic_records,
             'rx_byte',
-            ['name']
+            base_labels
         )
 
         yield BaseCollector.counter_collector(
@@ -84,7 +86,7 @@ class InterfaceCollector(BaseCollector):
             'Number of transmitted bytes',
             interface_traffic_records,
             'tx_byte',
-            ['name']
+            base_labels
         )
 
         yield BaseCollector.counter_collector(
@@ -92,7 +94,7 @@ class InterfaceCollector(BaseCollector):
             'Number of packets received',
             interface_traffic_records,
             'rx_packet',
-            ['name']
+            base_labels
         )
 
         yield BaseCollector.counter_collector(
@@ -100,7 +102,7 @@ class InterfaceCollector(BaseCollector):
             'Number of transmitted packets',
             interface_traffic_records,
             'tx_packet',
-            ['name']
+            base_labels
         )
 
         yield BaseCollector.counter_collector(
@@ -108,7 +110,7 @@ class InterfaceCollector(BaseCollector):
             'Number of packets received with an error',
             interface_traffic_records,
             'rx_error',
-            ['name']
+            base_labels
         )
 
         yield BaseCollector.counter_collector(
@@ -116,7 +118,7 @@ class InterfaceCollector(BaseCollector):
             'Number of packets transmitted with an error',
             interface_traffic_records,
             'tx_error',
-            ['name']
+            base_labels
         )
 
         yield BaseCollector.counter_collector(
@@ -124,7 +126,7 @@ class InterfaceCollector(BaseCollector):
             'Number of received packets being dropped',
             interface_traffic_records,
             'rx_drop',
-            ['name']
+            base_labels
         )
 
         yield BaseCollector.counter_collector(
@@ -132,7 +134,7 @@ class InterfaceCollector(BaseCollector):
             'Number of transmitted packets being dropped',
             interface_traffic_records,
             'tx_drop',
-            ['name']
+            base_labels
         )
 
         yield BaseCollector.counter_collector(
@@ -140,7 +142,7 @@ class InterfaceCollector(BaseCollector):
             'Number of times link went down',
             interface_traffic_records,
             'link_downs',
-            ['name']
+            base_labels
         )
 
         yield BaseCollector.gauge_collector(
@@ -148,7 +150,7 @@ class InterfaceCollector(BaseCollector):
             'Actual Maximum Transmission Unit of the interface',
             interface_traffic_records,
             metric_key='actual_mtu',
-            metric_labels=['name']
+            metric_labels=base_labels
         )
 
         yield BaseCollector.info_collector(

@@ -95,9 +95,10 @@ The default configuration file comes with a sample configuration, making it easy
     connection_stats = False        # Open IP connections metrics
     connection_stats_destinations = False   # Set to True to track individual destination IPs/ports (Warning: High Cardinality)
 
-    interface = True                # Interfaces traffic metrics
-    wireguard_peers = False         # Wireguard peers metrics
-    bridge_vlan = False             # Bridge VLAN metrics
+    interface = True                    # Interfaces traffic metrics
+    interface_with_default_name = False # Append default_name label to interface metrics
+    wireguard_peers = False             # Wireguard peers metrics
+    bridge_vlan = False                 # Bridge VLAN metrics
 
     route = True                    # IPv4 Routes metrics
     pool = True                     # IPv4 Pool metrics
