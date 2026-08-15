@@ -46,6 +46,9 @@ class MKTXPDispatcher:
         elif args['sub_cmd'] == MKTXPCommands.EDIT:
             self.edit_entry(args)
 
+        elif args['sub_cmd'] == MKTXPCommands.RSC:
+            self.dispatch_rsc(args)
+
         else:
             # nothing to dispatch
             return False
@@ -124,6 +127,60 @@ class MKTXPDispatcher:
 
         else:
             print("Select metric option(s) to print out, or run 'mktxp print -h' to find out more")
+
+    def dispatch_rsc(self, args):
+        ''' Dispatches RouterOS RSC configuration processing (format or split)
+        '''
+        from mktxp.rsc import RSCEngine
+
+        input_path = args['input']
+        with open(input_path, 'r', encoding='utf8') as f:
+            raw_text = f.read()
+
+        rsc_conf = config_handler.rsc_config()
+        engine = RSCEngine(rsc_conf)
+
+        extract_scripts_conf = rsc_conf.get('extract_scripts', False)
+        if isinstance(extract_scripts_conf, str):
+            extract_scripts_conf = extract_scripts_conf.lower() in ('true', '1', 'yes')
+        extract_scripts = args.get('extract_scripts', False) or extract_scripts_conf
+
+        if args['rsc_cmd'] == 'format':
+            out_path = args.get('out')
+            formatted_text, extracted_scripts = engine.format(
+                raw_text=raw_text,
+                wrap_lines=args.get('wrap_lines', False),
+                wrap_col=args.get('wrap_col', 80),
+                extract_scripts=extract_scripts,
+                strip_dynamic_macs=args.get('strip_macs', False)
+            )
+
+            if out_path:
+                with open(out_path, 'w', encoding='utf8') as f:
+                    f.write(formatted_text)
+                print(f"Formatted RouterOS export written to {out_path}")
+            else:
+                print(formatted_text)
+
+        elif args['rsc_cmd'] == 'split':
+            out_dir = args.get('out_dir')
+            if not out_dir:
+                out_dir = rsc_conf.get('base_dir', './exports')
+
+            emitted_files = engine.split(
+                raw_text=raw_text,
+                output_dir=out_dir,
+                numbered=args.get('numbered', True),
+                wrap_lines=args.get('wrap_lines', False),
+                wrap_col=args.get('wrap_col', 80),
+                extract_scripts=extract_scripts,
+                strip_dynamic_macs=args.get('strip_macs', False)
+            )
+
+            print(f"Successfully split RouterOS export into {len(emitted_files)} files in: {out_dir}")
+            for fname in sorted(emitted_files.keys()):
+                print(f"  |- {fname}")
+
 
 def main():
     MKTXPDispatcher().dispatch()

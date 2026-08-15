@@ -25,6 +25,7 @@ class MKTXPCommands:
     EXPORT = 'export'
     PRINT = 'print'
     SHOW = 'show'
+    RSC = 'rsc'
 
     @classmethod
     def commands_meta(cls):
@@ -34,6 +35,7 @@ class MKTXPCommands:
                         f'{cls.EXPORT}, ',
                         f'{cls.PRINT}, ',
                         f'{cls.SHOW}, ',
+                        f'{cls.RSC}, ',
                         '}'))
 
 class MKTXPOptionsParser:
@@ -44,7 +46,7 @@ class MKTXPOptionsParser:
         version = Version('mktxp')
         self._description =  \
 f'''
-Prometheus Exporter for Mikrotik RouterOS, version {version}
+Prometheus Exporter and GitOps Configuration Manager for Mikrotik RouterOS, version {version}
 Supports gathering metrics across multiple RouterOS devices, all easily configurable via built-in CLI interface.
 Comes along with a dedicated Grafana dashboard (https://grafana.com/grafana/dashboards/13679)
 Selected metrics info can be printed on the command line. For more information, run: 'mktxp -h'
@@ -163,6 +165,50 @@ Selected metrics info can be printed on the command line. For more information, 
                 help = "Netwatch metrics",
                 action = 'store_true')
 
+        # RSC command
+        rsc_parser = subparsers.add_parser(MKTXPCommands.RSC,
+                                           description = 'RouterOS GitOps configuration formatter and splitter',
+                                           formatter_class=MKTXPHelpFormatter)
+        rsc_subparsers = rsc_parser.add_subparsers(dest = 'rsc_cmd',
+                                                   title = 'RSC actions',
+                                                   metavar = '{format, split}')
+
+        # rsc format
+        format_parser = rsc_subparsers.add_parser('format',
+                                                  description = 'Formats raw RouterOS export into a single clean .rsc file',
+                                                  formatter_class=MKTXPHelpFormatter)
+        format_parser.add_argument('-i', '--input', dest='input', required=True,
+                                   help='Input RouterOS export .rsc file path', type=str)
+        format_parser.add_argument('-o', '--out', dest='out', default=None,
+                                   help='Output file path (defaults to stdout)', type=str)
+        format_parser.add_argument('--wrap', dest='wrap_lines', action='store_true', default=False,
+                                   help='Wrap long lines with backslashes')
+        format_parser.add_argument('--wrap-col', dest='wrap_col', type=int, default=80,
+                                   help='Line wrapping column width (default: 80)')
+        format_parser.add_argument('--extract-scripts', dest='extract_scripts', action='store_true', default=False,
+                                   help='Extract multi-line scripts into separate .rsc files')
+        format_parser.add_argument('--strip-macs', dest='strip_macs', action='store_true', default=False,
+                                   help='Strip dynamic MAC addresses')
+
+        # rsc split
+        split_parser = rsc_subparsers.add_parser('split',
+                                                 description = 'Splits raw RouterOS export into modular GitOps directory structure',
+                                                 formatter_class=MKTXPHelpFormatter)
+        split_parser.add_argument('-i', '--input', dest='input', required=True,
+                                  help='Input RouterOS export .rsc file path', type=str)
+        split_parser.add_argument('-d', '-o', '--out-dir', dest='out_dir', default=None,
+                                  help='Output directory to emit .rsc files', type=str)
+        split_parser.add_argument('--no-numbered', dest='numbered', action='store_false', default=True,
+                                  help='Disable numeric prefixes on output files')
+        split_parser.add_argument('--wrap', dest='wrap_lines', action='store_true', default=False,
+                                  help='Wrap long lines with backslashes')
+        split_parser.add_argument('--wrap-col', dest='wrap_col', type=int, default=80,
+                                  help='Line wrapping column width (default: 80)')
+        split_parser.add_argument('--extract-scripts', dest='extract_scripts', action='store_true', default=False,
+                                  help='Extract multi-line scripts into separate .rsc files')
+        split_parser.add_argument('--strip-macs', dest='strip_macs', action='store_true', default=False,
+                                  help='Strip dynamic MAC addresses')
+
 
     # Options checking
     def _check_args(self, args, parser):
@@ -170,6 +216,14 @@ Selected metrics info can be printed on the command line. For more information, 
         '''
         # check if there is a cmd to execute
         self._check_cmd_args(args, parser)
+
+        if args['sub_cmd'] == MKTXPCommands.RSC:
+            if not args.get('rsc_cmd'):
+                print("Specify an action for 'rsc' (e.g. 'mktxp rsc format -h' or 'mktxp rsc split -h')")
+                parser.exit()
+            if not args.get('input') or not os.path.isfile(args['input']):
+                print(f"Input file does not exist or is not readable: {args.get('input')}")
+                parser.exit()
 
         if args['sub_cmd'] in (MKTXPCommands.SHOW, MKTXPCommands.PRINT):
             # Registered Entry name could be a partial match, need to expand

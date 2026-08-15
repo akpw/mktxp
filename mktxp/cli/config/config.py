@@ -423,6 +423,49 @@ class MKTXPConfigHandler:
         _entry_reader = self._system_entry_reader()
         return ConfigEntry.MKTXPSystemEntry(**_entry_reader)
 
+    def _rsc_template(self):
+        ''' Loads the default [RSC] template from packaged _mktxp.conf
+        '''
+        try:
+            ref = importlib.resources.files('mktxp') / 'cli/config/_mktxp.conf'
+            with importlib.resources.as_file(ref) as path:
+                template_conf = ConfigObj(str(path), indent_type='    ', encoding='utf-8')
+                return template_conf.get('RSC', {})
+        except Exception:
+            return {}
+
+    def _rsc_config_reader(self):
+        ''' Reads the [RSC] section, dynamically injecting missing keys/section from the template
+        '''
+        template_rsc = self._rsc_template()
+        changed = False
+
+        if 'RSC' not in self._config:
+            self._config['RSC'] = {}
+            for k, v in template_rsc.items():
+                self._config['RSC'][k] = v
+            changed = True
+        else:
+            for k, v in template_rsc.items():
+                if k not in self._config['RSC']:
+                    self._config['RSC'][k] = v
+                    changed = True
+
+        if changed:
+            try:
+                self._config.write()
+            except Exception as exc:
+                print(f'Error updating _mktxp.conf [RSC] section: {exc}')
+
+        return dict(self._config['RSC'])
+
+    def rsc_config(self):
+        ''' Returns the [RSC] configuration dict from _mktxp.conf, updating it if needed
+        '''
+        if hasattr(self, '_config') and self._config is not None:
+            return self._rsc_config_reader()
+        return {}
+
     def _read_from_disk(self):
         ''' (Force-)Read conf data from disk
         '''

@@ -7,11 +7,13 @@
 
 ## Description
 MKTXP is a Prometheus Exporter for Mikrotik RouterOS devices.\
-It gathers and exports a rich set of metrics across multiple routers, all easily configurable via built-in CLI interface. 
+It can also serve as a CLI tool to gather and inspect router metrics directly from the command line, as well as a deterministic **GitOps Configuration Formatter & Splitter** for RouterOS `.rsc` exports.
 
 While simple to use, MKTXP supports [advanced features](https://github.com/akpw/mktxp#advanced-features) such as automatic IP address resolution with both local & remote DHCP servers, concurrent exports across multiple router devices, configurable data processing & transformations, injectable custom labels for easy device grouping, optional bandwidth testing, support for Prometheus multi-target dynamic discovery, etc.
 
-Apart from exporting to Prometheus, MKTXP can print selected metrics directly on the command line (see examples below). 
+Apart from exporting to Prometheus, MKTXP provides powerful CLI capabilities:
+- **Metrics Inspection**: Print live client, DHCP, connection, and wireless metrics directly to your terminal.
+- **GitOps Config Parser (`mktxp rsc`)**: Parse, clean, and format raw RouterOS `.rsc` export files into clean, deterministic monolithic files (`format`) or split them into a structured, modular GitOps directory hierarchy (`split`) with automatic sidecar script extraction.
 
 For effortless visualization of the RouterOS metrics exported to Prometheus, MKTXP comes with a dedicated [Grafana dashboard](https://grafana.com/grafana/dashboards/13679):
 
@@ -390,10 +392,11 @@ Now with your RouterOS metrics being exported to Prometheus, it's easy to visual
         .. print    Displays selected metrics on the command line
         .. export   Starts collecting metrics for all enabled RouterOS configuration entries
         .. show     Shows MKTXP configuration entries on the command line
+        .. rsc      RouterOS GitOps configuration formatter and splitter
 
 ````
 ❯ mktxp -h
-usage: MKTXP [-h] [--cfg-dir CFG_DIR] {info, edit, export, print, show, } ...
+usage: MKTXP [-h] [--cfg-dir CFG_DIR] {info, edit, export, print, show, rsc} ...
 
 Prometheus Exporter for Mikrotik RouterOS
 
@@ -415,6 +418,44 @@ optional arguments:
                         Config entry name
   -cfg, --config        Shows MKTXP config files paths
 ````  
+
+### RouterOS GitOps Configuration Management (`mktxp rsc`)
+RouterOS `.rsc` export files are often messy, mixing structural configurations with arbitrary inline scripts, backslash continuations, and inconsistent ordering. MKTXP provides built-in GitOps formatting and splitting capabilities to turn raw exports into clean, version-controllable files.
+
+#### 1. Format (`mktxp rsc format`)
+Parses a raw export and formats it into a clean, deterministic monolithic `.rsc` file with standardized `# Section:` headers:
+```bash
+❯ mktxp rsc format -i raw_export.rsc -o clean_export.rsc
+```
+Options:
+- `-i`, `--input`: Input `.rsc` file path (*required*).
+- `-o`, `--out`: Output file path (defaults to stdout).
+- `--wrap`: Wrap long command lines at 80 columns with trailing backslashes `\` (default: unwrapped single lines for clean git line diffs).
+- `--wrap-col <cols>`: Set custom column width for line wrapping (default: 80).
+- `--extract-scripts`: Extract multi-line scripts to standalone `.rsc` sidecar files (default: keep embedded inline).
+- `--strip-macs`: Strip dynamic/auto MAC addresses to prevent false-positive Git diffs across hardware replacements.
+
+#### 2. Split (`mktxp rsc split`)
+Splits a raw `.rsc` export into modular, numbered configuration files organized by component (with optional sidecar script extraction):
+```bash
+❯ mktxp rsc split -i raw_export.rsc -d ./exports/MyRouter/ --extract-scripts
+Successfully split RouterOS export into 8 files in: ./exports/MyRouter/
+  |- 01-base.rsc
+  |- 02-wifi.rsc
+  |- 03-system.rsc
+  |- 04-ip.rsc
+  |- 05-dhcp-leases.rsc
+  |- 06-firewall.rsc
+  |- 08-wireguard.rsc
+  |- Watchdog.rsc
+```
+Options:
+- `-i`, `--input`: Input `.rsc` file path (*required*).
+- `-d`, `-o`, `--out-dir`: Destination directory for split `.rsc` files (defaults to current directory or `base_dir` in `_mktxp.conf`).
+- `--no-numbered`: Emit plain filenames (e.g. `base.rsc`, `wifi.rsc`) without numeric order prefixes.
+- `--wrap`: Wrap lines with backslashes at 80 columns.
+- `--extract-scripts`: Extract multi-line scripts to standalone `.rsc` sidecar files (default: keep embedded inline).
+- `--strip-macs`: Strip dynamic MAC addresses.
 
 ## Advanced features
 While most of the [mktxp options](https://github.com/akpw/mktxp#getting-started) are self explanatory, some might require a bit of a context.
