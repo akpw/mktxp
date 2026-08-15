@@ -6,8 +6,7 @@
 
 
 ## Description
-MKTXP is a Prometheus Exporter for Mikrotik RouterOS devices.\
-It can also serve as a CLI tool to gather and inspect router metrics directly from the command line, as well as a deterministic **GitOps Configuration Formatter & Splitter** for RouterOS `.rsc` exports.
+MKTXP is a Prometheus Exporter for Mikrotik RouterOS devices. It is also a CLI tool to gather and inspect router metrics directly from the command line, as well as a deterministic **GitOps Configuration Formatter & Splitter** for RouterOS `.rsc` exports.
 
 While simple to use, MKTXP supports [advanced features](https://github.com/akpw/mktxp#advanced-features) such as automatic IP address resolution with both local & remote DHCP servers, concurrent exports across multiple router devices, configurable data processing & transformations, injectable custom labels for easy device grouping, optional bandwidth testing, support for Prometheus multi-target dynamic discovery, etc.
 
