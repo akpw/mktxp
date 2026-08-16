@@ -6,13 +6,13 @@
 
 
 ## Description
-MKTXP is a Prometheus Exporter for Mikrotik RouterOS devices. It is also a CLI tool to gather and inspect router metrics directly from the command line, as well as a deterministic **GitOps Configuration Formatter & Splitter** for RouterOS `.rsc` exports.
+MKTXP is a Prometheus Exporter for Mikrotik RouterOS devices. It is also a CLI tool to gather and inspect router metrics directly from the command line, as well as a deterministic [GitOps Configuration Formatter & Splitter](#routeros-gitops-configuration-management-mktxp-rsc) for RouterOS `.rsc` exports.
 
 While simple to use, MKTXP supports [advanced features](https://github.com/akpw/mktxp#advanced-features) such as automatic IP address resolution with both local & remote DHCP servers, concurrent exports across multiple router devices, configurable data processing & transformations, injectable custom labels for easy device grouping, optional bandwidth testing, support for Prometheus multi-target dynamic discovery, etc.
 
 Apart from exporting to Prometheus, MKTXP provides powerful CLI capabilities:
-- **Metrics Inspection**: Print live client, DHCP, connection, and wireless metrics directly to your terminal.
-- **GitOps Config Parser (`mktxp rsc`)**: Parse, clean, and format raw RouterOS `.rsc` export files into clean, deterministic monolithic files (`format`) or split them into a structured, modular GitOps directory hierarchy (`split`) with automatic sidecar script extraction.
+- [Metrics Inspection](#a-check-on-reality): Print live client, DHCP, connection, and wireless metrics directly to your terminal.
+- [GitOps Config Parser (`mktxp rsc`)](#routeros-gitops-configuration-management-mktxp-rsc): Parse, clean, and format raw RouterOS `.rsc` export files into clean, deterministic monolithic files (`format`) or split them into a structured, modular GitOps directory hierarchy (`split`) with automatic sidecar script extraction.
 
 For effortless visualization of the RouterOS metrics exported to Prometheus, MKTXP comes with a dedicated [Grafana dashboard](https://grafana.com/grafana/dashboards/13679):
 
@@ -31,6 +31,10 @@ For effortless visualization of the RouterOS metrics exported to Prometheus, MKT
    * [Prometheus](https://prometheus.io/docs/prometheus/latest/installation/)
    * [Grafana](https://grafana.com/docs/grafana/latest/installation/)
    * [Docker](https://docs.docker.com/) / [Docker Compose](https://docs.docker.com/compose/)
+
+
+## Blogs
+- [Wrangling RouterOS Configs: Introducing GitOps for MikroTik with MKTXP](https://akpw.github.io/articles/2026/08/16/GitOps-for-Mikrotik-RSC.html)
 
 
 ## Install:
