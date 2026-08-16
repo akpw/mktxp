@@ -3,6 +3,8 @@
 ![Language](https://img.shields.io/badge/python-v3.9+-blue)
 ![License](https://img.shields.io/badge/mikrotik-routeros-orange)
 ![License](https://img.shields.io/badge/prometheus-exporter-blueviolet)
+![GitOps](https://img.shields.io/badge/gitops-rsc%20config-2ea44f)
+[![Docker Pulls](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fghcr-badge.elias.eu.org%2Fapi%2Fakpw%2Fmktxp%2Fmktxp&query=%24.downloadCount&label=docker%20pulls&logo=docker&logoColor=white&color=2496ed)](https://github.com/akpw/mktxp/pkgs/container/mktxp)
 
 
 ## Description
