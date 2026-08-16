@@ -376,6 +376,29 @@ mktxp edit -i
     probe_connection_pool = False             # Enable probe-only connection reuse keyed by module+target
     probe_connection_pool_ttl = 300           # Probe connection TTL in seconds
     probe_connection_pool_max_size = 128      # Max number of probe connections to keep
+
+
+[RSC]
+    base_dir = './exports'                    # Default destination directory for split .rsc files
+    numbered_files = True                     # Prefix output files with numbers according to handler_order
+    wrap_lines = False                        # Wrap long command lines with backslashes
+    wrap_column = 80                          # Column width for line wrapping
+    extract_scripts = False                   # For the split command, extracts scripts to standalone .rsc sidecar files
+    strip_mac_addresses = False               # Strip dynamic MAC addresses
+    ssh_port = 22                             # Default SSH port for live exports
+    ssh_timeout = 15                          # SSH connection timeout in seconds
+    show_sensitive = False                    # Default sensitive data export setting
+
+    handler_order = base, wifi, system, ip, dhcp-leases, firewall, lte, wireguard
+
+    handler_base = /interface bridge, /interface ethernet, /interface vlan, /interface list, /interface macvlan, /interface ovpn-server
+    handler_wifi = /caps-man, /interface wifi, /interface wireless
+    handler_system = /system, /user, /certificate, /zerotier, /ppp, /queue, /snmp, /interface l2tp-server, /interface sstp-server, /ip smb, /ip neighbor discovery-settings, /ip settings, /ipv6 settings, /ip ipsec, /ip service, /ip ssh, /ipv6 nd, /routing bfd, /routing bgp, /routing ospf, /tool bandwidth-server, /tool mac-server, /tool romon, /tool e-mail, /tool netwatch, /tool traffic-monitor, /app, /ip kid-control, /caps-man access-list
+    handler_dhcp-leases = /ip dhcp-server lease
+    handler_ip = /ip address, /ipv6 address, /ip pool, /ipv6 pool, /ip dhcp-client, /ip dhcp-server, /ipv6 dhcp-client, /ipv6 dhcp-server, /ip dns, /ip route, /ipv6 route, /ip cloud, /routing table, /routing rule
+    handler_firewall = /ip firewall, /ipv6 firewall
+    handler_lte = /interface lte, /tool sms
+    handler_wireguard = /interface wireguard
 ```    
 <sup>💡</sup> *When changing the default mktxp port for [docker image installs](https://github.com/akpw/mktxp#docker-image-install), you'll need to adjust the `docker run ... -p 49090:49090 ...` command to reflect the new port*
 
@@ -419,25 +442,41 @@ optional arguments:
 ````  
 
 ### RouterOS GitOps Configuration Management (`mktxp rsc`)
-RouterOS `.rsc` export files are often messy, mixing structural configurations with arbitrary inline scripts, backslash continuations, and inconsistent ordering. MKTXP provides built-in GitOps formatting and splitting capabilities to turn raw exports into clean, version-controllable files.
+RouterOS `.rsc` export files are often messy, mixing structural configurations with arbitrary inline scripts, backslash continuations, and inconsistent ordering. MKTXP provides built-in GitOps formatting and splitting capabilities to turn raw or live exports into clean, version-controllable files.
+
+Configurations can be processed from local `.rsc` files (`-i`) or fetched live from configured routers over SSH (`-en`).
+
+> **Authentication**: Metrics collection uses the standard RouterOS API (supporting username/password). Live `mktxp rsc` exports use native SSH and require SSH key authentication (e.g., `~/.ssh/id_ed25519`, `~/.ssh/id_rsa`, `ssh-agent`, or `--ssh-key`) for secure automation.
 
 #### 1. Format (`mktxp rsc format`)
 Parses a raw export and formats it into a clean, deterministic monolithic `.rsc` file with standardized `# Section:` headers:
 ```bash
+# Format from local file
 ❯ mktxp rsc format -i raw_export.rsc -o clean_export.rsc
+
+# Format live directly from router entry over SSH
+❯ mktxp rsc format -en MyRouter -o ./backups/MyRouter-clean.rsc
 ```
 Options:
-- `-i`, `--input`: Input `.rsc` file path (*required*).
+- `-i`, `--input`: Input `.rsc` file path.
+- `-en`, `--entry-name`: Router entry name from `mktxp.conf` for live SSH export.
 - `-o`, `--out`: Output file path (defaults to stdout).
+- `--show-sensitive`: Include passwords and sensitive keys in live export (default: hidden).
+- `--user <username>`: Override SSH username for live export.
+- `--ssh-key <path>`: Path to SSH private key for live export.
+- `--ssh-port <port>`: Override SSH port (default: 22).
 - `--wrap`: Wrap long command lines at 80 columns with trailing backslashes `\` (default: unwrapped single lines for clean git line diffs).
 - `--wrap-col <cols>`: Set custom column width for line wrapping (default: 80).
-- `--extract-scripts`: Extract multi-line scripts to standalone `.rsc` sidecar files (default: keep embedded inline).
 - `--strip-macs`: Strip dynamic/auto MAC addresses to prevent false-positive Git diffs across hardware replacements.
 
 #### 2. Split (`mktxp rsc split`)
-Splits a raw `.rsc` export into modular, numbered configuration files organized by component (with optional sidecar script extraction):
+Splits a raw or live `.rsc` export into modular, numbered configuration files organized by component (with optional sidecar script extraction). When `-d` is omitted, output is automatically scoped into an isolated subfolder `<base_dir>/<Name>/` (e.g. `./exports/MyRouter/`):
 ```bash
-❯ mktxp rsc split -i raw_export.rsc -d ./exports/MyRouter/ --extract-scripts
+# Split from local file (auto-emits to ./exports/MyRouter/)
+❯ mktxp rsc split -i MyRouter.rsc --extract-scripts
+
+# Split live directly from router entry (auto-emits to ./exports/MyRouter/)
+❯ mktxp rsc split -en MyRouter --extract-scripts
 Successfully split RouterOS export into 8 files in: ./exports/MyRouter/
   |- 01-base.rsc
   |- 02-wifi.rsc
@@ -449,8 +488,13 @@ Successfully split RouterOS export into 8 files in: ./exports/MyRouter/
   |- Watchdog.rsc
 ```
 Options:
-- `-i`, `--input`: Input `.rsc` file path (*required*).
-- `-d`, `-o`, `--out-dir`: Destination directory for split `.rsc` files (defaults to current directory or `base_dir` in `_mktxp.conf`).
+- `-i`, `--input`: Input `.rsc` file path.
+- `-en`, `--entry-name`: Router entry name from `mktxp.conf` for live SSH export.
+- `-d`, `-o`, `--out-dir`: Destination directory for split `.rsc` files (defaults to `<base_dir>/<Name>/` derived from router entry name or input filename).
+- `--show-sensitive`: Include passwords and sensitive keys in live export (default: hidden).
+- `--user <username>`: Override SSH username for live export.
+- `--ssh-key <path>`: Path to SSH private key for live export.
+- `--ssh-port <port>`: Override SSH port (default: 22).
 - `--no-numbered`: Emit plain filenames (e.g. `base.rsc`, `wifi.rsc`) without numeric order prefixes.
 - `--wrap`: Wrap lines with backslashes at 80 columns.
 - `--extract-scripts`: Extract multi-line scripts to standalone `.rsc` sidecar files (default: keep embedded inline).

@@ -13,17 +13,19 @@
 ## GNU General Public License for more details.
 
 
-import mktxp.cli.checks.chk_pv  # Force version check before other imports
-import subprocess
+import os
 import shlex
+import subprocess
+
+import mktxp.cli.checks.chk_pv  # Force version check before other imports
 from mktxp.cli.config.config import config_handler
-from mktxp.cli.options import MKTXPOptionsParser, MKTXPCommands
+from mktxp.cli.options import MKTXPCommands, MKTXPOptionsParser
 from mktxp.flow.processor.base_proc import ExportProcessor, OutputProcessor
 
 
 class MKTXPDispatcher:
-    ''' Base MKTXP Commands Dispatcher
-    '''
+    """Base MKTXP Commands Dispatcher"""
+
     def __init__(self):
         self.option_parser = MKTXPOptionsParser()
 
@@ -31,22 +33,22 @@ class MKTXPDispatcher:
     def dispatch(self):
         args = self.option_parser.parse_options()
 
-        if args['sub_cmd'] == MKTXPCommands.INFO:
+        if args["sub_cmd"] == MKTXPCommands.INFO:
             self.print_info()
 
-        elif args['sub_cmd'] == MKTXPCommands.SHOW:
+        elif args["sub_cmd"] == MKTXPCommands.SHOW:
             self.show_entries(args)
 
-        elif args['sub_cmd'] == MKTXPCommands.EXPORT:
+        elif args["sub_cmd"] == MKTXPCommands.EXPORT:
             self.start_export(args)
 
-        elif args['sub_cmd'] == MKTXPCommands.PRINT:
+        elif args["sub_cmd"] == MKTXPCommands.PRINT:
             self.print(args)
 
-        elif args['sub_cmd'] == MKTXPCommands.EDIT:
+        elif args["sub_cmd"] == MKTXPCommands.EDIT:
             self.edit_entry(args)
 
-        elif args['sub_cmd'] == MKTXPCommands.RSC:
+        elif args["sub_cmd"] == MKTXPCommands.RSC:
             self.dispatch_rsc(args)
 
         else:
@@ -57,127 +59,158 @@ class MKTXPDispatcher:
 
     # Dispatched methods
     def print_info(self):
-        ''' Prints MKTXP general info
-        '''
-        print(f'{self.option_parser.script_name}: {self.option_parser.description}')
+        """Prints MKTXP general info"""
+        print(f"{self.option_parser.script_name}: {self.option_parser.description}")
 
     def show_entries(self, args):
-        if args['config']:
-            print(f'MKTXP data config: {config_handler.usr_conf_data_path}')
-            print(f'MKTXP internal config: {config_handler.mktxp_conf_path}')
+        if args["config"]:
+            print(f"MKTXP data config: {config_handler.usr_conf_data_path}")
+            print(f"MKTXP internal config: {config_handler.mktxp_conf_path}")
         else:
             for entryname in config_handler.registered_entries():
-                if args['entry_name'] and entryname != args['entry_name']:
+                if args["entry_name"] and entryname != args["entry_name"]:
                     continue
                 entry = config_handler.config_entry(entryname)
-                print(f'[{entryname}]')
-                divider_fields = set(['username', 'use_ssl', 'dhcp'])
+                print(f"[{entryname}]")
+                divider_fields = set(["username", "use_ssl", "dhcp"])
                 for field in entry._fields:
-                    if field == 'password':
+                    if field == "password":
                         print(f'    {field}: {"*" * len(entry.password)}')
                     else:
                         if field in divider_fields:
                             print()
-                        print(f'    {field}: {getattr(entry, field)}')
-                print('\n')
+                        print(f"    {field}: {getattr(entry, field)}")
+                print("\n")
 
-    def edit_entry(self, args):        
-        editor = args['editor']
+    def edit_entry(self, args):
+        editor = args["editor"]
         if not editor:
             # Try to detect editor if not provided
             editor = self.option_parser._system_editor()
-        
+
         if not editor:
-            print(f'No editor found to edit configuration files.')
-            print(f'Please set the EDITOR environment variable or specify an editor with --editor')
+            print(f"No editor found to edit configuration files.")
+            print(
+                f"Please set the EDITOR environment variable or specify an editor with --editor"
+            )
             return
-        
+
         # Parse editor command to handle arguments (e.g., "subl -w" or "'path with spaces' -w")
         editor_cmd = shlex.split(editor)
-        
-        if args['internal']:
+
+        if args["internal"]:
             subprocess.check_call(editor_cmd + [config_handler.mktxp_conf_path])
         else:
             subprocess.check_call(editor_cmd + [config_handler.usr_conf_data_path])
-       
+
     def start_export(self, args):
         ExportProcessor.start()
 
     def print(self, args):
-        if args['wifi_clients']:
-            OutputProcessor.wifi_clients(args['entry_name'])
+        if args["wifi_clients"]:
+            OutputProcessor.wifi_clients(args["entry_name"])
 
-        elif args['capsman_clients']:
-            OutputProcessor.capsman_clients(args['entry_name'])
+        elif args["capsman_clients"]:
+            OutputProcessor.capsman_clients(args["entry_name"])
 
-        elif args['dhcp_clients']:
-            OutputProcessor.dhcp_clients(args['entry_name'])
+        elif args["dhcp_clients"]:
+            OutputProcessor.dhcp_clients(args["entry_name"])
 
-        elif args['conn_stats']:
-            OutputProcessor.conn_stats(args['entry_name'])
+        elif args["conn_stats"]:
+            OutputProcessor.conn_stats(args["entry_name"])
 
-        elif args['kid_control']:
-            OutputProcessor.kid_control(args['entry_name'])
+        elif args["kid_control"]:
+            OutputProcessor.kid_control(args["entry_name"])
 
-        elif args['address_lists']:
-            OutputProcessor.address_lists(args['entry_name'], args['address_lists'])
+        elif args["address_lists"]:
+            OutputProcessor.address_lists(args["entry_name"], args["address_lists"])
 
-        elif args['netwatch']:
-            OutputProcessor.netwatch(args['entry_name'])
+        elif args["netwatch"]:
+            OutputProcessor.netwatch(args["entry_name"])
 
         else:
-            print("Select metric option(s) to print out, or run 'mktxp print -h' to find out more")
+            print(
+                "Select metric option(s) to print out, or run 'mktxp print -h' to find out more"
+            )
 
     def dispatch_rsc(self, args):
-        ''' Dispatches RouterOS RSC configuration processing (format or split)
-        '''
-        from mktxp.rsc import RSCEngine
-
-        input_path = args['input']
-        with open(input_path, 'r', encoding='utf8') as f:
-            raw_text = f.read()
+        """Dispatches RouterOS RSC configuration processing (format or split)"""
+        from mktxp.rsc import RSCEngine, SSHExportFetcher
 
         rsc_conf = config_handler.rsc_config()
+
+        entry_name = args.get("entry_name")
+        if entry_name:
+            config_entry = config_handler.config_entry(entry_name)
+            if not config_entry:
+                print(f"Failed to load router entry '{entry_name}' from mktxp.conf")
+                return
+
+            print(
+                f"Fetching live RouterOS export from '{entry_name}' ({config_entry.hostname})..."
+            )
+            fetcher = SSHExportFetcher.from_config_entry(
+                entry_name=entry_name,
+                config_entry=config_entry,
+                rsc_conf=rsc_conf,
+                cli_overrides=args,
+            )
+            try:
+                raw_text = fetcher.fetch_export()
+            except Exception as exc:
+                print(f"Error fetching live export: {exc}")
+                return
+        else:
+            input_path = args["input"]
+            with open(input_path, "r", encoding="utf8") as f:
+                raw_text = f.read()
+
         engine = RSCEngine(rsc_conf)
 
-        extract_scripts_conf = rsc_conf.get('extract_scripts', False)
+        extract_scripts_conf = rsc_conf.get("extract_scripts", False)
         if isinstance(extract_scripts_conf, str):
-            extract_scripts_conf = extract_scripts_conf.lower() in ('true', '1', 'yes')
-        extract_scripts = args.get('extract_scripts', False) or extract_scripts_conf
-
-        if args['rsc_cmd'] == 'format':
-            out_path = args.get('out')
-            formatted_text, extracted_scripts = engine.format(
+            extract_scripts_conf = extract_scripts_conf.lower() in ("true", "1", "yes")
+        if args["rsc_cmd"] == "format":
+            out_path = args.get("out")
+            formatted_text, _ = engine.format(
                 raw_text=raw_text,
-                wrap_lines=args.get('wrap_lines', False),
-                wrap_col=args.get('wrap_col', 80),
-                extract_scripts=extract_scripts,
-                strip_dynamic_macs=args.get('strip_macs', False)
+                wrap_lines=args.get("wrap_lines", False),
+                wrap_col=args.get("wrap_col", 80),
+                extract_scripts=False,
+                strip_dynamic_macs=args.get("strip_macs", False),
             )
 
             if out_path:
-                with open(out_path, 'w', encoding='utf8') as f:
+                with open(out_path, "w", encoding="utf8") as f:
                     f.write(formatted_text)
                 print(f"Formatted RouterOS export written to {out_path}")
             else:
                 print(formatted_text)
 
-        elif args['rsc_cmd'] == 'split':
-            out_dir = args.get('out_dir')
+        elif args["rsc_cmd"] == "split":
+            extract_scripts = args.get("extract_scripts", False) or extract_scripts_conf
+            out_dir = args.get("out_dir")
             if not out_dir:
-                out_dir = rsc_conf.get('base_dir', './exports')
+                base_dir = rsc_conf.get("base_dir", "./exports")
+                if entry_name:
+                    sub_name = entry_name
+                else:
+                    sub_name = os.path.splitext(os.path.basename(args["input"]))[0]
+                out_dir = os.path.join(base_dir, sub_name)
 
             emitted_files = engine.split(
                 raw_text=raw_text,
                 output_dir=out_dir,
-                numbered=args.get('numbered', True),
-                wrap_lines=args.get('wrap_lines', False),
-                wrap_col=args.get('wrap_col', 80),
+                numbered=args.get("numbered", True),
+                wrap_lines=args.get("wrap_lines", False),
+                wrap_col=args.get("wrap_col", 80),
                 extract_scripts=extract_scripts,
-                strip_dynamic_macs=args.get('strip_macs', False)
+                strip_dynamic_macs=args.get("strip_macs", False),
             )
 
-            print(f"Successfully split RouterOS export into {len(emitted_files)} files in: {out_dir}")
+            print(
+                f"Successfully split RouterOS export into {len(emitted_files)} files in: {out_dir}"
+            )
             for fname in sorted(emitted_files.keys()):
                 print(f"  |- {fname}")
 
@@ -185,6 +218,6 @@ class MKTXPDispatcher:
 def main():
     MKTXPDispatcher().dispatch()
 
-if __name__ == '__main__':
-    main()
 
+if __name__ == "__main__":
+    main()

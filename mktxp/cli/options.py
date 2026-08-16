@@ -177,16 +177,24 @@ Selected metrics info can be printed on the command line. For more information, 
         format_parser = rsc_subparsers.add_parser('format',
                                                   description = 'Formats raw RouterOS export into a single clean .rsc file',
                                                   formatter_class=MKTXPHelpFormatter)
-        format_parser.add_argument('-i', '--input', dest='input', required=True,
+        format_parser.add_argument('-i', '--input', dest='input', default=None,
                                    help='Input RouterOS export .rsc file path', type=str)
+        self._add_entry_name(format_parser, registered_only = True, required = False,
+                             help='Router entry name from mktxp.conf for live export over SSH')
         format_parser.add_argument('-o', '--out', dest='out', default=None,
                                    help='Output file path (defaults to stdout)', type=str)
+        format_parser.add_argument('--show-sensitive', dest='show_sensitive', action='store_true', default=False,
+                                   help='Include passwords and sensitive keys in live export')
+        format_parser.add_argument('--user', dest='user', type=str, default=None,
+                                   help='Override SSH username for live export')
+        format_parser.add_argument('--ssh-key', dest='ssh_key', type=str, default=None,
+                                   help='Path to SSH private key for live export')
+        format_parser.add_argument('--ssh-port', dest='ssh_port', type=int, default=None,
+                                   help='Override SSH port (default: 22)')
         format_parser.add_argument('--wrap', dest='wrap_lines', action='store_true', default=False,
                                    help='Wrap long lines with backslashes')
         format_parser.add_argument('--wrap-col', dest='wrap_col', type=int, default=80,
                                    help='Line wrapping column width (default: 80)')
-        format_parser.add_argument('--extract-scripts', dest='extract_scripts', action='store_true', default=False,
-                                   help='Extract multi-line scripts into separate .rsc files')
         format_parser.add_argument('--strip-macs', dest='strip_macs', action='store_true', default=False,
                                    help='Strip dynamic MAC addresses')
 
@@ -194,10 +202,20 @@ Selected metrics info can be printed on the command line. For more information, 
         split_parser = rsc_subparsers.add_parser('split',
                                                  description = 'Splits raw RouterOS export into modular GitOps directory structure',
                                                  formatter_class=MKTXPHelpFormatter)
-        split_parser.add_argument('-i', '--input', dest='input', required=True,
+        split_parser.add_argument('-i', '--input', dest='input', default=None,
                                   help='Input RouterOS export .rsc file path', type=str)
+        self._add_entry_name(split_parser, registered_only = True, required = False,
+                             help='Router entry name from mktxp.conf for live export over SSH')
         split_parser.add_argument('-d', '-o', '--out-dir', dest='out_dir', default=None,
                                   help='Output directory to emit .rsc files', type=str)
+        split_parser.add_argument('--show-sensitive', dest='show_sensitive', action='store_true', default=False,
+                                  help='Include passwords and sensitive keys in live export')
+        split_parser.add_argument('--user', dest='user', type=str, default=None,
+                                  help='Override SSH username for live export')
+        split_parser.add_argument('--ssh-key', dest='ssh_key', type=str, default=None,
+                                  help='Path to SSH private key for live export')
+        split_parser.add_argument('--ssh-port', dest='ssh_port', type=int, default=None,
+                                  help='Override SSH port (default: 22)')
         split_parser.add_argument('--no-numbered', dest='numbered', action='store_false', default=True,
                                   help='Disable numeric prefixes on output files')
         split_parser.add_argument('--wrap', dest='wrap_lines', action='store_true', default=False,
@@ -221,13 +239,26 @@ Selected metrics info can be printed on the command line. For more information, 
             if not args.get('rsc_cmd'):
                 print("Specify an action for 'rsc' (e.g. 'mktxp rsc format -h' or 'mktxp rsc split -h')")
                 parser.exit()
-            if not args.get('input') or not os.path.isfile(args['input']):
-                print(f"Input file does not exist or is not readable: {args.get('input')}")
+
+            has_input = bool(args.get('input'))
+            has_entry = bool(args.get('entry_name'))
+
+            if not has_input and not has_entry:
+                print("Specify either an input file with -i / --input or a router entry with -en / --entry-name")
                 parser.exit()
 
-        if args['sub_cmd'] in (MKTXPCommands.SHOW, MKTXPCommands.PRINT):
+            if has_input and has_entry:
+                print("Specify either -i / --input or -en / --entry-name, not both")
+                parser.exit()
+
+            if has_input:
+                if not os.path.isfile(args['input']):
+                    print(f"Input file does not exist or is not readable: {args['input']}")
+                    parser.exit()
+
+        if args['sub_cmd'] in (MKTXPCommands.SHOW, MKTXPCommands.PRINT, MKTXPCommands.RSC):
             # Registered Entry name could be a partial match, need to expand
-            if args['entry_name']:
+            if args.get('entry_name'):
                 args['entry_name'] = UniquePartialMatchList(config_handler.registered_entries()).find(args['entry_name'])
 
         if args['sub_cmd'] == MKTXPCommands.PRINT:
