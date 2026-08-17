@@ -506,6 +506,19 @@ Options:
 - `--extract-scripts`: Extract multi-line scripts to standalone `.rsc` sidecar files (default: keep embedded inline).
 - `--strip-macs`: Strip dynamic MAC addresses.
 
+#### Extensibility & Custom Handlers
+The handler pipeline is completely dynamic and configuration-driven. You can customize existing handlers, reorder them, or introduce new ones (e.g. `bgp`, `switch`, `vpn`) without any Python code changes:
+1. Add the handler name to `handler_order` in `_mktxp.conf` under `[RSC]`:
+   ```ini
+   handler_order = base, wifi, system, ip, dhcp-leases, firewall, lte, wireguard, bgp
+   ```
+2. Define the matching RouterOS paths under `handler_<name>`:
+   ```ini
+   handler_bgp = /routing bgp, /routing bfd, /routing filter, /routing ospf
+   ```
+The engine uses longest-prefix specificity matching (so `/routing bgp` takes priority over general `/routing` in `system`), automatically numbers the output file (e.g. `09-bgp.rsc`), and safely routes any unmapped command paths to `99-other.rsc`.
+
+
 ## Advanced features
 While most of the [mktxp options](https://github.com/akpw/mktxp#getting-started) are self explanatory, some might require a bit of a context.
 
