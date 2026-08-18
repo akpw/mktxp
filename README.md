@@ -162,7 +162,7 @@ The default configuration file comes with a sample configuration, making it easy
 
 Most options are easy to understand at first glance, and some are described in more details [later](https://github.com/akpw/mktxp#advanced-features).
 
-<sup>💡</sup> To automatically migrate from the older `mktxp.conf` format in the existing installs, just set `compact_default_conf_values = True` in [the mktxp system config](https://github.com/akpw/mktxp#mktxp-system-configuration)
+<sup>💡</sup> *To automatically migrate from the older `mktxp.conf` format in the existing installs, just set `compact_default_conf_values = True` in [the mktxp system config](https://github.com/akpw/mktxp#mktxp-system-configuration)*
 
 #### Local install
 If you have a local MKTXP installation, you can edit the configuration file with your default system editor directly from mktxp:
@@ -449,6 +449,8 @@ optional arguments:
 
 ### RouterOS GitOps Configuration Management (`mktxp rsc`)
 RouterOS `.rsc` export files are often messy, mixing structural configurations with arbitrary inline scripts, backslash continuations, and inconsistent ordering. MKTXP provides built-in GitOps formatting and splitting capabilities to turn raw or live exports into clean, version-controllable files.
+
+> 📖 *For a deep dive into the motivation, AST/middleware architecture, and GitOps workflows, check out the blog post: [Wrangling RouterOS Configs: Introducing GitOps for MikroTik with MKTXP](https://akpw.github.io/articles/2026/08/16/GitOps-for-Mikrotik-RSC.html).*
 
 Configurations can be processed from local `.rsc` files (`-i`) or fetched live from configured routers over SSH (`-en`).
 
