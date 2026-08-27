@@ -210,33 +210,77 @@ class BaseOutputProcessor:
         if not rate_str or rate_str == '0':
             return 0
         
-        # If it's already a numeric string, convert directly
+        # Handle raw numeric strings first
         try:
             return int(rate_str)
         except (ValueError, TypeError):
             pass
         
-        # Handle parsed rate strings like '1 Kbps', '53 Mbps', '1.5 Gbps'
+        # Handle parsed rate strings like '1 Kbps', '53 Mbps', '1.5 Gbps', '18M'
         if isinstance(rate_str, str):
-            parts = rate_str.strip().split()
-            if len(parts) >= 1:
+            rate_clean = rate_str.strip()
+            match = re.match(r'^([\d.]+)\s*([A-Za-z]+)$', rate_clean)
+            if match:
                 try:
-                    num = float(parts[0])
-                    if len(parts) > 1:
-                        unit = parts[1].lower()
-                        if 'gbps' in unit:
-                            return int(num * 1000000000)
-                        elif 'mbps' in unit:
-                            return int(num * 1000000)
-                        elif 'kbps' in unit:
-                            return int(num * 1000)
-                        elif 'bps' in unit:
-                            return int(num)
-                    return int(num)  # Default to bps if no unit
+                    num = float(match.group(1))
+                    unit = match.group(2).lower()
+                    if 'tbps' in unit or unit == 't' or unit == 'tb':
+                        return int(num * 1000000000000)
+                    elif 'gbps' in unit or unit == 'g' or unit == 'gb':
+                        return int(num * 1000000000)
+                    elif 'mbps' in unit or unit == 'm' or unit == 'mb':
+                        return int(num * 1000000)
+                    elif 'kbps' in unit or unit == 'k' or unit == 'kb':
+                        return int(num * 1000)
+                    elif 'bps' in unit or unit == 'b':
+                        return int(num)
+                    return int(num)
                 except ValueError:
                     pass
         
         return 0
+
+    @classmethod
+    def parse_duration_limit(cls, duration_str):
+        """Converts user-supplied duration filter string (e.g. '15m', '1h', '30s', '16')
+        to integer seconds. If a pure number without unit is supplied, treats it as minutes ('m').
+        """
+        if duration_str is None:
+            return 0
+        if isinstance(duration_str, (int, float)):
+            return int(duration_str * 60)
+        if isinstance(duration_str, str):
+            dur_clean = duration_str.strip()
+            if re.match(r'^\d+(\.\d+)?$', dur_clean):
+                return int(float(dur_clean) * 60)
+            try:
+                return int(cls.parse_timedelta_seconds(dur_clean))
+            except Exception:
+                pass
+        return 0
+
+    @classmethod
+    def parse_rate_limit(cls, rate_str):
+        """Converts user-supplied rate filter string (e.g. '18', '18M', '54 Mbps', '500k')
+        to integer bps. If a pure number without unit is supplied, treats it as Mbps (matching CLI table units).
+        """
+        if rate_str is None:
+            return 0
+        if isinstance(rate_str, (int, float)):
+            if rate_str < 10000:
+                return int(rate_str * 1000 ** 2)
+            return int(rate_str)
+        if isinstance(rate_str, str):
+            rate_clean = rate_str.strip()
+            if re.match(r'^\d+(\.\d+)?$', rate_clean):
+                try:
+                    val = float(rate_clean)
+                    if val < 10000:
+                        return int(val * 1000 ** 2)
+                    return int(val)
+                except ValueError:
+                    pass
+        return cls.parse_numeric_rate(rate_str)
 
     @classmethod
     def parse_interface_rate(cls, interface_rate):
@@ -301,6 +345,101 @@ class BaseOutputProcessor:
                     if _val_matches_pat(val, pat_lower):
                         return False
                         
+        return True
+
+    @classmethod
+    def match_wireless_record(cls, record_dict, diag_conf=None, low_signal=None, min_signal=None, low_rate=None, recent=None, band=None, raw_uptime=None):
+        ''' Checks if a wireless client record matches specialized wireless diagnostic filters.
+        - low_signal: if set, matches signal <= threshold (e.g. <= -75 dBm)
+        - min_signal: if set, matches signal >= threshold (e.g. >= -60 dBm)
+        - low_rate: if set, matches min(tx_rate, rx_rate) <= rate_limit (e.g. <= 18M)
+        - recent: if set, matches uptime <= duration (e.g. <= 15m)
+        - band: if set (2g, 5g, 6g), matches band in interface/ssid
+        '''
+        if low_signal is None and min_signal is None and low_rate is None and recent is None and band is None:
+            return True
+
+        if diag_conf is None:
+            diag_conf = config_handler.diag_config() if hasattr(config_handler, 'diag_config') else {}
+
+        # 1. Signal strength filtering
+        signal_val_str = record_dict.get('rx_signal') or record_dict.get('signal_strength')
+        if signal_val_str is not None:
+            try:
+                sig_match = re.search(r'-?\d+', str(signal_val_str))
+                if sig_match:
+                    signal_int = int(sig_match.group())
+
+                    if low_signal is not None:
+                        threshold = -abs(int(diag_conf.get('low_signal_threshold', -75))) if low_signal is True else -abs(int(low_signal))
+                        if signal_int > threshold:
+                            return False
+
+                    if min_signal is not None:
+                        threshold = -abs(int(diag_conf.get('min_signal_threshold', -60))) if min_signal is True else -abs(int(min_signal))
+                        if signal_int < threshold:
+                            return False
+            except (ValueError, TypeError):
+                pass
+
+        # 2. Low negotiated rate filtering
+        if low_rate is not None:
+            if low_rate is True:
+                rate_limit_str = diag_conf.get('low_rate_threshold', '18M')
+            else:
+                rate_limit_str = low_rate
+            rate_limit_bps = cls.parse_rate_limit(rate_limit_str)
+            if rate_limit_bps > 0:
+                tx_bps = cls.parse_numeric_rate(record_dict.get('tx_rate', 0))
+                rx_bps = cls.parse_numeric_rate(record_dict.get('rx_rate', 0))
+                rates = [r for r in (tx_bps, rx_bps) if r > 0]
+                if rates and min(rates) > rate_limit_bps:
+                    return False
+
+        # 3. Recent connection duration filtering
+        if recent is not None:
+            duration_str = diag_conf.get('recent_duration', '15m') if recent is True else recent
+            max_seconds = cls.parse_duration_limit(duration_str)
+            if max_seconds > 0:
+                uptime_val = raw_uptime if raw_uptime is not None else record_dict.get('uptime')
+                if uptime_val:
+                    try:
+                        uptime_seconds = cls.parse_timedelta_seconds(str(uptime_val))
+                        if uptime_seconds > max_seconds:
+                            return False
+                    except Exception:
+                        pass
+
+        # 4. Frequency band filtering (2g / 5g / 6g)
+        if band is not None:
+            band_str = str(band).lower().strip()
+            native_band = str(record_dict.get('band', '')).lower()
+            interface_str = str(record_dict.get('interface', '')).lower()
+            ssid_str = str(record_dict.get('ssid', '')).lower()
+            combined = f'{native_band} {interface_str} {ssid_str}'
+
+            if band_str in ('2g', '2.4', '2.4g', '2.4ghz'):
+                if native_band:
+                    if not any(token in native_band for token in ('2ghz', '2.4', '2.4ghz', '2g')):
+                        return False
+                elif not any(token in combined for token in ('2g', '2.4', '2.4ghz', '2ghz', 'wlan1', 'wifi1')):
+                    return False
+            elif band_str in ('5g', '5ghz'):
+                if native_band:
+                    if not any(token in native_band for token in ('5ghz', '5g')):
+                        return False
+                elif not any(token in combined for token in ('5g', '5ghz', 'wlan2', 'wifi2')):
+                    return False
+            elif band_str in ('6g', '6ghz'):
+                if native_band:
+                    if not any(token in native_band for token in ('6ghz', '6g')):
+                        return False
+                elif not any(token in combined for token in ('6g', '6ghz', 'wlan3', 'wifi3')):
+                    return False
+            else:
+                if band_str not in combined:
+                    return False
+
         return True
 
     @staticmethod

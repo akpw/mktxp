@@ -33,23 +33,23 @@ class MKTXPDispatcher:
     def dispatch(self):
         args = self.option_parser.parse_options()
 
-        if args["sub_cmd"] == MKTXPCommands.INFO:
-            self.print_info()
+        if args["sub_cmd"] in (MKTXPCommands.DIAG, MKTXPCommands.PRINT):
+            self.diag(args)
 
-        elif args["sub_cmd"] == MKTXPCommands.SHOW:
-            self.show_entries(args)
+        elif args["sub_cmd"] == MKTXPCommands.RSC:
+            self.dispatch_rsc(args)
 
         elif args["sub_cmd"] == MKTXPCommands.EXPORT:
             self.start_export(args)
 
-        elif args["sub_cmd"] == MKTXPCommands.PRINT:
-            self.print(args)
-
         elif args["sub_cmd"] == MKTXPCommands.EDIT:
             self.edit_entry(args)
 
-        elif args["sub_cmd"] == MKTXPCommands.RSC:
-            self.dispatch_rsc(args)
+        elif args["sub_cmd"] == MKTXPCommands.SHOW:
+            self.show_entries(args)
+
+        elif args["sub_cmd"] == MKTXPCommands.INFO:
+            self.print_info()
 
         else:
             # nothing to dispatch
@@ -106,7 +106,7 @@ class MKTXPDispatcher:
     def start_export(self, args):
         ExportProcessor.start()
 
-    def print(self, args):
+    def diag(self, args):
         include = args.get("include") or []
         exclude = args.get("exclude") or []
         if isinstance(include, str):
@@ -114,11 +114,38 @@ class MKTXPDispatcher:
         if isinstance(exclude, str):
             exclude = [exclude]
 
+        diag_conf = config_handler.diag_config() if hasattr(config_handler, 'diag_config') else {}
+        low_signal = args.get("low_signal")
+        min_signal = args.get("min_signal")
+        low_rate = args.get("low_rate")
+        recent = args.get("recent")
+        band = args.get("band")
+
         if args["wifi_clients"]:
-            OutputProcessor.wifi_clients(args["entry_name"], include=include, exclude=exclude)
+            OutputProcessor.wifi_clients(
+                args["entry_name"],
+                include=include,
+                exclude=exclude,
+                diag_conf=diag_conf,
+                low_signal=low_signal,
+                min_signal=min_signal,
+                low_rate=low_rate,
+                recent=recent,
+                band=band
+            )
 
         elif args["capsman_clients"]:
-            OutputProcessor.capsman_clients(args["entry_name"], include=include, exclude=exclude)
+            OutputProcessor.capsman_clients(
+                args["entry_name"],
+                include=include,
+                exclude=exclude,
+                diag_conf=diag_conf,
+                low_signal=low_signal,
+                min_signal=min_signal,
+                low_rate=low_rate,
+                recent=recent,
+                band=band
+            )
 
         elif args["dhcp_clients"]:
             OutputProcessor.dhcp_clients(args["entry_name"], include=include, exclude=exclude)
@@ -137,8 +164,11 @@ class MKTXPDispatcher:
 
         else:
             print(
-                "Select metric option(s) to print out, or run 'mktxp print -h' to find out more"
+                "Select diagnostic option(s) to run, or run 'mktxp diag -h' to find out more"
             )
+
+    def print(self, args):
+        return self.diag(args)
 
     def dispatch_rsc(self, args):
         """Dispatches RouterOS RSC configuration processing (format or split)"""

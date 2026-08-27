@@ -134,3 +134,83 @@ class TestOutputIntegration:
         assert "Office-Workstation" in captured
         assert "Guest-Tablet" not in captured
         assert "Matching DHCP clients: 1 (Total: 2)" in captured
+
+
+class TestWirelessDiagnostics:
+    @pytest.fixture
+    def weak_client(self):
+        return {
+            'dhcp_name': 'Weak-IoT',
+            'rx_signal': '-82',
+            'tx_rate': '12 Mbps',
+            'rx_rate': '6 Mbps',
+            'uptime': '5m',
+            'interface': 'wlan-2.4G-1',
+            'ssid': 'Corporate-2G'
+        }
+
+    @pytest.fixture
+    def strong_fast_client(self):
+        return {
+            'dhcp_name': 'Fast-Laptop',
+            'rx_signal': '-52',
+            'tx_rate': '866 Mbps',
+            'rx_rate': '866 Mbps',
+            'uptime': '2d',
+            'interface': 'wlan-5G-1',
+            'ssid': 'Corporate-5G'
+        }
+
+    def test_low_signal_filter(self, weak_client, strong_fast_client):
+        # Default -75 dBm: -82 matches (is <= -75), -52 fails (is > -75)
+        assert BaseOutputProcessor.match_wireless_record(weak_client, low_signal=True) is True
+        assert BaseOutputProcessor.match_wireless_record(strong_fast_client, low_signal=True) is False
+        # Custom -85 dBm: -82 fails
+        assert BaseOutputProcessor.match_wireless_record(weak_client, low_signal='-85') is False
+
+    def test_min_signal_filter(self, weak_client, strong_fast_client):
+        # Default -60 dBm: -52 matches (is >= -60), -82 fails (is < -60)
+        assert BaseOutputProcessor.match_wireless_record(strong_fast_client, min_signal=True) is True
+        assert BaseOutputProcessor.match_wireless_record(weak_client, min_signal=True) is False
+
+    def test_low_rate_filter(self, weak_client, strong_fast_client):
+        # Default 18M: 6 Mbps matches (is <= 18M), 866 Mbps fails
+        assert BaseOutputProcessor.match_wireless_record(weak_client, low_rate=True) is True
+        assert BaseOutputProcessor.match_wireless_record(strong_fast_client, low_rate=True) is False
+        # Unitless number: 18 -> 18 Mbps
+        assert BaseOutputProcessor.match_wireless_record(weak_client, low_rate='18') is True
+        assert BaseOutputProcessor.match_wireless_record(weak_client, low_rate=18) is True
+        # Custom 5 Mbps: 6 Mbps fails
+        assert BaseOutputProcessor.match_wireless_record(weak_client, low_rate='5') is False
+
+    def test_recent_filter(self, weak_client, strong_fast_client):
+        # Default 15m: 5m matches (is <= 15m), 2d fails
+        assert BaseOutputProcessor.match_wireless_record(weak_client, recent=True) is True
+        assert BaseOutputProcessor.match_wireless_record(strong_fast_client, recent=True) is False
+        # Unitless number: 16 -> 16m (matches 5m)
+        assert BaseOutputProcessor.match_wireless_record(weak_client, recent='16') is True
+        assert BaseOutputProcessor.match_wireless_record(weak_client, recent=16) is True
+        assert BaseOutputProcessor.match_wireless_record(weak_client, recent='16m') is True
+        # Stricter 2m: 5m fails
+        assert BaseOutputProcessor.match_wireless_record(weak_client, recent='2m') is False
+        assert BaseOutputProcessor.match_wireless_record(weak_client, recent=2) is False
+
+    def test_band_filter(self, weak_client, strong_fast_client):
+        assert BaseOutputProcessor.match_wireless_record(weak_client, band='2g') is True
+        assert BaseOutputProcessor.match_wireless_record(weak_client, band='5g') is False
+        assert BaseOutputProcessor.match_wireless_record(strong_fast_client, band='5g') is True
+        assert BaseOutputProcessor.match_wireless_record(strong_fast_client, band='2g') is False
+
+
+class TestOptionsParserWirelessFlags:
+    @patch('mktxp.cli.options.config_handler')
+    def test_print_options_wireless_flags(self, mock_conf):
+        mock_conf.registered_entries.return_value = ['TestRouter']
+        mock_conf.config_entry.return_value.enabled = True
+        parser = MKTXPOptionsParser()
+        args = parser.parse_options(["print", "-en", "TestRouter", "-cc", "--low-signal", "-80", "--band", "5g", "--recent", "1h"])
+        assert args["capsman_clients"] is True
+        assert args["low_signal"] == "-80"
+        assert args["band"] == "5g"
+        assert args["recent"] == "1h"
+

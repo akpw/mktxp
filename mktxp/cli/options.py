@@ -20,22 +20,23 @@ from mktxp.utils.utils import FSHelper, UniquePartialMatchList, run_cmd
 from importlib.metadata import version as Version
 
 class MKTXPCommands:
-    INFO = 'info'
-    EDIT = 'edit'
-    EXPORT = 'export'
+    DIAG = 'diag'
     PRINT = 'print'
-    SHOW = 'show'
     RSC = 'rsc'
+    EXPORT = 'export'
+    EDIT = 'edit'
+    SHOW = 'show'
+    INFO = 'info'
 
     @classmethod
     def commands_meta(cls):
         return ''.join(('{',
-                        f'{cls.INFO}, ',
-                        f'{cls.EDIT}, ',
-                        f'{cls.EXPORT}, ',
-                        f'{cls.PRINT}, ',
-                        f'{cls.SHOW}, ',
+                        f'{cls.DIAG}, ',
                         f'{cls.RSC}, ',
+                        f'{cls.EXPORT}, ',
+                        f'{cls.EDIT}, ',
+                        f'{cls.SHOW}, ',
+                        f'{cls.INFO}, ',
                         '}'))
 
 class MKTXPOptionsParser:
@@ -61,23 +62,23 @@ Selected metrics info can be printed on the command line. For more information, 
         return self._script_name
 
     # Options Parsing Workflow
-    def parse_options(self):
+    def parse_options(self, cli_args=None):
         ''' General Options parsing workflow
         '''
 
         global_options_parser = ArgumentParser(add_help=False)
         self.parse_global_options(global_options_parser)
-        namespace, _ = global_options_parser.parse_known_args()    
+        namespace, _ = global_options_parser.parse_known_args(cli_args)    
         if namespace.cfg_dir:
             config_handler(CustomConfig(namespace.cfg_dir))
         else:
             config_handler()
 
         commands_parser = ArgumentParser(prog = self._script_name,
-                                description = 'Prometheus Exporter for Mikrotik RouterOS',
+                                description = 'Mikrotik RouterOS CLI Diagnostic Tool, Prometheus Exporter, and GitOps Configuration Manager',
                                 formatter_class=MKTXPHelpFormatter, parents=[global_options_parser])
         self.parse_commands(commands_parser)
-        args = vars(commands_parser.parse_args())
+        args = vars(commands_parser.parse_args(cli_args))
 
         self._check_args(args, commands_parser)
 
@@ -97,87 +98,94 @@ Selected metrics info can be printed on the command line. For more information, 
                                            title = 'MKTXP commands',
                                            metavar = MKTXPCommands.commands_meta())
         
-        # Info command
-        subparsers.add_parser(MKTXPCommands.INFO,
-                                        description = 'Displays MKTXP info',
+        # 1. Diag command (with print as alias)
+        diag_parser = subparsers.add_parser(MKTXPCommands.DIAG,
+                                        aliases = [MKTXPCommands.PRINT],
+                                        description = 'Displays selected metrics and diagnostics on the command line',
+                                        usage = '%(prog)s -en ENTRY [COMMAND] [FILTERS]',
                                         formatter_class=MKTXPHelpFormatter)
-        # Show command
-        show_parser = subparsers.add_parser(MKTXPCommands.SHOW,
-                                        description = 'Displays MKTXP config router entries',
-                                        formatter_class=MKTXPHelpFormatter)
-        self._add_entry_name(show_parser, registered_only = True, required = False, help = "Config entry name")
-        show_parser.add_argument('-cfg', '--config', dest='config',
-                                        help = "Shows MKTXP config files paths",
-                                        action = 'store_true')
-
-        # Edit command
-        edit_parser = subparsers.add_parser(MKTXPCommands.EDIT,
-                                        description = 'Edits an existing MKTXP router entry',
-                                        formatter_class=MKTXPHelpFormatter)
-        optional_args_group = edit_parser.add_argument_group('Optional Arguments')
-        optional_args_group.add_argument('-ed', '--editor', dest='editor',
-                help = "Command line editor to use (auto-detected by default)",
-                default = None,
-                type = str)        
-        optional_args_group.add_argument('-i', '--internal', dest='internal',
-                help = f"Edit MKTXP internal configuration (advanced)",
-                action = 'store_true')
-
-        # Export command
-        export_parser = subparsers.add_parser(MKTXPCommands.EXPORT,
-                                        description = 'Starts exporting Miktorik Router Metrics to Prometheus',
-                                        formatter_class=MKTXPHelpFormatter)
-
-        # Print command
-        print_parser = subparsers.add_parser(MKTXPCommands.PRINT,
-                                        description = 'Displays selected metrics on the command line',
-                                        formatter_class=MKTXPHelpFormatter)
-        required_args_group = print_parser.add_argument_group('Required Arguments')
+        required_args_group = diag_parser.add_argument_group('Required Arguments')
         self._add_entry_name(required_args_group, registered_only = True, help = "Name of config RouterOS entry")
 
-        optional_args_group = print_parser.add_argument_group('Optional Arguments')
-        optional_args_group.add_argument('-cc', '--capsman_clients', dest='capsman_clients',
+        diag_cmds_group = diag_parser.add_argument_group('Diagnostic Commands')
+        diag_cmds_group.add_argument('-cc', '--capsman_clients', dest='capsman_clients',
                 help = "CAPsMAN clients metrics",
                 action = 'store_true')
 
-        optional_args_group.add_argument('-wc', '--wifi_clients', dest='wifi_clients',
+        diag_cmds_group.add_argument('-wc', '--wifi_clients', dest='wifi_clients',
                 help = "WiFi clients metrics",
                 action = 'store_true')
 
-        optional_args_group.add_argument('-dc', '--dhcp_clients', dest='dhcp_clients',
+        diag_cmds_group.add_argument('-dc', '--dhcp_clients', dest='dhcp_clients',
                 help = "DHCP clients metrics",
                 action = 'store_true')
 
-        optional_args_group.add_argument('-cn', '--conn_stats', dest='conn_stats',
+        diag_cmds_group.add_argument('-cn', '--conn_stats', dest='conn_stats',
                 help = "IP connections stats",
                 action = 'store_true')
 
-        optional_args_group.add_argument('-kc', '--kid_control', dest='kid_control',
+        diag_cmds_group.add_argument('-kc', '--kid_control', dest='kid_control',
                 help = "Kid Control device metrics",
                 action = 'store_true')
 
-        optional_args_group.add_argument('-al', '--address_lists', dest='address_lists',
+        diag_cmds_group.add_argument('-al', '--address_lists', dest='address_lists',
                 help = "Address List metrics (comma-separated list names)",
                 type = str,
                 metavar = 'LISTS')
 
-        optional_args_group.add_argument('-nw', '--netwatch', dest='netwatch',
+        diag_cmds_group.add_argument('-nw', '--netwatch', dest='netwatch',
                 help = "Netwatch metrics",
                 action = 'store_true')
 
-        optional_args_group.add_argument('-in', '--include', dest='include',
+        general_filters_group = diag_parser.add_argument_group('General Filters')
+        general_filters_group.add_argument('-in', '--include', dest='include',
                 help = "Include: patterns separated by ';'",
                 type = str,
                 default = None,
                 metavar = 'PATTERNS')
 
-        optional_args_group.add_argument('-ex', '--exclude', dest='exclude',
+        general_filters_group.add_argument('-ex', '--exclude', dest='exclude',
                 help = "Exclude: patterns separated by ';'",
                 type = str,
                 default = None,
                 metavar = 'PATTERNS')
 
-        # RSC command
+        wireless_filters_group = diag_parser.add_argument_group('Wireless & CAPsMAN Filters (-cc, -wc)')
+        wireless_filters_group.add_argument('--low-signal', dest='low_signal',
+                help = "Show devices with weak signal (default: from [DIAG] low_signal_threshold)",
+                nargs = '?',
+                const = True,
+                default = None,
+                metavar = 'DBM')
+
+        wireless_filters_group.add_argument('--min-signal', dest='min_signal',
+                help = "Show devices with strong signal (default: from [DIAG] min_signal_threshold)",
+                nargs = '?',
+                const = True,
+                default = None,
+                metavar = 'DBM')
+
+        wireless_filters_group.add_argument('--low-rate', dest='low_rate',
+                help = "Show devices with low negotiated rate (default: from [DIAG] low_rate_threshold)",
+                nargs = '?',
+                const = True,
+                default = None,
+                metavar = 'RATE')
+
+        wireless_filters_group.add_argument('--recent', dest='recent',
+                help = "Show newly connected devices (default: from [DIAG] recent_duration)",
+                nargs = '?',
+                const = True,
+                default = None,
+                metavar = 'TIME')
+
+        wireless_filters_group.add_argument('--band', dest='band',
+                help = "Filter by frequency band (e.g. 2g, 5g, 6g)",
+                type = str,
+                default = None,
+                metavar = 'BAND')
+
+        # 2. RSC command
         rsc_parser = subparsers.add_parser(MKTXPCommands.RSC,
                                            description = 'RouterOS GitOps configuration formatter and splitter',
                                            formatter_class=MKTXPHelpFormatter)
@@ -222,14 +230,16 @@ Selected metrics info can be printed on the command line. For more information, 
                                   help='Output directory to emit .rsc files', type=str)
         split_parser.add_argument('--show-sensitive', dest='show_sensitive', action='store_true', default=False,
                                   help='Include passwords and sensitive keys in live export')
+        split_parser.add_argument('--numbered', dest='numbered_files', action='store_true', default=None,
+                                  help='Prefix split filenames with numeric indices')
+        split_parser.add_argument('--no-numbered', dest='numbered_files', action='store_false',
+                                  help='Do not prefix split filenames with numeric indices')
         split_parser.add_argument('--user', dest='user', type=str, default=None,
                                   help='Override SSH username for live export')
         split_parser.add_argument('--ssh-key', dest='ssh_key', type=str, default=None,
                                   help='Path to SSH private key for live export')
         split_parser.add_argument('--ssh-port', dest='ssh_port', type=int, default=None,
                                   help='Override SSH port (default: 22)')
-        split_parser.add_argument('--no-numbered', dest='numbered', action='store_false', default=True,
-                                  help='Disable numeric prefixes on output files')
         split_parser.add_argument('--wrap', dest='wrap_lines', action='store_true', default=False,
                                   help='Wrap long lines with backslashes')
         split_parser.add_argument('--wrap-col', dest='wrap_col', type=int, default=80,
@@ -239,6 +249,37 @@ Selected metrics info can be printed on the command line. For more information, 
         split_parser.add_argument('--strip-macs', dest='strip_macs', action='store_true', default=False,
                                   help='Strip dynamic MAC addresses')
 
+        # 3. Export command
+        export_parser = subparsers.add_parser(MKTXPCommands.EXPORT,
+                                        description = 'Starts exporting Miktorik Router Metrics to Prometheus',
+                                        formatter_class=MKTXPHelpFormatter)
+
+        # 4. Edit command
+        edit_parser = subparsers.add_parser(MKTXPCommands.EDIT,
+                                        description = 'Edits an existing MKTXP router entry',
+                                        formatter_class=MKTXPHelpFormatter)
+        optional_args_group = edit_parser.add_argument_group('Optional Arguments')
+        optional_args_group.add_argument('-ed', '--editor', dest='editor',
+                help = "Command line editor to use (auto-detected by default)",
+                default = None,
+                type = str)        
+        optional_args_group.add_argument('-i', '--internal', dest='internal',
+                help = f"Edit MKTXP internal configuration (advanced)",
+                action = 'store_true')
+
+        # 5. Show command
+        show_parser = subparsers.add_parser(MKTXPCommands.SHOW,
+                                        description = 'Displays MKTXP config router entries',
+                                        formatter_class=MKTXPHelpFormatter)
+        self._add_entry_name(show_parser, registered_only = True, required = False, help = "Config entry name")
+        show_parser.add_argument('-cfg', '--config', dest='config',
+                                        help = "Shows MKTXP config files paths",
+                                        action = 'store_true')
+
+        # 6. Info command
+        subparsers.add_parser(MKTXPCommands.INFO,
+                                        description = 'Displays MKTXP info',
+                                        formatter_class=MKTXPHelpFormatter)
 
     # Options checking
     def _check_args(self, args, parser):
@@ -268,14 +309,14 @@ Selected metrics info can be printed on the command line. For more information, 
                     print(f"Input file does not exist or is not readable: {args['input']}")
                     parser.exit()
 
-        if args['sub_cmd'] in (MKTXPCommands.SHOW, MKTXPCommands.PRINT, MKTXPCommands.RSC):
+        if args['sub_cmd'] in (MKTXPCommands.SHOW, MKTXPCommands.DIAG, MKTXPCommands.PRINT, MKTXPCommands.RSC):
             # Registered Entry name could be a partial match, need to expand
             if args.get('entry_name'):
                 args['entry_name'] = UniquePartialMatchList(config_handler.registered_entries()).find(args['entry_name'])
 
-        if args['sub_cmd'] == MKTXPCommands.PRINT:
+        if args['sub_cmd'] in (MKTXPCommands.DIAG, MKTXPCommands.PRINT):
             if not config_handler.config_entry(args['entry_name']).enabled:
-                print(f"Can not print metrics for disabled RouterOS entry: {args['entry_name']}\nRun 'mktxp edit' to review and enable it in the configuration file first")
+                print(f"Can not run diagnostics for disabled RouterOS entry: {args['entry_name']}\nRun 'mktxp edit' to review and enable it in the configuration file first")
                 parser.exit()
 
     def _check_cmd_args(self, args, parser):
@@ -323,11 +364,18 @@ Selected metrics info can be printed on the command line. For more information, 
 
     @staticmethod
     def _add_entry_name(parser, registered_only = False, required = True, help = 'MKTXP Entry name'):
+        if registered_only:
+            try:
+                entries = list(config_handler.registered_entries())
+                if entries:
+                    help = f"{help} (choose from: {', '.join(entries)})"
+            except Exception:
+                pass
         parser.add_argument('-en', '--entry-name', dest = 'entry_name',
             type = str,
-            metavar = list(config_handler.registered_entries()) if registered_only else None,
+            metavar = 'ENTRY',
             required = required,
-            choices = UniquePartialMatchList(config_handler.registered_entries())if registered_only else None,
+            choices = UniquePartialMatchList(config_handler.registered_entries()) if registered_only else None,
             help = help)
 
     @staticmethod
@@ -354,8 +402,39 @@ Selected metrics info can be printed on the command line. For more information, 
 
 class MKTXPHelpFormatter(HelpFormatter):
     ''' Custom formatter for ArgumentParser
-        Disables double metavar display, showing only for long-named options
+        Disables double metavar display, showing only for long-named options,
+        and dynamically filters specialized filter groups when a specific diagnostic command is in argv.
     '''
+    def format_help(self):
+        import sys
+        help_text = super().format_help()
+        argv = sys.argv
+        has_wireless = any(arg in ('-cc', '-wc') or arg.startswith(('--caps', '--wifi', '-cc', '-wc')) for arg in argv)
+        has_dhcp = any(arg in ('-dc', '-d') or arg.startswith(('--dhcp', '-dc')) for arg in argv)
+        has_conn = any(arg in ('-cn',) or arg.startswith(('--conn', '-cn')) for arg in argv)
+        has_kc = any(arg in ('-kc',) or arg.startswith(('--kid', '-kc')) for arg in argv)
+        has_al = any(arg in ('-al',) or arg.startswith(('--addr', '-al')) for arg in argv)
+        has_nw = any(arg in ('-nw',) or arg.startswith(('--net', '-nw')) for arg in argv)
+
+        specific_targets = sum([has_wireless, has_dhcp, has_conn, has_kc, has_al, has_nw])
+        if specific_targets == 1:
+            sections = help_text.split('\n\n')
+            filtered_sections = []
+            for sec in sections:
+                if 'Wireless & CAPsMAN Filters' in sec and not has_wireless:
+                    continue
+                if 'DHCP Server Filters' in sec and not has_dhcp:
+                    continue
+                if 'IP Connections Filters' in sec and not has_conn:
+                    continue
+                if 'Kid Control Filters' in sec and not has_kc:
+                    continue
+                if 'Netwatch Filters' in sec and not has_nw:
+                    continue
+                filtered_sections.append(sec)
+            return '\n\n'.join(filtered_sections)
+        return help_text
+
     def _format_action_invocation(self, action):
         if not action.option_strings:
             metavar, = self._metavar_formatter(action, action.dest)(1)

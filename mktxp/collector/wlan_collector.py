@@ -48,7 +48,7 @@ class WLANCollector(BaseCollector):
 
         # the client info metrics
         if router_entry.config_entry.wireless_clients:
-            registration_labels = ['interface', 'ssid', 'mac_address', 'tx_rate', 'rx_rate', 'uptime', 'bytes', 'signal_to_noise', 'tx_ccq', 'signal_strength', 'signal']
+            registration_labels = ['interface', 'ssid', 'mac_address', 'tx_rate', 'rx_rate', 'uptime', 'bytes', 'signal_to_noise', 'tx_ccq', 'signal_strength', 'signal', 'band']
             registration_records = WirelessMetricsDataSource.metric_records(router_entry, metric_labels = registration_labels)
             if registration_records:
                 for registration_record in registration_records:
@@ -70,7 +70,7 @@ class WLANCollector(BaseCollector):
                 yield tx_ccq_metrics
 
                 registration_metrics = BaseCollector.info_collector('wlan_clients_devices', 'Client devices info', 
-                                        registration_records, ['dhcp_name', 'dhcp_address', 'rx_signal', 'ssid', 'tx_rate', 'rx_rate', 'interface', 'mac_address', 'uptime'])
+                                        registration_records, ['dhcp_name', 'dhcp_address', 'rx_signal', 'ssid', 'tx_rate', 'rx_rate', 'interface', 'mac_address', 'uptime', 'band'])
                 yield registration_metrics
 
 

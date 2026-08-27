@@ -466,6 +466,61 @@ class MKTXPConfigHandler:
             return self._rsc_config_reader()
         return {}
 
+    def _diag_template(self):
+        try:
+            ref = importlib.resources.files('mktxp') / 'cli/config/_mktxp.conf'
+            with importlib.resources.as_file(ref) as path:
+                template_conf = ConfigObj(str(path), indent_type='    ', encoding='utf-8')
+                return template_conf.get('DIAG', {})
+        except Exception:
+            return {
+                'low_signal_threshold': -75,
+                'min_signal_threshold': -60,
+                'low_rate_threshold': '18M',
+                'recent_duration': '15m',
+                'top_connections_count': 10,
+                'rate_above_threshold': '1M'
+            }
+
+    def _diag_config_reader(self):
+        ''' Reads the [DIAG] section, dynamically injecting missing keys/section from the template
+        '''
+        template_diag = self._diag_template()
+        changed = False
+
+        if 'DIAG' not in self._config:
+            self._config['DIAG'] = {}
+            for k, v in template_diag.items():
+                self._config['DIAG'][k] = v
+            changed = True
+        else:
+            for k, v in template_diag.items():
+                if k not in self._config['DIAG']:
+                    self._config['DIAG'][k] = v
+                    changed = True
+
+        if changed:
+            try:
+                self._config.write()
+            except Exception as exc:
+                print(f'Error updating _mktxp.conf [DIAG] section: {exc}')
+
+        return dict(self._config['DIAG'])
+
+    def diag_config(self):
+        ''' Returns the [DIAG] configuration dict from _mktxp.conf, updating it if needed
+        '''
+        if hasattr(self, '_config') and self._config is not None:
+            return self._diag_config_reader()
+        return {
+            'low_signal_threshold': -75,
+            'min_signal_threshold': -60,
+            'low_rate_threshold': '54M',
+            'recent_duration': '15m',
+            'top_connections_count': 10,
+            'rate_above_threshold': '1M'
+        }
+
     def _read_from_disk(self):
         ''' (Force-)Read conf data from disk
         '''

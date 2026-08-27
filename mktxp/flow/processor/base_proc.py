@@ -206,16 +206,36 @@ class OutputProcessor:
     ''' Base CLI Processing
     '''    
     @staticmethod
-    def capsman_clients(entry_name, include=None, exclude=None):
+    def capsman_clients(entry_name, include=None, exclude=None, diag_conf=None, low_signal=None, min_signal=None, low_rate=None, recent=None, band=None):
         router_entry = RouterEntriesHandler.router_entry(entry_name)
         if router_entry:
-            CapsmanOutput.clients_summary(router_entry, include=include, exclude=exclude)
+            CapsmanOutput.clients_summary(
+                router_entry,
+                include=include,
+                exclude=exclude,
+                diag_conf=diag_conf,
+                low_signal=low_signal,
+                min_signal=min_signal,
+                low_rate=low_rate,
+                recent=recent,
+                band=band
+            )
         
     @staticmethod
-    def wifi_clients(entry_name, include=None, exclude=None):
+    def wifi_clients(entry_name, include=None, exclude=None, diag_conf=None, low_signal=None, min_signal=None, low_rate=None, recent=None, band=None):
         router_entry = RouterEntriesHandler.router_entry(entry_name)
         if router_entry:
-            WirelessOutput.clients_summary(router_entry, include=include, exclude=exclude)
+            WirelessOutput.clients_summary(
+                router_entry,
+                include=include,
+                exclude=exclude,
+                diag_conf=diag_conf,
+                low_signal=low_signal,
+                min_signal=min_signal,
+                low_rate=low_rate,
+                recent=recent,
+                band=band
+            )
         
     @staticmethod
     def dhcp_clients(entry_name, include=None, exclude=None):

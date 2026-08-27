@@ -19,8 +19,8 @@ class CapsmanOutput:
     ''' CAPsMAN CLI Output
     '''    
     @staticmethod
-    def clients_summary(router_entry, include=None, exclude=None):
-        registration_labels = ['interface', 'ssid', 'mac_address', 'rx_signal', 'uptime', 'tx_rate', 'rx_rate']
+    def clients_summary(router_entry, include=None, exclude=None, diag_conf=None, low_signal=None, min_signal=None, low_rate=None, recent=None, band=None):
+        registration_labels = ['interface', 'ssid', 'mac_address', 'rx_signal', 'uptime', 'tx_rate', 'rx_rate', 'band']
         registration_records = CapsmanRegistrationsMetricsDataSource.metric_records(router_entry, metric_labels = registration_labels, add_router_id = False)
         if not registration_records:
             print('No CAPsMAN registration records')
@@ -31,8 +31,22 @@ class CapsmanOutput:
         total_unfiltered = len(registration_records)
         filtered_records = []
         for registration_record in sorted(registration_records, key = lambda rt_record: rt_record['rx_signal'], reverse=True):
+            raw_uptime = registration_record.get('uptime')
+            raw_tx_rate = registration_record.get('tx_rate')
+            raw_rx_rate = registration_record.get('rx_rate')
             BaseOutputProcessor.augment_record(router_entry, registration_record)
             if not BaseOutputProcessor.match_record(registration_record, include, exclude):
+                continue
+            if not BaseOutputProcessor.match_wireless_record(
+                registration_record,
+                diag_conf=diag_conf,
+                low_signal=low_signal,
+                min_signal=min_signal,
+                low_rate=low_rate,
+                recent=recent,
+                band=band,
+                raw_uptime=raw_uptime
+            ):
                 continue
             filtered_records.append(registration_record)
             interface = registration_record['interface']
@@ -48,16 +62,19 @@ class CapsmanOutput:
                 
         for key in dhcp_rt_by_interface.keys():
             for record in dhcp_rt_by_interface[key]:
-                output_table.add_row(output_entry(**record))
+                entry_dict = {f: record.get(f, '') for f in output_entry._fields}
+                output_table.add_row(output_entry(**entry_dict))
                 output_records += 1
             if output_records < total_displayed:
                 output_table.add_row(output_entry())
+
+        has_filters = include or exclude or low_signal is not None or min_signal is not None or low_rate is not None or recent is not None or band is not None
 
         if total_displayed > 0:
             print (output_table.draw())
             for server in dhcp_rt_by_interface.keys():
                 print(f'{server} clients: {len(dhcp_rt_by_interface[server])}')
-            if include or exclude:
+            if has_filters:
                 print(f'Matching CAPsMAN clients: {output_records} (Total connected: {total_unfiltered})', '\n')
             else:
                 print(f'Total connected CAPsMAN clients: {output_records}', '\n')
