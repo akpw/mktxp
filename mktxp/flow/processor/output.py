@@ -12,7 +12,7 @@
 ## GNU General Public License for more details.
 
 
-import re, os
+import re, os, fnmatch
 from datetime import timedelta
 from collections import namedtuple
 from texttable import Texttable
@@ -148,12 +148,19 @@ class BaseOutputProcessor:
         if resolve_address:
             registration_record['dhcp_address'] = dhcp_address
 
-    @staticmethod
-    def parse_rates(rate):
-        rates_rgx = config_handler.re_compiled.get('rates_rgx')
-        if not rates_rgx:
-            rates_rgx = re.compile(r'(\d*(?:\.\d*)?)([GgMmKk]bps?)')
-            config_handler.re_compiled['rates_rgx'] = rates_rgx
+    _re_compiled = {}
+
+    @classmethod
+    def _get_re(cls, key, pattern):
+        rgx = cls._re_compiled.get(key)
+        if not rgx:
+            rgx = re.compile(pattern) if isinstance(pattern, str) else pattern
+            cls._re_compiled[key] = rgx
+        return rgx
+
+    @classmethod
+    def parse_rates(cls, rate):
+        rates_rgx = cls._get_re('rates_rgx', r'(\d*(?:\.\d*)?)([GgMmKk]bps?)')
         rc = rates_rgx.search(rate)
         return f'{int(float(rc[1]))} {rc[2]}' if rc and len(rc.groups()) == 2 else rate
 
@@ -171,15 +178,13 @@ class BaseOutputProcessor:
         power = floor(log(rate, 1000))
         return f"{int(rate / 1000 ** power)} {['bps', 'Kbps', 'Mbps', 'Gbps'][int(power)]}"
 
-    @staticmethod
-    def parse_timedelta(time, ms_span=False):
+    @classmethod
+    def parse_timedelta(cls, time, ms_span=False):
         # ms_span for milliseconds-long durations, since otherwise minutes would match the ms in the value
         rgx_key = 'duration_interval_rgx_sp' if ms_span else 'duration_interval_rgx'
-        duration_interval_rgx = config_handler.re_compiled.get(rgx_key)
-        if not duration_interval_rgx:
-            duration_interval_rgx = re.compile(r'((?P<seconds>\d+)s)?((?P<milliseconds>\d+)ms)?((?P<microseconds>\d+)us)?') if ms_span else\
-                    re.compile(r'((?P<weeks>\d+)w)?((?P<days>\d+)d)?((?P<hours>\d+)h)?((?P<minutes>\d+)m)?((?P<seconds>\d+)s)?((?P<milliseconds>\d+)ms)?')
-            config_handler.re_compiled[rgx_key] = duration_interval_rgx                        
+        pattern = r'((?P<seconds>\d+)s)?((?P<milliseconds>\d+)ms)?((?P<microseconds>\d+)us)?' if ms_span else\
+                  r'((?P<weeks>\d+)w)?((?P<days>\d+)d)?((?P<hours>\d+)h)?((?P<minutes>\d+)m)?((?P<seconds>\d+)s)?((?P<milliseconds>\d+)ms)?'
+        duration_interval_rgx = cls._get_re(rgx_key, pattern)
         time_dict = duration_interval_rgx.match(time).groupdict()
         return timedelta(**{key: int(value) for key, value in time_dict.items() if value})
 
@@ -191,13 +196,9 @@ class BaseOutputProcessor:
     def parse_timedelta_milliseconds(time, ms_span=False):
         return BaseOutputProcessor.parse_timedelta(time, ms_span=ms_span) / timedelta(milliseconds=1)
 
-    @staticmethod
-    def parse_signal_strength(signal_strength):
-        wifi_signal_strength_rgx = config_handler.re_compiled.get('wifi_signal_strength_rgx')
-        if not wifi_signal_strength_rgx:
-            # wifi_signal_strength_rgx = re.compile(r'(-?\d+(?:\.\d+)?)(dBm)?')
-            wifi_signal_strength_rgx = re.compile(r'(-?\d+(?:\.\d+)?)')           
-            config_handler.re_compiled['wifi_signal_strength_rgx'] = wifi_signal_strength_rgx
+    @classmethod
+    def parse_signal_strength(cls, signal_strength):
+        wifi_signal_strength_rgx = cls._get_re('wifi_signal_strength_rgx', r'(-?\d+(?:\.\d+)?)')
         return wifi_signal_strength_rgx.search(signal_strength).group()
 
     @staticmethod
@@ -209,7 +210,7 @@ class BaseOutputProcessor:
         if not rate_str or rate_str == '0':
             return 0
         
-        # Handle raw numeric strings first
+        # If it's already a numeric string, convert directly
         try:
             return int(rate_str)
         except (ValueError, TypeError):
@@ -237,18 +238,78 @@ class BaseOutputProcessor:
         
         return 0
 
-    @staticmethod
-    def parse_interface_rate(interface_rate):
-        interface_rate_rgx = config_handler.re_compiled.get('interface_rate_rgx')
-        if not interface_rate_rgx:
-            interface_rate_rgx = re.compile(r'[^.\-\d]')
-            config_handler.re_compiled['interface_rate_rgx'] = interface_rate_rgx
+    @classmethod
+    def parse_interface_rate(cls, interface_rate):
+        interface_rate_rgx = cls._get_re('interface_rate_rgx', r'[^.\-\d]')
         rate = lambda interface_rate: 1000 if interface_rate.find('Mbps') < 0 else 1
         return(int(float(interface_rate_rgx.sub('', interface_rate)) * rate(interface_rate)))
 
     @staticmethod
+    def parse_patterns(patterns):
+        ''' Parses patterns separated by ';'
+        Example: "OF-5G;Pro" -> ["OF-5G", "Pro"]
+        '''
+        if not patterns:
+            return []
+        if isinstance(patterns, str):
+            return [p.strip() for p in patterns.split(';') if p.strip()]
+        if isinstance(patterns, (list, tuple)):
+            res = []
+            for item in patterns:
+                if item:
+                    res.extend([p.strip() for p in str(item).split(';') if p.strip()])
+            return res
+        return []
+
+    @staticmethod
+    def match_record(record_dict, include_patterns=None, exclude_patterns=None):
+        ''' Evaluates whether a record matches include and exclude filter patterns.
+        Supports semicolon/comma delimited patterns and Unix glob wildcards (*, ?).
+        - include_patterns: if provided, at least one value in record must match ANY include pattern (case-insensitive substring or glob)
+        - exclude_patterns: if provided, no value in record may match ANY exclude pattern (case-insensitive substring or glob)
+        '''
+        include_list = BaseOutputProcessor.parse_patterns(include_patterns)
+        exclude_list = BaseOutputProcessor.parse_patterns(exclude_patterns)
+
+        if not include_list and not exclude_list:
+            return True
+            
+        values = [str(v).lower() for v in record_dict.values() if v is not None and str(v) != '']
+
+        def _val_matches_pat(val_lower, pat_lower):
+            if '*' in pat_lower or '?' in pat_lower:
+                return fnmatch.fnmatchcase(val_lower, pat_lower) or fnmatch.fnmatchcase(val_lower, f'*{pat_lower}*')
+            return pat_lower in val_lower
+        
+        if include_list:
+            matched = False
+            for pat in include_list:
+                pat_lower = pat.lower()
+                for val in values:
+                    if _val_matches_pat(val, pat_lower):
+                        matched = True
+                        break
+                if matched:
+                    break
+            if not matched:
+                return False
+                
+        if exclude_list:
+            for pat in exclude_list:
+                pat_lower = pat.lower()
+                for val in values:
+                    if _val_matches_pat(val, pat_lower):
+                        return False
+                        
+        return True
+
+    @staticmethod
     def output_table(outputEntry = None):
-        table = Texttable(max_width = os.get_terminal_size().columns)
+        try:
+            terminal_columns = os.get_terminal_size().columns
+        except (OSError, ValueError):
+            terminal_columns = 0
+        table = Texttable(max_width = terminal_columns)
         table.set_deco(Texttable.HEADER | Texttable.BORDER | Texttable.VLINES )        
         if outputEntry:
             table.header(outputEntry._fields)

@@ -20,18 +20,24 @@ class ConnectionsStatsOutput:
     ''' Connections Stats Output
     '''    
     @staticmethod
-    def clients_summary(router_entry):
+    def clients_summary(router_entry, include=None, exclude=None):
         connection_records = IPConnectionStatsDatasource.metric_records(router_entry, add_router_id = False)
         if not connection_records:
             print('No connection stats records')
             return 
 
         conn_cnt = 0
+        total_unfiltered_cnt = 0
+        total_unfiltered_conns = 0
         output_records = []
         for registration_record in sorted(connection_records, key = lambda rt_record: rt_record['connection_count'], reverse=True):
             BaseOutputProcessor.resolve_dhcp(router_entry, registration_record, id_key = 'src_address', resolve_address = False)        
+            total_unfiltered_cnt += 1
+            total_unfiltered_conns += registration_record.get('connection_count', 0)
+            if not BaseOutputProcessor.match_record(registration_record, include, exclude):
+                continue
             output_records.append(registration_record)
-            conn_cnt += registration_record['connection_count']
+            conn_cnt += registration_record.get('connection_count', 0)
 
         output_records_cnt = 0
         output_entry = BaseOutputProcessor.OutputConnStatsEntry
@@ -42,8 +48,14 @@ class ConnectionsStatsOutput:
             output_table.add_row(output_entry())
             output_records_cnt += 1
                 
-        print (output_table.draw())
-
-        print(f'Distinct source addresses: {output_records_cnt}')
-        print(f'Total open connections: {conn_cnt}', '\n')
+        if output_records_cnt > 0:
+            print (output_table.draw())
+            if include or exclude:
+                print(f'Matching source addresses: {output_records_cnt} (Total: {total_unfiltered_cnt})')
+                print(f'Matching open connections: {conn_cnt} (Total: {total_unfiltered_conns})', '\n')
+            else:
+                print(f'Distinct source addresses: {output_records_cnt}')
+                print(f'Total open connections: {conn_cnt}', '\n')
+        else:
+            print('No matching connection records found', '\n')
 

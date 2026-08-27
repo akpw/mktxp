@@ -206,45 +206,45 @@ class OutputProcessor:
     ''' Base CLI Processing
     '''    
     @staticmethod
-    def capsman_clients(entry_name):
+    def capsman_clients(entry_name, include=None, exclude=None):
         router_entry = RouterEntriesHandler.router_entry(entry_name)
         if router_entry:
-            CapsmanOutput.clients_summary(router_entry)
+            CapsmanOutput.clients_summary(router_entry, include=include, exclude=exclude)
         
     @staticmethod
-    def wifi_clients(entry_name):
+    def wifi_clients(entry_name, include=None, exclude=None):
         router_entry = RouterEntriesHandler.router_entry(entry_name)
         if router_entry:
-            WirelessOutput.clients_summary(router_entry)
+            WirelessOutput.clients_summary(router_entry, include=include, exclude=exclude)
         
     @staticmethod
-    def dhcp_clients(entry_name):
+    def dhcp_clients(entry_name, include=None, exclude=None):
         router_entry = RouterEntriesHandler.router_entry(entry_name)
         if router_entry:
-            DHCPOutput.clients_summary(router_entry)
+            DHCPOutput.clients_summary(router_entry, include=include, exclude=exclude)
 
     @staticmethod
-    def conn_stats(entry_name):
+    def conn_stats(entry_name, include=None, exclude=None):
         router_entry = RouterEntriesHandler.router_entry(entry_name)
         if router_entry:
-            ConnectionsStatsOutput.clients_summary(router_entry)
+            ConnectionsStatsOutput.clients_summary(router_entry, include=include, exclude=exclude)
 
     @staticmethod
-    def kid_control(entry_name):
+    def kid_control(entry_name, include=None, exclude=None):
         router_entry = RouterEntriesHandler.router_entry(entry_name)
         if router_entry:
-            KidControlOutput.clients_summary(router_entry)
+            KidControlOutput.clients_summary(router_entry, include=include, exclude=exclude)
 
     @staticmethod
-    def address_lists(entry_name, address_lists_str):
+    def address_lists(entry_name, address_lists_str, include=None, exclude=None):
         router_entry = RouterEntriesHandler.router_entry(entry_name)
         if router_entry:
-            AddressListOutput.clients_summary(router_entry, address_lists_str)
+            AddressListOutput.clients_summary(router_entry, address_lists_str, include=include, exclude=exclude)
 
     @staticmethod
-    def netwatch(entry_name):
+    def netwatch(entry_name, include=None, exclude=None):
         router_entry = RouterEntriesHandler.router_entry(entry_name)
         if router_entry:
-            NetwatchOutput.clients_summary(router_entry)
+            NetwatchOutput.clients_summary(router_entry, include=include, exclude=exclude)
 
             

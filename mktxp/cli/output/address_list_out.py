@@ -21,7 +21,7 @@ class AddressListOutput:
     '''
     
     @staticmethod
-    def clients_summary(router_entry, address_lists_str):
+    def clients_summary(router_entry, address_lists_str, include=None, exclude=None):
         ''' Display address list summary for the specified lists
         '''
         if not address_lists_str:
@@ -60,13 +60,13 @@ class AddressListOutput:
         tables_displayed = 0
         
         if ipv4_records:
-            AddressListOutput._display_table(ipv4_records, 'IPv4')
+            AddressListOutput._display_table(ipv4_records, 'IPv4', include=include, exclude=exclude)
             tables_displayed += 1
             
         if ipv6_records:
             if tables_displayed > 0:
                 print()  # Add spacing between tables
-            AddressListOutput._display_table(ipv6_records, 'IPv6')
+            AddressListOutput._display_table(ipv6_records, 'IPv6', include=include, exclude=exclude)
             tables_displayed += 1
             
         if tables_displayed == 0:
@@ -160,14 +160,25 @@ class AddressListOutput:
             return time_part
         
     @staticmethod
-    def _display_table(records, ip_version):
+    def _display_table(records, ip_version, include=None, exclude=None):
         ''' Display address list records in a table
         '''
         if not records:
             return
+
+        total_unfiltered = len(records)
+        filtered_records = []
+        for record in records:
+            if not BaseOutputProcessor.match_record(record, include, exclude):
+                continue
+            filtered_records.append(record)
+
+        if not filtered_records:
+            print(f"Address Lists ({ip_version}): No matching entries found")
+            return
             
         # Sort records by list name, then by address
-        sorted_records = sorted(records, key=lambda x: (x.get('list', ''), x.get('address', '')))
+        sorted_records = sorted(filtered_records, key=lambda x: (x.get('list', ''), x.get('address', '')))
         
         # Create output table
         output_entry = BaseOutputProcessor.OutputAddressListEntry
@@ -193,5 +204,8 @@ class AddressListOutput:
         # Print summary
         total_entries = len(sorted_records)
         unique_lists = len(set(record.get('list', '') for record in sorted_records))
-        print(f"Total entries: {total_entries}")
+        if include or exclude:
+            print(f"Matching entries: {total_entries} (Total: {total_unfiltered})")
+        else:
+            print(f"Total entries: {total_entries}")
         print(f"Unique lists: {unique_lists}")

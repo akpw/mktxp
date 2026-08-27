@@ -21,7 +21,7 @@ class NetwatchOutput:
     '''    
     
     @staticmethod
-    def clients_summary(router_entry):
+    def clients_summary(router_entry, include=None, exclude=None):
         ''' Display netwatch summary
         '''
         print(f'{router_entry.router_name}@{router_entry.config_entry.hostname}: OK to connect')
@@ -35,7 +35,7 @@ class NetwatchOutput:
             return
             
         # Display table
-        NetwatchOutput._display_table(netwatch_records)
+        NetwatchOutput._display_table(netwatch_records, include=include, exclude=exclude)
             
     @staticmethod
     def _collect_records(router_entry):
@@ -62,14 +62,25 @@ class NetwatchOutput:
             return []
         
     @staticmethod
-    def _display_table(records):
+    def _display_table(records, include=None, exclude=None):
         ''' Display netwatch records in a table
         '''
         if not records:
             return
+
+        total_unfiltered = len(records)
+        filtered_records = []
+        for record in records:
+            if not BaseOutputProcessor.match_record(record, include, exclude):
+                continue
+            filtered_records.append(record)
+
+        if not filtered_records:
+            print("Netwatch Entries: No matching entries found")
+            return
             
         # Sort records by name, then by host
-        sorted_records = sorted(records, key=lambda x: (x.get('name', ''), x.get('host', '')))
+        sorted_records = sorted(filtered_records, key=lambda x: (x.get('name', ''), x.get('host', '')))
         
         # Create output table
         output_entry = BaseOutputProcessor.OutputNetwatchEntry
@@ -99,6 +110,9 @@ class NetwatchOutput:
         up_count = len([r for r in sorted_records if r.get('status', '').lower() == 'up'])
         down_count = total_entries - up_count
         
-        print(f"Total entries: {total_entries}")
+        if include or exclude:
+            print(f"Matching entries: {total_entries} (Total: {total_unfiltered})")
+        else:
+            print(f"Total entries: {total_entries}")
         print(f"Up: {up_count}")
         print(f"Down: {down_count}")

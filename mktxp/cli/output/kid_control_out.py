@@ -19,7 +19,7 @@ class KidControlOutput:
     ''' Kid Control CLI Output
     '''    
     @staticmethod
-    def clients_summary(router_entry):
+    def clients_summary(router_entry, include=None, exclude=None):
         device_labels = ['name', 'user', 'mac_address', 'ip_address', 'bytes_down', 'bytes_up', 'rate_up', 'rate_down', 'idle_time']
         device_records = KidDeviceMetricsDataSource.metric_records(router_entry, metric_labels = device_labels, cli_output=True)
         if not device_records:
@@ -29,6 +29,7 @@ class KidControlOutput:
         # translate / trim / augment device records
         devices_with_users = []
         dynamic_devices = []
+        total_unfiltered = len(device_records)
         
         for device_record in device_records:
             BaseOutputProcessor.augment_record(router_entry, device_record)
@@ -66,6 +67,9 @@ class KidControlOutput:
                 '_total_rate_numeric': rate_up_numeric + rate_down_numeric
             }
 
+            if not BaseOutputProcessor.match_record(filtered_record, include, exclude):
+                continue
+
             # Separate devices with users from dynamic devices
             if filtered_record.get('user'):
                 devices_with_users.append(filtered_record)
@@ -92,7 +96,6 @@ class KidControlOutput:
             device.pop('_total_rate_numeric', None)
 
         output_records = 0
-        total_devices = len(device_records)                
         output_entry = BaseOutputProcessor.OutputKidControlEntry
         output_table = BaseOutputProcessor.output_table(output_entry)
                 
@@ -116,15 +119,21 @@ class KidControlOutput:
             output_table.add_row(output_entry(**record))
             output_records += 1
 
-        print (output_table.draw())
+        if output_records > 0:
+            print (output_table.draw())
 
-        # Print summary
-        if devices_with_users:
-            for user in devices_by_user.keys():
-                print(f'{user} devices: {len(devices_by_user[user])}')
-            print(f'User-assigned devices: {user_device_count}')
-        
-        if dynamic_devices:
-            print(f'Dynamic devices (no user): {len(dynamic_devices)}')
+            # Print summary
+            if devices_with_users:
+                for user in devices_by_user.keys():
+                    print(f'{user} devices: {len(devices_by_user[user])}')
+                print(f'User-assigned devices: {user_device_count}')
             
-        print(f'Total Kid Control devices: {output_records}', '\n')
+            if dynamic_devices:
+                print(f'Dynamic devices (no user): {len(dynamic_devices)}')
+                
+            if include or exclude:
+                print(f'Matching Kid Control devices: {output_records} (Total: {total_unfiltered})', '\n')
+            else:
+                print(f'Total Kid Control devices: {output_records}', '\n')
+        else:
+            print('No matching Kid Control devices found', '\n')

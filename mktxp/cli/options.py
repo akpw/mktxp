@@ -46,7 +46,7 @@ class MKTXPOptionsParser:
         version = Version('mktxp')
         self._description =  \
 f'''
-Prometheus Exporter and GitOps Configuration Manager for Mikrotik RouterOS, version {version}
+Mikrotik RouterOS CLI Diagnostic Tool, Prometheus Exporter, and GitOps Configuration Manager, version {version}
 Supports gathering metrics across multiple RouterOS devices, all easily configurable via built-in CLI interface.
 Comes along with a dedicated Grafana dashboard (https://grafana.com/grafana/dashboards/13679)
 Selected metrics info can be printed on the command line. For more information, run: 'mktxp -h'
@@ -164,6 +164,18 @@ Selected metrics info can be printed on the command line. For more information, 
         optional_args_group.add_argument('-nw', '--netwatch', dest='netwatch',
                 help = "Netwatch metrics",
                 action = 'store_true')
+
+        optional_args_group.add_argument('-in', '--include', dest='include',
+                help = "Include: patterns separated by ';'",
+                type = str,
+                default = None,
+                metavar = 'PATTERNS')
+
+        optional_args_group.add_argument('-ex', '--exclude', dest='exclude',
+                help = "Exclude: patterns separated by ';'",
+                type = str,
+                default = None,
+                metavar = 'PATTERNS')
 
         # RSC command
         rsc_parser = subparsers.add_parser(MKTXPCommands.RSC,

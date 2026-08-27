@@ -20,7 +20,7 @@ class WirelessOutput:
     ''' Wireless Clients CLI Output
     '''    
     @staticmethod
-    def clients_summary(router_entry):
+    def clients_summary(router_entry, include=None, exclude=None):
         registration_labels = ['interface', 'mac_address', 'signal_strength', 'uptime', 'tx_rate', 'rx_rate', 'signal_to_noise']
         registration_records = WirelessMetricsDataSource.metric_records(router_entry, metric_labels = registration_labels, add_router_id = False)
         if not registration_records:
@@ -29,10 +29,15 @@ class WirelessOutput:
 
         # translate / trim / augment registration records
         dhcp_rt_by_interface = {}
+        total_unfiltered = len(registration_records)
+        filtered_records = []
 
         key = lambda rt_record: rt_record['signal_strength'] if rt_record.get('signal_strength') else rt_record['interface']
         for registration_record in sorted(registration_records, key = key, reverse=True):
             BaseOutputProcessor.augment_record(router_entry, registration_record)
+            if not BaseOutputProcessor.match_record(registration_record, include, exclude):
+                continue
+            filtered_records.append(registration_record)
 
             interface = registration_record['interface']
             if interface in dhcp_rt_by_interface.keys():
@@ -41,7 +46,7 @@ class WirelessOutput:
                 dhcp_rt_by_interface[interface] = [registration_record]         
 
         output_records = 0
-        registration_records = len(registration_records)                
+        total_displayed = len(filtered_records)                
         output_entry = BaseOutputProcessor.OutputWirelessEntry \
                         if router_entry.wireless_type in (RouterEntryWirelessType.DUAL, RouterEntryWirelessType.WIRELESS) else BaseOutputProcessor.OutputWiFiEntry
         output_table = BaseOutputProcessor.output_table(output_entry)
@@ -50,12 +55,17 @@ class WirelessOutput:
             for record in dhcp_rt_by_interface[key]:
                 output_table.add_row(output_entry(**record))
                 output_records += 1
-            if output_records < registration_records:
+            if output_records < total_displayed:
                 output_table.add_row(output_entry())
                 
-        print (output_table.draw())
-
-        for server in dhcp_rt_by_interface.keys():
-            print(f'{server} clients: {len(dhcp_rt_by_interface[server])}')
-        print(f'Total connected WiFi devices: {output_records}', '\n')
+        if total_displayed > 0:
+            print (output_table.draw())
+            for server in dhcp_rt_by_interface.keys():
+                print(f'{server} clients: {len(dhcp_rt_by_interface[server])}')
+            if include or exclude:
+                print(f'Matching WiFi devices: {output_records} (Total connected: {total_unfiltered})', '\n')
+            else:
+                print(f'Total connected WiFi devices: {output_records}', '\n')
+        else:
+            print('No matching WiFi devices found', '\n')
 

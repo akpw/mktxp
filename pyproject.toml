@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "mktxp"
 version = "1.2.21"
-description = "Prometheus Exporter for Mikrotik RouterOS devices"
+description = "Mikrotik RouterOS CLI Diagnostic Tool, Prometheus Exporter, and GitOps Configuration Manager"
 readme = "README.md"
 authors = [
     { name = "Arseniy Kuznetsov" }

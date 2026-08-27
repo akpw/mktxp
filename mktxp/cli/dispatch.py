@@ -107,26 +107,33 @@ class MKTXPDispatcher:
         ExportProcessor.start()
 
     def print(self, args):
+        include = args.get("include") or []
+        exclude = args.get("exclude") or []
+        if isinstance(include, str):
+            include = [include]
+        if isinstance(exclude, str):
+            exclude = [exclude]
+
         if args["wifi_clients"]:
-            OutputProcessor.wifi_clients(args["entry_name"])
+            OutputProcessor.wifi_clients(args["entry_name"], include=include, exclude=exclude)
 
         elif args["capsman_clients"]:
-            OutputProcessor.capsman_clients(args["entry_name"])
+            OutputProcessor.capsman_clients(args["entry_name"], include=include, exclude=exclude)
 
         elif args["dhcp_clients"]:
-            OutputProcessor.dhcp_clients(args["entry_name"])
+            OutputProcessor.dhcp_clients(args["entry_name"], include=include, exclude=exclude)
 
         elif args["conn_stats"]:
-            OutputProcessor.conn_stats(args["entry_name"])
+            OutputProcessor.conn_stats(args["entry_name"], include=include, exclude=exclude)
 
         elif args["kid_control"]:
-            OutputProcessor.kid_control(args["entry_name"])
+            OutputProcessor.kid_control(args["entry_name"], include=include, exclude=exclude)
 
         elif args["address_lists"]:
-            OutputProcessor.address_lists(args["entry_name"], args["address_lists"])
+            OutputProcessor.address_lists(args["entry_name"], args["address_lists"], include=include, exclude=exclude)
 
         elif args["netwatch"]:
-            OutputProcessor.netwatch(args["entry_name"])
+            OutputProcessor.netwatch(args["entry_name"], include=include, exclude=exclude)
 
         else:
             print(
