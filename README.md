@@ -20,8 +20,10 @@ For effortless visualization of the RouterOS metrics exported to Prometheus, MKT
 
 <img width="32%" alt="1" src="https://user-images.githubusercontent.com/5028474/217029083-3c2f561e-853f-45a7-b9f1-d818a830daf5.png"> <img width="32%" alt="2" src="https://user-images.githubusercontent.com/5028474/217029092-2b86b41b-1f89-4383-ac48-16652e820f7e.png"> <img width="32%" alt="3" src="https://user-images.githubusercontent.com/5028474/217029096-dbf6b46c-3ed7-4c76-a57b-8cebfb3b671c.png">
 
+## Blogs
+- [Wrangling RouterOS Configs: Introducing GitOps for MikroTik with MKTXP](https://akpw.github.io/articles/2026/08/16/GitOps-for-Mikrotik-RSC.html)
 
-#### Requirements:
+## Requirements:
 - Supported OSs:
    * Linux   
    * Mac OSX
@@ -33,10 +35,6 @@ For effortless visualization of the RouterOS metrics exported to Prometheus, MKT
    * [Prometheus](https://prometheus.io/docs/prometheus/latest/installation/)
    * [Grafana](https://grafana.com/docs/grafana/latest/installation/)
    * [Docker](https://docs.docker.com/) / [Docker Compose](https://docs.docker.com/compose/)
-
-
-## Blogs
-- [Wrangling RouterOS Configs: Introducing GitOps for MikroTik with MKTXP](https://akpw.github.io/articles/2026/08/16/GitOps-for-Mikrotik-RSC.html)
 
 
 ## Install:
