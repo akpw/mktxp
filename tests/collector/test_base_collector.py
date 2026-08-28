@@ -13,7 +13,7 @@
 
 import pytest
 from mktxp.collector.base_collector import BaseCollector
-from mktxp.cli.config.config import MKTXPConfigKeys
+from mktxp.cli.config import MKTXPConfigKeys
 
 # Case 1: Records with duplicates
 records_with_duplicates = [

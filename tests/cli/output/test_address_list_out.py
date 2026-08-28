@@ -15,7 +15,6 @@
 import pytest
 from unittest.mock import Mock, patch
 from mktxp.cli.output.address_list_out import AddressListOutput
-from mktxp.flow.processor.output import BaseOutputProcessor
 
 
 @pytest.fixture

@@ -138,3 +138,7 @@ dmypy.json
 *.zip
 *.gz
 *.rar
+
+# RouterOS exports
+_exports/
+exports/

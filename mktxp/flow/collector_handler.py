@@ -15,8 +15,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from timeit import default_timer
 from datetime import datetime
 from threading import Event, Lock, Timer
-from mktxp.cli.config.config import config_handler
-from mktxp.cli.config.config import MKTXPConfigKeys
+from mktxp.cli.config import config_handler
+from mktxp.cli.config import MKTXPConfigKeys
 
 class CollectorHandler:
     ''' MKTXP Collectors Handler

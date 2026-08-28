@@ -15,7 +15,7 @@ import pytest
 from unittest.mock import MagicMock, call
 from collections import defaultdict
 from mktxp.collector.address_list_collector import AddressListCollector
-from mktxp.cli.config.config import config_handler, MKTXPConfigKeys
+from mktxp.cli.config import config_handler, MKTXPConfigKeys
 
 @pytest.mark.parametrize("address_list_config, ipv6_address_list_config", [
     ("MyList, AnotherList", "AnotherList"),
@@ -144,3 +144,35 @@ def _assert_metrics_for_ip_version(metrics, ip_version, lists_cleaned, response)
         list_name = sample.labels['list']
         expected_count = len([r for r in response if r['list'] == list_name])
         assert sample.value == expected_count
+
+
+def test_address_list_collector_counts_disabled():
+    """Verify that when total_address_list_counts is False, all_count metric is skipped while selected counts still work."""
+    config_handler()
+    mock_router_entry = MagicMock()
+    mock_router_entry.config_entry.address_list = "MyList"
+    mock_router_entry.config_entry.total_address_list_counts = False
+    mock_router_entry.config_entry.ipv6_address_list = None
+    mock_router_entry.router_name = "TestRouter"
+    mock_router_entry.config_entry.hostname = "testhost"
+    mock_router_entry.api_connection = MagicMock()
+    mock_router_entry.router_id = {
+        MKTXPConfigKeys.ROUTERBOARD_NAME: 'test_router',
+        MKTXPConfigKeys.ROUTERBOARD_ADDRESS: '1.2.3.4'
+    }
+
+    mock_api = MagicMock()
+    mock_router_entry.api_connection.router_api.return_value = mock_api
+    mock_resource = MagicMock()
+    mock_resource.get.return_value = [
+        {'list': 'MyList', 'address': '192.168.1.1', 'dynamic': 'false', 'timeout': '0s', 'disabled': 'false', 'comment': ''}
+    ]
+    mock_api.get_resource.return_value = mock_resource
+
+    metrics = list(AddressListCollector.collect(mock_router_entry))
+    metric_names = [m.name for m in metrics]
+
+    assert 'mktxp_firewall_address_list' in metric_names
+    assert 'mktxp_firewall_address_list_selected_count' in metric_names
+    assert 'mktxp_firewall_address_list_all_count' not in metric_names
+

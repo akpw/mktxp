@@ -1,5 +1,5 @@
 import pytest
-from mktxp.cli.config.config import MKTXPConfigKeys, ConfigEntry
+from mktxp.cli.config import MKTXPConfigKeys, ConfigEntry
 
 def test_bridge_vlan_key_registration():
     """

@@ -12,7 +12,9 @@
 ## GNU General Public License for more details.
 
 
-from mktxp.flow.processor.output import BaseOutputProcessor
+from mktxp.utils.tables import output_table, OutputCapsmanEntry
+from mktxp.utils.filtering import match_record, match_wireless_record
+from mktxp.flow.processor.enrichment import augment_record
 from mktxp.datasource.capsman_ds import CapsmanRegistrationsMetricsDataSource
 
 class CapsmanOutput:
@@ -34,10 +36,10 @@ class CapsmanOutput:
             raw_uptime = registration_record.get('uptime')
             raw_tx_rate = registration_record.get('tx_rate')
             raw_rx_rate = registration_record.get('rx_rate')
-            BaseOutputProcessor.augment_record(router_entry, registration_record)
-            if not BaseOutputProcessor.match_record(registration_record, include, exclude):
+            augment_record(router_entry, registration_record)
+            if not match_record(registration_record, include, exclude):
                 continue
-            if not BaseOutputProcessor.match_wireless_record(
+            if not match_wireless_record(
                 registration_record,
                 diag_conf=diag_conf,
                 low_signal=low_signal,
@@ -57,21 +59,21 @@ class CapsmanOutput:
 
         output_records = 0
         total_displayed = len(filtered_records)
-        output_entry = BaseOutputProcessor.OutputCapsmanEntry
-        output_table = BaseOutputProcessor.output_table(output_entry)
+        output_entry = OutputCapsmanEntry
+        tbl = output_table(output_entry)
                 
         for key in dhcp_rt_by_interface.keys():
             for record in dhcp_rt_by_interface[key]:
                 entry_dict = {f: record.get(f, '') for f in output_entry._fields}
-                output_table.add_row(output_entry(**entry_dict))
+                tbl.add_row(output_entry(**entry_dict))
                 output_records += 1
             if output_records < total_displayed:
-                output_table.add_row(output_entry())
+                tbl.add_row(output_entry())
 
         has_filters = include or exclude or low_signal is not None or min_signal is not None or low_rate is not None or recent is not None or band is not None
 
         if total_displayed > 0:
-            print (output_table.draw())
+            print (tbl.draw())
             for server in dhcp_rt_by_interface.keys():
                 print(f'{server} clients: {len(dhcp_rt_by_interface[server])}')
             if has_filters:

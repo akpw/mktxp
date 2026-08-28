@@ -12,9 +12,9 @@
 ## GNU General Public License for more details.
 
 
-from mktxp.flow.processor.output import BaseOutputProcessor
+from mktxp.utils.tables import output_table, OutputAddressListEntry
+from mktxp.utils.filtering import match_record
 from mktxp.datasource.address_list_ds import AddressListMetricsDataSource
-from humanize import naturaldelta
 
 class AddressListOutput:
     ''' Address List CLI Output
@@ -169,7 +169,7 @@ class AddressListOutput:
         total_unfiltered = len(records)
         filtered_records = []
         for record in records:
-            if not BaseOutputProcessor.match_record(record, include, exclude):
+            if not match_record(record, include, exclude):
                 continue
             filtered_records.append(record)
 
@@ -181,8 +181,8 @@ class AddressListOutput:
         sorted_records = sorted(filtered_records, key=lambda x: (x.get('list', ''), x.get('address', '')))
         
         # Create output table
-        output_entry = BaseOutputProcessor.OutputAddressListEntry
-        output_table = BaseOutputProcessor.output_table(output_entry)
+        output_entry = OutputAddressListEntry
+        tbl = output_table(output_entry)
         
         # Add records to table
         for record in sorted_records:
@@ -195,11 +195,11 @@ class AddressListOutput:
                 'dynamic': record.get('dynamic', ''),
                 'disabled': record.get('disabled', '')
             }
-            output_table.add_row(output_entry(**filtered_record))
+            tbl.add_row(output_entry(**filtered_record))
         
         # Print table with title
         print(f"Address Lists ({ip_version}):")
-        print(output_table.draw())
+        print(tbl.draw())
         
         # Print summary
         total_entries = len(sorted_records)

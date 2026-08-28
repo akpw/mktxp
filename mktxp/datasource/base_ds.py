@@ -11,8 +11,8 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
-from mktxp.cli.config.config import MKTXPConfigKeys
-from mktxp.cli.config.config import config_handler
+from mktxp.cli.config import MKTXPConfigKeys
+from mktxp.cli.config import config_handler
 
 class BaseDSProcessor:
     ''' Base Metrics DataSource processing

@@ -13,7 +13,7 @@
 
 
 from mktxp.collector.base_collector import BaseCollector
-from mktxp.flow.processor.output import BaseOutputProcessor
+from mktxp.utils.units import parse_timedelta_milliseconds
 from mktxp.datasource.bfd_ds import BFDMetricsDataSource
 
 
@@ -27,11 +27,11 @@ class BFDCollector(BaseCollector):
             return
 
         translation_table = {
-            "actual_tx_interval": lambda value: BaseOutputProcessor.parse_timedelta_milliseconds(value, ms_span=True) if value else "0",
-            "desired_tx_interval": lambda value: BaseOutputProcessor.parse_timedelta_milliseconds(value, ms_span=True) if value else "0",
-            "hold_time": lambda value: BaseOutputProcessor.parse_timedelta_milliseconds(value, ms_span=True) if value else "0",
+            "actual_tx_interval": lambda value: parse_timedelta_milliseconds(value, ms_span=True) if value else "0",
+            "desired_tx_interval": lambda value: parse_timedelta_milliseconds(value, ms_span=True) if value else "0",
+            "hold_time": lambda value: parse_timedelta_milliseconds(value, ms_span=True) if value else "0",
             "up": lambda value: "1" if value == "true" else "0",
-            "uptime": lambda value: BaseOutputProcessor.parse_timedelta_milliseconds(value) if value else "0",
+            "uptime": lambda value: parse_timedelta_milliseconds(value) if value else "0",
             "remote_address": lambda value: value if value else '',
             "local_address": lambda value: value if value else '',
             "interface": lambda value: value if value else '',

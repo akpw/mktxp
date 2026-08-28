@@ -11,7 +11,7 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
-from mktxp.cli.config.config import config_handler, MKTXPConfigKeys
+from mktxp.cli.config import config_handler, MKTXPConfigKeys
 from mktxp.flow.router_connection import RouterAPIConnection
 from mktxp.flow.router_entry import RouterEntry, RouterEntryWirelessType
 

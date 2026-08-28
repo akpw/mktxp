@@ -45,7 +45,7 @@ verbose_mode = False
 """)
     
     with patch('mktxp.flow.router_entry.RouterAPIConnection', return_value=mock_api_connection):
-        from mktxp.cli.config.config import config_handler, CustomConfig
+        from mktxp.cli.config import config_handler, CustomConfig
         config_handler(os_config=CustomConfig(str(tmpdir)))
         
         entry = RouterEntry('test_router')

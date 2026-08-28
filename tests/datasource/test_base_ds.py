@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import Mock
 from unittest.mock import patch
 from mktxp.datasource.base_ds import BaseDSProcessor
-from mktxp.cli.config.config import MKTXPConfigKeys
+from mktxp.cli.config import MKTXPConfigKeys
 from mktxp.datasource.interface_ds import BaseInterfaceDataSource, BridgeVlanMetricsDataSource
 
 @pytest.mark.parametrize(

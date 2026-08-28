@@ -13,7 +13,7 @@
 
 
 from mktxp.collector.base_collector import BaseCollector
-from mktxp.flow.processor.output import BaseOutputProcessor
+from mktxp.utils.units import parse_timedelta_seconds
 from mktxp.datasource.system_resource_ds import SystemResourceMetricsDataSource
 from mktxp.utils.utils import check_for_updates
 
@@ -27,7 +27,7 @@ class SystemResourceCollector(BaseCollector):
                            'cpu', 'cpu_count', 'cpu_frequency', 'cpu_load', 
                            'free_hdd_space', 'total_hdd_space', 
                            'architecture_name', 'board_name']
-        translation_table = {'uptime': lambda value: BaseOutputProcessor.parse_timedelta_seconds(value)}
+        translation_table = {'uptime': lambda value: parse_timedelta_seconds(value)}
 
         resource_records = SystemResourceMetricsDataSource.metric_records(router_entry, metric_labels = resource_labels, translation_table=translation_table)   
         if resource_records:

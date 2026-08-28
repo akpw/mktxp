@@ -13,7 +13,7 @@
 
 
 from mktxp.datasource.base_ds import BaseDSProcessor
-from mktxp.flow.processor.output import BaseOutputProcessor
+from mktxp.flow.processor.enrichment import format_interface_name
 
 
 class ContainerDataSource:
@@ -28,7 +28,7 @@ class ContainerDataSource:
             for record in router_records:
                 if 'comment' in record:
                     # Format name with comment using centralized function
-                    record['name'] = BaseOutputProcessor.format_interface_name(
+                    record['name'] = format_interface_name(
                         record['name'],
                         record['comment'],
                         router_entry.config_entry.interface_name_format

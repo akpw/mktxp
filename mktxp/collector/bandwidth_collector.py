@@ -16,7 +16,7 @@ import socket
 import speedtest
 from datetime import datetime
 from multiprocessing import Pool, get_context
-from mktxp.cli.config.config import config_handler
+from mktxp.cli.config import config_handler
 from mktxp.collector.base_collector import BaseCollector
 
 

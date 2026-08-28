@@ -13,7 +13,7 @@
 
 import pytest
 from configobj import ConfigObj
-from mktxp.cli.config.config import MKTXPConfigHandler, MKTXPConfigKeys, CustomConfig
+from mktxp.cli.config import MKTXPConfigHandler, MKTXPConfigKeys, CustomConfig
 from mktxp.datasource.base_ds import BaseDSProcessor
 
 def test_default_config_no_new_keys(tmpdir):

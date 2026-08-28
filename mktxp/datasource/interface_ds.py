@@ -15,7 +15,7 @@
 from mktxp.datasource.base_ds import BaseDSProcessor
 from mktxp.datasource.system_resource_ds import SystemResourceMetricsDataSource
 from mktxp.utils.utils import routerOS7_version
-from mktxp.flow.processor.output import BaseOutputProcessor
+from mktxp.flow.processor.enrichment import format_interface_name
 
 class BaseInterfaceDataSource:
     @staticmethod
@@ -25,7 +25,7 @@ class BaseInterfaceDataSource:
                 metric_record['default-name'] = metric_record.get('name', '')
 
             if metric_record.get('comment'):
-                metric_record['name'] = BaseOutputProcessor.format_interface_name(
+                metric_record['name'] = format_interface_name(
                     metric_record['name'],
                     metric_record['comment'],
                     router_entry.config_entry.interface_name_format
@@ -123,7 +123,7 @@ class InterfaceMonitorMetricsDataSource:
                 # Apply interface name formatting based on config
                 if interface.get('comment'):
                     # Format name with comment using centralized function
-                    interface_monitor_record['name'] = BaseOutputProcessor.format_interface_name(
+                    interface_monitor_record['name'] = format_interface_name(
                         interface['name'],
                         interface['comment'],
                         router_entry.config_entry.interface_name_format

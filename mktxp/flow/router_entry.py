@@ -14,7 +14,7 @@
 
 from enum import IntEnum
 from collections import namedtuple
-from mktxp.cli.config.config import config_handler, MKTXPConfigKeys, CollectorKeys
+from mktxp.cli.config import config_handler, MKTXPConfigKeys, CollectorKeys
 from mktxp.flow.router_connection import RouterAPIConnection
 from mktxp.datasource.package_ds import PackageMetricsDataSource
 from mktxp.datasource.system_resource_ds import SystemResourceMetricsDataSource

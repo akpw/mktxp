@@ -13,7 +13,7 @@
 
 
 from mktxp.collector.base_collector import BaseCollector
-from mktxp.flow.processor.output import BaseOutputProcessor
+from mktxp.utils.units import parse_interface_rate
 from mktxp.datasource.interface_ds import InterfaceMonitorMetricsDataSource
 
 
@@ -176,4 +176,4 @@ class MonitorCollector(BaseCollector):
             return rate_value
 
         # ...or just calculate in case it's not
-        return BaseOutputProcessor.parse_interface_rate(rate_option)
+        return parse_interface_rate(rate_option)

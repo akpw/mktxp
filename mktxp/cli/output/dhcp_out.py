@@ -12,7 +12,9 @@
 ## GNU General Public License for more details.
 
 
-from mktxp.flow.processor.output import BaseOutputProcessor
+from mktxp.utils.tables import output_table, OutputDHCPEntry
+from mktxp.utils.filtering import match_record
+from mktxp.flow.processor.enrichment import dhcp_name
 from mktxp.datasource.dhcp_ds import DHCPMetricsDataSource
 
 
@@ -31,8 +33,8 @@ class DHCPOutput:
         total_unfiltered = len(dhcp_lease_records)
         filtered_records = []
         for dhcp_lease_record in sorted(dhcp_lease_records, key = lambda dhcp_record: dhcp_record['address'], reverse=True):
-            dhcp_lease_record['host_name'] = BaseOutputProcessor.dhcp_name(router_entry, dhcp_lease_record, drop_comment = True)
-            if not BaseOutputProcessor.match_record(dhcp_lease_record, include, exclude):
+            dhcp_lease_record['host_name'] = dhcp_name(router_entry, dhcp_lease_record, drop_comment = True)
+            if not match_record(dhcp_lease_record, include, exclude):
                 continue
             filtered_records.append(dhcp_lease_record)
 
@@ -46,18 +48,18 @@ class DHCPOutput:
 
         output_records = 0
         total_displayed = len(filtered_records)        
-        output_entry = BaseOutputProcessor.OutputDHCPEntry
-        output_table = BaseOutputProcessor.output_table(output_entry)
+        output_entry = OutputDHCPEntry
+        tbl = output_table(output_entry)
                 
         for key in dhcp_by_server.keys():
             for record in dhcp_by_server[key]:
-                output_table.add_row(output_entry(**record))
+                tbl.add_row(output_entry(**record))
                 output_records += 1
             if output_records < total_displayed:
-                output_table.add_row(output_entry())
+                tbl.add_row(output_entry())
 
         if total_displayed > 0:
-            print (output_table.draw())
+            print (tbl.draw())
             for server in dhcp_by_server.keys():
                 print(f'{server} clients: {len(dhcp_by_server[server])}')
             if include or exclude:

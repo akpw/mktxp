@@ -12,7 +12,7 @@
 ## GNU General Public License for more details.
 
 
-from mktxp.cli.config.config import MKTXPConfigKeys
+from mktxp.cli.config import MKTXPConfigKeys
 from mktxp.collector.base_collector import BaseCollector
 from mktxp.datasource.pool_ds import PoolMetricsDataSource, PoolUsedMetricsDataSource
 

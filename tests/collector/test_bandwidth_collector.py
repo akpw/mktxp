@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import MagicMock, patch
 from mktxp.collector.bandwidth_collector import BandwidthCollector
-from mktxp.cli.config.config import config_handler
+from mktxp.cli.config import config_handler
 from types import SimpleNamespace
 
 def test_bandwidth_collector_queue_leak_prevention():

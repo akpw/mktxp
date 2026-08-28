@@ -13,7 +13,8 @@
 
 
 from mktxp.collector.base_collector import BaseCollector
-from mktxp.flow.processor.output import BaseOutputProcessor
+from mktxp.utils.units import parse_rates, parse_timedelta_seconds
+from mktxp.flow.processor.enrichment import resolve_dhcp
 from mktxp.datasource.kid_control_device_ds import KidDeviceMetricsDataSource
 
 
@@ -30,9 +31,9 @@ class KidDeviceCollector(BaseCollector):
                     'rate_down','bytes_up', 'idle_time','blocked', 'limited', 'inactive', 'disabled']
 
         translation_table = {
-            'rate_up': lambda value: BaseOutputProcessor.parse_rates(value),
-            'rate_down': lambda value: BaseOutputProcessor.parse_rates(value),
-            'idle_time': lambda value: BaseOutputProcessor.parse_timedelta_seconds(value) if value else 0,
+            'rate_up': lambda value: parse_rates(value),
+            'rate_down': lambda value: parse_rates(value),
+            'idle_time': lambda value: parse_timedelta_seconds(value) if value else 0,
             'blocked': lambda value: '1' if value == 'true' else '0',
             'limited': lambda value: '1' if value == 'true' else '0',
             'inactive': lambda value: '1' if value == 'true' else '0',
@@ -42,7 +43,7 @@ class KidDeviceCollector(BaseCollector):
         if records:
             # dhcp resolution
             for registration_record in records:
-                BaseOutputProcessor.resolve_dhcp(router_entry, registration_record, resolve_address=False)
+                resolve_dhcp(router_entry, registration_record, resolve_address=False)
 
             info_labels = ['name', 'dhcp_name', 'mac_address', 'user', 'ip_address', 'disabled']
             yield BaseCollector.info_collector('kid_control_device', 'Kid-control device Info', records, info_labels)

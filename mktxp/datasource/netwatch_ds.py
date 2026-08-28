@@ -13,7 +13,7 @@
 
 
 from mktxp.datasource.base_ds import BaseDSProcessor
-from mktxp.flow.processor.output import BaseOutputProcessor
+from mktxp.flow.processor.enrichment import format_interface_name
 
 
 class NetwatchMetricsDataSource:
@@ -34,7 +34,7 @@ class NetwatchMetricsDataSource:
                 comment = netwatch_record.get('comment')
 
                 # Apply the centralized formatting
-                netwatch_record['name'] = BaseOutputProcessor.format_interface_name(
+                netwatch_record['name'] = format_interface_name(
                     name,
                     comment,
                     router_entry.config_entry.interface_name_format

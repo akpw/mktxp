@@ -16,7 +16,7 @@ import ssl
 import socket
 import collections
 from datetime import datetime
-from mktxp.cli.config.config import config_handler
+from mktxp.cli.config import config_handler
 import functools
 import yaml
 

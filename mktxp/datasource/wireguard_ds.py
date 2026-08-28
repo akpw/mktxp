@@ -13,14 +13,14 @@
 
 
 from mktxp.datasource.base_ds import BaseDSProcessor
-from mktxp.flow.processor.output import BaseOutputProcessor
+from mktxp.flow.processor.enrichment import format_interface_name
 
 class BaseWireGuardPeerDataSource:
     @staticmethod
     def rewrite_interface_names(router_entry, metric_records):
         for metric_record in metric_records:
             if metric_record.get('comment'):
-                metric_record['name'] = BaseOutputProcessor.format_interface_name(
+                metric_record['name'] = format_interface_name(
                     metric_record['name'],
                     metric_record['comment'],
                     router_entry.config_entry.interface_name_format

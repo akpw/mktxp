@@ -13,7 +13,7 @@
 
 
 from mktxp.collector.base_collector import BaseCollector
-from mktxp.flow.processor.output import BaseOutputProcessor
+from mktxp.flow.processor.enrichment import augment_record
 from mktxp.datasource.connection_ds import IPConnectionDatasource, IPConnectionStatsDatasource
 
 
@@ -36,7 +36,7 @@ class IPConnectionCollector(BaseCollector):
             connection_stats_records = IPConnectionStatsDatasource.metric_records(router_entry)
             if connection_stats_records:
                 for connection_stat_record in connection_stats_records:
-                    BaseOutputProcessor.augment_record(router_entry, connection_stat_record, id_key = 'src_address')
+                    augment_record(router_entry, connection_stat_record, id_key = 'src_address')
 
                 if router_entry.config_entry.connection_stats_destinations:
                     connection_stats_labels = ['src_address', 'dst_addresses', 'dhcp_name']

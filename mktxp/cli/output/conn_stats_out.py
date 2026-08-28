@@ -12,7 +12,9 @@
 ## GNU General Public License for more details.
 
 
-from mktxp.flow.processor.output import BaseOutputProcessor
+from mktxp.utils.tables import output_table, OutputConnStatsEntry
+from mktxp.utils.filtering import match_record
+from mktxp.flow.processor.enrichment import resolve_dhcp
 from mktxp.datasource.connection_ds import IPConnectionStatsDatasource
 
 
@@ -31,25 +33,25 @@ class ConnectionsStatsOutput:
         total_unfiltered_conns = 0
         output_records = []
         for registration_record in sorted(connection_records, key = lambda rt_record: rt_record['connection_count'], reverse=True):
-            BaseOutputProcessor.resolve_dhcp(router_entry, registration_record, id_key = 'src_address', resolve_address = False)        
+            resolve_dhcp(router_entry, registration_record, id_key = 'src_address', resolve_address = False)        
             total_unfiltered_cnt += 1
             total_unfiltered_conns += registration_record.get('connection_count', 0)
-            if not BaseOutputProcessor.match_record(registration_record, include, exclude):
+            if not match_record(registration_record, include, exclude):
                 continue
             output_records.append(registration_record)
             conn_cnt += registration_record.get('connection_count', 0)
 
         output_records_cnt = 0
-        output_entry = BaseOutputProcessor.OutputConnStatsEntry
-        output_table = BaseOutputProcessor.output_table(output_entry)
+        output_entry = OutputConnStatsEntry
+        tbl = output_table(output_entry)
         
         for record in output_records:
-            output_table.add_row(output_entry(**record))
-            output_table.add_row(output_entry())
+            tbl.add_row(output_entry(**record))
+            tbl.add_row(output_entry())
             output_records_cnt += 1
                 
         if output_records_cnt > 0:
-            print (output_table.draw())
+            print (tbl.draw())
             if include or exclude:
                 print(f'Matching source addresses: {output_records_cnt} (Total: {total_unfiltered_cnt})')
                 print(f'Matching open connections: {conn_cnt} (Total: {total_unfiltered_conns})', '\n')

@@ -13,7 +13,7 @@
 
 
 from mktxp.collector.base_collector import BaseCollector
-from mktxp.flow.processor.output import BaseOutputProcessor
+from mktxp.utils.units import parse_timedelta_milliseconds
 from mktxp.datasource.netwatch_ds import NetwatchMetricsDataSource
 
 
@@ -30,13 +30,13 @@ class NetwatchCollector(BaseCollector):
                            "tcp_connect_time", "http_status_code", "http_resp_time",                           ]
         translation_table = {
             'status': lambda value: '1' if value == 'up' else '0',      
-            'rtt_avg': lambda value: BaseOutputProcessor.parse_timedelta_milliseconds(value, ms_span=True) if value else '0',
-            'rtt_min': lambda value: BaseOutputProcessor.parse_timedelta_milliseconds(value, ms_span=True) if value else '0',
-            'rtt_max': lambda value: BaseOutputProcessor.parse_timedelta_milliseconds(value, ms_span=True) if value else '0',
-            'rtt_jitter': lambda value: BaseOutputProcessor.parse_timedelta_milliseconds(value, ms_span=True) if value else '0',
-            'rtt_stdev': lambda value: BaseOutputProcessor.parse_timedelta_milliseconds(value, ms_span=True) if value else '0',
-            'tcp_connect_time': lambda value: BaseOutputProcessor.parse_timedelta_milliseconds(value, ms_span=True) if value else '0',
-            'http_resp_time': lambda value: BaseOutputProcessor.parse_timedelta_milliseconds(value, ms_span=True) if value else '0'}
+            'rtt_avg': lambda value: parse_timedelta_milliseconds(value, ms_span=True) if value else '0',
+            'rtt_min': lambda value: parse_timedelta_milliseconds(value, ms_span=True) if value else '0',
+            'rtt_max': lambda value: parse_timedelta_milliseconds(value, ms_span=True) if value else '0',
+            'rtt_jitter': lambda value: parse_timedelta_milliseconds(value, ms_span=True) if value else '0',
+            'rtt_stdev': lambda value: parse_timedelta_milliseconds(value, ms_span=True) if value else '0',
+            'tcp_connect_time': lambda value: parse_timedelta_milliseconds(value, ms_span=True) if value else '0',
+            'http_resp_time': lambda value: parse_timedelta_milliseconds(value, ms_span=True) if value else '0'}
         netwatch_records = NetwatchMetricsDataSource.metric_records(router_entry, metric_labels = netwatch_labels, translation_table=translation_table)
 
         if netwatch_records:

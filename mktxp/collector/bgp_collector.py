@@ -13,7 +13,7 @@
 
 
 from mktxp.collector.base_collector import BaseCollector
-from mktxp.flow.processor.output import BaseOutputProcessor
+from mktxp.utils.units import parse_timedelta_milliseconds
 from mktxp.datasource.bgp_ds import BGPMetricsDataSource
 
 
@@ -27,7 +27,7 @@ class BGPCollector(BaseCollector):
         bgp_labels = ['name', 'remote_address', 'remote_as', 'local_as', 'remote_afi', 'local_afi', 'remote_messages', 'remote_bytes', 'local_messages', 'local_bytes', 'prefix_count', 'established', 'uptime']
         translation_table = {
                 'established': lambda value: '1' if value=='true' else '0',
-                'uptime': lambda value: BaseOutputProcessor.parse_timedelta_milliseconds(value) if value else '0'
+                'uptime': lambda value: parse_timedelta_milliseconds(value) if value else '0'
                 }
         bgp_records = BGPMetricsDataSource.metric_records(router_entry, metric_labels=bgp_labels, translation_table = translation_table)
 

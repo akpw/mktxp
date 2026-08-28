@@ -13,7 +13,6 @@
 
 
 from mktxp.collector.base_collector import BaseCollector
-from mktxp.flow.processor.output import BaseOutputProcessor
 from mktxp.datasource.interface_ds import InterfaceMonitorMetricsDataSource
 
 

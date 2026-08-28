@@ -13,7 +13,7 @@
 
 
 from mktxp.datasource.base_ds import BaseDSProcessor
-from mktxp.flow.processor.output import BaseOutputProcessor
+from mktxp.flow.processor.enrichment import format_interface_name
 
 
 class POEMetricsDataSource:
@@ -48,7 +48,7 @@ class POEMetricsDataSource:
                 comment = [comment_fn(interface) for interface in interfaces if interface['name'] == poe_record['name']][0]       
                 if comment:
                     # Format name with comment using centralized function
-                    poe_record['name'] = BaseOutputProcessor.format_interface_name(
+                    poe_record['name'] = format_interface_name(
                         poe_record['name'],
                         comment,
                         router_entry.config_entry.interface_name_format

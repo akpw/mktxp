@@ -85,7 +85,7 @@ def test_cli_rsc_split_extract_scripts(mock_rsc_file, tmp_path, capsys):
     assert "MockScript.rsc" in files
 
 
-@patch('mktxp.cli.dispatch.config_handler')
+@patch('mktxp.rsc.dispatcher.config_handler')
 def test_cli_rsc_split_default_dir(mock_dispatch_handler, mock_rsc_file, tmp_path, capsys):
     mock_dispatch_handler.rsc_config.return_value = {"base_dir": str(tmp_path)}
     test_args = ["mktxp", "rsc", "split", "-i", mock_rsc_file]
@@ -104,7 +104,7 @@ def test_cli_rsc_split_default_dir(mock_dispatch_handler, mock_rsc_file, tmp_pat
 
 
 @patch('mktxp.cli.options.config_handler')
-@patch('mktxp.cli.dispatch.config_handler')
+@patch('mktxp.rsc.dispatcher.config_handler')
 @patch('mktxp.rsc.fetcher.SSHExportFetcher.fetch_export')
 def test_cli_rsc_live_format(mock_fetch_export, mock_dispatch_handler, mock_options_handler, tmp_path, capsys):
     mock_fetch_export.return_value = MOCK_RSC_EXPORT
@@ -135,7 +135,7 @@ def test_cli_rsc_live_format(mock_fetch_export, mock_dispatch_handler, mock_opti
 
 
 @patch('mktxp.cli.options.config_handler')
-@patch('mktxp.cli.dispatch.config_handler')
+@patch('mktxp.rsc.dispatcher.config_handler')
 @patch('mktxp.rsc.fetcher.SSHExportFetcher.fetch_export')
 def test_cli_rsc_live_split(mock_fetch_export, mock_dispatch_handler, mock_options_handler, tmp_path, capsys):
     mock_fetch_export.return_value = MOCK_RSC_EXPORT

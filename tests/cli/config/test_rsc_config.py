@@ -2,7 +2,7 @@
 import os
 import pytest
 from configobj import ConfigObj
-from mktxp.cli.config.config import MKTXPConfigHandler, CustomConfig
+from mktxp.cli.config import MKTXPConfigHandler, CustomConfig
 
 
 def test_rsc_config_injects_when_missing(tmp_path):

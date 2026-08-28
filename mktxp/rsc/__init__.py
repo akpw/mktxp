@@ -5,6 +5,7 @@ from .parser import RSCParser
 from .formatter import RSCFormatter
 from .engine import RSCEngine
 from .fetcher import SSHExportFetcher
+from .dispatcher import RSCDispatcher
 
 __all__ = [
     'CommandNode',
@@ -15,5 +16,6 @@ __all__ = [
     'RSCParser',
     'RSCFormatter',
     'RSCEngine',
-    'SSHExportFetcher'
+    'SSHExportFetcher',
+    'RSCDispatcher'
 ]

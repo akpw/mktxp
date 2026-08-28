@@ -12,7 +12,7 @@
 ## GNU General Public License for more details.
 
 
-from mktxp.flow.processor.output import BaseOutputProcessor
+from mktxp.flow.processor.enrichment import augment_record
 from mktxp.collector.base_collector import BaseCollector
 from mktxp.datasource.wireless_ds import WirelessMetricsDataSource
 from mktxp.datasource.interface_ds import InterfaceMonitorMetricsDataSource
@@ -52,7 +52,7 @@ class WLANCollector(BaseCollector):
             registration_records = WirelessMetricsDataSource.metric_records(router_entry, metric_labels = registration_labels)
             if registration_records:
                 for registration_record in registration_records:
-                    BaseOutputProcessor.augment_record(router_entry, registration_record)
+                    augment_record(router_entry, registration_record)
 
                 tx_byte_metrics = BaseCollector.counter_collector('wlan_clients_tx_bytes', 'Number of sent packet bytes', registration_records, 'tx_bytes', ['dhcp_name', 'mac_address'])
                 yield tx_byte_metrics

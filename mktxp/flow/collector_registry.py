@@ -13,7 +13,7 @@
 
 
 from collections import OrderedDict
-from mktxp.cli.config.config import CollectorKeys
+from mktxp.cli.config import CollectorKeys
 from mktxp.collector.dhcp_collector import DHCPCollector
 from mktxp.collector.bridge_vlan_collector import BridgeVlanCollector
 from mktxp.collector.package_collector import PackageCollector

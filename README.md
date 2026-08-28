@@ -8,15 +8,12 @@
 
 
 ## Description
-MKTXP is a Prometheus Exporter for Mikrotik RouterOS devices. It is also a CLI tool to gather and inspect router metrics directly from the command line, as well as a deterministic [GitOps Configuration Formatter & Splitter](#routeros-gitops-configuration-management-mktxp-rsc) for RouterOS `.rsc` exports.
+MKTXP is a **Mikrotik RouterOS CLI Diagnostic Tool, Prometheus Exporter, and GitOps Configuration Manager**.
 
-While simple to use, MKTXP supports [advanced features](https://github.com/akpw/mktxp#advanced-features) such as automatic IP address resolution with both local & remote DHCP servers, concurrent exports across multiple router devices, configurable data processing & transformations, injectable custom labels for easy device grouping, optional bandwidth testing, support for Prometheus multi-target dynamic discovery, etc.
-
-Apart from exporting to Prometheus, MKTXP provides powerful CLI capabilities:
-- [Metrics Inspection](#a-check-on-reality): Print live client, DHCP, connection, and wireless metrics directly to your terminal.
-- [GitOps Config Parser (`mktxp rsc`)](#routeros-gitops-configuration-management-mktxp-rsc): Parse, clean, and format raw RouterOS `.rsc` export files into clean, deterministic monolithic files (`format`) or split them into a structured, modular GitOps directory hierarchy (`split`) with automatic sidecar script extraction.
-
-For effortless visualization of the RouterOS metrics exported to Prometheus, MKTXP comes with a dedicated [Grafana dashboard](https://grafana.com/grafana/dashboards/13679):
+It covers three core areas of functionality:
+- **[Diagnostics (`mktxp diag`)](#a-check-on-reality)**: Live CLI network diagnostics, client registration monitoring, and targeted filtering directly in your terminal.
+- **[GitOps Config Management (`mktxp rsc`)](#routeros-gitops-configuration-management-mktxp-rsc)**: Deterministic RouterOS `.rsc` configuration formatter (`format`) and modular per-domain directory splitter (`split`) with configurable script extraction.
+- **[Prometheus Metrics Exporter (`mktxp export`)](#exporting-to-prometheus)**: Multi-device Prometheus metric collection with dedicated [Grafana dashboard](https://grafana.com/grafana/dashboards/13679), supporting automatic IP address resolution with both local & remote DHCP servers, concurrent exports across multiple router devices, configurable data processing & transformations, injectable custom labels for easy device grouping, optional bandwidth testing, and Prometheus multi-target dynamic discovery (`/probe`).
 
 <img width="32%" alt="1" src="https://user-images.githubusercontent.com/5028474/217029083-3c2f561e-853f-45a7-b9f1-d818a830daf5.png"> <img width="32%" alt="2" src="https://user-images.githubusercontent.com/5028474/217029092-2b86b41b-1f89-4383-ac48-16652e820f7e.png"> <img width="32%" alt="3" src="https://user-images.githubusercontent.com/5028474/217029096-dbf6b46c-3ed7-4c76-a57b-8cebfb3b671c.png">
 
@@ -56,6 +53,8 @@ There are multiple ways to install this project, from a standalone app to a [ful
 
 ## Getting started
 To get started with MKTXP, you need to edit its main configuration file. This essentially involves filling in your Mikrotik devices IP addresses & authentication info, optionally modifying various settings to specific needs. 
+
+<sup>💡</sup> *Formatting and splitting local `.rsc` files (`mktxp rsc format -i ...` / `mktxp rsc split -i ...`) works right out of the box without any configuration.*
 
 The default configuration file comes with a sample configuration, making it easy to copy / edit parameters for your RouterOS devices as needed:
 ```
@@ -105,18 +104,20 @@ The default configuration file comes with a sample configuration, making it easy
     wireguard_peers = False             # Wireguard peers metrics
     bridge_vlan = False                 # Bridge VLAN metrics
 
-    route = True                    # IPv4 Routes metrics
-    pool = True                     # IPv4 Pool metrics
-    firewall = True                 # IPv4 Firewall rules traffic metrics
-    neighbor = True                 # IPv4 Reachable Neighbors
-    address_list = None             # Firewall Address List metrics, a comma-separated list of names
-    dns = False                     # DNS stats
+    route = True                        # IPv4 Routes metrics
+    pool = True                         # IPv4 Pool metrics
+    firewall = True                     # IPv4 Firewall rules traffic metrics
+    neighbor = True                     # IPv4 Reachable Neighbors
+    address_list = None                 # Firewall Address List metrics, a comma-separated list of names
+    total_address_list_counts = True    # Firewall Address List total counts across all lists (set False if large lists cause timeouts)
+    dns = False                         # DNS stats
 
-    ipv6_route = False              # IPv6 Routes metrics    
-    ipv6_pool = False               # IPv6 Pool metrics
-    ipv6_firewall = False           # IPv6 Firewall rules traffic metrics
-    ipv6_neighbor = False           # IPv6 Reachable Neighbors
-    ipv6_address_list = None        # IPv6 Firewall Address List metrics, a comma-separated list of names
+    ipv6_route = False                  # IPv6 Routes metrics    
+    ipv6_pool = False                   # IPv6 Pool metrics
+    ipv6_firewall = False               # IPv6 Firewall rules traffic metrics
+    ipv6_neighbor = False               # IPv6 Reachable Neighbors
+    ipv6_address_list = None            # IPv6 Firewall Address List metrics, a comma-separated list of names
+    ipv6_total_address_list_counts = True # IPv6 Firewall Address List total counts across all lists (set False if large lists cause timeouts)
 
     poe = True                      # POE metrics
     monitor = True                  # Interface monitor metrics
@@ -371,6 +372,7 @@ mktxp edit -i
     max_worker_threads = 5              # Max number of worker threads that can fetch routers (parallel fetch only)
     max_scrape_duration = 10            # Max duration of individual routers' metrics collection (parallel fetch only)
     total_max_scrape_duration = 30      # Max overall duration of all metrics collection (parallel fetch only)
+    http_server_threads = 16            # Number of worker threads for the HTTP server
 
     persistent_router_connection_pool = True  # Use a persistent router connections pool between scrapes
     persistent_dhcp_cache = True              # Persist DHCP cache between metric collections
@@ -403,6 +405,18 @@ mktxp edit -i
     handler_firewall = /ip firewall, /ipv6 firewall
     handler_lte = /interface lte, /tool sms
     handler_wireguard = /interface wireguard
+
+
+[DIAG]
+    # Wireless & CAPsMAN defaults
+    low_signal_threshold = -75          # Default dBm threshold for --low-signal (matches <= -75 dBm)
+    min_signal_threshold = -60          # Default dBm threshold for --min-signal (matches >= -60 dBm)
+    low_rate_threshold = '18M'          # Default rate for --low-rate (matches <= 18 Mbps)
+    recent_duration = '15m'             # Default duration for --recent (matches uptime <= 15m)
+
+    # IP Connections & Bandwidth defaults
+    top_connections_count = 10          # Default limit for connection stats --top
+    rate_above_threshold = '1M'         # Default rate for kid control / bandwidth --rate-above
 ```    
 <sup>💡</sup> *When changing the default mktxp port for [docker image installs](https://github.com/akpw/mktxp#docker-image-install), you'll need to adjust the `docker run ... -p 49090:49090 ...` command to reflect the new port*
 
@@ -413,24 +427,49 @@ Now with your RouterOS metrics being exported to Prometheus, it's easy to visual
 ## Description of CLI Commands
 ### mktxp commands
        . MKTXP commands:
-        .. info     Shows base MKTXP info
-        .. edit     Open MKTXP configuration file in your editor of choice        
-        .. print    Displays selected metrics on the command line
-        .. export   Starts collecting metrics for all enabled RouterOS configuration entries
-        .. show     Shows MKTXP configuration entries on the command line
+        .. diag     Interactive diagnostic inspection for clients, wireless, connections, and leases (alias: print)
         .. rsc      RouterOS GitOps configuration formatter and splitter
+        .. export   Starts collecting metrics for all enabled RouterOS configuration entries
+        .. edit     Open MKTXP configuration file in your editor of choice        
+        .. show     Shows MKTXP configuration entries on the command line
+        .. info     Shows base MKTXP info
 
 ````
 ❯ mktxp -h
-usage: MKTXP [-h] [--cfg-dir CFG_DIR] {info, edit, export, print, show, rsc} ...
+usage: MKTXP [-h] [--cfg-dir CFG_DIR]
+             {diag, rsc, export, edit, show, info} ...
 
-Prometheus Exporter for Mikrotik RouterOS
+Mikrotik RouterOS CLI Diagnostic Tool, Prometheus Exporter, and GitOps
+Configuration Manager
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   --cfg-dir CFG_DIR     MKTXP config files directory (optional)
+
+MKTXP commands:
+  {diag, rsc, export, edit, show, info}
 ````
 To learn more about individual commands, just run it with ```-h```:
+
+### Diagnostics (`mktxp diag` / `mktxp print`)
+Displays live router diagnostics and tables with domain-aware filtering:
+- `-en`, `--entry-name`: Router entry name to inspect
+- `-cc`, `--capsman-clients`: Show connected CAPsMAN clients
+- `-wc`, `--wireless-clients`: Show connected WiFi / WiFiWave2 clients
+- `-dc`, `--dhcp-clients`: Show DHCP server leases
+- `-cn`, `--connections`: Show IP connection tracking statistics
+- `-kc`, `--kid-control`: Show Kid Control devices and bandwidth
+- `-al`, `--address-list <names>`: Show firewall address lists
+- `-nw`, `--netwatch`: Show Netwatch probe statuses
+- `-in`, `--include <patterns>`: Filter records matching semicolon-separated substrings or glob patterns (e.g. `-in "wlan-5G;Pro;*10.0.*"`)
+- `-ex`, `--exclude <patterns>`: Exclude records matching patterns (e.g. `-ex "2.4G;Guest"`)
+
+**Wireless Diagnostic Filters (used with `-cc` or `-wc`):**
+- `--low-signal [dBm]`: Filter clients with weak signal (default: `<= -75 dBm`)
+- `--min-signal [dBm]`: Filter clients with strong signal (default: `>= -60 dBm`)
+- `--low-rate [rate]`: Filter clients with low PHY rates (default: `<= 18M`)
+- `--recent [duration]`: Filter recently connected clients (default: `<= 15m`)
+- `--band [2g|5g|6g]`: Filter clients by frequency band
 For example, to learn everything about ````mktxp show````:
 ````
 ❯ mktxp show -h

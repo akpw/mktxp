@@ -12,8 +12,8 @@
 ## GNU General Public License for more details.
 
 
-from mktxp.cli.config.config import MKTXPConfigKeys
-from mktxp.flow.processor.output import BaseOutputProcessor
+from mktxp.cli.config import MKTXPConfigKeys
+from mktxp.flow.processor.enrichment import augment_record
 from mktxp.collector.base_collector import BaseCollector
 from mktxp.datasource.capsman_ds import CapsmanCapsMetricsDataSource, CapsmanRegistrationsMetricsDataSource, CapsmanInterfacesDatasource
 from mktxp.datasource.wireless_ds import WirelessMetricsDataSource
@@ -53,7 +53,7 @@ class CapsmanCollector(BaseCollector):
 
                 # translate / trim / augment registration records
                 for registration_record in registration_records:
-                    BaseOutputProcessor.augment_record(router_entry, registration_record)
+                    augment_record(router_entry, registration_record)
 
                 tx_byte_metrics = BaseCollector.counter_collector('capsman_clients_tx_bytes', 'Number of sent packet bytes', registration_records, 'tx_bytes', ['dhcp_name', 'mac_address'])
                 yield tx_byte_metrics

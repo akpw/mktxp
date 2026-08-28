@@ -13,7 +13,7 @@
 
 import itertools
 from prometheus_client.core import GaugeMetricFamily, CounterMetricFamily, InfoMetricFamily
-from mktxp.cli.config.config import MKTXPConfigKeys, config_handler
+from mktxp.cli.config import MKTXPConfigKeys, config_handler
 
 class BaseCollector:
     """ Base Collector methods

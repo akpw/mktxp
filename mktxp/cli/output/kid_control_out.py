@@ -12,7 +12,11 @@
 ## GNU General Public License for more details.
 
 
-from mktxp.flow.processor.output import BaseOutputProcessor
+from humanize import naturaldelta
+from mktxp.utils.tables import output_table, OutputKidControlEntry
+from mktxp.utils.filtering import match_record
+from mktxp.utils.units import parse_numeric_rate, parse_bitrates, parse_timedelta_seconds
+from mktxp.flow.processor.enrichment import augment_record
 from mktxp.datasource.kid_control_device_ds import KidDeviceMetricsDataSource
 
 class KidControlOutput:
@@ -32,22 +36,21 @@ class KidControlOutput:
         total_unfiltered = len(device_records)
         
         for device_record in device_records:
-            BaseOutputProcessor.augment_record(router_entry, device_record)
+            augment_record(router_entry, device_record)
 
             # Store original numeric rates for sorting before parsing for display
-            rate_up_numeric = BaseOutputProcessor.parse_numeric_rate(device_record.get('rate_up', '0'))
-            rate_down_numeric = BaseOutputProcessor.parse_numeric_rate(device_record.get('rate_down', '0'))
+            rate_up_numeric = parse_numeric_rate(device_record.get('rate_up', '0'))
+            rate_down_numeric = parse_numeric_rate(device_record.get('rate_down', '0'))
             
             # Parse rates for display
             if device_record.get('rate_up'):
-                device_record['rate_up'] = BaseOutputProcessor.parse_bitrates(device_record['rate_up'])
+                device_record['rate_up'] = parse_bitrates(device_record['rate_up'])
             if device_record.get('rate_down'):
-                device_record['rate_down'] = BaseOutputProcessor.parse_bitrates(device_record['rate_down'])
+                device_record['rate_down'] = parse_bitrates(device_record['rate_down'])
 
             # Parse idle time for display
             if device_record.get('idle_time'):
-                from humanize import naturaldelta
-                idle_seconds = BaseOutputProcessor.parse_timedelta_seconds(device_record['idle_time'])
+                idle_seconds = parse_timedelta_seconds(device_record['idle_time'])
                 device_record['idle_time'] = naturaldelta(idle_seconds, minimum_unit='seconds')
                 
             # Filter to only the fields we need for output
@@ -67,7 +70,7 @@ class KidControlOutput:
                 '_total_rate_numeric': rate_up_numeric + rate_down_numeric
             }
 
-            if not BaseOutputProcessor.match_record(filtered_record, include, exclude):
+            if not match_record(filtered_record, include, exclude):
                 continue
 
             # Separate devices with users from dynamic devices
@@ -96,31 +99,31 @@ class KidControlOutput:
             device.pop('_total_rate_numeric', None)
 
         output_records = 0
-        output_entry = BaseOutputProcessor.OutputKidControlEntry
-        output_table = BaseOutputProcessor.output_table(output_entry)
+        output_entry = OutputKidControlEntry
+        tbl = output_table(output_entry)
                 
         # First, add devices with users (grouped by user)
         user_device_count = 0
         for user, devices in devices_by_user.items():
             for record in devices:
-                output_table.add_row(output_entry(**record))
+                tbl.add_row(output_entry(**record))
                 output_records += 1
                 user_device_count += 1
             # Add separator line between users if there are multiple users
             if len(devices_by_user) > 1 and output_records < len(devices_with_users):
-                output_table.add_row(output_entry())
+                tbl.add_row(output_entry())
         
         # Add separator between user devices and dynamic devices if both exist
         if devices_with_users and dynamic_devices:
-            output_table.add_row(output_entry())
+            tbl.add_row(output_entry())
         
         # Then add dynamic devices (no users)
         for record in dynamic_devices:
-            output_table.add_row(output_entry(**record))
+            tbl.add_row(output_entry(**record))
             output_records += 1
 
         if output_records > 0:
-            print (output_table.draw())
+            print (tbl.draw())
 
             # Print summary
             if devices_with_users:

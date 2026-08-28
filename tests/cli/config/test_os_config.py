@@ -1,6 +1,6 @@
 import os
 import pytest
-from mktxp.cli.config.config import LinuxConfig
+from mktxp.cli.config import LinuxConfig
 from mktxp.utils.utils import FSHelper
 
 def test_mktxp_user_dir_path_legacy(mocker):

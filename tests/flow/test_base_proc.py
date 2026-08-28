@@ -13,7 +13,7 @@
 
 import gzip
 import pytest
-from mktxp.flow.processor.base_proc import MetricsRouter, PrometheusHeadersDeduplicatingMiddleware
+from mktxp.exporter import MetricsRouter, PrometheusHeadersDeduplicatingMiddleware
 
 # A mock WSGI app to simulate the prometheus_client
 def mock_app(environ, start_response):
@@ -102,7 +102,7 @@ def test_probe_missing_module_returns_503():
 
 
 def test_probe_unknown_module_returns_503(monkeypatch):
-    from mktxp.flow.processor import base_proc
+    from mktxp.exporter import router as base_proc
 
     class DummySystemEntry:
         probe_connection_pool = False
@@ -130,7 +130,7 @@ def test_probe_unknown_module_returns_503(monkeypatch):
 
 
 def test_probe_disabled_module_returns_503(monkeypatch):
-    from mktxp.flow.processor import base_proc
+    from mktxp.exporter import router as base_proc
 
     class DummySystemEntry:
         probe_connection_pool = False
@@ -165,7 +165,7 @@ def test_probe_disabled_module_returns_503(monkeypatch):
 
 
 def test_probe_valid_module_uses_probe_app(monkeypatch):
-    from mktxp.flow.processor import base_proc
+    from mktxp.exporter import router as base_proc
 
     class DummySystemEntry:
         probe_connection_pool = False
@@ -249,7 +249,7 @@ def test_probe_valid_module_uses_probe_app(monkeypatch):
 
 
 def test_probe_target_override_applies_hostname(monkeypatch):
-    from mktxp.flow.processor import base_proc
+    from mktxp.exporter import router as base_proc
 
     class DummySystemEntry:
         probe_connection_pool = False
@@ -329,7 +329,7 @@ def test_probe_target_override_applies_hostname(monkeypatch):
 
 
 def test_probe_module_only_requires_target(monkeypatch):
-    from mktxp.flow.processor import base_proc
+    from mktxp.exporter import router as base_proc
 
     class DummySystemEntry:
         probe_connection_pool = False
@@ -364,7 +364,7 @@ def test_probe_module_only_requires_target(monkeypatch):
 
 
 def test_probe_empty_target_returns_503(monkeypatch):
-    from mktxp.flow.processor import base_proc
+    from mktxp.exporter import router as base_proc
 
     class DummySystemEntry:
         probe_connection_pool = False
