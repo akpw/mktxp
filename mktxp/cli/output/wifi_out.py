@@ -12,7 +12,7 @@
 ## GNU General Public License for more details.
 
 
-from mktxp.utils.tables import output_table, OutputWirelessEntry, OutputWiFiEntry
+from mktxp.cli.output.tables import output_table, OutputWirelessEntry, OutputWiFiEntry
 from mktxp.utils.filtering import match_record, match_wireless_record
 from mktxp.flow.processor.enrichment import augment_record
 from mktxp.datasource.wireless_ds import WirelessMetricsDataSource

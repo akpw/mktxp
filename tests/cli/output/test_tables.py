@@ -12,7 +12,7 @@
 ## GNU General Public License for more details.
 
 from unittest.mock import patch
-from mktxp.utils.tables import (
+from mktxp.cli.output.tables import (
     OutputCapsmanEntry,
     OutputWirelessEntry,
     OutputWiFiEntry,

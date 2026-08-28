@@ -12,7 +12,7 @@
 ## GNU General Public License for more details.
 
 
-from mktxp.utils.tables import output_table, OutputNetwatchEntry
+from mktxp.cli.output.tables import output_table, OutputNetwatchEntry
 from mktxp.utils.filtering import match_record
 from mktxp.datasource.netwatch_ds import NetwatchMetricsDataSource
 from humanize import naturaldelta

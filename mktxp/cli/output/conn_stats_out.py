@@ -12,7 +12,7 @@
 ## GNU General Public License for more details.
 
 
-from mktxp.utils.tables import output_table, OutputConnStatsEntry
+from mktxp.cli.output.tables import output_table, OutputConnStatsEntry
 from mktxp.utils.filtering import match_record
 from mktxp.flow.processor.enrichment import resolve_dhcp
 from mktxp.datasource.connection_ds import IPConnectionStatsDatasource

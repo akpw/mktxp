@@ -12,7 +12,7 @@
 ## GNU General Public License for more details.
 
 
-from mktxp.utils.tables import output_table, OutputAddressListEntry
+from mktxp.cli.output.tables import output_table, OutputAddressListEntry
 from mktxp.utils.filtering import match_record
 from mktxp.datasource.address_list_ds import AddressListMetricsDataSource
 

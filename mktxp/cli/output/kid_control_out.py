@@ -13,7 +13,7 @@
 
 
 from humanize import naturaldelta
-from mktxp.utils.tables import output_table, OutputKidControlEntry
+from mktxp.cli.output.tables import output_table, OutputKidControlEntry
 from mktxp.utils.filtering import match_record
 from mktxp.utils.units import parse_numeric_rate, parse_bitrates, parse_timedelta_seconds
 from mktxp.flow.processor.enrichment import augment_record

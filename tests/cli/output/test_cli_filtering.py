@@ -13,7 +13,7 @@
 
 import pytest
 from unittest.mock import Mock, patch
-from mktxp.utils.tables import output_table, OutputCapsmanEntry
+from mktxp.cli.output.tables import output_table, OutputCapsmanEntry
 from mktxp.utils.filtering import parse_patterns, match_record, match_wireless_record
 from mktxp.cli.output.capsman_out import CapsmanOutput
 from mktxp.cli.output.dhcp_out import DHCPOutput

@@ -18,6 +18,7 @@ It covers three core areas of functionality:
 <img width="32%" alt="1" src="https://user-images.githubusercontent.com/5028474/217029083-3c2f561e-853f-45a7-b9f1-d818a830daf5.png"> <img width="32%" alt="2" src="https://user-images.githubusercontent.com/5028474/217029092-2b86b41b-1f89-4383-ac48-16652e820f7e.png"> <img width="32%" alt="3" src="https://user-images.githubusercontent.com/5028474/217029096-dbf6b46c-3ed7-4c76-a57b-8cebfb3b671c.png">
 
 ## Blogs
+- [Under the Hood: Refactoring MKTXP for 2.0](https://akpw.github.io/articles/2026/08/28/Refactoring-MKTXP-2.0-Modular-Architecture.html)
 - [Wrangling RouterOS Configs: Introducing GitOps for MikroTik with MKTXP](https://akpw.github.io/articles/2026/08/16/GitOps-for-Mikrotik-RSC.html)
 
 ## Requirements:

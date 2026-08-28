@@ -12,7 +12,7 @@
 ## GNU General Public License for more details.
 
 
-from mktxp.utils.tables import output_table, OutputDHCPEntry
+from mktxp.cli.output.tables import output_table, OutputDHCPEntry
 from mktxp.utils.filtering import match_record
 from mktxp.flow.processor.enrichment import dhcp_name
 from mktxp.datasource.dhcp_ds import DHCPMetricsDataSource
