@@ -8,12 +8,12 @@
 
 
 ## Description
-MKTXP is a **Mikrotik RouterOS CLI Diagnostic Tool, Prometheus Exporter, and GitOps Configuration Manager**.
+MKTXP is a Mikrotik RouterOS CLI Diagnostic Tool, Prometheus Exporter, and GitOps Configuration Manager.
 
 It covers three core areas of functionality:
-- **[Diagnostics (`mktxp diag`)](#a-check-on-reality)**: Live CLI network diagnostics, client registration monitoring, and targeted filtering directly in your terminal.
-- **[GitOps Config Management (`mktxp rsc`)](#routeros-gitops-configuration-management-mktxp-rsc)**: Deterministic RouterOS `.rsc` configuration formatter (`format`) and modular per-domain directory splitter (`split`) with configurable script extraction.
-- **[Prometheus Metrics Exporter (`mktxp export`)](#exporting-to-prometheus)**: Multi-device Prometheus metric collection with dedicated [Grafana dashboard](https://grafana.com/grafana/dashboards/13679), supporting automatic IP address resolution with both local & remote DHCP servers, concurrent exports across multiple router devices, configurable data processing & transformations, injectable custom labels for easy device grouping, optional bandwidth testing, and Prometheus multi-target dynamic discovery (`/probe`).
+- [Diagnostics (`mktxp diag`)](#a-check-on-reality): Live CLI network diagnostics, client registration monitoring, and targeted filtering directly in your terminal.
+- [GitOps Config Management (`mktxp rsc`)](#routeros-gitops-configuration-management-mktxp-rsc): Deterministic RouterOS `.rsc` configuration formatter (`format`) and modular per-domain directory splitter (`split`) with configurable script extraction.
+- [Prometheus Metrics Exporter (`mktxp export`)](#exporting-to-prometheus): Multi-device Prometheus metric collection with dedicated [Grafana dashboard](https://grafana.com/grafana/dashboards/13679), supporting automatic IP address resolution with both local & remote DHCP servers, concurrent exports across multiple router devices, configurable data processing & transformations, injectable custom labels for easy device grouping, optional bandwidth testing, and Prometheus multi-target dynamic discovery (`/probe`).
 
 <img width="32%" alt="1" src="https://user-images.githubusercontent.com/5028474/217029083-3c2f561e-853f-45a7-b9f1-d818a830daf5.png"> <img width="32%" alt="2" src="https://user-images.githubusercontent.com/5028474/217029092-2b86b41b-1f89-4383-ac48-16652e820f7e.png"> <img width="32%" alt="3" src="https://user-images.githubusercontent.com/5028474/217029096-dbf6b46c-3ed7-4c76-a57b-8cebfb3b671c.png">
 
