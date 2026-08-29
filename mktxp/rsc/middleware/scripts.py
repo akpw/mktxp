@@ -51,12 +51,11 @@ class ScriptExtractor(BaseMiddleware):
                         )
                         config.extracted_scripts.append(script_node)
 
-                        # Replace AST node with note comment
-                        note_cmd = CommandNode(
-                            command='',
-                            note_comment=f"# Note: {script_name} script source is exported to {script_name}.rsc in this directory"
-                        )
-                        new_commands.append(note_cmd)
+                        # Retain script definition with metadata, setting source="", and attach pointer note
+                        extracted_cmd = cmd.clone()
+                        extracted_cmd.params['source'] = '""'
+                        extracted_cmd.note_comment = f"# Note: {script_name} script source is exported to {script_name}.rsc in this directory"
+                        new_commands.append(extracted_cmd)
                         continue
 
                 new_commands.append(cmd)

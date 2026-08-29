@@ -87,6 +87,29 @@ def test_rsc_engine_split_script_modes(tmp_path):
     assert "ShortScript.rsc" in out_extracted
     assert "Medium Script.rsc" in out_extracted
     assert "ComplexScript.rsc" in out_extracted
+
+    # Verify script object definitions are preserved with source="" and pointer notes underneath
+    assert 'add name=ShortScript owner=admin source=""' in out_extracted["03-system.rsc"]
+    assert 'add name="Medium Script" owner=admin source=""' in out_extracted["03-system.rsc"]
+    assert 'add name=ComplexScript owner=admin source=""' in out_extracted["03-system.rsc"]
     assert "# Note: ShortScript script source is exported to ShortScript.rsc in this directory" in out_extracted["03-system.rsc"]
     assert "# Note: Medium Script script source is exported to Medium Script.rsc in this directory" in out_extracted["03-system.rsc"]
     assert "# Note: ComplexScript script source is exported to ComplexScript.rsc in this directory" in out_extracted["03-system.rsc"]
+
+
+def test_script_metadata_and_permissions_preserved(tmp_path):
+    raw_script = """
+/system script
+add comment="Maintenance Task" dont-require-permissions=yes name=CustomTask owner=admin policy=read,write,reboot source="/system logging info \\"Running maintenance...\\";"
+"""
+    engine = RSCEngine()
+    out = engine.split(raw_text=raw_script, output_dir=str(tmp_path), extract_scripts=True)
+
+    assert "CustomTask.rsc" in out
+    assert out["CustomTask.rsc"].strip() == '/system logging info "Running maintenance...";'
+
+    assert "03-system.rsc" in out
+    sys_rsc = out["03-system.rsc"]
+    assert 'add comment="Maintenance Task" dont-require-permissions=yes name=CustomTask owner=admin policy=read,write,reboot source=""' in sys_rsc
+    assert '# Note: CustomTask script source is exported to CustomTask.rsc in this directory' in sys_rsc
+

@@ -68,7 +68,7 @@ class RSCFormatter:
         return "\n".join(lines)
 
     def format_command(self, cmd: CommandNode) -> str:
-        if cmd.note_comment:
+        if not cmd.command and cmd.note_comment:
             return cmd.note_comment
 
         lines: List[str] = []
@@ -97,6 +97,9 @@ class RSCFormatter:
         else:
             wrapped = self._wrap_tokens(tokens)
             lines.append(wrapped)
+
+        if cmd.note_comment:
+            lines.append(cmd.note_comment)
 
         return "\n".join(lines)
 
