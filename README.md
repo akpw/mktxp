@@ -1,924 +1,180 @@
+# MKTXP
 
 ![License](https://img.shields.io/badge/License-GNU%20GPL-blue.svg)
 ![Language](https://img.shields.io/badge/python-v3.9+-blue)
-![License](https://img.shields.io/badge/mikrotik-routeros-orange)
-![License](https://img.shields.io/badge/prometheus-exporter-blueviolet)
+![Platform](https://img.shields.io/badge/mikrotik-routeros-orange)
+![Diagnostics](https://img.shields.io/badge/cli-diagnostics-blue)
 ![GitOps](https://img.shields.io/badge/gitops-rsc%20config-2ea44f)
+![Prometheus](https://img.shields.io/badge/prometheus-exporter-blueviolet)
 [![Docker Pulls](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fghcr-badge.elias.eu.org%2Fapi%2Fakpw%2Fmktxp%2Fmktxp&query=%24.downloadCount&label=docker%20pulls&logo=docker&logoColor=white&color=2496ed)](https://github.com/akpw/mktxp/pkgs/container/mktxp)
 
+MKTXP is an extensible toolkit for MikroTik RouterOS network engineering. It unifies **interactive terminal diagnostics**, **deterministic GitOps configuration management**, and a **production-grade Prometheus metrics exporter** into a single command-line tool.
 
-## Description
-MKTXP is a Mikrotik RouterOS CLI Diagnostic Tool, Prometheus Exporter, and GitOps Configuration Manager.
+---
 
-It covers three core areas of functionality:
-- [Diagnostics (`mktxp diag`)](#a-check-on-reality): Live CLI network diagnostics, client registration monitoring, and targeted filtering directly in your terminal.
-- [GitOps Config Management (`mktxp rsc`)](#routeros-gitops-configuration-management-mktxp-rsc): Deterministic RouterOS `.rsc` configuration formatter (`format`) and modular per-domain directory splitter (`split`) with configurable script extraction.
-- [Prometheus Metrics Exporter (`mktxp export`)](#exporting-to-prometheus): Multi-device Prometheus metric collection with dedicated [Grafana dashboard](https://grafana.com/grafana/dashboards/13679), supporting automatic IP address resolution with both local & remote DHCP servers, concurrent exports across multiple router devices, configurable data processing & transformations, injectable custom labels for easy device grouping, optional bandwidth testing, and Prometheus multi-target dynamic discovery (`/probe`).
+## Choose Your Workflow
 
-<img width="32%" alt="1" src="https://user-images.githubusercontent.com/5028474/217029083-3c2f561e-853f-45a7-b9f1-d818a830daf5.png"> <img width="32%" alt="2" src="https://user-images.githubusercontent.com/5028474/217029092-2b86b41b-1f89-4383-ac48-16652e820f7e.png"> <img width="32%" alt="3" src="https://user-images.githubusercontent.com/5028474/217029096-dbf6b46c-3ed7-4c76-a57b-8cebfb3b671c.png">
+| I want to… | Start with | Full Guide |
+| :--- | :--- | :--- |
+| **Troubleshoot a router now** | `mktxp diag …` | [Diagnostics Guide](https://github.com/akpw/mktxp/blob/main/docs/diagnostics.md) |
+| **Clean up / version RouterOS configs** | `mktxp rsc …` | [GitOps RSC Guide](https://github.com/akpw/mktxp/blob/main/docs/rsc.md) |
+| **Monitor routers continuously** | `mktxp export` | [Exporter Guide](https://github.com/akpw/mktxp/blob/main/docs/exporter.md) |
 
-## Blogs
+---
+
+## Install
+
+### Standalone CLI & Exporter
+
+```bash
+# Recommended for local CLI usage
+❯ pipx install mktxp
+
+# Or via standard pip
+❯ pip install mktxp
+
+# Via Homebrew
+❯ brew install mktxp
+
+# Via Docker
+❯ docker pull ghcr.io/akpw/mktxp:latest
+```
+
+*Requirements: Python >= 3.9. Supported on Linux, macOS, and FreeBSD.*
+
+### Ready-to-Run Monitoring & Logging Stack ([MKTXP Stack](https://github.com/akpw/mktxp-stack))
+
+If you want a turnkey environment without manually wiring services, [**MKTXP Stack**](https://github.com/akpw/mktxp-stack) is an out-of-the-box Docker Compose deployment that packages MKTXP alongside Prometheus, pre-configured Grafana dashboards, and centralized MikroTik syslog processing powered by Grafana Loki and Promtail.
+
+---
+
+## Quick Start: GitOps Configuration (`mktxp rsc`)
+
+`mktxp rsc` works immediately on local `.rsc` files with **zero configuration or router setup required**:
+
+```bash
+# Deterministic formatting: single-line commands, standardized headers, and clean Git diffs
+❯ mktxp rsc format -i backup.rsc -o clean_backup.rsc
+
+# Modular domain splitting: break a monolithic export into numbered component files and extracted scripts
+❯ mktxp rsc split -i backup.rsc -o ./config-repo/ --extract-scripts
+```
+
+> 📖 *For AST architecture, custom domain handlers, and CI/CD automation, see the [GitOps RSC Guide](https://github.com/akpw/mktxp/blob/main/docs/rsc.md).*
+
+---
+
+## Connect to a Router
+
+Both **Live Diagnostics** and the **Prometheus Exporter** connect to your routers via the standard RouterOS API.
+
+### 1. Minimal Configuration
+
+Add your router entry to `mktxp.conf` (edit with `mktxp edit` or place at `~/.config/mktxp/mktxp.conf`):
+
+```ini
+[My-Router]
+    hostname = 192.168.88.1
+    username = mktxp_user
+    password = secret_password
+```
+
+*(For all available metrics switches and defaults, see the canonical [mktxp/cli/config/mktxp.conf](https://github.com/akpw/mktxp/blob/main/mktxp/cli/config/mktxp.conf) template.)*
+
+### 2. Router User Setup
+
+Create a dedicated monitoring user on your MikroTik router:
+
+```routeros
+/user group add name=mktxp_group policy=api,read
+/user add name=mktxp_user group=mktxp_group password=secret_password
+```
+
+*(Note: For LTE metrics on RouterOS v6, the user also needs the `test` permission policy.)*
+
+---
+
+## Quick Start: Live Diagnostics (`mktxp diag`)
+
+Run targeted, domain-specific diagnostic one-liners directly in your terminal:
+
+```bash
+# Find sticky wireless clients clinging to distant APs with poor signal or low rates
+❯ mktxp diag -en My-Router -cc --low-signal --low-rate 1M
+
+# Surface top bandwidth consumers across the network
+❯ mktxp diag -en My-Router -kc --top 5
+
+# Audit mystery DHCP devices with no hostname
+❯ mktxp diag -en My-Router -dc --unidentified
+
+# Check active dynamic firewall threat bans
+❯ mktxp diag -en My-Router -al blacklist --dynamic-only
+```
+
+Sample output:
+```text
++----------------------+--------------+-------------------+-----------+------------------+--------+---------+---------+---------+
+|      dhcp_name       | dhcp_address |    mac_address    | rx_signal |    interface     |  ssid  | tx_rate | rx_rate | uptime  |
++======================+==============+===================+===========+==================+========+=========+=========+=========+
+| wlan0 (Conf Printer) | 10.20.10.49  | D8:1F:12:AD:3C:55 |    -87    | AP-Breakroom-2G  | Office | 36 Mbps | 1 Mbps  | 6 hours |
+| wlan0 (Boardroom Tab)| 10.20.10.97  | 10:5A:17:0C:B9:C8 |    -84    | AP-Reception-2G  | Office | 24 Mbps | 1 Mbps  |  a day  |
++----------------------+--------------+-------------------+-----------+------------------+--------+---------+---------+---------+
+Matching CAPsMAN clients: 2 (Total connected: 127)
+```
+
+> 💡 **Tip:** Appending `-h` to any command (e.g. `mktxp diag -kc -h`) dynamically scopes help to only that command's filters.  
+> 📖 *For all 6 diagnostic domains, table schemas, and recipes, see the [Diagnostics Guide](https://github.com/akpw/mktxp/blob/main/docs/diagnostics.md).*
+
+---
+
+## Quick Start: Prometheus Exporter (`mktxp export`)
+
+Start the exporter daemon to scrape configured routers and serve metrics to Prometheus:
+
+```bash
+❯ mktxp export
+# Serving Prometheus metrics at http://localhost:49090/metrics
+```
+
+Add the scrape target to `/etc/prometheus/prometheus.yml`:
+```yaml
+scrape_configs:
+  - job_name: 'mktxp'
+    static_configs:
+      - targets: ['localhost:49090']
+```
+
+Import the official [Grafana Dashboard (ID: 13679)](https://grafana.com/grafana/dashboards/13679):
+
+<img width="32%" alt="Traffic & Interface" src="https://user-images.githubusercontent.com/5028474/217029083-3c2f561e-853f-45a7-b9f1-d818a830daf5.png"> <img width="32%" alt="Wireless Clients" src="https://user-images.githubusercontent.com/5028474/217029092-2b86b41b-1f89-4383-ac48-16652e820f7e.png"> <img width="32%" alt="Device Health" src="https://user-images.githubusercontent.com/5028474/217029096-dbf6b46c-3ed7-4c76-a57b-8cebfb3b671c.png">
+
+> Want centralized RouterOS logs too? [**MKTXP Stack**](https://github.com/akpw/mktxp-stack) adds Grafana Loki and Promtail alongside Prometheus and MKTXP. The screenshot below is the Stack's log-analysis dashboard; the three screenshots above are the standard MKTXP metrics dashboard.
+
+<img width="50%" alt="MKTXP Stack Centralized Logging" src="https://user-images.githubusercontent.com/5028474/210771516-06a3e6ab-8eab-458c-9f38-5d44f95d23d4.png">
+
+> 📖 *For dynamic multi-target discovery (`/probe`), Docker/Kubernetes, and systemd/FreeBSD service deployment, see the [Exporter Guide](https://github.com/akpw/mktxp/blob/main/docs/exporter.md).*
+
+---
+
+## Detailed Documentation
+
+- [Live CLI Diagnostics Guide](https://github.com/akpw/mktxp/blob/main/docs/diagnostics.md): Detailed filter reference, table schemas, and recipes for all 6 diagnostic domains.
+- [RouterOS GitOps RSC Guide](https://github.com/akpw/mktxp/blob/main/docs/rsc.md): AST formatting, modular domain splitting, script extraction, and CI/CD pipelines.
+- [Prometheus Exporter Guide](https://github.com/akpw/mktxp/blob/main/docs/exporter.md): Metrics catalog, `/probe` multi-target pattern, container manifests, and service files.
+
+---
+
+## Articles & Deep Dives
+
 - [Beyond Metrics: Instant RouterOS Diagnostics with MKTXP 2.0](https://akpw.github.io/articles/2026/09/06/MKTXP-2.0-Live-CLI-Diagnostics.html)
 - [Under the Hood: Refactoring MKTXP for 2.0](https://akpw.github.io/articles/2026/08/28/Refactoring-MKTXP-2.0-Modular-Architecture.html)
 - [Wrangling RouterOS Configs: Introducing GitOps for MikroTik with MKTXP](https://akpw.github.io/articles/2026/08/16/GitOps-for-Mikrotik-RSC.html)
 
-## Requirements:
-- Supported OSs:
-   * Linux   
-   * Mac OSX
-   * FreeBSD
+---
 
-- Mikrotik RouterOS device(s)
+## License & Contributing
 
-- Optional: 
-   * [Prometheus](https://prometheus.io/docs/prometheus/latest/installation/)
-   * [Grafana](https://grafana.com/docs/grafana/latest/installation/)
-   * [Docker](https://docs.docker.com/) / [Docker Compose](https://docs.docker.com/compose/)
-
-
-## Install:
-There are multiple ways to install this project, from a standalone app to a [fully dockerized monitoring stack](https://github.com/akpw/mktxp-stack). The supported options include:
-- [MKTXP Stack](https://github.com/akpw/mktxp-stack): a mktxp companion project, that provides ready-to-go MKTXP monitoring stack along with added Mikrotik centralized log processing:
-
-  <img width="48%" alt="loki" src="https://user-images.githubusercontent.com/5028474/210771516-06a3e6ab-8eab-458c-9f38-5d44f95d23d4.png">
-
-- with [Homebrew](https://brew.sh): `❯ brew install mktxp`
-
-- from [Docker image](https://github.com/akpw/mktxp/pkgs/container/mktxp) : `❯ docker pull ghcr.io/akpw/mktxp:latest`
-
-- from [PyPI](https://pypi.org/project/mktxp/): `❯ pip install mktxp`
-
-- latest from source repository: `❯ pip install git+https://github.com/akpw/mktxp`
-
-- with the [sample Kubernetes deployment](deploy/kubernetes/deployment.yaml)
-
-
-## Getting started
-To get started with MKTXP, you need to edit its main configuration file. This essentially involves filling in your Mikrotik devices IP addresses & authentication info, optionally modifying various settings to specific needs. 
-
-<sup>💡</sup> *Formatting and splitting local `.rsc` files (`mktxp rsc format -i ...` / `mktxp rsc split -i ...`) works right out of the box without any configuration.*
-
-The default configuration file comes with a sample configuration, making it easy to copy / edit parameters for your RouterOS devices as needed:
-```
-[Sample-Router-1]
-    # for specific configuration on the router level, overload the defaults here
-    hostname = 192.168.88.1
-    custom_labels = dc:london, rack=a1, service:prod
-
-[Sample-Router-2]
-    # for specific configuration on the router level, overload the defaults here
-    hostname = 192.168.88.2
-
-[default]
-    # this affects configuration of all routers, unless overloaded on their specific levels
-
-    enabled = True          # turns metrics collection for this RouterOS device on / off
-    module_only = False     # use this entry only as a probe module (skip /metrics collection)
-    hostname = localhost    # RouterOS IP address
-    port = 8728             # RouterOS IP Port
-    
-    username = username     # RouterOS user, needs to have 'read' and 'api' permissions
-    password = password
-    credentials_file = ""   # To use an external file in YAML format for both username and password, specify the path here
-    
-    custom_labels = None    # Custom labels to be injected to all device metrics, comma-separated key:value (or key=value) pairs    
-                            # Example: 'dc:london, rack=a1, service:prod' (quotation marks are optional)
-
-    use_ssl = False                 # enables connection via API-SSL servis
-    no_ssl_certificate = False      # enables API_SSL connect without router SSL certificate
-    ssl_certificate_verify = False  # turns SSL certificate verification on / off
-    ssl_check_hostname = True       # check if the hostname matches the peer cert’s hostname
-    ssl_ca_file = ""                # path to the certificate authority file to validate against, leave empty to use system store
-    plaintext_login = True          # for legacy RouterOS versions below 6.43 use False
-
-    routerboard = False             # RouterBOARD inventory / firmware metrics
-    health = True                   # System Health metrics
-    installed_packages = True       # Installed packages
-    dhcp = True                     # DHCP general metrics
-    dhcp_lease = True               # DHCP lease metrics
-
-    connections = True              # IP connections metrics
-    connection_stats = False        # Open IP connections metrics
-    connection_stats_destinations = False   # Set to True to track individual destination IPs/ports (Warning: High Cardinality)
-
-    interface = True                    # Interfaces traffic metrics
-    interface_with_default_name = False # Append default_name label to interface metrics
-    wireguard_peers = False             # Wireguard peers metrics
-    bridge_vlan = False                 # Bridge VLAN metrics
-
-    route = True                        # IPv4 Routes metrics
-    pool = True                         # IPv4 Pool metrics
-    firewall = True                     # IPv4 Firewall rules traffic metrics
-    neighbor = True                     # IPv4 Reachable Neighbors
-    address_list = None                 # Firewall Address List metrics, a comma-separated list of names
-    total_address_list_counts = True    # Firewall Address List total counts across all lists (set False if large lists cause timeouts)
-    dns = False                         # DNS stats
-
-    ipv6_route = False                  # IPv6 Routes metrics    
-    ipv6_pool = False                   # IPv6 Pool metrics
-    ipv6_firewall = False               # IPv6 Firewall rules traffic metrics
-    ipv6_neighbor = False               # IPv6 Reachable Neighbors
-    ipv6_address_list = None            # IPv6 Firewall Address List metrics, a comma-separated list of names
-    ipv6_total_address_list_counts = True # IPv6 Firewall Address List total counts across all lists (set False if large lists cause timeouts)
-
-    poe = True                      # POE metrics
-    monitor = True                  # Interface monitor metrics
-    netwatch = True                 # Netwatch metrics
-    public_ip = True                # Public IP metrics
-    wireless = True                 # WLAN general metrics
-    wireless_clients = True         # WLAN clients metrics
-    capsman = True                  # CAPsMAN general metrics
-    capsman_clients = True          # CAPsMAN clients metrics
-    w60g = False                    # W60G metrics
-
-    eoip = False                    # EoIP status metrics
-    gre = False                     # GRE status metrics
-    ipip = False                    # IPIP status metrics
-    lte = False                     # LTE signal and status metrics (requires additional 'test' permission policy on RouterOS v6)
-    ipsec = False                   # IPSec active peer metrics
-    switch_port = False             # Switch Port metrics
-
-    kid_control_assigned = False    # Allow Kid Control metrics for connected devices with assigned users
-    kid_control_dynamic = False     # Allow Kid Control metrics for all connected devices, including those without assigned user
-
-    user = True                     # Active Users metrics
-    queue = True                    # Queues metrics
-
-    bfd = False                     # BFD sessions metrics
-    bgp = False                     # BGP sessions metrics
-    routing_stats = False           # Routing process stats
-    certificate = False             # Certificates metrics
-
-    container = False               # Containers metrics
-    
-    remote_dhcp_entry = None        # An MKTXP entry to provide for remote DHCP info / resolution
-    remote_capsman_entry = None     # An MKTXP entry to provide for remote capsman info 
-
-    interface_name_format = name    # Format to use for interface / resource names, allowed values: 'name', 'comment', or 'combined'
-                                        # 'name': use interface name only (e.g. 'ether1')
-                                        # 'comment': use comment if available, fallback to name if not
-                                        # 'combined': use both (e.g. 'ether1 (Office Switch)')
-    check_for_updates = False       # check for available ROS updates
-```
-
-Most options are easy to understand at first glance, and some are described in more details [later](https://github.com/akpw/mktxp#advanced-features).
-
-<sup>💡</sup> *To automatically migrate from the older `mktxp.conf` format in the existing installs, just set `compact_default_conf_values = True` in [the mktxp system config](https://github.com/akpw/mktxp#mktxp-system-configuration)*
-
-#### Local install
-If you have a local MKTXP installation, you can edit the configuration file with your default system editor directly from mktxp:
-```bash
-❯ mktxp edit
-```
-In case you prefer a different editor, run the ```edit``` command with its optional `-ed` parameter:
-```
-❯ mktxp edit -ed nano
-```
-Obviously, you can do the same via just opening the config file directly:
-```
-❯ nano ~/mktxp/mktxp.conf
-
-```
-
-> 💡 **Tip:** `mktxp` now fully supports the XDG Base Directory standard. To migrate an existing legacy installation, simply move your configuration folder: `mv ~/mktxp ~/.config/mktxp`
-
-#### Docker image install
-The MKTXP Docker image runs as UID 1000 (standard user ID on most Linux distributions) to simplify file permissions when bind-mounting configuration files.
-
-<sup>💡</sup> *Docker images are available at https://github.com/akpw/mktxp/pkgs/container/mktxp. Use `:main` for the latest features or `:latest` for the most recent stable release.*
-
-For Docker instances, you have several options for managing configuration:
-
-**Option 1: Using `/etc/mktxp` (Recommended)**
-```bash
-# Create config directory and files
-mkdir mktxp-config
-nano mktxp-config/mktxp.conf     # copy&edit sample entry(ies) from above
-nano mktxp-config/_mktxp.conf    # optional: system configuration
-
-# Run with dedicated config directory
-docker run -v "$(pwd)/mktxp-config:/etc/mktxp" -p 49090:49090 -it --rm \
-  ghcr.io/akpw/mktxp:latest
-```
-
-**Option 2: Mount individual files**
-```bash
-# Create config files
-nano mktxp.conf  # copy&edit sample entry(ies) from above
-
-# Mount only the config file (internal _mktxp.conf will be auto-created)
-docker run -v "$(pwd)/mktxp.conf:/etc/mktxp/mktxp.conf" -p 49090:49090 -it --rm \
-  ghcr.io/akpw/mktxp:latest
-```
-
-**Option 3: Legacy home directory method (backward compatible)**
-```bash
-mkdir mktxp
-nano mktxp/mktxp.conf  # copy&edit sample entry(ies) from above
-
-# Traditional mounting to home directory
-docker run -v "$(pwd)/mktxp:/home/mktxp/mktxp/" -p 49090:49090 -it --rm \
-  ghcr.io/akpw/mktxp:latest
-```
-
-**Getting shell access for debugging:**
-```bash
-# Easy shell access (no --entrypoint needed)
-docker run -v "$(pwd)/mktxp-config:/etc/mktxp" -it --rm ghcr.io/akpw/mktxp:latest sh
-```
-
-#### MKTXP stack install
-[MKTXP Stack Getting Started](https://github.com/akpw/mktxp-stack#install--getting-started) provides similar instructions around editing the mktxp.conf file and, if needed, adding a dedicated API user to your Mikrotik RouterOS devices as mentioned below.
-
-<sup>💡</sup> *In the case of usage within a [Docker Swarm](https://docs.docker.com/engine/swarm/), please do make sure to have all settings explicitly set in both the `mktxp.conf` and `_mktxp.conf` files.  Not doing this may cause [issues](https://github.com/akpw/mktxp/issues/55#issuecomment-1346693843) regarding a `read-only` filesystem.*
-
-## Mikrotik Device Config
-For the purpose of RouterOS device monitoring, it's best to create a dedicated user with minimal required permissions. \
-MKTXP only needs ```API``` and ```Read```<sup>💡</sup>, so at that point you can go to your router's terminal and type:
-```
-/user group add name=mktxp_group policy=api,read
-/user add name=mktxp_user group=mktxp_group password=mktxp_user_password
-```
-
-<sup>💡</sup> *For the LTE metrics on RouterOS v6, the mktxp user will also need the `test` permission policy.*
-
-## A check on reality
-Now let's put some Mikrotik device address / user credentials in the above MKTXP configuration file, and at that point we should already be able to check out on our progress so far. Since MKTXP can output selected metrics directly on the command line with the ````mktxp diag```` command (alias: ````mktxp print````), it's easy to do it even without Prometheus or Grafana. \
-For example, let's go take a look at some of my smart home CAPsMAN clients:
-```
- ❯ mktxp diag -en MKT-GT -cc
-Connecting to router MKT-GT@10.**.*.**
-2021-01-24 12:04:29 Connection to router MKT-GT@10.**.*.** has been established
-
-| dhcp_name            | dhcp_address   | mac_address       |   rx_signal | interface   | ssid   | tx_rate   | rx_rate   | uptime   |
-|----------------------|----------------|-------------------|-------------|-------------|--------|-----------|-----------|----------|
-| Woox Runner          | 10.**.*.**     | 80:*************D |         -64 | LR-2G-1-1   | AKP    | 72 Mbps   | 54 Mbps   | 3 days   |
-| Woox Office Lamp     | 10.**.*.**     | 80:*************F |         -59 | LR-2G-1-1   | AKP    | 72 Mbps   | 54 Mbps   | 3 days   |
-| Harmony Hub          | 10.**.*.**     | C8:*************5 |         -46 | LR-2G-1-1   | AKP    | 72 Mbps   | 72 Mbps   | 3 days   |
-| Woox Office Hub      | 10.**.*.**     | DC:*************7 |         -44 | LR-2G-1-1   | AKP    | 72 Mbps   | 54 Mbps   | 3 days   |
-| Woox Ext Hub         | 10.**.*.**     | DC:*************E |         -44 | LR-2G-1-1   | AKP    | 72 Mbps   | 54 Mbps   | 3 days   |
-| Amazon Echo          | 10.**.*.**     | CC:*************4 |         -44 | LR-2G-1-1   | AKP    | 72 Mbps   | 72 Mbps   | a day    |
-| Woox Living Room Hub | 10.**.*.**     | DC:*************0 |         -43 | LR-2G-1-1   | AKP    | 72 Mbps   | 54 Mbps   | 3 days   |
-| JBL View             | 10.**.*.**     | 00:*************D |         -28 | LR-2G-1-1   | AKP    | 144 Mbps  | 117 Mbps  | 7 hours  |
-|                      |                |                   |             |             |        |           |           |          |
-| MBP15                | 10.**.*.**     | 78:*************E |         -53 | GT-5G-1     | AKP5G  | 877 Mbps  | 877 Mbps  | 3 days   |
-|                      |                |                   |             |             |        |           |           |          |
-| Woox Toaster         | 10.**.*.**     | 68:*************B |         -70 | KT-2G-1-1   | AKP    | 72 Mbps   | 54 Mbps   | 3 days   |
-| Woox Kettle          | 10.**.*.**     | B4:*************5 |         -65 | KT-2G-1-1   | AKP    | 65 Mbps   | 54 Mbps   | 2 days   |
-| Woburn White         | 10.**.*.**     | 54:*************6 |         -59 | KT-2G-1-1   | AKP    | 72 Mbps   | 72 Mbps   | 9 hours  |
-| Siemens Washer       | 10.**.*.**     | 68:*************1 |         -57 | KT-2G-1-1   | AKP    | 72 Mbps   | 72 Mbps   | 2 days   |
-| Woburn Black         | 10.**.*.**     | 54:*************8 |         -57 | KT-2G-1-1   | AKP    | 72 Mbps   | 72 Mbps   | 9 hours  |
-| Google Nest Display  | 10.**.*.**     | 1C:*************A |         -49 | KT-2G-1-1   | AKP    | 52 Mbps   | 43 Mbps   | 8 hours  |
------------------------  --
-Connected Wifi Devices:  15
------------------------  --
-```
-Hmmm, that toaster could probably use a better signal... :) \
-Instead of scrolling through every device, MKTXP's diagnostic filters let you immediately isolate problem clients:
-```
- ❯ mktxp diag -en MKT-GT -cc --low-signal
-```
-or narrow down to clients on the 2.4 GHz band experiencing low negotiated link rates:
-```
- ❯ mktxp diag -en MKT-GT -cc --band 2g --low-rate
-```
-
-> 📖 *For a comprehensive walkthrough of live CLI diagnostics covering wireless client health, mystery DHCP devices, open connection tracking, dynamic threat bans, and real-time bandwidth hogs, check out the blog post: [Beyond Metrics: Instant RouterOS Diagnostics with MKTXP 2.0](https://akpw.github.io/articles/2026/09/06/MKTXP-2.0-Live-CLI-Diagnostics.html).*
-
-But let's get back on track and proceed with the business of exporting RouterOS metrics to Prometheus.
-
-
-## Exporting to Prometheus
-For getting your routers' metrics into an existing Prometheus installation, we basically just need to connect MKTXP to it. \
-Let's do just that via editing the Prometheus config file: 
-```
-❯ nano /etc/prometheus/prometheus.yml
-```
-
-and simply add:
-
-```
-  - job_name: 'mktxp'
-    static_configs:
-      - targets: ['mktxp_machine_IP:49090']
-
-```
-
-At that point, we should be all ready for running the main `mktxp export` command that will be gathering router(s) metrics as configured above and serving them to Prometheus via a http server on the default port 49090. \
-````
-❯ mktxp export
-Connecting to router MKT-GT@10.**.*.**
-2021-01-24 14:16:22 Connection to router MKT-GT@10.**.*.** has been established
-Connecting to router MKT-LR@10.**.*.**
-2021-01-24 14:16:23 Connection to router MKT-LR@10.**.*.** has been established
-2021-01-24 14:16:23 Running HTTP metrics server on port 49090
-````
-
-### Multi-target exporter pattern (/probe)
-MKTXP supports the Prometheus multi-target exporter pattern via the `/probe` endpoint. This allows using a module (a regular mktxp.conf entry) and optionally overriding the hostname with a `target` parameter for the scrape request. \
-The multi-target pattern is designed for large deployments and service discovery. To keep Grafana dashboard compatibility, use relabeling as described in the reference guide or in the provided example.
-
-Reference: https://prometheus.io/docs/guides/multi-target-exporter/#the-multi-target-exporter-pattern
-
-In the following example we override the username/password and disable POE collection while enabling routing stats. The entry is marked as probe-only with `module_only = True`.
-
-```
-[router-module]
-    # for specific configuration on the router/module level, overload the defaults here
-    module_only = True
-    routing_stats = True
-    poe = False
-    username = some_user
-    password = secret_password
-```
-
-
-Example of a multi-target Prometheus job:
-```
-  - job_name: 'mktxp-multi-target'
-    metrics_path: /probe
-    params:
-      module: [router-module] # a regular mktxp.conf entry
-    static_configs:
-      - targets:
-        - router01.example.com
-        - router2
-    relabel_configs:
-      - source_labels: [__address__]
-        target_label: __param_target
-      - source_labels: [__param_target]
-        target_label: instance
-      - source_labels: [__param_target]
-        target_label: routerboard_name # this replaces the label routerboard_name with the "target"
-      - target_label: __address__
-        replacement: mktxp_machine_IP:49090
-```
-
-Notes:
-- `module` refers to an mktxp.conf entry for the `/probe` endpoint; if `module_only = True`, it will only work via `/probe` and requires `target`.
-- `target` is optional for non-module-only entries; when set, it overrides the module hostname for that request.
-
-## MKTXP system configuration
-In case you need more control on how MKTXP is run, it can be done via editing the `_mktxp.conf` file. This allows things like changing the port <sup>💡</sup> and other impl-related parameters, enable parallel router fetching and configurable scrapes timeouts, etc. 
-As before, for local installation the editing can be done directly from mktxp:
-```
-mktxp edit -i
-```
-
-```
-[MKTXP]
-    listen = '0.0.0.0:49090'         # Space separated list of socket addresses to listen to, both IPV4 and IPV6
-    socket_timeout = 2
-    
-    initial_delay_on_failure = 120
-    max_delay_on_failure = 900
-    delay_inc_div = 5
-
-    bandwidth = False                   # Turns metrics bandwidth metrics collection on / off
-    bandwidth_test_dns_server = 8.8.8.8 # The DNS server to be used for the bandwidth test connectivity check
-    bandwidth_test_interval = 600       # Interval for collecting bandwidth metrics
-    minimal_collect_interval = 5        # Minimal metric collection interval
-
-    verbose_mode = False            # Set it on for troubleshooting
-
-    fetch_routers_in_parallel = False   # Fetch metrics from multiple routers in parallel / sequentially     
-    max_worker_threads = 5              # Max number of worker threads that can fetch routers (parallel fetch only)
-    max_scrape_duration = 10            # Max duration of individual routers' metrics collection (parallel fetch only)
-    total_max_scrape_duration = 30      # Max overall duration of all metrics collection (parallel fetch only)
-    http_server_threads = 16            # Number of worker threads for the HTTP server
-
-    persistent_router_connection_pool = True  # Use a persistent router connections pool between scrapes
-    persistent_dhcp_cache = True              # Persist DHCP cache between metric collections
-    compact_default_conf_values = False       # Compact mktxp.conf, so only specific values are kept on the individual routers' level    
-    prometheus_headers_deduplication = False  # Deduplicate Prometheus HELP / TYPE headers in the metrics output 
-
-    probe_connection_pool = False             # Enable probe-only connection reuse keyed by module+target
-    probe_connection_pool_ttl = 300           # Probe connection TTL in seconds
-    probe_connection_pool_max_size = 128      # Max number of probe connections to keep
-
-
-[RSC]
-    base_dir = './exports'                    # Default destination directory for split .rsc files
-    numbered_files = True                     # Prefix output files with numbers according to handler_order
-    wrap_lines = False                        # Wrap long command lines with backslashes
-    wrap_column = 80                          # Column width for line wrapping
-    extract_scripts = False                   # For the split command, extracts scripts to standalone .rsc sidecar files
-    strip_mac_addresses = False               # Strip dynamic MAC addresses
-    ssh_port = 22                             # Default SSH port for live exports
-    ssh_timeout = 15                          # SSH connection timeout in seconds
-    show_sensitive = False                    # Default sensitive data export setting
-
-    handler_order = base, wifi, system, ip, dhcp-leases, firewall, lte, wireguard
-
-    handler_base = /interface bridge, /interface ethernet, /interface vlan, /interface list, /interface macvlan, /interface ovpn-server
-    handler_wifi = /caps-man, /interface wifi, /interface wireless
-    handler_system = /system, /user, /certificate, /zerotier, /ppp, /queue, /snmp, /interface l2tp-server, /interface sstp-server, /ip smb, /ip neighbor discovery-settings, /ip settings, /ipv6 settings, /ip ipsec, /ip service, /ip ssh, /ipv6 nd, /routing bfd, /routing bgp, /routing ospf, /tool bandwidth-server, /tool mac-server, /tool romon, /tool e-mail, /tool netwatch, /tool traffic-monitor, /app, /ip kid-control, /caps-man access-list
-    handler_dhcp-leases = /ip dhcp-server lease
-    handler_ip = /ip address, /ipv6 address, /ip pool, /ipv6 pool, /ip dhcp-client, /ip dhcp-server, /ipv6 dhcp-client, /ipv6 dhcp-server, /ip dns, /ip route, /ipv6 route, /ip cloud, /routing table, /routing rule
-    handler_firewall = /ip firewall, /ipv6 firewall
-    handler_lte = /interface lte, /tool sms
-    handler_wireguard = /interface wireguard
-
-
-[DIAG]
-    # Wireless & CAPsMAN defaults
-    low_signal_threshold = -75          # Default dBm threshold for --low-signal (matches <= -75 dBm)
-    min_signal_threshold = -60          # Default dBm threshold for --min-signal (matches >= -60 dBm)
-    low_rate_threshold = '18M'          # Default rate for --low-rate (matches <= 18 Mbps)
-    recent_duration = '15m'             # Default duration for --recent (matches uptime <= 15m)
-
-    # IP Connections & Bandwidth defaults
-    top_connections_count = 10          # Default limit for --top in connection stats (-cn) and kid control (-kc)
-    rate_above_threshold = '1M'         # Default rate for kid control / bandwidth --rate-above
-```    
-<sup>💡</sup> *When changing the default mktxp port for [docker image installs](https://github.com/akpw/mktxp#docker-image-install), you'll need to adjust the `docker run ... -p 49090:49090 ...` command to reflect the new port*
-
-## Grafana dashboard
-Now with your RouterOS metrics being exported to Prometheus, it's easy to visualize them with this [Grafana dashboard](https://grafana.com/grafana/dashboards/13679)
-
-
-## Description of CLI Commands
-### mktxp commands
-       . MKTXP commands:
-        .. diag     Interactive diagnostic inspection for clients, wireless, connections, and leases (alias: print)
-        .. rsc      RouterOS GitOps configuration formatter and splitter
-        .. export   Starts collecting metrics for all enabled RouterOS configuration entries
-        .. edit     Open MKTXP configuration file in your editor of choice        
-        .. show     Shows MKTXP configuration entries on the command line
-        .. info     Shows base MKTXP info
-
-````
-❯ mktxp -h
-usage: MKTXP [-h] [--cfg-dir CFG_DIR]
-             {diag, rsc, export, edit, show, info} ...
-
-Mikrotik RouterOS CLI Diagnostic Tool, Prometheus Exporter, and GitOps
-Configuration Manager
-
-options:
-  -h, --help            show this help message and exit
-  --cfg-dir CFG_DIR     MKTXP config files directory (optional)
-
-MKTXP commands:
-  {diag, rsc, export, edit, show, info}
-````
-To learn more about individual commands, just run it with ```-h```:
-
-### Diagnostics (`mktxp diag`)
-Displays live router diagnostics and tables with domain-aware filtering (`mktxp print` is supported as an alias):
-- `-en`, `--entry-name`: Router entry name to inspect
-- `-cc`, `--capsman_clients`: Show connected CAPsMAN clients (shortcut: `--caps`)
-- `-wc`, `--wifi_clients`: Show connected WiFi / WiFiWave2 clients (shortcut: `--wifi`)
-- `-dc`, `--dhcp_clients`: Show DHCP server leases (shortcut: `--dhcp`)
-- `-cn`, `--conn_stats`: Show IP connection tracking statistics (shortcut: `--conn`)
-- `-kc`, `--kid_control`: Show Kid Control devices and bandwidth (shortcut: `--kid`)
-- `-al`, `--address_lists <names>`: Show firewall address lists (shortcut: `--addr`)
-- `-nw`, `--netwatch`: Show Netwatch probe statuses (shortcut: `--net`)
-- `-in`, `--include <patterns>`: Filter records matching semicolon-separated substrings or glob patterns (e.g. `-in "wlan-5G;Pro;*10.0.*"`)
-- `-ex`, `--exclude <patterns>`: Exclude records matching patterns (e.g. `-ex "2.4G;Guest"`)
-
-> 💡 **CLI Parameter Shortcuts & Context-Aware Help:**  
-> The CLI options parser automatically matches any unique initial prefix sequence — so `--wifi`, `--caps`, `--dhcp`, `--conn`, `--kid`, `--addr`, and `--net` work interchangeably without typing the full parameter name.  
-> Appending `-h` to any command (e.g. `mktxp diag -kc -h` or `mktxp diag --wifi -h`) dynamically scopes `--help` to show only the relevant domain filters for that command.
-
-**Wireless Diagnostic Filters (used with `-cc` or `-wc`):**
-- `--low-signal [dBm]`: Filter clients with weak signal (default: `<= -75 dBm`)
-- `--min-signal [dBm]`: Filter clients with strong signal (default: `>= -60 dBm`)
-- `--low-rate [rate]`: Filter clients with low PHY rates (default: `<= 18M`)
-- `--recent [duration]`: Filter recently connected clients (default: `<= 15m`)
-- `--band [2g|5g|6g]`: Filter clients by frequency band
-
-**DHCP Leases Filters (used with `-dc`):**
-- `--unidentified`: Show mystery devices with no DHCP hostname and no comment (security auditing)
-- `--static` / `--dynamic`: Filter static vs. dynamic leases (mutually exclusive)
-- `--active-only` / `--inactive-only`: Show active lease holders vs. stale/bound leases (mutually exclusive)
-
-**IP Connection Stats Filters (used with `-cn`):**
-- `--top [N]`: Show top N talkers by active open socket count (default: `10`)
-- `--min-conns [N]`: Filter out low-volume background hosts with fewer than N active connections
-
-**Kid Control & Bandwidth Filters (used with `-kc`):**
-- `--top [N]`: Show top N talkers by real-time bandwidth consumption ($Tx + Rx$), rendered as a flat global leaderboard across the network (default: `10`)
-- `--active`: Show active devices with non-zero traffic only (hides dormant/idle devices)
-- `--rate-above [RATE]`: Filter devices with bandwidth exceeding a threshold (e.g. `5M`, `500k`, default: `1M`)
-- `--unassigned`: Show devices not assigned to any user/child profile
-- `--dynamic-only` / `--static-only`: Filter dynamic auto-discovered devices vs. static manually added devices (mutually exclusive)
-
-> 💡 **Tip: Using Kid Control as a Real-Time LAN Bandwidth Monitor**  
-> MikroTik RouterOS does not natively track per-device real-time transfer rates (`rate_up`, `rate_down`), cumulative volume (`bytes_up`, `bytes_down`), or activity recency (`idle_time`) anywhere else without custom firewall mangle rules.  
-> You can repurpose Kid Control as an automated, passive LAN monitor:  
-> 1. In RouterOS, create a single 24/7 unlimited user profile (e.g. `/ip kid-control add name=DeviceMonitor mon=0s-1d tue=0s-1d ...`). This activates RouterOS's internal kid-control packet accounting engine without blocking or limiting traffic.  
-> 2. RouterOS will automatically discover and track all connected devices under `/ip kid-control device`.  
-> 3. Use `mktxp diag -kc --top 5` or `mktxp diag -kc --active` to view top talkers and live LAN throughput directly from the CLI.
-
-**Address List Filters (used with `-al`):**
-- `--dynamic-only` / `--static-only`: Filter dynamic entries (e.g. threat bans, scanners) vs. static configurations (mutually exclusive)
-
-**Netwatch Filters (used with `-nw`):**
-- `--down-only` / `--up-only`: Filter failing / down probe targets vs. passing / up targets (mutually exclusive)
-
-For example, to learn everything about ````mktxp show````:
-````
-❯ mktxp show -h
-usage: MKTXP show [-h]
-                  [-en ['Sample-Router']]
-                  [-cfg]
-Displays MKTXP config router entries
-optional arguments:
-  -h, --help            show this help message and exit
-  -en, --entry-name ['Sample-Router']
-                        Config entry name
-  -cfg, --config        Shows MKTXP config files paths
-````  
-
-### RouterOS GitOps Configuration Management (`mktxp rsc`)
-RouterOS `.rsc` export files are often messy, mixing structural configurations with arbitrary inline scripts, backslash continuations, and inconsistent ordering. MKTXP provides built-in GitOps formatting and splitting capabilities to turn raw or live exports into clean, version-controllable files.
-
-> 📖 *For a deep dive into the motivation, AST/middleware architecture, and GitOps workflows, check out the blog post: [Wrangling RouterOS Configs: Introducing GitOps for MikroTik with MKTXP](https://akpw.github.io/articles/2026/08/16/GitOps-for-Mikrotik-RSC.html).*
-
-Configurations can be processed from local `.rsc` files (`-i`) or fetched live from configured routers over SSH (`-en`).
-
-> **Authentication**: Metrics collection uses the standard RouterOS API (supporting username/password). Live `mktxp rsc` exports use native SSH and require SSH key authentication (e.g., `~/.ssh/id_ed25519`, `~/.ssh/id_rsa`, `ssh-agent`, or `--ssh-key`) for secure automation.
-
-#### 1. Format (`mktxp rsc format`)
-Parses a raw export and formats it into a clean, deterministic monolithic `.rsc` file with standardized `# Section:` headers:
-```bash
-# Format from local file
-❯ mktxp rsc format -i raw_export.rsc -o clean_export.rsc
-
-# Format live directly from router entry over SSH
-❯ mktxp rsc format -en MyRouter -o ./backups/MyRouter-clean.rsc
-```
-Options:
-- `-i`, `--input`: Input `.rsc` file path.
-- `-en`, `--entry-name`: Router entry name from `mktxp.conf` for live SSH export.
-- `-o`, `--out`: Output file path (defaults to stdout).
-- `--show-sensitive`: Include passwords and sensitive keys in live export (default: hidden).
-- `--user <username>`: Override SSH username for live export.
-- `--ssh-key <path>`: Path to SSH private key for live export.
-- `--ssh-port <port>`: Override SSH port (default: 22).
-- `--wrap`: Wrap long command lines at 80 columns with trailing backslashes `\` (default: unwrapped single lines for clean git line diffs).
-- `--wrap-col <cols>`: Set custom column width for line wrapping (default: 80).
-- `--strip-macs`: Strip dynamic/auto MAC addresses to prevent false-positive Git diffs across hardware replacements.
-
-#### 2. Split (`mktxp rsc split`)
-Splits a raw or live `.rsc` export into modular, numbered configuration files organized by component (with optional sidecar script extraction). When `-d` is omitted, output is automatically scoped into an isolated subfolder `<base_dir>/<Name>/` (e.g. `./exports/MyRouter/`):
-```bash
-# Split from local file (auto-emits to ./exports/MyRouter/)
-❯ mktxp rsc split -i MyRouter.rsc --extract-scripts
-
-# Split live directly from router entry (auto-emits to ./exports/MyRouter/)
-❯ mktxp rsc split -en MyRouter --extract-scripts
-Successfully split RouterOS export into 8 files in: ./exports/MyRouter/
-  |- 01-base.rsc
-  |- 02-wifi.rsc
-  |- 03-system.rsc
-  |- 04-ip.rsc
-  |- 05-dhcp-leases.rsc
-  |- 06-firewall.rsc
-  |- 08-wireguard.rsc
-  |- Watchdog.rsc
-```
-Options:
-- `-i`, `--input`: Input `.rsc` file path.
-- `-en`, `--entry-name`: Router entry name from `mktxp.conf` for live SSH export.
-- `-d`, `-o`, `--out-dir`: Destination directory for split `.rsc` files (defaults to `<base_dir>/<Name>/` derived from router entry name or input filename).
-- `--show-sensitive`: Include passwords and sensitive keys in live export (default: hidden).
-- `--user <username>`: Override SSH username for live export.
-- `--ssh-key <path>`: Path to SSH private key for live export.
-- `--ssh-port <port>`: Override SSH port (default: 22).
-- `--no-numbered`: Emit plain filenames (e.g. `base.rsc`, `wifi.rsc`) without numeric order prefixes.
-- `--wrap`: Wrap lines with backslashes at 80 columns.
-- `--extract-scripts`: Extract multi-line scripts to standalone `.rsc` sidecar files (default: keep embedded inline).
-- `--strip-macs`: Strip dynamic MAC addresses.
-
-#### Extensibility & Custom Handlers
-The handler pipeline is completely dynamic and configuration-driven. You can customize existing handlers, reorder them, or introduce new ones (e.g. `bgp`, `switch`, `vpn`) without any Python code changes:
-1. Add the handler name to `handler_order` in `_mktxp.conf` under `[RSC]`:
-   ```ini
-   handler_order = base, wifi, system, ip, dhcp-leases, firewall, lte, wireguard, bgp
-   ```
-2. Define the matching RouterOS paths under `handler_<name>`:
-   ```ini
-   handler_bgp = /routing bgp, /routing bfd, /routing filter, /routing ospf
-   ```
-The engine uses longest-prefix specificity matching (so `/routing bgp` takes priority over general `/routing` in `system`), automatically numbers the output file (e.g. `09-bgp.rsc`), and safely routes any unmapped command paths to `99-other.rsc`.
-
-
-## Advanced features
-While most of the [mktxp options](https://github.com/akpw/mktxp#getting-started) are self explanatory, some might require a bit of a context.
-
-### Remote DHCP resolution
-When gathering various IP address-related metrics, MKTXP automatically resolves IP addresses whenever DHCP info is available. In many cases however, the exported devices do not have this information locally and instead rely on central DHCP servers. To improve readability / usefulness of the exported metrics, MKTXP supports remote DHCP server calls via the following option:
-```
-remote_dhcp_entry = None        # An MKTXP entry to provide for remote DHCP info / resolution
-```
-`MKTXP entry` in this context can be any other mktxp.conf entry, and for the sole purpose of providing DHCP info it does not even need to be enabled.  An example:
-```
-[RouterA]
-    ...  # RouterA settings as normal
-
-[RouterB]
-    remote_dhcp_entry = RouterA  # Will resolve via RouterA
-```
-
-### Remote CAPsMAN info
-Similar to remote DHCP resolution, mktxp allows collecting CAPsMAN-related metrics via the following option: 
-```
-    remote_capsman_entry = None     # An MKTXP entry to provide for remote capsman info
-```
-`MKTXP entry` in this context can be any other mktxp.conf entry, and for the sole purpose of collecting CAPsMAN-related metrics it does not even need to be enabled.  An example:
-```
-[RouterA]
-    ...  # RouterA settings as normal
-
-[RouterB]
-    remote_capsman_entry = RouterA  # Will collect the CAPsMAN-related info via router A
-```
-
-### Kid Control device monitoring
-MKTXP Kid Control metrics help track network activity and bandwidth usage for all connected devices on a RouterOS network. This makes it easy to identify high-traffic devices and monitor network usage patterns in real-time.
-
-The Kid Control functionality offers two modes of operation:
-```
-kid_control_assigned = False    # Allow Kid Control metrics for connected devices with assigned users
-kid_control_dynamic = False     # Allow Kid Control metrics for all connected devices, including those without assigned user
-```
-
-When set up on the router, is is possible to view Kid Control device metrics directly from the command line:
-```
-❯ mktxp diag -en MKT-GT -kc
-MKT-GT@10.70.0.1: OK to connect
-Connecting to router MKT-GT@10.70.0.1
-2025-09-24 12:08:42 Connection to router MKT-GT@10.70.0.1 has been established
-+-------------------+-------------------+---------------+----------------+-------------------+------------------+---------+-----------+------------+
-|     dhcp_name     |       name        |     user      |  dhcp_address  |    mac_address    |    ip_address    | rate_up | rate_down | idle_time  |
-+===================+===================+===============+================+===================+==================+=========+===========+============+
-| MacBook Pro       |    MacBookPro     | alice         |   10.10.0.15   | A1:B2:C3:D4:E5:F6 |   10.10.0.15     | 2 Mbps  |  15 Mbps  |  a second  |
-| Smart TV          |   Samsung TV      |               |   10.20.0.45   | C1:D2:E3:F4:A5:B6 |   10.20.0.45     | 1 Mbps  |  8 Mbps   | 10 seconds |
-| iPhone 15         |     iPhone        | alice         |   10.10.0.22   | A2:B3:C4:D5:E6:F7 |   10.10.0.22     | 512 Kbps|  3 Mbps   |  2 seconds |
-| Galaxy Tab        |  Samsung Galaxy   | bob           |   10.10.0.28   | B1:C2:D3:E4:F5:A6 |   10.10.0.28     | 256 Kbps|  1 Mbps   |  5 seconds |
-| Kitchen Display   |   Google Nest     |               |   10.20.0.52   | D1:E2:F3:A4:B5:C6 |   10.20.0.52     | 128 Kbps|  512 Kbps | 30 seconds |
-| Ring Doorbell     |   Ring Camera     |               |   10.20.0.67   | E1:F2:A3:B4:C5:D6 |   10.20.0.67     | 64 Kbps |  256 Kbps |  a minute  |
-| Smart Thermostat  |      Nest         |               |   10.20.0.73   | F1:A2:B3:C4:D5:E6 |   10.20.0.73     | 32 Kbps |  64 Kbps  |  2 minutes |
-| Alexa Echo        |   Amazon Echo     |               |   10.20.0.81   | A3:B4:C5:D6:E7:F8 |   10.20.0.81     |  0 bps  |   0 bps   |  5 minutes |
-+-------------------+-------------------+---------------+----------------+-------------------+------------------+---------+-----------+------------+
-alice devices: 2
-bob devices: 1
-User-assigned devices: 3
-Dynamic devices (no user): 5
-Active LAN Traffic: 3.97 Mbps Up / 27.83 Mbps Down
-Total Kid Control devices: 8
-```
-The devices are automatically sorted by total bandwidth usage (upload + download rates), making it easy to identify high-traffic devices at a glance.
-
-When you want to cut through idle devices and instantly spot bandwidth hogs, use `--top` to flatten the view into a real-time global leaderboard sorted by total transfer rate:
-```
-❯ mktxp diag -en MKT-GT -kc --top 3
-+-------------+-------------+-------+--------------+-------------------+-------------+---------+-----------+------------+
-|  dhcp_name  |    name     | user  | dhcp_address |    mac_address    | ip_address  | rate_up | rate_down | idle_time  |
-+=============+=============+=======+==============+===================+=============+=========+===========+============+
-| MacBook Pro | MacBookPro  | alice | 10.10.0.15   | A1:B2:C3:D4:E5:F6 | 10.10.0.15  | 2 Mbps  | 15 Mbps   | a second   |
-| Smart TV    | Samsung TV  |       | 10.20.0.45   | C1:D2:E3:F4:A5:B6 | 10.20.0.45  | 1 Mbps  | 8 Mbps    | 10 seconds |
-| iPhone 15   | iPhone      | alice | 10.10.0.22   | A2:B3:C4:D5:E6:F7 | 10.10.0.22  | 512 Kbps| 3 Mbps    | 2 seconds  |
-+-------------+-------------+-------+--------------+-------------------+-------------+---------+-----------+------------+
-Active LAN Traffic: 3.51 Mbps Up / 26.00 Mbps Down
-Total Kid Control devices: 3
-```
-
-**Diagnostic Filters:**
-- `--top [N]`: Show top N talkers flattened into a global leaderboard across the network (e.g. `mktxp diag -en MKT-GT -kc --top 5`)
-- `--active`: Show active devices with non-zero traffic only (hides dormant/idle devices)
-- `--rate-above [RATE]`: Filter devices with bandwidth exceeding a threshold (e.g. `mktxp diag -en MKT-GT -kc --rate-above 5M`)
-- `--unassigned`: Show devices not assigned to any user/child profile (e.g. `mktxp diag -en MKT-GT -kc --unassigned`)
-- `--dynamic-only` / `--static-only`: Filter dynamic auto-discovered devices vs. static manually added devices (mutually exclusive)
-
-### Address List device monitoring
-Similarly to the above, MKTXP IPv4 / IPv6 firewall address lists can be inspected directly from the command line. The feature supports multiple address lists and automatically detects which IP versions contain which entries.
-
-```
-❯ mktxp diag -en MKT-GT -al "blocklist, allowlist"
-MKT-GT@10.70.0.1: OK to connect
-Connecting to router MKT-GT@10.70.0.1
-2025-09-25 12:15:30 Connection to router MKT-GT@10.70.0.1 has been established
-
-Address Lists (IPv4):
-+----------+---------------+------------------+---------+---------+----------+
-|   list   |    address    |     comment      | timeout | dynamic | disabled |
-+==========+===============+==================+=========+=========+==========+
-| blocklist| 192.168.1.100 | Suspicious host  |         |   No    |   No     |
-| blocklist| 10.0.0.5      | Auto-blocked     | 2h      |   Yes   |   No     |
-| allowlist| 192.168.1.10  | Admin workstation|         |   No    |   No     |
-+----------+---------------+------------------+---------+---------+----------+
-Total entries: 3
-Unique lists: 2
-
-Address Lists (IPv6):
-+----------+----------------+------------------+---------+---------+----------+
-|   list   |    address     |     comment      | timeout | dynamic | disabled |
-+==========+================+==================+=========+=========+==========+
-| blocklist| 2001:db8::bad  | IPv6 bad actor   |         |   No    |   No     |
-+----------+----------------+------------------+---------+---------+----------+
-Total entries: 1
-Unique lists: 1
-```
-The command automatically queries both IPv4 and IPv6 address lists, displaying separate tables when entries exist in both IP versions. Missing lists are reported as warnings, and entries are sorted by list name and then by address for easy scanning.
-
-When managing security blacklists or scanner defenses, you can filter out permanent static entries to inspect only active dynamic blocks with timeouts:
-```
-❯ mktxp diag -en MKT-GT -al "blocklist" --dynamic-only
-```
-
-**Diagnostic Filters:**
-- `--dynamic-only` / `--static-only`: Filter dynamic entries (e.g. threat bans, scanners) vs. static configurations (mutually exclusive)
-
-### Connections stats
-With many connected devices everywhere, one can often only guess where do they go to and what they actually do with all the information from your network environment. MKTXP let's you easily track those with a single option, with results available both from [mktxp dashboard](https://grafana.com/grafana/dashboards/13679-mikrotik-mktxp-exporter/) and the command line:
-
-```
-connection_stats = False        # Open IP connections metrics 
-connection_stats_destinations = False   # Set to True to track individual destination IPs/ports (Warning: High Cardinality)
-```
-Setting this to `True` obviously enables the feature and allows to see something like that:
-
-<img width="2346" alt="conns" src="https://user-images.githubusercontent.com/5028474/217042107-bffa0a81-a6a0-4474-87d4-1597cdd80735.png">
-
-Hey, what is this Temp&Humidity sensor has to do with a bunch of open network connections? 12 of them, really?
-Let's go check on that in the dashboard, or just get the info right from the command line:
-
-```
-❯ mktxp diag -en MKT-GT -cn
-+-------------------+--------------+------------------+-----------------------------------------------------------------------+
-|     dhcp_name     | src_address  | connection_count |                             dst_addresses                             |
-+===================+==============+==================+=======================================================================+
-| T&H Cat's Room    | 10.20.10.149 |        12        |          3.124.97.151:32100(udp), 13.38.179.104:32100(udp),           |
-|                   |              |                  |                       54.254.90.185:32100(udp)
-```
-*A few quick checks show all of the destination IPs relate to AWS instances, so supposedly it's legit... but let's remain vigilant, to know better :)*
-
-On busy networks with hundreds of open sockets, you can filter out ordinary background traffic to isolate top talkers:
-```
-❯ mktxp diag -en MKT-GT -cn --top 5
-```
-or isolate hosts with abnormally high connection counts (e.g. torrents, network scanners, or runaway apps):
-```
-❯ mktxp diag -en MKT-GT -cn --min-conns 50
-```
-
-**Diagnostic Filters:**
-- `--top [N]`: Show top N talkers by active open socket count (identifies runaway apps, torrents, or DDoS)
-- `--min-conns [N]`: Filter out low-volume background hosts with fewer than N active connections
-
-### RouterBOARD inventory and firmware
-RouterBOARD inventory and firmware status can be exported with:
-
-```
-routerboard = False             # RouterBOARD inventory / firmware metrics
-```
-
-This enables:
-
-- `mktxp_routerboard_info`
-- `mktxp_routerboard_firmware_upgrade_available`
-
-The option is disabled by default. On devices without `/system/routerboard` support, enabling it may result in no data or scrape errors.
-
-
-### Parallel routers fetch
-Concurrent exports across multiple devices can considerably speed up things for slow network connections. This feature can be turned on and configured with the following [system options](https://github.com/akpw/mktxp/blob/main/README.md#mktxp-system-configuration):
-```
-fetch_routers_in_parallel = False   # Set to True if you want to fetch multiple routers parallel
-max_worker_threads = 5              # Max number of worker threads that can fetch routers (parallel fetch only)
-max_scrape_duration = 10            # Max duration of individual routers' metrics collection (parallel fetch only)
-total_max_scrape_duration = 30      # Max overall duration of all metrics collection (parallel fetch only)
-```
-To keeps things within expected boundaries, the last two parameters allows for controlling both individual and overall scrape durations
-
-
-### Injectable router-level custom labels
-You can add custom labels to your devices using the `custom_labels` option. These labels are attached to all the metrics for a specific device, allowing e.g. easy router grouping for detailed overview dashboards in Grafana. You can define default labels in the `[default]` section and override or extend them in the router-specific sections.
-
-### mktxp endpoint listen addresses
-By default, mktxp runs it's HTTP metrics endpoint on any IPv4 address on port 49090. However, it is also able to listen on multiple socket addresses, both IPv4 and IPv6. 
-You can configure this behaviour via the following [system option](https://github.com/akpw/mktxp/blob/main/README.md#mktxp-system-configuration), setting ```listen``` to a space-separated list of sockets to listen to, e.g.:
-```
-listen = '0.0.0.0:49090 [::1]:49090'
-```
-A wildcard for the hostname is supported as well, and binding to both IPv4/IPv6 as available.
-
-## Setting up MKTXP to run as a Linux Service
-If you've installed MKTXP on a Linux system, you can run it with system boot via adding a service. \
-Let's start with:
-
-
-```
-❯ nano /etc/systemd/system/mktxp.service
-
-```
-
-Now copy and paste the following:
-
-```
-[Unit]
-Description=MKTXP Exporter
-
-[Service]
-User=user # the user under which mktxp was installed
-ExecStart=mktxp export # if mktxp is not at your $PATH, you might need to provide a full path
-
-[Install]
-WantedBy=default.target
-
-```
-
-Let's save and then start the service as well as check on its' status:
-```
-❯ sudo systemctl daemon-reload
-❯ sudo systemctl start mktxp
-❯ sudo systemctl enable mktxp
-
-❯ systemctl status mktxp
-● mktxp.service - MKTXP Mikrotik Exporter to Prometheus
-     Loaded: loaded (/etc/systemd/system/mktxp.service; disabled; vendor preset: enabled)
-     Active: active (running) since Sun 2021-01-24 09:16:44 CET; 2h 44min ago
-     ...
-```
-
-
-## Setting up MKTXP to run as a FreeBSD Service
-If you've installed MKTXP on a FreeBSD system, you can run it with system boot via adding a service. \
-Let's start with:
-
-
-```
-❯ nano /usr/local/etc/rc.d/mktxp
-```
-
-Now copy and paste the following:
-
-```
-#!/bin/sh
-
-# PROVIDE: mktxp
-# REQUIRE: DAEMON NETWORKING
-# BEFORE: LOGIN
-# KEYWORD: shutdown
-
-# Add the following lines to /etc/rc.conf to enable mktxp:
-# mktxp_enable="YES"
-#
-# mktxp_enable (bool):    Set to YES to enable mktxp
-#                Default: NO
-# mktxp_user (str):       mktxp daemon user
-#                Default: root
-
-. /etc/rc.subr
-
-name=mktxp
-rcvar=mktxp_enable 
-
-: ${mktxp_enable:="NO"}
-: ${mktxp_user:="root"}
-
-# daemon
-pidfile="/var/run/${name}.pid"
-command="/usr/sbin/daemon"
-mktxp_command="/usr/local/bin/mktxp export"
-procname="daemon"
-command_args=" -c -f -P ${pidfile} ${mktxp_command}"
-
-load_rc_config $name 
-run_rc_command "$1"
-```
-
-Let's save and then start the service as well as check on its' status:
-```
-❯ sudo sysrc mktxp_enable="YES"
-❯ service mktxp start
-❯ service mktxp status
-
-❯ service mktxp status
-mktxp is running as pid 36704
-```
-
-## Installing Development version
-- Clone the repo, create a virtual environment, and activate it: 
-  ```bash
-  $ python3 -m venv .venv
-  $ source .venv/bin/activate
-  ```
-- Install the project in editable mode:
-  ```bash
-  $ pip install -e .
-  ```
-
-**Running Tests**
-- To run the test suite, first ensure you have installed the development dependencies:
-  ```bash
-  $ pip install -e ".[test]"
-  ```
-- Then run the tests using `pytest`:
-  ```bash
-  $ pytest -v --tb=short
-  ```
-*(Note: If you have `tox` installed, you can still run `$ tox` for multi-environment testing)*
+- Distributed under the [GNU General Public License v2](LICENSE).
+- Local development & testing: `pip install -e ".[test]"` and run `pytest`.
+- For issues, discussions, and feature requests, visit the [MKTXP GitHub Repository](https://github.com/akpw/mktxp).

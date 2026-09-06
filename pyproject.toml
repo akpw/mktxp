@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "mktxp"
 version = "2.0.0"
-description = "Mikrotik RouterOS CLI Diagnostic Tool, Prometheus Exporter, and GitOps Configuration Manager"
+description = "MikroTik RouterOS CLI Diagnostic Tool, GitOps Configuration Manager, and Prometheus Exporter"
 readme = "README.md"
 authors = [
     { name = "Arseniy Kuznetsov" }
@@ -28,7 +28,7 @@ classifiers = [
     "Topic :: System :: Systems Administration",
     "Topic :: Utilities"
 ]
-keywords = ["Mikrotik", "RouterOS", "Prometheus", "Exporter"]
+keywords = ["MikroTik", "RouterOS", "Diagnostics", "CLI", "GitOps", "Prometheus", "Exporter", "Network-Monitoring"]
 dependencies = [
     "prometheus-client>=0.9.0",
     "RouterOS-api>=0.19.0",

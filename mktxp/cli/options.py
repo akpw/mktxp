@@ -53,7 +53,7 @@ class MKTXPOptionsParser:
         self._script_name = f"MKTXP"
         version = Version("mktxp")
         self._description = f"""
-Mikrotik RouterOS CLI Diagnostic Tool, Prometheus Exporter, and GitOps Configuration Manager, version {version}
+MikroTik RouterOS CLI Diagnostic Tool, GitOps Configuration Manager, and Prometheus Exporter, version {version}
 - Diagnostics: Live CLI network diagnostics, client registration monitoring, and targeted filtering ('mktxp diag -h')
 - RSC: RouterOS GitOps configuration formatter and modular directory splitter ('mktxp rsc -h')
 - Metrics: Multi-device Prometheus metric collection with dedicated Grafana dashboard (https://grafana.com/grafana/dashboards/13679)
@@ -80,7 +80,7 @@ For more information, run: 'mktxp -h'
 
         commands_parser = ArgumentParser(
             prog=self._script_name,
-            description="Mikrotik RouterOS CLI Diagnostic Tool, Prometheus Exporter, and GitOps Configuration Manager",
+            description="MikroTik RouterOS CLI Diagnostic Tool, GitOps Configuration Manager, and Prometheus Exporter",
             formatter_class=MKTXPHelpFormatter,
             parents=[global_options_parser],
         )

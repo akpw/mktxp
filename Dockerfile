@@ -1,7 +1,7 @@
 FROM python:3-alpine
 
 LABEL org.opencontainers.image.source=https://github.com/akpw/mktxp
-LABEL org.opencontainers.image.description="Mikrotik RouterOS CLI Diagnostic Tool, Prometheus Exporter, and GitOps Configuration Manager"
+LABEL org.opencontainers.image.description="MikroTik RouterOS CLI Diagnostic Tool, GitOps Configuration Manager, and Prometheus Exporter"
 LABEL org.opencontainers.image.licenses=GPLv2+
 
 # Provision non-root user, editor, and config directory in a single layer to minimize image size
