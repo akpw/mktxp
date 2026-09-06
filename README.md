@@ -68,9 +68,15 @@ If you want a turnkey environment without manually wiring services, [**MKTXP Sta
 
 Both **Live Diagnostics** and the **Prometheus Exporter** connect to your routers via the standard RouterOS API.
 
-### 1. Minimal Configuration
+MKTXP uses two configuration files:
+- **`mktxp.conf`**: Router connection profiles, credentials, custom labels, and metrics switches. Edit with `mktxp edit`.
+- **`_mktxp.conf`**: Daemon listen sockets, timeouts, parallel scraping, GitOps rules, and CLI diagnostic thresholds. Edit with `mktxp edit -i`.
 
-Add your router entry to `mktxp.conf` (edit with `mktxp edit` or place at `~/.config/mktxp/mktxp.conf`):
+Files are resolved automatically from `~/.config/mktxp/` (XDG standard) or `/etc/mktxp/` (system/Docker). Check active paths anytime with `mktxp show -cfg`.
+
+### 1. Minimal Configuration (`mktxp.conf`)
+
+Add your router entry to `mktxp.conf`:
 
 ```ini
 [My-Router]
@@ -79,7 +85,7 @@ Add your router entry to `mktxp.conf` (edit with `mktxp edit` or place at `~/.co
     password = secret_password
 ```
 
-*(For all available metrics switches and defaults, see the canonical [mktxp/cli/config/mktxp.conf](https://github.com/akpw/mktxp/blob/main/mktxp/cli/config/mktxp.conf) template.)*
+*(For Docker, simply mount your config directory: `-v "$(pwd)/mktxp-config:/etc/mktxp"`)*
 
 ### 2. Router User Setup
 
@@ -91,6 +97,8 @@ Create a dedicated monitoring user on your MikroTik router:
 ```
 
 *(Note: For LTE metrics on RouterOS v6, the user also needs the `test` permission policy.)*
+
+> 📖 *For complete parameter references, `[default]` section inheritance, custom labels, parallel fetching, and diagnostic tuning, see the [Configuration Guide](https://github.com/akpw/mktxp/blob/main/docs/configuration.md).*
 
 ---
 
@@ -162,6 +170,7 @@ Import the official [Grafana Dashboard (ID: 13679)](https://grafana.com/grafana/
 - [Live CLI Diagnostics Guide](https://github.com/akpw/mktxp/blob/main/docs/diagnostics.md): Detailed filter reference, table schemas, and recipes for all 6 diagnostic domains.
 - [RouterOS GitOps RSC Guide](https://github.com/akpw/mktxp/blob/main/docs/rsc.md): AST formatting, modular domain splitting, script extraction, and CI/CD pipelines.
 - [Prometheus Exporter Guide](https://github.com/akpw/mktxp/blob/main/docs/exporter.md): Metrics catalog, `/probe` multi-target pattern, container manifests, and service files.
+- [Configuration Reference Guide](https://github.com/akpw/mktxp/blob/main/docs/configuration.md): Complete anatomy of `mktxp.conf` and `_mktxp.conf`, multi-router inheritance, tuning, and Docker mounts.
 
 ---
 

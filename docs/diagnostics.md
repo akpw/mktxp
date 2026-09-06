@@ -36,7 +36,7 @@
 ## CLI Ergonomics & Scoped Help
 
 1. **Prefix Matching**: You don't have to type full flags. The options parser matches any unique initial prefix sequence—`--wifi`, `--caps`, `--dhcp`, `--conn`, `--kid`, `--addr`, and `--net` resolve cleanly.
-2. **Context-Aware Scoped Help**: Appending `-h` to any domain narrows help down to the switches relevant to that command, printing active thresholds from your `_mktxp.conf`:
+2. **Context-Aware Scoped Help**: Appending `-h` to any domain narrows help down to the switches relevant to that command, printing active thresholds from your `_mktxp.conf` (see the [Configuration Guide](configuration.md#3-diag--live-diagnostics-thresholds) to tune defaults):
    ```bash
    ❯ mktxp diag -en ROUTER -kc -h
    ```

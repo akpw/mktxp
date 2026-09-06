@@ -83,6 +83,8 @@ Tune daemon-level parameters with `mktxp edit -i`:
     compact_default_conf_values = True
 ```
 
+> 📖 *For the complete configuration reference, multi-router `[default]` inheritance, parallel scraping, and Docker deployment, see the [Configuration Guide](configuration.md).*
+
 ---
 
 ## Prometheus Scrape Configuration

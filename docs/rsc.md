@@ -137,7 +137,7 @@ When `-d` / `-o` is omitted, `mktxp rsc split` automatically scopes output into 
 
 The splitting pipeline is entirely configurable. You can customize existing handlers, reorder them, or introduce new domain handlers (e.g. `bgp`, `switch`, `vpn`) without writing any Python code:
 
-1. Add the handler name to `handler_order` in `_mktxp.conf` under `[RSC]`:
+1. Add the handler name to `handler_order` in `_mktxp.conf` under `[RSC]` (see the [Configuration Guide](configuration.md#2-rsc--gitops-rsc-settings--custom-handlers)):
    ```ini
    handler_order = base, wifi, system, ip, dhcp-leases, firewall, lte, wireguard, bgp
    ```
