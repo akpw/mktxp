@@ -20,10 +20,11 @@ class NetwatchDiagHandler(BaseDiagHandler):
 
     name = "netwatch"
     cmd_flags = ["-nw", "--netwatch"]
+    cmd_prefixes = ["-nw", "--net"]
     cmd_dest = "netwatch"
     cmd_help = "Netwatch metrics"
     filter_group_title = "Netwatch Filters (-nw)"
-    help_prefixes = ["-nw", "--net"]
+    help_prefixes = ["-nw", "--net", "--down-only", "--up-only"]
 
     def register_diag_cmd(self, parser_group) -> None:
         parser_group.add_argument(
@@ -34,6 +35,24 @@ class NetwatchDiagHandler(BaseDiagHandler):
             action="store_true",
         )
 
+    def register_filter_options(self, parser) -> None:
+        group = parser.add_argument_group(self.filter_group_title)
+        status_group = group.add_mutually_exclusive_group()
+        status_group.add_argument(
+            "--down-only",
+            dest="down_only",
+            help="Show unreachable/down targets only",
+            action="store_true",
+            default=False,
+        )
+        status_group.add_argument(
+            "--up-only",
+            dest="up_only",
+            help="Show reachable/up targets only",
+            action="store_true",
+            default=False,
+        )
+
     def execute(self, router_entry, args: dict) -> None:
         include = args.get("include") or []
         exclude = args.get("exclude") or []
@@ -42,4 +61,13 @@ class NetwatchDiagHandler(BaseDiagHandler):
         if isinstance(exclude, str):
             exclude = [exclude]
 
-        NetwatchOutput.clients_summary(router_entry, include=include, exclude=exclude)
+        down_only = args.get("down_only", False)
+        up_only = args.get("up_only", False)
+
+        NetwatchOutput.clients_summary(
+            router_entry,
+            include=include,
+            exclude=exclude,
+            down_only=down_only,
+            up_only=up_only,
+        )

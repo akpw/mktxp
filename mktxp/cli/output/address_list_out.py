@@ -15,13 +15,14 @@
 from mktxp.cli.output.tables import output_table, OutputAddressListEntry
 from mktxp.utils.filtering import match_record
 from mktxp.datasource.address_list_ds import AddressListMetricsDataSource
+import re
 
 class AddressListOutput:
     ''' Address List CLI Output
     '''
     
     @staticmethod
-    def clients_summary(router_entry, address_lists_str, include=None, exclude=None):
+    def clients_summary(router_entry, address_lists_str, include=None, exclude=None, dynamic_only=False, static_only=False):
         ''' Display address list summary for the specified lists
         '''
         if not address_lists_str:
@@ -60,13 +61,27 @@ class AddressListOutput:
         tables_displayed = 0
         
         if ipv4_records:
-            AddressListOutput._display_table(ipv4_records, 'IPv4', include=include, exclude=exclude)
+            AddressListOutput._display_table(
+                ipv4_records,
+                'IPv4',
+                include=include,
+                exclude=exclude,
+                dynamic_only=dynamic_only,
+                static_only=static_only,
+            )
             tables_displayed += 1
             
         if ipv6_records:
             if tables_displayed > 0:
                 print()  # Add spacing between tables
-            AddressListOutput._display_table(ipv6_records, 'IPv6', include=include, exclude=exclude)
+            AddressListOutput._display_table(
+                ipv6_records,
+                'IPv6',
+                include=include,
+                exclude=exclude,
+                dynamic_only=dynamic_only,
+                static_only=static_only,
+            )
             tables_displayed += 1
             
         if tables_displayed == 0:
@@ -160,7 +175,7 @@ class AddressListOutput:
             return time_part
         
     @staticmethod
-    def _display_table(records, ip_version, include=None, exclude=None):
+    def _display_table(records, ip_version, include=None, exclude=None, dynamic_only=False, static_only=False):
         ''' Display address list records in a table
         '''
         if not records:
@@ -169,6 +184,12 @@ class AddressListOutput:
         total_unfiltered = len(records)
         filtered_records = []
         for record in records:
+            is_dynamic = str(record.get('dynamic', '')).lower() in ('yes', 'true', '1')
+            if dynamic_only and not is_dynamic:
+                continue
+            if static_only and is_dynamic:
+                continue
+
             if not match_record(record, include, exclude):
                 continue
             filtered_records.append(record)
@@ -204,7 +225,8 @@ class AddressListOutput:
         # Print summary
         total_entries = len(sorted_records)
         unique_lists = len(set(record.get('list', '') for record in sorted_records))
-        if include or exclude:
+        has_filters = bool(include) or bool(exclude) or dynamic_only or static_only
+        if has_filters:
             print(f"Matching entries: {total_entries} (Total: {total_unfiltered})")
         else:
             print(f"Total entries: {total_entries}")

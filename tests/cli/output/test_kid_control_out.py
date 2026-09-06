@@ -164,3 +164,108 @@ def test_combined_rate_calculation_sorting():
     assert device1_total > device2_total
     assert device1_total == 22020096
     assert device2_total == 11534336
+
+
+def test_kid_control_filtering_active_and_rate(mock_router_entry, capsys):
+    """Test Kid Control active_only, rate_above, and unassigned filters."""
+    devices = [
+        {
+            'name': 'Idle Kid Device', 'user': 'Child1', 'mac_address': 'AA:01:00:00:00:01',
+            'ip_address': '10.0.0.1', 'rate_up': '0', 'rate_down': '0',
+            'idle_time': '10m', 'bytes_up': '100', 'bytes_down': '200'
+        },
+        {
+            'name': 'Active Streamer', 'user': 'Child1', 'mac_address': 'AA:01:00:00:00:02',
+            'ip_address': '10.0.0.2', 'rate_up': '100000', 'rate_down': '6000000',
+            'idle_time': '1s', 'bytes_up': '1000000', 'bytes_down': '2000000'
+        },
+        {
+            'name': 'Unassigned Active Device', 'user': '', 'mac_address': 'AA:01:00:00:00:03',
+            'ip_address': '10.0.0.3', 'rate_up': '50000', 'rate_down': '50000',
+            'idle_time': '2s', 'bytes_up': '50000', 'bytes_down': '50000'
+        },
+        {
+            'name': 'Unassigned Idle Device', 'user': '', 'mac_address': 'AA:01:00:00:00:04',
+            'ip_address': '10.0.0.4', 'rate_up': '0', 'rate_down': '0',
+            'idle_time': '1h', 'bytes_up': '0', 'bytes_down': '0'
+        },
+    ]
+
+    import copy
+    with patch('mktxp.datasource.kid_control_device_ds.KidDeviceMetricsDataSource.metric_records', side_effect=lambda *a, **kw: copy.deepcopy(devices)):
+        # 1. Test unassigned filter
+        KidControlOutput.clients_summary(mock_router_entry, unassigned=True)
+        out = capsys.readouterr().out
+        assert 'Unassigned Active Device' in out
+        assert 'Unassigned Idle Device' in out
+        assert 'Idle Kid Device' not in out
+        assert 'Active Streamer' not in out
+        assert 'Matching Kid Control devices: 2 (Total: 4)' in out
+
+        # 2. Test active_only filter
+        KidControlOutput.clients_summary(mock_router_entry, active_only=True)
+        out = capsys.readouterr().out
+        assert 'Active Streamer' in out
+        assert 'Unassigned Active Device' in out
+        assert 'Idle Kid Device' not in out
+        assert 'Unassigned Idle Device' not in out
+        assert 'Matching Kid Control devices: 2 (Total: 4)' in out
+
+        # 3. Test rate_above filter (e.g. 5M)
+        KidControlOutput.clients_summary(mock_router_entry, rate_above='5M')
+        out = capsys.readouterr().out
+        assert 'Active Streamer' in out
+        assert 'Unassigned Active Device' not in out
+        assert 'Idle Kid Device' not in out
+        assert 'Matching Kid Control devices: 1 (Total: 4)' in out
+
+
+def test_kid_control_top_and_dynamic_filters(mock_router_entry, capsys):
+    """Test Kid Control top limit, dynamic_only, static_only, and active traffic summary."""
+    devices = [
+        {
+            'name': 'Device One', 'user': 'UserA', 'mac_address': 'AA:01:00:00:00:01',
+            'ip_address': '10.0.0.1', 'rate_up': '1000000', 'rate_down': '2000000',
+            'idle_time': '10s', 'bytes_up': '100', 'bytes_down': '200', 'dynamic': 'true'
+        },
+        {
+            'name': 'Device Two', 'user': 'UserB', 'mac_address': 'AA:01:00:00:00:02',
+            'ip_address': '10.0.0.2', 'rate_up': '500000', 'rate_down': '500000',
+            'idle_time': '5s', 'bytes_up': '100', 'bytes_down': '200', 'dynamic': 'false'
+        },
+        {
+            'name': 'Device Three', 'user': '', 'mac_address': 'AA:01:00:00:00:03',
+            'ip_address': '10.0.0.3', 'rate_up': '100000', 'rate_down': '100000',
+            'idle_time': '2s', 'bytes_up': '100', 'bytes_down': '200', 'dynamic': 'true'
+        },
+    ]
+
+    import copy
+    with patch('mktxp.datasource.kid_control_device_ds.KidDeviceMetricsDataSource.metric_records', side_effect=lambda *a, **kw: copy.deepcopy(devices)):
+        # 1. Test top=2
+        KidControlOutput.clients_summary(mock_router_entry, top=2)
+        out = capsys.readouterr().out
+        assert 'Device One' in out
+        assert 'Device Two' in out
+        assert 'Device Three' not in out
+        assert 'Top 2 Kid Control devices by rate (Matching: 3, Total: 3)' in out
+        assert 'Active LAN Traffic:' in out
+
+        # 2. Test dynamic_only=True
+        KidControlOutput.clients_summary(mock_router_entry, dynamic_only=True)
+        out = capsys.readouterr().out
+        assert 'Device One' in out
+        assert 'Device Three' in out
+        assert 'Device Two' not in out
+        assert 'Matching Kid Control devices: 2 (Total: 3)' in out
+
+        # 3. Test static_only=True
+        KidControlOutput.clients_summary(mock_router_entry, static_only=True)
+        out = capsys.readouterr().out
+        assert 'Device Two' in out
+        assert 'Device One' not in out
+        assert 'Device Three' not in out
+        assert 'Matching Kid Control devices: 1 (Total: 3)' in out
+
+
+

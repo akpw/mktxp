@@ -242,10 +242,10 @@ MKTXP only needs ```API``` and ```Read```<sup>💡</sup>, so at that point you c
 <sup>💡</sup> *For the LTE metrics on RouterOS v6, the mktxp user will also need the `test` permission policy.*
 
 ## A check on reality
-Now let's put some Mikrotik device address / user credentials in the above MKTXP configuration file, and at that point we should already be able to check out on our progress so far. Since MKTXP can output selected metrics directly on the command line with the ````mktxp print```` command, it's easy to do it even without Prometheus or Grafana. \
+Now let's put some Mikrotik device address / user credentials in the above MKTXP configuration file, and at that point we should already be able to check out on our progress so far. Since MKTXP can output selected metrics directly on the command line with the ````mktxp diag```` command (alias: ````mktxp print````), it's easy to do it even without Prometheus or Grafana. \
 For example, let's go take a look at some of my smart home CAPsMAN clients:
 ```
- ❯ mktxp print -en MKT-GT -cc
+ ❯ mktxp diag -en MKT-GT -cc
 Connecting to router MKT-GT@10.**.*.**
 2021-01-24 12:04:29 Connection to router MKT-GT@10.**.*.** has been established
 
@@ -273,6 +273,14 @@ Connected Wifi Devices:  15
 -----------------------  --
 ```
 Hmmm, that toaster could probably use a better signal... :) \
+Instead of scrolling through every device, MKTXP's diagnostic filters let you immediately isolate problem clients:
+```
+ ❯ mktxp diag -en MKT-GT -cc --low-signal
+```
+or narrow down to clients on the 2.4 GHz band experiencing low negotiated link rates:
+```
+ ❯ mktxp diag -en MKT-GT -cc --band 2g --low-rate
+```
 But let's get back on track and proceed with the business of exporting RouterOS metrics to Prometheus.
 
 
@@ -416,7 +424,7 @@ mktxp edit -i
     recent_duration = '15m'             # Default duration for --recent (matches uptime <= 15m)
 
     # IP Connections & Bandwidth defaults
-    top_connections_count = 10          # Default limit for connection stats --top
+    top_connections_count = 10          # Default limit for --top in connection stats (-cn) and kid control (-kc)
     rate_above_threshold = '1M'         # Default rate for kid control / bandwidth --rate-above
 ```    
 <sup>💡</sup> *When changing the default mktxp port for [docker image installs](https://github.com/akpw/mktxp#docker-image-install), you'll need to adjust the `docker run ... -p 49090:49090 ...` command to reflect the new port*
@@ -452,18 +460,22 @@ MKTXP commands:
 ````
 To learn more about individual commands, just run it with ```-h```:
 
-### Diagnostics (`mktxp diag` / `mktxp print`)
-Displays live router diagnostics and tables with domain-aware filtering:
+### Diagnostics (`mktxp diag`)
+Displays live router diagnostics and tables with domain-aware filtering (`mktxp print` is supported as an alias):
 - `-en`, `--entry-name`: Router entry name to inspect
-- `-cc`, `--capsman-clients`: Show connected CAPsMAN clients
-- `-wc`, `--wireless-clients`: Show connected WiFi / WiFiWave2 clients
-- `-dc`, `--dhcp-clients`: Show DHCP server leases
-- `-cn`, `--connections`: Show IP connection tracking statistics
-- `-kc`, `--kid-control`: Show Kid Control devices and bandwidth
-- `-al`, `--address-list <names>`: Show firewall address lists
-- `-nw`, `--netwatch`: Show Netwatch probe statuses
+- `-cc`, `--capsman_clients`: Show connected CAPsMAN clients (shortcut: `--caps`)
+- `-wc`, `--wifi_clients`: Show connected WiFi / WiFiWave2 clients (shortcut: `--wifi`)
+- `-dc`, `--dhcp_clients`: Show DHCP server leases (shortcut: `--dhcp`)
+- `-cn`, `--conn_stats`: Show IP connection tracking statistics (shortcut: `--conn`)
+- `-kc`, `--kid_control`: Show Kid Control devices and bandwidth (shortcut: `--kid`)
+- `-al`, `--address_lists <names>`: Show firewall address lists (shortcut: `--addr`)
+- `-nw`, `--netwatch`: Show Netwatch probe statuses (shortcut: `--net`)
 - `-in`, `--include <patterns>`: Filter records matching semicolon-separated substrings or glob patterns (e.g. `-in "wlan-5G;Pro;*10.0.*"`)
 - `-ex`, `--exclude <patterns>`: Exclude records matching patterns (e.g. `-ex "2.4G;Guest"`)
+
+> 💡 **CLI Parameter Shortcuts & Context-Aware Help:**  
+> The CLI options parser automatically matches any unique initial prefix sequence — so `--wifi`, `--caps`, `--dhcp`, `--conn`, `--kid`, `--addr`, and `--net` work interchangeably without typing the full parameter name.  
+> Appending `-h` to any command (e.g. `mktxp diag -kc -h` or `mktxp diag --wifi -h`) dynamically scopes `--help` to show only the relevant domain filters for that command.
 
 **Wireless Diagnostic Filters (used with `-cc` or `-wc`):**
 - `--low-signal [dBm]`: Filter clients with weak signal (default: `<= -75 dBm`)
@@ -471,6 +483,36 @@ Displays live router diagnostics and tables with domain-aware filtering:
 - `--low-rate [rate]`: Filter clients with low PHY rates (default: `<= 18M`)
 - `--recent [duration]`: Filter recently connected clients (default: `<= 15m`)
 - `--band [2g|5g|6g]`: Filter clients by frequency band
+
+**DHCP Leases Filters (used with `-dc`):**
+- `--unidentified`: Show mystery devices with no DHCP hostname and no comment (security auditing)
+- `--static` / `--dynamic`: Filter static vs. dynamic leases (mutually exclusive)
+- `--active-only` / `--inactive-only`: Show active lease holders vs. stale/bound leases (mutually exclusive)
+
+**IP Connection Stats Filters (used with `-cn`):**
+- `--top [N]`: Show top N talkers by active open socket count (default: `10`)
+- `--min-conns [N]`: Filter out low-volume background hosts with fewer than N active connections
+
+**Kid Control & Bandwidth Filters (used with `-kc`):**
+- `--top [N]`: Show top N talkers by real-time bandwidth consumption ($Tx + Rx$), rendered as a flat global leaderboard across the network (default: `10`)
+- `--active`: Show active devices with non-zero traffic only (hides dormant/idle devices)
+- `--rate-above [RATE]`: Filter devices with bandwidth exceeding a threshold (e.g. `5M`, `500k`, default: `1M`)
+- `--unassigned`: Show devices not assigned to any user/child profile
+- `--dynamic-only` / `--static-only`: Filter dynamic auto-discovered devices vs. static manually added devices (mutually exclusive)
+
+> 💡 **Tip: Using Kid Control as a Real-Time LAN Bandwidth Monitor**  
+> MikroTik RouterOS does not natively track per-device real-time transfer rates (`rate_up`, `rate_down`), cumulative volume (`bytes_up`, `bytes_down`), or activity recency (`idle_time`) anywhere else without custom firewall mangle rules.  
+> You can repurpose Kid Control as an automated, passive LAN monitor:  
+> 1. In RouterOS, create a single 24/7 unlimited user profile (e.g. `/ip kid-control add name=DeviceMonitor mon=0s-1d tue=0s-1d ...`). This activates RouterOS's internal kid-control packet accounting engine without blocking or limiting traffic.  
+> 2. RouterOS will automatically discover and track all connected devices under `/ip kid-control device`.  
+> 3. Use `mktxp diag -kc --top 5` or `mktxp diag -kc --active` to view top talkers and live LAN throughput directly from the CLI.
+
+**Address List Filters (used with `-al`):**
+- `--dynamic-only` / `--static-only`: Filter dynamic entries (e.g. threat bans, scanners) vs. static configurations (mutually exclusive)
+
+**Netwatch Filters (used with `-nw`):**
+- `--down-only` / `--up-only`: Filter failing / down probe targets vs. passing / up targets (mutually exclusive)
+
 For example, to learn everything about ````mktxp show````:
 ````
 ❯ mktxp show -h
@@ -601,7 +643,7 @@ kid_control_dynamic = False     # Allow Kid Control metrics for all connected de
 
 When set up on the router, is is possible to view Kid Control device metrics directly from the command line:
 ```
-❯ mktxp print -en MKT-GT -kc
+❯ mktxp diag -en MKT-GT -kc
 MKT-GT@10.70.0.1: OK to connect
 Connecting to router MKT-GT@10.70.0.1
 2025-09-24 12:08:42 Connection to router MKT-GT@10.70.0.1 has been established
@@ -621,15 +663,37 @@ alice devices: 2
 bob devices: 1
 User-assigned devices: 3
 Dynamic devices (no user): 5
+Active LAN Traffic: 3.97 Mbps Up / 27.83 Mbps Down
 Total Kid Control devices: 8
 ```
 The devices are automatically sorted by total bandwidth usage (upload + download rates), making it easy to identify high-traffic devices at a glance.
+
+When you want to cut through idle devices and instantly spot bandwidth hogs, use `--top` to flatten the view into a real-time global leaderboard sorted by total transfer rate:
+```
+❯ mktxp diag -en MKT-GT -kc --top 3
++-------------+-------------+-------+--------------+-------------------+-------------+---------+-----------+------------+
+|  dhcp_name  |    name     | user  | dhcp_address |    mac_address    | ip_address  | rate_up | rate_down | idle_time  |
++=============+=============+=======+==============+===================+=============+=========+===========+============+
+| MacBook Pro | MacBookPro  | alice | 10.10.0.15   | A1:B2:C3:D4:E5:F6 | 10.10.0.15  | 2 Mbps  | 15 Mbps   | a second   |
+| Smart TV    | Samsung TV  |       | 10.20.0.45   | C1:D2:E3:F4:A5:B6 | 10.20.0.45  | 1 Mbps  | 8 Mbps    | 10 seconds |
+| iPhone 15   | iPhone      | alice | 10.10.0.22   | A2:B3:C4:D5:E6:F7 | 10.10.0.22  | 512 Kbps| 3 Mbps    | 2 seconds  |
++-------------+-------------+-------+--------------+-------------------+-------------+---------+-----------+------------+
+Active LAN Traffic: 3.51 Mbps Up / 26.00 Mbps Down
+Total Kid Control devices: 3
+```
+
+**Diagnostic Filters:**
+- `--top [N]`: Show top N talkers flattened into a global leaderboard across the network (e.g. `mktxp diag -en MKT-GT -kc --top 5`)
+- `--active`: Show active devices with non-zero traffic only (hides dormant/idle devices)
+- `--rate-above [RATE]`: Filter devices with bandwidth exceeding a threshold (e.g. `mktxp diag -en MKT-GT -kc --rate-above 5M`)
+- `--unassigned`: Show devices not assigned to any user/child profile (e.g. `mktxp diag -en MKT-GT -kc --unassigned`)
+- `--dynamic-only` / `--static-only`: Filter dynamic auto-discovered devices vs. static manually added devices (mutually exclusive)
 
 ### Address List device monitoring
 Similarly to the above, MKTXP IPv4 / IPv6 firewall address lists can be inspected directly from the command line. The feature supports multiple address lists and automatically detects which IP versions contain which entries.
 
 ```
-❯ mktxp print -en MKT-GT -al "blocklist, allowlist"
+❯ mktxp diag -en MKT-GT -al "blocklist, allowlist"
 MKT-GT@10.70.0.1: OK to connect
 Connecting to router MKT-GT@10.70.0.1
 2025-09-25 12:15:30 Connection to router MKT-GT@10.70.0.1 has been established
@@ -656,6 +720,14 @@ Unique lists: 1
 ```
 The command automatically queries both IPv4 and IPv6 address lists, displaying separate tables when entries exist in both IP versions. Missing lists are reported as warnings, and entries are sorted by list name and then by address for easy scanning.
 
+When managing security blacklists or scanner defenses, you can filter out permanent static entries to inspect only active dynamic blocks with timeouts:
+```
+❯ mktxp diag -en MKT-GT -al "blocklist" --dynamic-only
+```
+
+**Diagnostic Filters:**
+- `--dynamic-only` / `--static-only`: Filter dynamic entries (e.g. threat bans, scanners) vs. static configurations (mutually exclusive)
+
 ### Connections stats
 With many connected devices everywhere, one can often only guess where do they go to and what they actually do with all the information from your network environment. MKTXP let's you easily track those with a single option, with results available both from [mktxp dashboard](https://grafana.com/grafana/dashboards/13679-mikrotik-mktxp-exporter/) and the command line:
 
@@ -671,7 +743,7 @@ Hey, what is this Temp&Humidity sensor has to do with a bunch of open network co
 Let's go check on that in the dashboard, or just get the info right from the command line:
 
 ```
-❯ mktxp print -en MKT-GT -cn
+❯ mktxp diag -en MKT-GT -cn
 +-------------------+--------------+------------------+-----------------------------------------------------------------------+
 |     dhcp_name     | src_address  | connection_count |                             dst_addresses                             |
 +===================+==============+==================+=======================================================================+
@@ -679,6 +751,19 @@ Let's go check on that in the dashboard, or just get the info right from the com
 |                   |              |                  |                       54.254.90.185:32100(udp)
 ```
 *A few quick checks show all of the destination IPs relate to AWS instances, so supposedly it's legit... but let's remain vigilant, to know better :)*
+
+On busy networks with hundreds of open sockets, you can filter out ordinary background traffic to isolate top talkers:
+```
+❯ mktxp diag -en MKT-GT -cn --top 5
+```
+or isolate hosts with abnormally high connection counts (e.g. torrents, network scanners, or runaway apps):
+```
+❯ mktxp diag -en MKT-GT -cn --min-conns 50
+```
+
+**Diagnostic Filters:**
+- `--top [N]`: Show top N talkers by active open socket count (identifies runaway apps, torrents, or DDoS)
+- `--min-conns [N]`: Filter out low-volume background hosts with fewer than N active connections
 
 ### RouterBOARD inventory and firmware
 RouterBOARD inventory and firmware status can be exported with:

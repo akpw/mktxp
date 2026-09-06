@@ -22,7 +22,7 @@ class NetwatchOutput:
     '''    
     
     @staticmethod
-    def clients_summary(router_entry, include=None, exclude=None):
+    def clients_summary(router_entry, include=None, exclude=None, down_only=False, up_only=False):
         ''' Display netwatch summary
         '''
         print(f'{router_entry.router_name}@{router_entry.config_entry.hostname}: OK to connect')
@@ -36,7 +36,13 @@ class NetwatchOutput:
             return
             
         # Display table
-        NetwatchOutput._display_table(netwatch_records, include=include, exclude=exclude)
+        NetwatchOutput._display_table(
+            netwatch_records,
+            include=include,
+            exclude=exclude,
+            down_only=down_only,
+            up_only=up_only,
+        )
             
     @staticmethod
     def _collect_records(router_entry):
@@ -63,7 +69,7 @@ class NetwatchOutput:
             return []
         
     @staticmethod
-    def _display_table(records, include=None, exclude=None):
+    def _display_table(records, include=None, exclude=None, down_only=False, up_only=False):
         ''' Display netwatch records in a table
         '''
         if not records:
@@ -72,6 +78,12 @@ class NetwatchOutput:
         total_unfiltered = len(records)
         filtered_records = []
         for record in records:
+            is_up = record.get('status', '').lower() == 'up'
+            if down_only and is_up:
+                continue
+            if up_only and not is_up:
+                continue
+
             if not match_record(record, include, exclude):
                 continue
             filtered_records.append(record)
@@ -111,7 +123,8 @@ class NetwatchOutput:
         up_count = len([r for r in sorted_records if r.get('status', '').lower() == 'up'])
         down_count = total_entries - up_count
         
-        if include or exclude:
+        has_filters = bool(include) or bool(exclude) or down_only or up_only
+        if has_filters:
             print(f"Matching entries: {total_entries} (Total: {total_unfiltered})")
         else:
             print(f"Total entries: {total_entries}")

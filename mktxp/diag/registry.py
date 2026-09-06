@@ -51,4 +51,10 @@ class DiagRegistry:
     @classmethod
     def get_matching_help_handlers(cls, argv: List[str]) -> List[BaseDiagHandler]:
         """Find handlers that match command switches in argv for targeted help formatting."""
+        # 1. Prioritize primary command switches (e.g. -kc, -cn, --wifi)
+        cmd_matches = [h for h in cls._handlers if h.matches_cmd(argv)]
+        if cmd_matches:
+            return cmd_matches
+
+        # 2. If no primary command switch was provided, match by filter prefixes (e.g. --top, --rate-above)
         return [h for h in cls._handlers if h.matches_help_target(argv)]

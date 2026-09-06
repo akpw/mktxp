@@ -14,9 +14,10 @@
 import pytest
 from unittest.mock import Mock, patch
 from mktxp.cli.output.tables import output_table, OutputCapsmanEntry
-from mktxp.utils.filtering import parse_patterns, match_record, match_wireless_record
+from mktxp.utils.filtering import parse_patterns, match_record, match_wireless_record, match_dhcp_record
 from mktxp.cli.output.capsman_out import CapsmanOutput
 from mktxp.cli.output.dhcp_out import DHCPOutput
+from mktxp.cli.output.conn_stats_out import ConnectionsStatsOutput
 from mktxp.cli.options import MKTXPOptionsParser
 
 
@@ -135,6 +136,214 @@ class TestOutputIntegration:
         assert "Office-Workstation" in captured
         assert "Guest-Tablet" not in captured
         assert "Matching DHCP clients: 1 (Total: 2)" in captured
+
+
+class TestDHCPDiagnostics:
+    @pytest.fixture
+    def sample_leases(self):
+        return [
+            {
+                'host_name': 'Server-Main',
+                'comment': 'Core Infrastructure',
+                'mac_address': 'AA:00:00:00:00:01',
+                'address': '192.168.1.10',
+                'active_address': '192.168.1.10',
+                'server': 'lan',
+                'expires_after': '1d',
+                'dynamic': 'false',
+                'status': 'bound',
+            },
+            {
+                'host_name': 'Guest-Phone',
+                'comment': '',
+                'mac_address': 'AA:00:00:00:00:02',
+                'address': '192.168.1.50',
+                'active_address': '192.168.1.50',
+                'server': 'lan',
+                'expires_after': '6h',
+                'dynamic': 'true',
+                'status': 'bound',
+            },
+            {
+                'host_name': '',
+                'comment': 'AP Backyard',
+                'mac_address': 'AA:00:00:00:00:03',
+                'address': '192.168.1.20',
+                'active_address': '',
+                'server': 'lan',
+                'expires_after': '',
+                'dynamic': 'false',
+                'status': 'waiting',
+            },
+            {
+                'host_name': '',
+                'comment': '',
+                'mac_address': 'AA:00:00:00:00:99',
+                'address': '192.168.1.99',
+                'active_address': '192.168.1.99',
+                'server': 'lan',
+                'expires_after': '12h',
+                'dynamic': 'true',
+                'status': 'bound',
+            },
+            {
+                'host_name': '',
+                'comment': '',
+                'mac_address': 'AA:00:00:00:00:98',
+                'address': '192.168.1.98',
+                'active_address': '',
+                'server': 'lan',
+                'expires_after': '',
+                'dynamic': 'false',
+                'status': 'waiting',
+            },
+        ]
+
+    def test_match_dhcp_record_unidentified(self, sample_leases):
+        # Only leases with neither host_name nor comment should match
+        matched = [l['mac_address'] for l in sample_leases if match_dhcp_record(l, unidentified=True)]
+        assert matched == ['AA:00:00:00:00:99', 'AA:00:00:00:00:98']
+
+    def test_match_dhcp_record_static(self, sample_leases):
+        matched = [l['mac_address'] for l in sample_leases if match_dhcp_record(l, static_only=True)]
+        assert matched == ['AA:00:00:00:00:01', 'AA:00:00:00:00:03', 'AA:00:00:00:00:98']
+
+    def test_match_dhcp_record_dynamic(self, sample_leases):
+        matched = [l['mac_address'] for l in sample_leases if match_dhcp_record(l, dynamic_only=True)]
+        assert matched == ['AA:00:00:00:00:02', 'AA:00:00:00:00:99']
+
+    def test_match_dhcp_record_active_only(self, sample_leases):
+        matched = [l['mac_address'] for l in sample_leases if match_dhcp_record(l, active_only=True)]
+        assert matched == ['AA:00:00:00:00:01', 'AA:00:00:00:00:02', 'AA:00:00:00:00:99']
+
+    def test_match_dhcp_record_combined(self, sample_leases):
+        # Unidentified + active only
+        matched = [
+            l['mac_address']
+            for l in sample_leases
+            if match_dhcp_record(l, unidentified=True, active_only=True)
+        ]
+        assert matched == ['AA:00:00:00:00:99']
+
+        # Static + active only
+        static_active = [
+            l['mac_address']
+            for l in sample_leases
+            if match_dhcp_record(l, static_only=True, active_only=True)
+        ]
+        assert static_active == ['AA:00:00:00:00:01']
+
+    @patch('mktxp.cli.output.dhcp_out.DHCPMetricsDataSource.metric_records')
+    def test_dhcp_output_unidentified(self, mock_metric_records, mock_router_entry, sample_leases, capsys):
+        mock_metric_records.return_value = sample_leases
+        DHCPOutput.clients_summary(mock_router_entry, unidentified=True)
+        captured = capsys.readouterr().out
+        assert "AA:00:00:00:00:99" in captured
+        assert "AA:00:00:00:00:98" in captured
+        assert "Server-Main" not in captured
+        assert "Guest-Phone" not in captured
+        assert "Matching DHCP clients: 2 (Total: 5)" in captured
+
+    @patch('mktxp.cli.output.dhcp_out.DHCPMetricsDataSource.metric_records')
+    def test_dhcp_output_static_and_dynamic(self, mock_metric_records, mock_router_entry, sample_leases, capsys):
+        mock_metric_records.return_value = sample_leases
+        # Static
+        DHCPOutput.clients_summary(mock_router_entry, static_only=True)
+        captured = capsys.readouterr().out
+        assert "Server-Main" in captured
+        assert "Guest-Phone" not in captured
+        assert "Matching DHCP clients: 3 (Total: 5)" in captured
+
+        # Dynamic
+        DHCPOutput.clients_summary(mock_router_entry, dynamic_only=True)
+        captured = capsys.readouterr().out
+        assert "Guest-Phone" in captured
+        assert "Server-Main" not in captured
+        assert "Matching DHCP clients: 2 (Total: 5)" in captured
+
+    @patch('mktxp.cli.output.dhcp_out.DHCPMetricsDataSource.metric_records')
+    def test_dhcp_output_active_only(self, mock_metric_records, mock_router_entry, sample_leases, capsys):
+        mock_metric_records.return_value = sample_leases
+        DHCPOutput.clients_summary(mock_router_entry, active_only=True)
+        captured = capsys.readouterr().out
+        assert "Server-Main" in captured
+        assert "Guest-Phone" in captured
+        assert "AA:00:00:00:00:99" in captured
+        assert "AA:00:00:00:00:98" not in captured
+        assert "Matching DHCP clients: 3 (Total: 5)" in captured
+
+    def test_match_dhcp_record_inactive_only(self, sample_leases):
+        matched = [l['mac_address'] for l in sample_leases if match_dhcp_record(l, inactive_only=True)]
+        assert matched == ['AA:00:00:00:00:03', 'AA:00:00:00:00:98']
+
+    @patch('mktxp.cli.output.dhcp_out.DHCPMetricsDataSource.metric_records')
+    def test_dhcp_output_inactive_only(self, mock_metric_records, mock_router_entry, sample_leases, capsys):
+        mock_metric_records.return_value = sample_leases
+        DHCPOutput.clients_summary(mock_router_entry, inactive_only=True)
+        captured = capsys.readouterr().out
+        assert "AA:00:00:00:00:03" in captured or "AP Backyard" in captured
+        assert "AA:00:00:00:00:98" in captured
+        assert "Server-Main" not in captured
+        assert "Guest-Phone" not in captured
+        assert "Matching DHCP clients: 2 (Total: 5)" in captured
+
+    @patch('mktxp.cli.output.dhcp_out.DHCPMetricsDataSource.metric_records')
+    def test_dhcp_output_static_inactive_combined(self, mock_metric_records, mock_router_entry, sample_leases, capsys):
+        mock_metric_records.return_value = sample_leases
+        DHCPOutput.clients_summary(mock_router_entry, static_only=True, inactive_only=True)
+        captured = capsys.readouterr().out
+        assert "AA:00:00:00:00:03" in captured or "AP Backyard" in captured
+        assert "AA:00:00:00:00:98" in captured
+        assert "Server-Main" not in captured
+        assert "Matching DHCP clients: 2 (Total: 5)" in captured
+
+
+class TestConnectionStatsDiagnostics:
+    @pytest.fixture
+    def sample_connections(self):
+        return [
+            {'src_address': '10.0.0.10', 'connection_count': 100, 'dst_addresses': '1.1.1.1:443'},
+            {'src_address': '10.0.0.20', 'connection_count': 60, 'dst_addresses': '8.8.8.8:53'},
+            {'src_address': '10.0.0.30', 'connection_count': 25, 'dst_addresses': '9.9.9.9:53'},
+            {'src_address': '10.0.0.40', 'connection_count': 5, 'dst_addresses': '1.0.0.1:53'},
+        ]
+
+    @patch('mktxp.cli.output.conn_stats_out.IPConnectionStatsDatasource.metric_records')
+    def test_conn_stats_top(self, mock_metric_records, mock_router_entry, sample_connections, capsys):
+        mock_metric_records.return_value = sample_connections
+        # Top 2
+        ConnectionsStatsOutput.clients_summary(mock_router_entry, top=2)
+        out = capsys.readouterr().out
+        assert '10.0.0.10' in out
+        assert '10.0.0.20' in out
+        assert '10.0.0.30' not in out
+        assert '10.0.0.40' not in out
+        assert 'Matching source addresses: 2 (Total: 4)' in out
+
+    @patch('mktxp.cli.output.conn_stats_out.IPConnectionStatsDatasource.metric_records')
+    def test_conn_stats_min_conns(self, mock_metric_records, mock_router_entry, sample_connections, capsys):
+        mock_metric_records.return_value = sample_connections
+        # Min conns 30
+        ConnectionsStatsOutput.clients_summary(mock_router_entry, min_conns=30)
+        out = capsys.readouterr().out
+        assert '10.0.0.10' in out
+        assert '10.0.0.20' in out
+        assert '10.0.0.30' not in out
+        assert '10.0.0.40' not in out
+        assert 'Matching source addresses: 2 (Total: 4)' in out
+
+    @patch('mktxp.cli.output.conn_stats_out.IPConnectionStatsDatasource.metric_records')
+    def test_conn_stats_combined(self, mock_metric_records, mock_router_entry, sample_connections, capsys):
+        mock_metric_records.return_value = sample_connections
+        # Min conns 10 + Top 1
+        ConnectionsStatsOutput.clients_summary(mock_router_entry, min_conns=10, top=1)
+        out = capsys.readouterr().out
+        assert '10.0.0.10' in out
+        assert '10.0.0.20' not in out
+        assert 'Matching source addresses: 1 (Total: 4)' in out
+
+
+
 
 
 class TestWirelessDiagnostics:

@@ -22,6 +22,7 @@ class WirelessDiagHandler(BaseDiagHandler):
 
     name = "wireless"
     cmd_flags = ["-cc", "--capsman_clients", "-wc", "--wifi_clients"]
+    cmd_prefixes = ["-cc", "--caps", "-wc", "--wifi"]
     filter_group_title = "Wireless & CAPsMAN Filters (-cc, -wc)"
     help_prefixes = ["-cc", "--caps", "-wc", "--wifi"]
 
@@ -42,11 +43,21 @@ class WirelessDiagHandler(BaseDiagHandler):
         )
 
     def register_filter_options(self, parser) -> None:
+        diag_conf = (
+            config_handler.diag_config()
+            if hasattr(config_handler, "diag_config")
+            else {}
+        )
+        low_signal_def = diag_conf.get("low_signal_threshold", -75)
+        min_signal_def = diag_conf.get("min_signal_threshold", -60)
+        low_rate_def = diag_conf.get("low_rate_threshold", "18M")
+        recent_def = diag_conf.get("recent_duration", "15m")
+
         group = parser.add_argument_group(self.filter_group_title)
         group.add_argument(
             "--low-signal",
             dest="low_signal",
-            help="Show devices with weak signal (default: from [DIAG] low_signal_threshold)",
+            help=f"Show devices with weak signal (default: {low_signal_def} dBm)",
             nargs="?",
             const=True,
             default=None,
@@ -55,7 +66,7 @@ class WirelessDiagHandler(BaseDiagHandler):
         group.add_argument(
             "--min-signal",
             dest="min_signal",
-            help="Show devices with strong signal (default: from [DIAG] min_signal_threshold)",
+            help=f"Show devices with strong signal (default: {min_signal_def} dBm)",
             nargs="?",
             const=True,
             default=None,
@@ -64,7 +75,7 @@ class WirelessDiagHandler(BaseDiagHandler):
         group.add_argument(
             "--low-rate",
             dest="low_rate",
-            help="Show devices with low negotiated rate (default: from [DIAG] low_rate_threshold)",
+            help=f"Show devices with low negotiated rate (default: {low_rate_def})",
             nargs="?",
             const=True,
             default=None,
@@ -73,7 +84,7 @@ class WirelessDiagHandler(BaseDiagHandler):
         group.add_argument(
             "--recent",
             dest="recent",
-            help="Show newly connected devices (default: from [DIAG] recent_duration)",
+            help=f"Show newly connected devices (default: {recent_def})",
             nargs="?",
             const=True,
             default=None,

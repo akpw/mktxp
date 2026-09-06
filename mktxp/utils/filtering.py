@@ -224,3 +224,56 @@ def match_wireless_record(
                 return False
 
     return True
+
+
+def match_dhcp_record(
+    record_dict,
+    unidentified=False,
+    static_only=False,
+    dynamic_only=False,
+    active_only=False,
+    inactive_only=False,
+):
+    """Evaluates whether a DHCP lease record matches specialized DHCP diagnostic filters.
+    - unidentified: if True, matches only leases with no hostname and no comment
+    - static_only: if True, matches only static leases (dynamic is false)
+    - dynamic_only: if True, matches only dynamic leases (dynamic is true)
+    - active_only: if True, matches only actively bound leases
+    - inactive_only: if True, matches only inactive/waiting leases (offline devices)
+    """
+    if unidentified:
+        raw_host = str(record_dict.get('host_name') or '').strip()
+        raw_comment = str(record_dict.get('comment') or '').strip()
+        if raw_host or raw_comment:
+            return False
+
+    if static_only:
+        dyn_val = record_dict.get('dynamic')
+        if str(dyn_val).lower() in ('true', '1', 'yes') or dyn_val is True:
+            return False
+
+    if dynamic_only:
+        dyn_val = record_dict.get('dynamic')
+        if str(dyn_val).lower() not in ('true', '1', 'yes') and dyn_val is not True:
+            return False
+
+    if active_only:
+        status_val = str(record_dict.get('status') or '').lower().strip()
+        active_addr = str(record_dict.get('active_address') or '').strip()
+        if status_val:
+            if status_val != 'bound':
+                return False
+        elif not active_addr:
+            return False
+
+    if inactive_only:
+        status_val = str(record_dict.get('status') or '').lower().strip()
+        active_addr = str(record_dict.get('active_address') or '').strip()
+        if status_val:
+            if status_val == 'bound':
+                return False
+        elif active_addr:
+            return False
+
+    return True
+

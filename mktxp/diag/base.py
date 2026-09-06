@@ -20,6 +20,7 @@ class BaseDiagHandler(ABC):
 
     name: str = ""
     cmd_flags: List[str] = []
+    cmd_prefixes: List[str] = []
     cmd_dest: str = ""
     cmd_help: str = ""
     filter_group_title: Optional[str] = None
@@ -34,13 +35,22 @@ class BaseDiagHandler(ABC):
         """Register specialized filter arguments (e.g. --low-signal, --unidentified) into their dedicated group."""
         pass
 
-    def matches_help_target(self, argv: List[str]) -> bool:
-        """Check if any argument in argv matches this handler for targeted context-aware help."""
-        if not self.help_prefixes:
-            return any(arg in self.cmd_flags for arg in argv)
+    def matches_cmd(self, argv: List[str]) -> bool:
+        """Check if any argument in argv matches this handler's primary command switch or prefix."""
+        prefixes = self.cmd_prefixes or self.cmd_flags
         for arg in argv:
             if arg in self.cmd_flags:
                 return True
+            for prefix in prefixes:
+                if arg.startswith(prefix):
+                    return True
+        return False
+
+    def matches_help_target(self, argv: List[str]) -> bool:
+        """Check if any argument in argv matches this handler for targeted context-aware help."""
+        if self.matches_cmd(argv):
+            return True
+        for arg in argv:
             for prefix in self.help_prefixes:
                 if arg.startswith(prefix):
                     return True

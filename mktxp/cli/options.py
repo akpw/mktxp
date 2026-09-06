@@ -263,19 +263,46 @@ class MKTXPHelpFormatter(HelpFormatter):
         argv = sys.argv
         matching_handlers = DiagRegistry.get_matching_help_handlers(argv)
 
-        if len(matching_handlers) == 1:
-            active_handler = matching_handlers[0]
+        if matching_handlers:
             sections = help_text.split("\n\n")
             filtered_sections = []
             for sec in sections:
                 skip = False
                 for handler in DiagRegistry.get_handlers():
                     if handler.filter_group_title and handler.filter_group_title in sec:
-                        if handler != active_handler:
+                        if handler not in matching_handlers:
                             skip = True
                             break
-                if not skip:
-                    filtered_sections.append(sec)
+                if skip:
+                    continue
+
+                if sec.startswith("Diagnostic Commands:"):
+                    lines = sec.split("\n")
+                    header = lines[0]
+                    filtered_lines = [header]
+                    i = 1
+                    while i < len(lines):
+                        line = lines[i]
+                        if line.startswith("  -"):
+                            belongs = any(
+                                any(flag in line for flag in h.cmd_flags)
+                                for h in matching_handlers
+                            )
+                            if belongs:
+                                filtered_lines.append(line)
+                                i += 1
+                                while (
+                                    i < len(lines)
+                                    and lines[i].startswith(" ")
+                                    and not lines[i].startswith("  -")
+                                ):
+                                    filtered_lines.append(lines[i])
+                                    i += 1
+                                continue
+                        i += 1
+                    sec = "\n".join(filtered_lines)
+
+                filtered_sections.append(sec)
             return "\n\n".join(filtered_sections)
         return help_text
 

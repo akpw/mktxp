@@ -12,6 +12,7 @@
 ## GNU General Public License for more details.
 
 
+from mktxp.cli.config import config_handler
 from mktxp.cli.output.tables import output_table, OutputConnStatsEntry
 from mktxp.utils.filtering import match_record
 from mktxp.flow.processor.enrichment import resolve_dhcp
@@ -22,37 +23,67 @@ class ConnectionsStatsOutput:
     ''' Connections Stats Output
     '''    
     @staticmethod
-    def clients_summary(router_entry, include=None, exclude=None):
+    def clients_summary(router_entry, include=None, exclude=None, top=None, min_conns=None):
         connection_records = IPConnectionStatsDatasource.metric_records(router_entry, add_router_id = False)
         if not connection_records:
             print('No connection stats records')
             return 
 
-        conn_cnt = 0
-        total_unfiltered_cnt = 0
-        total_unfiltered_conns = 0
+        diag_conf = (
+            config_handler.diag_config()
+            if hasattr(config_handler, 'diag_config')
+            else {}
+        )
+
+        total_unfiltered_cnt = len(connection_records)
+        total_unfiltered_conns = sum(r.get('connection_count', 0) for r in connection_records)
+
         output_records = []
         for registration_record in sorted(connection_records, key = lambda rt_record: rt_record['connection_count'], reverse=True):
             resolve_dhcp(router_entry, registration_record, id_key = 'src_address', resolve_address = False)        
-            total_unfiltered_cnt += 1
-            total_unfiltered_conns += registration_record.get('connection_count', 0)
+
+            if min_conns is not None:
+                try:
+                    if registration_record.get('connection_count', 0) < int(min_conns):
+                        continue
+                except (ValueError, TypeError):
+                    pass
+
             if not match_record(registration_record, include, exclude):
                 continue
             output_records.append(registration_record)
-            conn_cnt += registration_record.get('connection_count', 0)
 
-        output_records_cnt = 0
+        if top is not None:
+            try:
+                limit = (
+                    int(diag_conf.get('top_connections_count', 10))
+                    if top is True
+                    else int(top)
+                )
+                if limit > 0:
+                    output_records = output_records[:limit]
+            except (ValueError, TypeError):
+                pass
+
+        conn_cnt = sum(r.get('connection_count', 0) for r in output_records)
+        output_records_cnt = len(output_records)
         output_entry = OutputConnStatsEntry
         tbl = output_table(output_entry)
         
         for record in output_records:
             tbl.add_row(output_entry(**record))
             tbl.add_row(output_entry())
-            output_records_cnt += 1
                 
+        has_filters = (
+            bool(include)
+            or bool(exclude)
+            or top is not None
+            or min_conns is not None
+        )
+
         if output_records_cnt > 0:
             print (tbl.draw())
-            if include or exclude:
+            if has_filters:
                 print(f'Matching source addresses: {output_records_cnt} (Total: {total_unfiltered_cnt})')
                 print(f'Matching open connections: {conn_cnt} (Total: {total_unfiltered_conns})', '\n')
             else:

@@ -88,3 +88,30 @@ def test_dispatch_diag(mock_router_entry, mock_get_active_handler):
 
     assert mock_get_active_handler.called
     assert mock_handler.execute.called
+
+
+def test_diag_help_formatter_scoping():
+    """Verify MKTXPHelpFormatter scopes both Diagnostic Commands and filter groups to the target command."""
+    import sys
+    import argparse
+    from unittest.mock import patch
+
+    cmd_parser = argparse.ArgumentParser()
+    MKTXPOptionsParser().parse_commands(cmd_parser)
+    subparsers_actions = [
+        action for action in cmd_parser._actions
+        if isinstance(action, argparse._SubParsersAction)
+    ]
+    diag_parser = subparsers_actions[0].choices['diag']
+
+    with patch.object(sys, 'argv', ['mktxp', 'diag', '-en', 'TestRouter', '-kc', '--top', '5', '-h']):
+        help_text = diag_parser.format_help()
+        assert "Kid Control Filters (-kc):" in help_text
+        assert "-kc, --kid_control" in help_text
+        assert "Wireless & CAPsMAN Filters" not in help_text
+        assert "DHCP Server Filters" not in help_text
+        assert "IP Connections Filters" not in help_text
+        assert "Netwatch Filters" not in help_text
+        assert "-cc, --capsman_clients" not in help_text
+        assert "-cn, --conn_stats" not in help_text
+

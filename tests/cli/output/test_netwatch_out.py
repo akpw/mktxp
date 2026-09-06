@@ -161,3 +161,26 @@ class TestNetwatchDisplayScenarios:
         assert len(positions) == 3, "Not all hosts found in output"
         assert positions['AHost_1'] < positions['AHost_2'], "AHost entries not sorted correctly by host"
         assert positions['AHost_2'] < positions['ZHost'], "Entries not sorted correctly by name"
+
+    @patch('mktxp.cli.output.netwatch_out.NetwatchOutput._collect_records')
+    def test_down_only_and_up_only(self, mock_collect_records, mock_router_entry, capsys):
+        ''' Test --down-only and --up-only filters
+        '''
+        mock_collect_records.return_value = [
+            {'name': 'Host-Up', 'host': '1.1.1.1', 'comment': 'Online', 'status': 'Up', 'type': 'simple', 'since': '', 'timeout': '', 'interval': ''},
+            {'name': 'Host-Down', 'host': '2.2.2.2', 'comment': 'Offline', 'status': 'Down', 'type': 'simple', 'since': '', 'timeout': '', 'interval': ''},
+        ]
+
+        # 1. Down only
+        NetwatchOutput.clients_summary(mock_router_entry, down_only=True)
+        out = capsys.readouterr().out
+        assert 'Host-Down' in out
+        assert 'Host-Up' not in out
+        assert 'Matching entries: 1 (Total: 2)' in out
+
+        # 2. Up only
+        NetwatchOutput.clients_summary(mock_router_entry, up_only=True)
+        out = capsys.readouterr().out
+        assert 'Host-Up' in out
+        assert 'Host-Down' not in out
+        assert 'Matching entries: 1 (Total: 2)' in out

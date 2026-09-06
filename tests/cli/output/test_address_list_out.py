@@ -212,3 +212,28 @@ class TestAddressListDisplayScenarios:
         captured = capsys.readouterr()
         assert "Warning: The following address lists were not found: missing_list" in captured.out
         assert "existing_list" in captured.out
+
+    @patch('mktxp.cli.output.address_list_out.AddressListOutput._collect_records')
+    def test_dynamic_only_and_static_only(self, mock_collect_records, mock_router_entry, capsys):
+        ''' Test --dynamic-only and --static-only filters
+        '''
+        records = [
+            {'list': 'threat-list', 'address': '198.51.100.1', 'comment': 'Bruteforce', 'timeout': '1d', 'dynamic': 'Yes', 'disabled': 'No'},
+            {'list': 'threat-list', 'address': '192.0.2.1', 'comment': 'Permanent whitelist', 'timeout': '', 'dynamic': 'No', 'disabled': 'No'},
+        ]
+        mock_collect_records.side_effect = lambda re, lists, ip_ver: records if ip_ver == 'ip' else []
+
+        # 1. Dynamic only
+        AddressListOutput.clients_summary(mock_router_entry, "threat-list", dynamic_only=True)
+        out = capsys.readouterr().out
+        assert '198.51.100.1' in out
+        assert '192.0.2.1' not in out
+        assert 'Matching entries: 1 (Total: 2)' in out
+
+        # 2. Static only
+        AddressListOutput.clients_summary(mock_router_entry, "threat-list", static_only=True)
+        out = capsys.readouterr().out
+        assert '192.0.2.1' in out
+        assert '198.51.100.1' not in out
+        assert 'Matching entries: 1 (Total: 2)' in out
+
