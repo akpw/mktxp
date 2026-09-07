@@ -42,7 +42,7 @@ MKTXP is an extensible toolkit for MikroTik RouterOS network engineering. It pro
 
 *Requirements: Python >= 3.9. Supported on Linux, macOS, and FreeBSD.*
 
-### Ready-to-Run Monitoring & Logging Stack ([MKTXP Stack](https://github.com/akpw/mktxp-stack))
+### Ready-to-Run Monitoring & Logging Stack
 
 If you need a turnkey environment without manually wiring services, [MKTXP Stack](https://github.com/akpw/mktxp-stack) is an out-of-the-box Docker Compose deployment that packages MKTXP alongside Prometheus / Grafana stack with pre-configured dashboards, and adds centralized MikroTik syslog processing via Loki and Promtail.
 
