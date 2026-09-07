@@ -50,3 +50,41 @@ def test_config_cli_show_paths(capsys):
     captured = capsys.readouterr()
     assert 'MKTXP data config:' in captured.out
     assert 'MKTXP internal config:' in captured.out
+
+
+def test_config_cli_edit_custom_editor():
+    """Verify ConfigCLI.edit uses specified editor."""
+    from unittest.mock import patch
+    config_handler()
+    with patch('subprocess.check_call') as mock_sub:
+        ConfigCLI.edit({'editor': 'nvim', 'internal': False})
+        mock_sub.assert_called_once_with(['nvim', config_handler.usr_conf_data_path])
+
+
+def test_config_cli_edit_internal():
+    """Verify ConfigCLI.edit with -i targets internal config."""
+    from unittest.mock import patch
+    config_handler()
+    with patch('subprocess.check_call') as mock_sub:
+        ConfigCLI.edit({'editor': 'nvim', 'internal': True})
+        mock_sub.assert_called_once_with(['nvim', config_handler.mktxp_conf_path])
+
+
+def test_config_cli_edit_fallback_detector():
+    """Verify ConfigCLI.edit invokes fallback_editor_detector when no editor passed."""
+    from unittest.mock import patch, MagicMock
+    config_handler()
+    mock_detector = MagicMock(return_value='nano')
+    with patch('subprocess.check_call') as mock_sub:
+        ConfigCLI.edit({}, fallback_editor_detector=mock_detector)
+        mock_detector.assert_called_once()
+        mock_sub.assert_called_once_with(['nano', config_handler.usr_conf_data_path])
+
+
+def test_config_cli_edit_no_editor_found(capsys):
+    """Verify ConfigCLI.edit prints helpful error when no editor available."""
+    config_handler()
+    ConfigCLI.edit({}, fallback_editor_detector=lambda: None)
+    captured = capsys.readouterr()
+    assert 'No editor found to edit configuration files' in captured.out
+

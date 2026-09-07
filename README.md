@@ -118,6 +118,9 @@ Run targeted, domain-specific diagnostic one-liners directly in your terminal:
 
 # Check active dynamic firewall threat bans
 ❯ mktxp diag -en My-Router -al blacklist --dynamic-only
+
+# Pinpoint degraded cables or ports negotiating down (< 100 Mbps or half-duplex)
+❯ mktxp diag -en My-Router -im --degraded
 ```
 
 Sample output:

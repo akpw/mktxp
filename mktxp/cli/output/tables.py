@@ -64,6 +64,18 @@ OutputNetwatchEntry = namedtuple(
 )
 OutputNetwatchEntry.__new__.__defaults__ = ('',) * len(OutputNetwatchEntry._fields)
 
+OutputInterfaceEntry = namedtuple(
+    'OutputInterfaceEntry',
+    ['interface', 'status', 'rate', 'duplex', 'auto_neg', 'sfp']
+)
+OutputInterfaceEntry.__new__.__defaults__ = ('',) * len(OutputInterfaceEntry._fields)
+
+OutputSFPDetailEntry = namedtuple(
+    'OutputSFPDetailEntry',
+    ['interface', 'status', 'rate', 'type', 'vendor_part', 'connector', 'rx_power', 'tx_power', 'temperature']
+)
+OutputSFPDetailEntry.__new__.__defaults__ = ('',) * len(OutputSFPDetailEntry._fields)
+
 
 def output_table(output_entry=None):
     """Creates an auto-sizing Texttable configured for CLI output."""

@@ -14,6 +14,7 @@
   - [4. Firewall Address Lists (`-al`)](#4-firewall-address-lists--al)
   - [5. Bandwidth & Top Talkers (`-kc`)](#5-bandwidth--top-talkers--kc)
   - [6. Upstream & Netwatch Health (`-nw`)](#6-upstream--netwatch-health--nw)
+  - [7. Ethernet & SFP Interface Monitor (`-im`)](#7-ethernet--sfp-interface-monitor--im)
 - [General Pattern Filters (`-in`, `-ex`)](#general-pattern-filters--in--ex)
 - [RouterOS Prerequisites & Permissions](#routeros-prerequisites--permissions)
 
@@ -30,12 +31,13 @@
 | `mktxp diag -al` | `--addr` | Firewall address lists (IPv4 and IPv6) | `--dynamic-only`, `--static-only` |
 | `mktxp diag -kc` | `--kid` | Real-time per-device bandwidth & LAN throughput | `--top [N]`, `--active`, `--rate-above [RATE]` |
 | `mktxp diag -nw` | `--net` | Netwatch ICMP ping monitors & gateway checks | `--down-only`, `--up-only` |
+| `mktxp diag -im` | `--interface` | Ethernet & SFP link status, PHY rates & optical DOM | `--degraded [RATE]`, `--plugged`, `--unplugged`, `--rate`, `--sfp-only` |
 
 ---
 
 ## CLI Ergonomics & Scoped Help
 
-1. Prefix Matching: You don't have to type full flags. The options parser matches any unique initial prefix sequence—`--wifi`, `--caps`, `--dhcp`, `--conn`, `--kid`, `--addr`, and `--net` resolve cleanly.
+1. Prefix Matching: You don't have to type full flags. The options parser matches any unique initial prefix sequence—`--wifi`, `--caps`, `--dhcp`, `--conn`, `--kid`, `--addr`, `--net`, and `--interface` resolve cleanly.
 2. Context-Aware Scoped Help: Appending `-h` to any domain narrows help down to the switches relevant to that command, printing active thresholds from your `_mktxp.conf` (see the [Configuration Guide](configuration.md#3-diag--live-diagnostics-thresholds) to tune defaults):
    ```bash
    ❯ mktxp diag -en ROUTER -kc -h
@@ -247,6 +249,109 @@ Netwatch Entries:
 Matching entries: 1 (Total: 6)
 Up: 0
 Down: 1
+```
+
+---
+
+### 7. Ethernet & SFP Interface Monitor (`-im`)
+
+Monitors physical Ethernet and SFP port link status (`Plugged-In` vs `Unplugged`), negotiated PHY data rates (`1 Gbps`, `100 Mbps`, `10 Gbps`), duplex, auto-negotiation, and optical transceiver DOM diagnostics.
+
+Available Filters:
+- `--degraded [RATE]`: Instantly surfaces active/linked ports operating below the sub-rate threshold (default: `< 100M`, configurable in `_mktxp.conf`) or at half-duplex—the classic "bad cable / damaged pair" detector. Can also be set to a custom threshold (e.g. `--degraded 1G` to isolate sub-gigabit links).
+- `--plugged`: Show only active/linked ports (`status: link-ok`).
+- `--unplugged`: Show only disconnected ports (`status: no-link`).
+- `--rate [RATE]`: Filter by exact negotiated rate (e.g. `100M`, `1G`, `10G`, `2.5G`).
+- `--rate-below [RATE]`: Filter ports with negotiated rate below threshold (e.g. `1G`).
+- `--sfp-only`: Isolate SFP/QSFP ports and render detailed optical transceiver DOM diagnostics (Rx/Tx optical power levels, temperature, connector types).
+
+Examples:
+
+```bash
+# Audit all switch and router ports
+❯ mktxp diag -en ROUTER -im
+```
+
+```text
+Interface Monitor:
++------------------------+------------+----------+--------+----------+---------------------+
+|       Interface        |   Status   |   Rate   | Duplex | Auto-Neg |         SFP         |
++========================+============+==========+========+==========+=====================+
+| INet Provider          | Plugged-In | 100 Mbps |  Full  |   Done   | -                   |
+| ether2                 | Plugged-In | 1 Gbps   |  Full  |   Done   | -                   |
+| SMLIGHT SLZB-06        | Plugged-In | 100 Mbps |  Full  |   Done   | -                   |
+| QNAP                   | Plugged-In | 1 Gbps   |  Full  |   Done   | -                   |
+| Eufy Base              | Plugged-In | 100 Mbps |  Full  |   Done   | -                   |
+| AKP-MB (Ubuntu)        | Plugged-In | 1 Gbps   |  Full  |   Done   | -                   |
+| Trunk to MKT-LR        | Plugged-In | 1 Gbps   |  Full  |   Done   | -                   |
+| Trunk (GMKTec K8+)     | Plugged-In | 1 Gbps   |  Full  |   Done   | -                   |
+| ether9 (Damaged Cable) | Plugged-In | 10 Mbps  |  Half  |   Done   | -                   |
+| sfp-sfpplus1           | Unplugged  | -        | -      | -        | -                   |
+| sfp-sfpplus2           | Plugged-In | 10 Gbps  |  Full  |   Done   | SFP+ (MikroTik)     |
+| PxProvision (GMKTec)   | Plugged-In | 1 Gbps   |  Full  |   Done   | -                   |
+| Trunk MKT-Switch (Wi)  | Plugged-In | 1 Gbps   |  Full  |   Done   | -                   |
++------------------------+------------+----------+--------+----------+---------------------+
+Total interfaces: 13
+Plugged: 12
+Unplugged: 1
+Degraded (< 100M): 1
+```
+
+```bash
+# Pinpoint degraded cables or ports negotiating down below 100 Mbps or running half-duplex
+❯ mktxp diag -en ROUTER -im --degraded
+```
+
+```text
+Interface Monitor:
++------------------------+------------+---------+--------+----------+-----+
+|       Interface        |   Status   |  Rate   | Duplex | Auto-Neg | SFP |
++========================+============+=========+========+==========+=====+
+| ether9 (Damaged Cable) | Plugged-In | 10 Mbps |  Half  |   Done   | -   |
++------------------------+------------+---------+--------+----------+-----+
+Matching interfaces: 1 (Total: 13)
+Plugged: 1
+Unplugged: 0
+Degraded (< 100M): 1
+```
+
+```bash
+# Surface all sub-gigabit links (< 1 Gbps) across the device
+❯ mktxp diag -en ROUTER -im --degraded 1G
+```
+
+```text
+Interface Monitor:
++------------------------+------------+----------+--------+----------+-----+
+|       Interface        |   Status   |   Rate   | Duplex | Auto-Neg | SFP |
++========================+============+==========+========+==========+=====+
+| INet Provider          | Plugged-In | 100 Mbps |  Full  |   Done   | -   |
+| SMLIGHT SLZB-06        | Plugged-In | 100 Mbps |  Full  |   Done   | -   |
+| Eufy Base              | Plugged-In | 100 Mbps |  Full  |   Done   | -   |
+| ether9 (Damaged Cable) | Plugged-In | 10 Mbps  |  Half  |   Done   | -   |
++------------------------+------------+----------+--------+----------+-----+
+Matching interfaces: 4 (Total: 13)
+Plugged: 4
+Unplugged: 0
+Degraded (< 1G): 4
+```
+
+```bash
+# Inspect optical transceivers and DOM light levels
+❯ mktxp diag -en ROUTER -im --sfp-only
+```
+
+```text
+SFP Interface Monitor:
++--------------+------------+---------+-------------+---------------------+-----------+----------+----------+-------+
+|  Interface   |   Status   |  Rate   |    Type     |    Vendor / Part    | Connector | Rx Power | Tx Power | Temp  |
++==============+============+=========+=============+=====================+===========+==========+==========+=======+
+| sfp-sfpplus1 | Unplugged  | -       | -           | -                   | -         | -        | -        | -     |
+| sfp-sfpplus2 | Plugged-In | 10 Gbps | SFP-or-SFP+ | MikroTik S+85DLC03D |    LC     | -5.2 dBm | -2.1 dBm | 42 °C |
++--------------+------------+---------+-------------+---------------------+-----------+----------+----------+-------+
+Total SFP interfaces: 2
+Plugged: 1
+Unplugged: 1
 ```
 
 ---

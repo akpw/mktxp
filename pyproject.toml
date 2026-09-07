@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mktxp"
-version = "2.0.1"
+version = "2.0.2"
 description = "MikroTik RouterOS CLI Diagnostic Tool, GitOps Configuration Manager, and Prometheus Exporter"
 readme = "README.md"
 authors = [
@@ -14,6 +14,7 @@ license = { text = "GNU General Public License v2 (GPLv2)" }
 requires-python = ">=3.9"
 classifiers = [
     "Development Status :: 4 - Beta",
+    "Environment :: Console",
     "License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3 :: Only",
@@ -21,10 +22,14 @@ classifiers = [
     "Intended Audience :: System Administrators",
     "Intended Audience :: Information Technology",
     "Intended Audience :: Customer Service",
+    "Intended Audience :: Telecommunications Industry",
     "Operating System :: MacOS",
     "Operating System :: POSIX :: BSD :: FreeBSD",
     "Operating System :: POSIX :: Linux",
     "Topic :: System",
+    "Topic :: System :: Monitoring",
+    "Topic :: System :: Networking",
+    "Topic :: System :: Networking :: Monitoring",
     "Topic :: System :: Systems Administration",
     "Topic :: Utilities"
 ]
@@ -43,6 +48,10 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/akpw/mktxp"
+Documentation = "https://github.com/akpw/mktxp/tree/main/docs"
+Repository = "https://github.com/akpw/mktxp"
+Issues = "https://github.com/akpw/mktxp/issues"
+Changelog = "https://github.com/akpw/mktxp/releases"
 
 [project.optional-dependencies]
 test = [

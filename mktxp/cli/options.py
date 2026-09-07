@@ -13,7 +13,7 @@
 
 import os
 from argparse import ArgumentParser, HelpFormatter
-from importlib.metadata import version as Version
+from mktxp._version import __version__
 from mktxp.cli.config import config_handler, CustomConfig
 from mktxp.cli.config.actions import ConfigCLI
 from mktxp.diag.registry import DiagRegistry
@@ -51,9 +51,8 @@ class MKTXPOptionsParser:
 
     def __init__(self):
         self._script_name = f"MKTXP"
-        version = Version("mktxp")
         self._description = f"""
-MikroTik RouterOS CLI Diagnostic Tool, GitOps Configuration Manager, and Prometheus Exporter, version {version}
+MikroTik RouterOS CLI Diagnostic Tool, GitOps Configuration Manager, and Prometheus Exporter, version {__version__}
 - Diagnostics: Live CLI network diagnostics, client registration monitoring, and targeted filtering ('mktxp diag -h')
 - RSC: RouterOS GitOps configuration formatter and modular directory splitter ('mktxp rsc -h')
 - Metrics: Multi-device Prometheus metric collection with dedicated Grafana dashboard (https://grafana.com/grafana/dashboards/13679)

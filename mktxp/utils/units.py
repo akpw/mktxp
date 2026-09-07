@@ -62,23 +62,23 @@ def parse_numeric_rate(rate_str):
     except (ValueError, TypeError):
         pass
 
-    # Handle parsed rate strings like '1 Kbps', '53 Mbps', '1.5 Gbps', '18M'
+    # Handle parsed rate strings like '1 Kbps', '53 Mbps', '1.5 Gbps', '18M', '100 Mb/s'
     if isinstance(rate_str, str):
-        rate_clean = rate_str.strip()
+        rate_clean = rate_str.strip().replace('/', '')
         match = re.match(r'^([\d.]+)\s*([A-Za-z]+)$', rate_clean)
         if match:
             try:
                 num = float(match.group(1))
                 unit = match.group(2).lower()
-                if 'tbps' in unit or unit in ('t', 'tb'):
+                if 'tbps' in unit or unit in ('t', 'tb', 'tbs'):
                     return int(num * 1000000000000)
-                elif 'gbps' in unit or unit in ('g', 'gb'):
+                elif 'gbps' in unit or unit in ('g', 'gb', 'gbs'):
                     return int(num * 1000000000)
-                elif 'mbps' in unit or unit in ('m', 'mb'):
+                elif 'mbps' in unit or unit in ('m', 'mb', 'mbs'):
                     return int(num * 1000000)
-                elif 'kbps' in unit or unit in ('k', 'kb'):
+                elif 'kbps' in unit or unit in ('k', 'kb', 'kbs'):
                     return int(num * 1000)
-                elif 'bps' in unit or unit == 'b':
+                elif 'bps' in unit or unit in ('b', 'bs'):
                     return int(num)
                 return int(num)
             except ValueError:

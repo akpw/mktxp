@@ -18,12 +18,13 @@ from mktxp.diag.connections import ConnectionDiagHandler
 from mktxp.diag.kid_control import KidControlDiagHandler
 from mktxp.diag.address_lists import AddressListDiagHandler
 from mktxp.diag.netwatch import NetwatchDiagHandler
+from mktxp.diag.interfaces import InterfaceDiagHandler
 
 
 def test_diag_registry_handler_count():
-    """Verify all 6 core diagnostic domain handlers are registered."""
+    """Verify all 7 core diagnostic domain handlers are registered."""
     handlers = DiagRegistry.get_handlers()
-    assert len(handlers) == 6
+    assert len(handlers) == 7
     handler_classes = [type(h) for h in handlers]
     assert WirelessDiagHandler in handler_classes
     assert DHCPDiagHandler in handler_classes
@@ -31,6 +32,7 @@ def test_diag_registry_handler_count():
     assert KidControlDiagHandler in handler_classes
     assert AddressListDiagHandler in handler_classes
     assert NetwatchDiagHandler in handler_classes
+    assert InterfaceDiagHandler in handler_classes
 
 
 def test_diag_registry_get_active_handler():
@@ -62,6 +64,10 @@ def test_diag_registry_get_active_handler():
     # Netwatch
     handler = DiagRegistry.get_active_handler({'netwatch': True})
     assert isinstance(handler, NetwatchDiagHandler)
+
+    # Interface Monitor
+    handler = DiagRegistry.get_active_handler({'interface_monitor': True})
+    assert isinstance(handler, InterfaceDiagHandler)
 
     # Unknown / None
     handler = DiagRegistry.get_active_handler({'unknown': True})
@@ -96,6 +102,15 @@ def test_diag_registry_matching_help_handlers():
     assert len(matching_top_alone) == 2
     assert any(isinstance(h, ConnectionDiagHandler) for h in matching_top_alone)
     assert any(isinstance(h, KidControlDiagHandler) for h in matching_top_alone)
+
+    # Interface monitor matching
+    matching_im = DiagRegistry.get_matching_help_handlers(['mktxp', 'diag', '-im', '-h'])
+    assert len(matching_im) == 1
+    assert isinstance(matching_im[0], InterfaceDiagHandler)
+
+    matching_degraded = DiagRegistry.get_matching_help_handlers(['mktxp', 'diag', '--degraded', '-h'])
+    assert len(matching_degraded) == 1
+    assert isinstance(matching_degraded[0], InterfaceDiagHandler)
 
 
 def test_dhcp_diag_handler_filter_registration():
@@ -273,6 +288,59 @@ def test_netwatch_diag_handler_filters():
         )
 
 
+def test_interface_diag_handler_filters():
+    """Verify InterfaceDiagHandler registers and delegates filter options."""
+    import argparse
+    from unittest.mock import Mock, patch
+    parser = argparse.ArgumentParser()
+    handler = InterfaceDiagHandler()
+    handler.register_filter_options(parser)
+
+    # Test default degraded flag
+    args = parser.parse_args(['--plugged', '--degraded', '--rate', '100M', '--sfp-only'])
+    assert args.plugged_only is True
+    assert args.unplugged_only is False
+    assert args.degraded is True
+    assert args.rate == '100M'
+    assert args.sfp_only is True
+
+    # Test custom sub-level with rate-below
+    args_custom = parser.parse_args(['--unplugged', '--degraded', '1G', '--rate-below', '1G'])
+    assert args_custom.plugged_only is False
+    assert args_custom.unplugged_only is True
+    assert args_custom.degraded == '1G'
+    assert args_custom.rate_below == '1G'
+
+    # Test mutual exclusion of --plugged and --unplugged
+    import pytest
+    with pytest.raises(SystemExit):
+        parser.parse_args(['--plugged', '--unplugged'])
+
+    # Test execution delegation
+    router_entry = Mock()
+    exec_args = {
+        'include': 'ether',
+        'exclude': 'guest',
+        'plugged_only': True,
+        'unplugged_only': False,
+        'degraded': '1G',
+        'rate': '100M',
+        'rate_below': None,
+        'sfp_only': False,
+    }
+    with patch('mktxp.diag.interfaces.InterfaceOutput.interfaces_summary') as mock_summary:
+        handler.execute(router_entry, exec_args)
+        mock_summary.assert_called_once()
+        call_kwargs = mock_summary.call_args.kwargs
+        assert call_kwargs['include'] == ['ether']
+        assert call_kwargs['exclude'] == ['guest']
+        assert call_kwargs['plugged_only'] is True
+        assert call_kwargs['unplugged_only'] is False
+        assert call_kwargs['degraded'] == '1G'
+        assert call_kwargs['rate'] == '100M'
+        assert call_kwargs['sfp_only'] is False
+
+
 def test_diag_dynamic_config_defaults_in_help():
     """Verify diagnostic filter help strings dynamically display configured defaults."""
     import argparse
@@ -285,6 +353,7 @@ def test_diag_dynamic_config_defaults_in_help():
         'recent_duration': '20m',
         'top_connections_count': 25,
         'rate_above_threshold': '5M',
+        'degraded_threshold': '1G',
     }
 
     with patch('mktxp.cli.config.config_handler.diag_config', return_value=mock_conf):
@@ -309,6 +378,13 @@ def test_diag_dynamic_config_defaults_in_help():
         help_text = parser.format_help()
         assert "(default: 25)" in help_text
         assert "(default: 5M)" in help_text
+
+        # Interface Monitor
+        parser = argparse.ArgumentParser()
+        InterfaceDiagHandler().register_filter_options(parser)
+        help_text_im = parser.format_help()
+        assert "(default: 1G)" in help_text_im
+
 
 
 

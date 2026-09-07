@@ -74,6 +74,16 @@ def test_dispatch_show(mock_show):
     assert mock_show.called
 
 
+@patch('mktxp.cli.dispatch.ConfigCLI.edit')
+def test_dispatch_edit(mock_edit):
+    """Verify dispatch edit_entry delegates to ConfigCLI.edit."""
+    dispatcher = MKTXPDispatcher()
+    args = {'sub_cmd': 'edit', 'editor': 'nvim', 'internal': False}
+    dispatcher.edit_entry(args)
+    assert mock_edit.called
+
+
+
 @patch('mktxp.cli.dispatch.DiagRegistry.get_active_handler')
 @patch('mktxp.cli.dispatch.RouterEntriesHandler.router_entry')
 def test_dispatch_diag(mock_router_entry, mock_get_active_handler):
@@ -112,6 +122,29 @@ def test_diag_help_formatter_scoping():
         assert "DHCP Server Filters" not in help_text
         assert "IP Connections Filters" not in help_text
         assert "Netwatch Filters" not in help_text
+        assert "Interface Monitor Filters" not in help_text
         assert "-cc, --capsman_clients" not in help_text
         assert "-cn, --conn_stats" not in help_text
+        assert "-im, --interface-monitor" not in help_text
+
+    with patch.object(sys, 'argv', ['mktxp', 'diag', '-en', 'TestRouter', '-im', '-h']):
+        im_help = diag_parser.format_help()
+        assert "Interface Monitor Filters (-im):" in im_help
+        assert "-im, --interface-monitor" in im_help
+        assert "--degraded [RATE]" in im_help
+        assert "--sfp-only" in im_help
+        assert "Kid Control Filters" not in im_help
+        assert "Wireless & CAPsMAN Filters" not in im_help
+
+
+def test_version_resolution():
+    """Verify version resolution in _version.py and options parser."""
+    import mktxp
+    from mktxp._version import get_version
+    version = get_version()
+    assert version == "2.0.2"
+    assert mktxp.__version__ == "2.0.2"
+    dispatcher = MKTXPDispatcher()
+    assert "2.0.2" in dispatcher.option_parser.description
+
 

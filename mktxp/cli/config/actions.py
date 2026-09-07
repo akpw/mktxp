@@ -98,9 +98,10 @@ class ConfigCLI:
                 print("\n")
 
     @staticmethod
-    def edit(args: dict) -> None:
+    def edit(args: dict, fallback_editor_detector=None) -> None:
         """Launch the system editor to edit user or internal configuration files."""
-        editor = args.get("editor") or ConfigCLI.system_editor()
+        detector = fallback_editor_detector or ConfigCLI.system_editor
+        editor = args.get("editor") or detector()
 
         if not editor:
             print("No editor found to edit configuration files.")

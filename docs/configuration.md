@@ -266,6 +266,9 @@ The engine automatically routes those command blocks into `09-bgp.rsc`. Any unma
     # IP Connections & Bandwidth thresholds
     top_connections_count = 10          # Default limit for connection stats --top
     rate_above_threshold = '1M'         # Default rate for kid control / bandwidth --rate-above
+
+    # Interface Monitor thresholds
+    degraded_threshold = '100M'         # Default rate for interface monitor --degraded (matches < 100 Mbps or half-duplex)
 ```
 
 Values set here serve as the runtime defaults when running `mktxp diag` commands without explicit CLI thresholds (e.g. `mktxp diag -cc --low-signal`). Appending `-h` to any diagnostic command displays the currently active threshold loaded from this section.

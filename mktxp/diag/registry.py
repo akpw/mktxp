@@ -19,6 +19,7 @@ from mktxp.diag.connections import ConnectionDiagHandler
 from mktxp.diag.kid_control import KidControlDiagHandler
 from mktxp.diag.address_lists import AddressListDiagHandler
 from mktxp.diag.netwatch import NetwatchDiagHandler
+from mktxp.diag.interfaces import InterfaceDiagHandler
 
 
 class DiagRegistry:
@@ -31,6 +32,7 @@ class DiagRegistry:
         KidControlDiagHandler(),
         AddressListDiagHandler(),
         NetwatchDiagHandler(),
+        InterfaceDiagHandler(),
     ]
 
     @classmethod

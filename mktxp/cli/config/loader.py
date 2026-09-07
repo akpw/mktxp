@@ -129,6 +129,7 @@ class MKTXPConfigHandler:
                 'recent_duration': '15m',
                 'top_connections_count': 10,
                 'rate_above_threshold': '1M',
+                'degraded_threshold': '100M',
             }
 
     def _diag_config_reader(self):
@@ -165,6 +166,7 @@ class MKTXPConfigHandler:
             'recent_duration': '15m',
             'top_connections_count': 10,
             'rate_above_threshold': '1M',
+            'degraded_threshold': '100M',
         }
 
     def _read_from_disk(self):

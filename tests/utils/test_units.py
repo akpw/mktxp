@@ -45,6 +45,8 @@ def test_parse_numeric_rate():
     assert parse_numeric_rate('0') == 0
     assert parse_numeric_rate(1000) == 1000
     assert parse_numeric_rate('54 Mbps') == 54000000
+    assert parse_numeric_rate('100 Mb/s') == 100000000
+    assert parse_numeric_rate('1 Gb/s') == 1000000000
     assert parse_numeric_rate('1.5 Gbps') == 1500000000
     assert parse_numeric_rate('500k') == 500000
     assert parse_numeric_rate('18M') == 18000000
@@ -56,6 +58,8 @@ def test_parse_rate_limit():
     assert parse_rate_limit('18') == 18000000
     assert parse_rate_limit('18M') == 18000000
     assert parse_rate_limit('54 Mbps') == 54000000
+    assert parse_rate_limit('100 Mb/s') == 100000000
+    assert parse_rate_limit('1 Gb/s') == 1000000000
 
 
 def test_parse_interface_rate():
