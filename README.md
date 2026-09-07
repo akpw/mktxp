@@ -44,8 +44,7 @@ MKTXP is an extensible toolkit for MikroTik RouterOS network engineering. It pro
 
 ### Ready-to-Run Monitoring & Logging Stack ([MKTXP Stack](https://github.com/akpw/mktxp-stack))
 
-If you need a turnkey environment without manually wiring services, [MKTXP Stack](https://github.com/akpw/mktxp-stack) is an out-of-the-box Docker Compose deployment that packages MKTXP alongside Prometheus, pre-configured Grafana dashboards, and adds centralized MikroTik syslog processing via Grafana Loki and Promtail.
-
+If you need a turnkey environment without manually wiring services, [MKTXP Stack](https://github.com/akpw/mktxp-stack) is an out-of-the-box Docker Compose deployment that packages MKTXP alongside Prometheus / Grafana stack with pre-configured dashboards, and adds centralized MikroTik syslog processing via Loki and Promtail
 ---
 
 ## Quick Start: GitOps Configuration (`mktxp rsc`)
@@ -157,11 +156,12 @@ Import the official [Grafana Dashboard (ID: 13679)](https://grafana.com/grafana/
 
 <img width="32%" alt="Traffic & Interface" src="https://user-images.githubusercontent.com/5028474/217029083-3c2f561e-853f-45a7-b9f1-d818a830daf5.png"> <img width="32%" alt="Wireless Clients" src="https://user-images.githubusercontent.com/5028474/217029092-2b86b41b-1f89-4383-ac48-16652e820f7e.png"> <img width="32%" alt="Device Health" src="https://user-images.githubusercontent.com/5028474/217029096-dbf6b46c-3ed7-4c76-a57b-8cebfb3b671c.png">
 
-> Want centralized RouterOS logs too? [MKTXP Stack](https://github.com/akpw/mktxp-stack) adds Grafana Loki and Promtail alongside Prometheus and MKTXP. The screenshot below is the Stack's log-analysis dashboard; the three screenshots above are the standard MKTXP metrics dashboard.
+> 💡 Tip: Want centralized RouterOS logs too? [MKTXP Stack](https://github.com/akpw/mktxp-stack) is an out-of-the-box Docker Compose deployment that packages MKTXP alongside Prometheus / Grafana stack with pre-configured dashboards, and adds centralized MikroTik syslog processing via Loki and Promtail.
+
 
 <img width="50%" alt="MKTXP Stack Centralized Logging" src="https://user-images.githubusercontent.com/5028474/210771516-06a3e6ab-8eab-458c-9f38-5d44f95d23d4.png">
 
-> 📖 *For dynamic multi-target discovery (`/probe`), Docker/Kubernetes, and systemd/FreeBSD service deployment, see the [Exporter Guide](https://github.com/akpw/mktxp/blob/main/docs/exporter.md).*
+> 💡 Tip: 📖 *For dynamic multi-target discovery (`/probe`), Docker/Kubernetes, and systemd/FreeBSD service deployment, see the [Exporter Guide](https://github.com/akpw/mktxp/blob/main/docs/exporter.md).*
 
 ---
 
