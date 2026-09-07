@@ -8,17 +8,17 @@
 ![Prometheus](https://img.shields.io/badge/prometheus-exporter-blueviolet)
 [![Docker Pulls](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fghcr-badge.elias.eu.org%2Fapi%2Fakpw%2Fmktxp%2Fmktxp&query=%24.downloadCount&label=docker%20pulls&logo=docker&logoColor=white&color=2496ed)](https://github.com/akpw/mktxp/pkgs/container/mktxp)
 
-MKTXP is an extensible toolkit for MikroTik RouterOS network engineering. It unifies **interactive terminal diagnostics**, **deterministic GitOps configuration management**, and a **production-grade Prometheus metrics exporter** into a single command-line tool.
+MKTXP is an extensible toolkit for MikroTik RouterOS network engineering. It provides interactive terminal diagnostics, deterministic GitOps configuration management, and a Prometheus metrics exporter within a single command-line tool.
 
 ---
 
 ## Choose Your Workflow
 
-| I want to… | Start with | Full Guide |
+| I need to … | Start with | Full Guide |
 | :--- | :--- | :--- |
-| **Troubleshoot a router now** | `mktxp diag …` | [Diagnostics Guide](https://github.com/akpw/mktxp/blob/main/docs/diagnostics.md) |
-| **Clean up / version RouterOS configs** | `mktxp rsc …` | [GitOps RSC Guide](https://github.com/akpw/mktxp/blob/main/docs/rsc.md) |
-| **Monitor routers continuously** | `mktxp export` | [Exporter Guide](https://github.com/akpw/mktxp/blob/main/docs/exporter.md) |
+| Troubleshoot a router now | `mktxp diag …` | [Diagnostics Guide](https://github.com/akpw/mktxp/blob/main/docs/diagnostics.md) |
+| Clean up / version RouterOS configs | `mktxp rsc …` | [GitOps RSC Guide](https://github.com/akpw/mktxp/blob/main/docs/rsc.md) |
+| Monitor routers continuously | `mktxp export` | [Exporter Guide](https://github.com/akpw/mktxp/blob/main/docs/exporter.md) |
 
 ---
 
@@ -44,13 +44,13 @@ MKTXP is an extensible toolkit for MikroTik RouterOS network engineering. It uni
 
 ### Ready-to-Run Monitoring & Logging Stack ([MKTXP Stack](https://github.com/akpw/mktxp-stack))
 
-If you want a turnkey environment without manually wiring services, [**MKTXP Stack**](https://github.com/akpw/mktxp-stack) is an out-of-the-box Docker Compose deployment that packages MKTXP alongside Prometheus, pre-configured Grafana dashboards, and centralized MikroTik syslog processing powered by Grafana Loki and Promtail.
+If you need a turnkey environment without manually wiring services, [MKTXP Stack](https://github.com/akpw/mktxp-stack) is an out-of-the-box Docker Compose deployment that packages MKTXP alongside Prometheus, pre-configured Grafana dashboards, and adds centralized MikroTik syslog processing via Grafana Loki and Promtail.
 
 ---
 
 ## Quick Start: GitOps Configuration (`mktxp rsc`)
 
-`mktxp rsc` works immediately on local `.rsc` files with **zero configuration or router setup required**:
+For local `.rsc` files, `mktxp rsc` works with zero configuration or router setup required:
 
 ```bash
 # Deterministic formatting: single-line commands, standardized headers, and clean Git diffs
@@ -60,17 +60,17 @@ If you want a turnkey environment without manually wiring services, [**MKTXP Sta
 ❯ mktxp rsc split -i backup.rsc -o ./config-repo/ --extract-scripts
 ```
 
-> 📖 *For AST architecture, custom domain handlers, and CI/CD automation, see the [GitOps RSC Guide](https://github.com/akpw/mktxp/blob/main/docs/rsc.md).*
+> 📖 *For AST architecture, custom domain handlers, live backups over SSH, and CI/CD automation, see the [GitOps RSC Guide](https://github.com/akpw/mktxp/blob/main/docs/rsc.md).*
 
 ---
 
 ## Connect to a Router
 
-Both **Live Diagnostics** and the **Prometheus Exporter** connect to your routers via the standard RouterOS API.
+Both Live Diagnostics and the Prometheus Exporter connect to your routers via the standard RouterOS API.
 
 MKTXP uses two configuration files:
-- **`mktxp.conf`**: Router connection profiles, credentials, custom labels, and metrics switches. Edit with `mktxp edit`.
-- **`_mktxp.conf`**: Daemon listen sockets, timeouts, parallel scraping, GitOps rules, and CLI diagnostic thresholds. Edit with `mktxp edit -i`.
+- `mktxp.conf`: Router connection profiles, credentials, custom labels, and metrics switches. Edit with `mktxp edit`.
+- `_mktxp.conf`: Daemon listen sockets, timeouts, parallel scraping, GitOps rules, and CLI diagnostic thresholds. Edit with `mktxp edit -i`.
 
 Files are resolved automatically from `~/.config/mktxp/` (XDG standard) or `/etc/mktxp/` (system/Docker). Check active paths anytime with `mktxp show -cfg`.
 
@@ -131,8 +131,8 @@ Sample output:
 Matching CAPsMAN clients: 2 (Total connected: 127)
 ```
 
-> 💡 **Tip:** Appending `-h` to any command (e.g. `mktxp diag -kc -h`) dynamically scopes help to only that command's filters.  
-> 📖 *For all 6 diagnostic domains, table schemas, and recipes, see the [Diagnostics Guide](https://github.com/akpw/mktxp/blob/main/docs/diagnostics.md).*
+> 💡 Tip: Appending `-h` to any command (e.g. `mktxp diag -kc -h`) dynamically scopes help to only that command's filters.  
+> 📖 *For more diagnostic domains, table schemas, and recipes, see the [Diagnostics Guide](https://github.com/akpw/mktxp/blob/main/docs/diagnostics.md).*
 
 ---
 
@@ -157,7 +157,7 @@ Import the official [Grafana Dashboard (ID: 13679)](https://grafana.com/grafana/
 
 <img width="32%" alt="Traffic & Interface" src="https://user-images.githubusercontent.com/5028474/217029083-3c2f561e-853f-45a7-b9f1-d818a830daf5.png"> <img width="32%" alt="Wireless Clients" src="https://user-images.githubusercontent.com/5028474/217029092-2b86b41b-1f89-4383-ac48-16652e820f7e.png"> <img width="32%" alt="Device Health" src="https://user-images.githubusercontent.com/5028474/217029096-dbf6b46c-3ed7-4c76-a57b-8cebfb3b671c.png">
 
-> Want centralized RouterOS logs too? [**MKTXP Stack**](https://github.com/akpw/mktxp-stack) adds Grafana Loki and Promtail alongside Prometheus and MKTXP. The screenshot below is the Stack's log-analysis dashboard; the three screenshots above are the standard MKTXP metrics dashboard.
+> Want centralized RouterOS logs too? [MKTXP Stack](https://github.com/akpw/mktxp-stack) adds Grafana Loki and Promtail alongside Prometheus and MKTXP. The screenshot below is the Stack's log-analysis dashboard; the three screenshots above are the standard MKTXP metrics dashboard.
 
 <img width="50%" alt="MKTXP Stack Centralized Logging" src="https://user-images.githubusercontent.com/5028474/210771516-06a3e6ab-8eab-458c-9f38-5d44f95d23d4.png">
 
@@ -167,14 +167,14 @@ Import the official [Grafana Dashboard (ID: 13679)](https://grafana.com/grafana/
 
 ## Detailed Documentation
 
-- [Live CLI Diagnostics Guide](https://github.com/akpw/mktxp/blob/main/docs/diagnostics.md): Detailed filter reference, table schemas, and recipes for all 6 diagnostic domains.
+- [Live CLI Diagnostics Guide](https://github.com/akpw/mktxp/blob/main/docs/diagnostics.md): Detailed filter reference, table schemas, and recipes for multiple diagnostic domains.
 - [RouterOS GitOps RSC Guide](https://github.com/akpw/mktxp/blob/main/docs/rsc.md): AST formatting, modular domain splitting, script extraction, and CI/CD pipelines.
 - [Prometheus Exporter Guide](https://github.com/akpw/mktxp/blob/main/docs/exporter.md): Metrics catalog, `/probe` multi-target pattern, container manifests, and service files.
 - [Configuration Reference Guide](https://github.com/akpw/mktxp/blob/main/docs/configuration.md): Complete anatomy of `mktxp.conf` and `_mktxp.conf`, multi-router inheritance, tuning, and Docker mounts.
 
 ---
 
-## Articles & Deep Dives
+## Blogs
 
 - [Beyond Metrics: Instant RouterOS Diagnostics with MKTXP 2.0](https://akpw.github.io/articles/2026/09/06/MKTXP-2.0-Live-CLI-Diagnostics.html)
 - [Under the Hood: Refactoring MKTXP for 2.0](https://akpw.github.io/articles/2026/08/28/Refactoring-MKTXP-2.0-Modular-Architecture.html)
@@ -185,5 +185,4 @@ Import the official [Grafana Dashboard (ID: 13679)](https://grafana.com/grafana/
 ## License & Contributing
 
 - Distributed under the [GNU General Public License v2](LICENSE).
-- Local development & testing: `pip install -e ".[test]"` and run `pytest`.
-- For issues, discussions, and feature requests, visit the [MKTXP GitHub Repository](https://github.com/akpw/mktxp).
+- Local development: create a virtual environment (`python3 -m venv .venv && source .venv/bin/activate`), install editable with test dependencies (`pip install -e ".[test]"`), and run `pytest`.
