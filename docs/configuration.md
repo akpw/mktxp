@@ -302,4 +302,12 @@ docker run -d \
   ghcr.io/akpw/mktxp:latest
 ```
 
-> ⚠️ Docker Swarm Tip: In Docker Swarm or read-only container filesystems, always provide **both** `mktxp.conf` and `_mktxp.conf` explicitly to prevent initialization errors when the container attempts to create missing config files on a read-only filesystem.
+### Container Tips & Debugging
+
+- Image tags: Use `:latest` for the most recent stable release or `:main` for bleeding-edge builds from the `main` branch.
+- Interactive shell debugging:
+  ```bash
+  docker run -v "$(pwd)/mktxp-config:/etc/mktxp" -it --rm ghcr.io/akpw/mktxp:latest sh
+  ```
+- Custom port mapping: If modifying `listen` in `_mktxp.conf` (e.g. to port `9090`), adjust the Docker port mapping accordingly (`-p 9090:9090`).
+- Docker Swarm & Read-Only filesystems: Always mount both `mktxp.conf` and `_mktxp.conf` explicitly to prevent initialization errors when the container attempts to create missing config files on a read-only filesystem.

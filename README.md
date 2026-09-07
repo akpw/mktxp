@@ -190,3 +190,4 @@ Import the official [Grafana Dashboard (ID: 13679)](https://grafana.com/grafana/
   - Create a virtual environment: `python3 -m venv .venv && source .venv/bin/activate`
   - Install editable with test dependencies: `pip install -e ".[test]"`
   - Run test suite: `pytest`
+  - Install latest development build directly: `pip install git+https://github.com/akpw/mktxp`

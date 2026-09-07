@@ -183,7 +183,15 @@ Unique lists: 2
 
 Pulls RouterOS Kid Control counters, translates them into human-readable bitrates, and calculates aggregate LAN throughput on the fly.
 
-*(Prerequisite: RouterOS Kid Control device tracking must be enabled for the target devices.)*
+> 💡 Tip: Using Kid Control as a Passive LAN Monitor  
+> MikroTik RouterOS does not natively track per-device real-time transfer rates (`rate_up`, `rate_down`), cumulative volume, or activity recency (`idle_time`) anywhere else without custom firewall mangle rules.  
+> You can repurpose Kid Control as an automated, passive LAN monitor without blocking or restricting traffic:
+> 1. In RouterOS, create a single 24/7 unlimited user profile to activate packet accounting:
+>    ```routeros
+>    /ip kid-control add name=DeviceMonitor mon=0s-1d tue=0s-1d wed=0s-1d thu=0s-1d fri=0s-1d sat=0s-1d sun=0s-1d
+>    ```
+> 2. RouterOS will automatically discover and track all connected devices under `/ip kid-control device`.
+> 3. Run `mktxp diag -kc --top 5` or `mktxp diag -kc --active` to view top talkers and live LAN throughput.
 
 Available Filters:
 - `--top [N]`: Show top N talkers flattened into a global leaderboard by combined transfer rate ($Tx + Rx$, default: `10`)
