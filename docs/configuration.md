@@ -2,8 +2,8 @@
 
 MKTXP uses two configuration files to cleanly separate router inventory from system daemon and workflow settings:
 
-- **`mktxp.conf`**: Router definitions, credentials, connection parameters, custom labels, and metrics collection switches.
-- **`_mktxp.conf`**: System daemon settings (`[MKTXP]`), GitOps formatting rules (`[RSC]`), and interactive CLI diagnostic thresholds (`[DIAG]`).
+- `mktxp.conf`: Router definitions, credentials, connection parameters, custom labels, and metrics collection switches.
+- `_mktxp.conf`: System daemon settings (`[MKTXP]`), GitOps formatting rules (`[RSC]`), and interactive CLI diagnostic thresholds (`[DIAG]`).
 
 ---
 
@@ -11,17 +11,17 @@ MKTXP uses two configuration files to cleanly separate router inventory from sys
 
 MKTXP automatically resolves configuration files in the following order:
 
-1. **XDG Standard Directory (Recommended)**:
+1. XDG Standard Directory (Recommended):
    - `$XDG_CONFIG_HOME/mktxp/` (defaults to `~/.config/mktxp/`)
    - Files: `~/.config/mktxp/mktxp.conf` and `~/.config/mktxp/_mktxp.conf`
-2. **System-wide / Container Directory**:
+2. System-wide / Container Directory:
    - `/etc/mktxp/`
    - Files: `/etc/mktxp/mktxp.conf` and `/etc/mktxp/_mktxp.conf`
-3. **Legacy Home Directory**:
+3. Legacy Home Directory:
    - `~/mktxp/`
    - Files: `~/mktxp/mktxp.conf` and `~/mktxp/_mktxp.conf`
 
-> 💡 **Migration Tip:** To migrate from the legacy `~/mktxp/` directory to the modern XDG standard:
+> 💡 Migration Tip: To migrate from the legacy `~/mktxp/` directory to the modern XDG standard:
 > ```bash
 > mv ~/mktxp ~/.config/mktxp
 > ```
@@ -72,7 +72,7 @@ MKTXP internal config: /Users/username/.config/mktxp/_mktxp.conf
 
 ### The `[default]` Section & Inheritance
 
-Parameters defined under `[default]` apply to **all** configured routers unless explicitly overridden in a router's individual section:
+Parameters defined under `[default]` apply to all configured routers unless explicitly overridden in a router's individual section:
 
 ```ini
 [default]
@@ -208,11 +208,11 @@ Enable or disable specific metric collectors per router or globally under `[defa
 ```
 
 #### Key Daemon Settings Explained:
-- **`listen`**: Space-separated list of socket addresses. Wildcards and simultaneous IPv4/IPv6 binding are fully supported.
-- **`fetch_routers_in_parallel`**: When scraping many routers, enable this to fetch metrics concurrently using worker threads rather than sequentially.
-- **`max_scrape_duration` & `total_max_scrape_duration`**: Bound individual and total collection times to avoid Prometheus scrape timeouts.
-- **`compact_default_conf_values`**: Automatically compacts `mktxp.conf` so only non-default values are preserved on router sections.
-- **`probe_connection_pool`**: Reuses open API connections for incoming `/probe` requests keyed by `module + target`.
+- `listen`: Space-separated list of socket addresses. Wildcards and simultaneous IPv4/IPv6 binding are fully supported.
+- `fetch_routers_in_parallel`: When scraping many routers, enable this to fetch metrics concurrently using worker threads rather than sequentially.
+- `max_scrape_duration` & `total_max_scrape_duration`: Bound individual and total collection times to avoid Prometheus scrape timeouts.
+- `compact_default_conf_values`: Automatically compacts `mktxp.conf` so only non-default values are preserved on router sections.
+- `probe_connection_pool`: Reuses open API connections for incoming `/probe` requests keyed by `module + target`.
 
 ---
 
@@ -302,4 +302,4 @@ docker run -d \
   ghcr.io/akpw/mktxp:latest
 ```
 
-> ⚠️ **Docker Swarm Tip:** In Docker Swarm or read-only container filesystems, always provide **both** `mktxp.conf` and `_mktxp.conf` explicitly to prevent initialization errors when the container attempts to create missing config files on a read-only filesystem.
+> ⚠️ Docker Swarm Tip: In Docker Swarm or read-only container filesystems, always provide **both** `mktxp.conf` and `_mktxp.conf` explicitly to prevent initialization errors when the container attempts to create missing config files on a read-only filesystem.

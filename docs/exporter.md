@@ -1,6 +1,6 @@
 # Prometheus Metrics Exporter (`mktxp export`)
 
-`mktxp export` is a production-grade metrics daemon for MikroTik RouterOS devices. It connects to configured routers via the RouterOS API, collects device health and network performance counters, performs DHCP address resolution and metric enrichment, and serves Prometheus-formatted telemetry over HTTP on default port `49090`.
+`mktxp export` is a metrics daemon for MikroTik RouterOS devices. It connects to configured routers via the RouterOS API, collects device health and network performance counters, performs DHCP address resolution and metric enrichment, and serves Prometheus-formatted telemetry over HTTP on default port `49090`.
 
 ---
 
@@ -37,7 +37,7 @@
 
 ## Grafana Dashboard Integration
 
-MKTXP includes an official, turnkey [Grafana Dashboard (ID: 13679)](https://grafana.com/grafana/dashboards/13679):
+MKTXP includes a turnkey [Grafana Dashboard (ID: 13679)](https://grafana.com/grafana/dashboards/13679):
 
 <img width="32%" alt="Traffic & Interface" src="https://user-images.githubusercontent.com/5028474/217029083-3c2f561e-853f-45a7-b9f1-d818a830daf5.png"> <img width="32%" alt="Wireless Clients" src="https://user-images.githubusercontent.com/5028474/217029092-2b86b41b-1f89-4383-ac48-16652e820f7e.png"> <img width="32%" alt="Device Health" src="https://user-images.githubusercontent.com/5028474/217029096-dbf6b46c-3ed7-4c76-a57b-8cebfb3b671c.png">
 

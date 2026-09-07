@@ -21,7 +21,7 @@ RouterOS `.rsc` export files are often difficult to maintain in version control.
 
 ## Quick Start
 
-`mktxp rsc` works right out of the box on local `.rsc` files with **zero configuration required**:
+For local `.rsc` files, `mktxp rsc` works right out of the box with zero configuration required:
 
 ```bash
 # Deterministic monolithic formatting
@@ -37,9 +37,9 @@ RouterOS `.rsc` export files are often difficult to maintain in version control.
 
 `mktxp rsc` supports two operational modes:
 
-1. **Local File Mode (`-i <path>`)**:
-   Processes an existing `.rsc` file without touching any network hardware.
-2. **Live Router Mode (`-en <router_entry>`)**:
+1. Local File Mode (`-i <path>`):
+   Processes an existing `.rsc` file without touching network hardware.
+2. Live Router Mode (`-en <router_entry>`):
    Directly connects to a configured router over SSH, initiates an export, streams the output into the AST parser, and formats or splits it on the fly.
 
 ### SSH Authentication
@@ -92,7 +92,7 @@ Splits a raw or live `.rsc` export into modular, numbered configuration files or
 ❯ mktxp rsc split -en MyRouter --extract-scripts
 ```
 
-**Output Layout:**
+Output Layout:
 ```text
 Successfully split RouterOS export into 8 files in: ./exports/MyRouter/
   |- 01-base.rsc
@@ -155,7 +155,8 @@ The engine uses longest-prefix specificity matching (so `/routing bgp` takes pri
 Because `mktxp rsc` produces deterministic, single-line AST output with stable sorting:
 - Committing split outputs to a Git repository turns every commit into an exact, audit-ready network changelog.
 - Hardware replacements don't trigger spurious diffs when `--strip-macs` is enabled.
-- Automated backup pipelines can run in a scheduled GitHub Action or cron job:
+- Automated backup pipelines can run in a scheduled GitHub Action or cron job.
+- A sample script with preset router names (can be easily modified to read directly from `mktxp.conf`):
 
 ```bash
 #!/usr/bin/env bash

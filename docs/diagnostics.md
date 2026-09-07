@@ -1,6 +1,6 @@
 # Live CLI Diagnostics (`mktxp diag`)
 
-`mktxp diag` (alias: `mktxp print`) provides immediate, interactive visibility into MikroTik RouterOS devices directly in your terminal. It renders clean ASCII tables with domain-specific filtering, automatic MAC-to-hostname DHCP enrichment, human-readable bitrates, and activity durations.
+`mktxp diag` (alias: `mktxp print`) provides interactive visibility into MikroTik RouterOS devices directly in your terminal. It renders clean ASCII tables with domain-specific filtering, automatic MAC-to-hostname DHCP enrichment, human-readable bitrates, and activity durations.
 
 ---
 
@@ -35,12 +35,12 @@
 
 ## CLI Ergonomics & Scoped Help
 
-1. **Prefix Matching**: You don't have to type full flags. The options parser matches any unique initial prefix sequence—`--wifi`, `--caps`, `--dhcp`, `--conn`, `--kid`, `--addr`, and `--net` resolve cleanly.
-2. **Context-Aware Scoped Help**: Appending `-h` to any domain narrows help down to the switches relevant to that command, printing active thresholds from your `_mktxp.conf` (see the [Configuration Guide](configuration.md#3-diag--live-diagnostics-thresholds) to tune defaults):
+1. Prefix Matching: You don't have to type full flags. The options parser matches any unique initial prefix sequence—`--wifi`, `--caps`, `--dhcp`, `--conn`, `--kid`, `--addr`, and `--net` resolve cleanly.
+2. Context-Aware Scoped Help: Appending `-h` to any domain narrows help down to the switches relevant to that command, printing active thresholds from your `_mktxp.conf` (see the [Configuration Guide](configuration.md#3-diag--live-diagnostics-thresholds) to tune defaults):
    ```bash
    ❯ mktxp diag -en ROUTER -kc -h
    ```
-3. **Transparent Alias**: `mktxp print` remains available as an alias for `mktxp diag`.
+3. Transparent Alias: `mktxp print` remains available as an alias for `mktxp diag`.
 
 ---
 
@@ -50,14 +50,14 @@
 
 Inspects wireless associations, grouping records by AP interface with automatic separators and client counts.
 
-**Available Filters:**
+Available Filters:
 - `--low-signal [dBm]`: Filter clients with weak signal (default: `<= -75 dBm`)
 - `--min-signal [dBm]`: Filter clients with strong signal (default: `>= -60 dBm`)
 - `--low-rate [rate]`: Filter clients with low negotiated PHY rate (e.g. `1M`, `18M`)
 - `--recent [duration]`: Filter newly joined clients (e.g. `15m`, `1h`)
 - `--band [2g|5g|6g]`: Filter clients by frequency band
 
-**Examples:**
+Examples:
 
 ```bash
 # Pinpoint sticky clients on distant APs with weak signal and bottom-tier rates
@@ -92,12 +92,12 @@ Matching CAPsMAN clients: 3 (Total connected: 127)
 
 Queries DHCP server lease tables to identify active clients, stale assignments, and unidentified devices.
 
-**Available Filters:**
+Available Filters:
 - `--unidentified`: Show mystery devices with no DHCP hostname and no comment (falls back to displaying MAC address)
 - `--dynamic` / `--static`: Filter dynamic vs. static lease configurations
 - `--active-only` / `--inactive-only`: Show online/active devices vs. stale/waiting leases
 
-**Examples:**
+Examples:
 
 ```bash
 # Surface mystery devices plugged into the network
@@ -121,13 +121,13 @@ Matching DHCP clients: 2 (Total: 46)
 
 Aggregates active firewall connections per source IP to spot infected hosts, heavy BitTorrent clients, or socket exhaustion.
 
-**Available Filters:**
+Available Filters:
 - `--top [N]`: Show top N connection holders (default: `10`)
 - `--min-conns [N]`: Filter out background hosts with fewer than N active connections
 
 *(Note: Destination addresses are displayed when `connection_stats_destinations = True` is enabled in `mktxp.conf`.)*
 
-**Example:**
+Example:
 
 ```bash
 ❯ mktxp diag -en ROUTER -cn --top 3
@@ -153,11 +153,11 @@ Matching open connections: 694 (Total: 1170)
 
 Inspects dynamic and static firewall address lists across IPv4 and IPv6 simultaneously.
 
-**Available Filters:**
+Available Filters:
 - `--dynamic-only`: Show temporary dynamic bans (e.g. brute-force honeypots, port-knock drops) with remaining timeouts
 - `--static-only`: Show permanent configured entries
 
-**Example:**
+Example:
 
 ```bash
 # Verify active dynamic threat drop lists
@@ -185,14 +185,14 @@ Pulls RouterOS Kid Control counters, translates them into human-readable bitrate
 
 *(Prerequisite: RouterOS Kid Control device tracking must be enabled for the target devices.)*
 
-**Available Filters:**
+Available Filters:
 - `--top [N]`: Show top N talkers flattened into a global leaderboard by combined transfer rate ($Tx + Rx$, default: `10`)
 - `--active`: Show devices with non-zero active throughput only
 - `--rate-above [RATE]`: Filter devices exceeding bandwidth threshold (e.g. `2M`, `500k`)
 - `--dynamic-only` / `--static-only`: Filter auto-discovered dynamic entries vs. manually added static Kid Control entries
 - `--unassigned`: Show devices not assigned to any specific user profile
 
-**Example:**
+Example:
 
 ```bash
 # Surface top 5 talkers with active throughput
@@ -219,11 +219,11 @@ Top 5 Kid Control devices by rate (Matching: 18, Total: 18)
 
 Monitors RouterOS Netwatch ICMP probe targets for WAN gateway and DNS availability.
 
-**Available Filters:**
+Available Filters:
 - `--down-only`: Show unreachable or failing probe targets
 - `--up-only`: Show passing / reachable targets
 
-**Example:**
+Example:
 
 ```bash
 ❯ mktxp diag -en ROUTER -nw --down-only

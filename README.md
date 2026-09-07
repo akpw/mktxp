@@ -16,9 +16,9 @@ MKTXP is an extensible toolkit for MikroTik RouterOS network engineering. It pro
 
 | I need to … | Start with | Full Guide |
 | :--- | :--- | :--- |
-| Troubleshoot a router now | `mktxp diag …` | [Diagnostics Guide](https://github.com/akpw/mktxp/blob/main/docs/diagnostics.md) |
+| Troubleshoot a router now | `mktxp diag …` | [CLI Diagnostics Guide](https://github.com/akpw/mktxp/blob/main/docs/diagnostics.md) |
 | Clean up / version RouterOS configs | `mktxp rsc …` | [GitOps RSC Guide](https://github.com/akpw/mktxp/blob/main/docs/rsc.md) |
-| Monitor routers continuously | `mktxp export` | [Exporter Guide](https://github.com/akpw/mktxp/blob/main/docs/exporter.md) |
+| Monitor routers continuously | `mktxp export` | [Prometheus Exporter Guide](https://github.com/akpw/mktxp/blob/main/docs/exporter.md) |
 
 ---
 
@@ -185,4 +185,7 @@ Import the official [Grafana Dashboard (ID: 13679)](https://grafana.com/grafana/
 ## License & Contributing
 
 - Distributed under the [GNU General Public License v2](LICENSE).
-- Local development: create a virtual environment (`python3 -m venv .venv && source .venv/bin/activate`), install editable with test dependencies (`pip install -e ".[test]"`), and run `pytest`.
+- Local development:
+  - Create a virtual environment: `python3 -m venv .venv && source .venv/bin/activate`
+  - Install editable with test dependencies: `pip install -e ".[test]"`
+  - Run test suite: `pytest`
