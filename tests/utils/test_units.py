@@ -23,6 +23,8 @@ from mktxp.utils.units import (
     parse_timedelta_milliseconds,
     parse_duration_limit,
     parse_signal_strength,
+    parse_uptime_seconds,
+    parse_rate_bps,
 )
 
 
@@ -87,3 +89,36 @@ def test_parse_signal_strength():
     assert parse_signal_strength('-65dBm') == '-65'
     assert parse_signal_strength('-72') == '-72'
     assert parse_signal_strength(None) == ''
+
+
+def test_parse_uptime_seconds():
+    assert parse_uptime_seconds('45s') == 45
+    assert parse_uptime_seconds('3h15m2s') == 11702
+    assert parse_uptime_seconds('1d2h3m4s') == 93784
+    assert parse_uptime_seconds('1w2d3h4m5s') == 788645
+    assert parse_uptime_seconds('4s830ms') == 4
+
+
+def test_parse_uptime_seconds_invalid():
+    assert parse_uptime_seconds(None) is None
+    assert parse_uptime_seconds('') is None
+    assert parse_uptime_seconds('02:03:04') is None
+    assert parse_uptime_seconds('1d 2h') is None
+    assert parse_uptime_seconds('abc') is None
+
+
+def test_parse_rate_bps():
+    assert parse_rate_bps('866.6Mbps-80MHz/2S/SGI') == 866600000
+    assert parse_rate_bps('1.2Gbps-160MHz/2S/SGI') == 1200000000
+    assert parse_rate_bps('144.4Mbps') == 144400000
+    assert parse_rate_bps('6Mbps') == 6000000
+    assert parse_rate_bps('54kbps') == 54000
+    assert parse_rate_bps('866000000') == 866000000
+
+
+def test_parse_rate_bps_invalid():
+    assert parse_rate_bps(None) is None
+    assert parse_rate_bps('') is None
+    assert parse_rate_bps('unknown') is None
+    assert parse_rate_bps('-80MHz') is None
+    assert parse_rate_bps('Mbps') is None
