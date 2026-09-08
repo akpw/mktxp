@@ -147,12 +147,15 @@ def test_diag_help_formatter_scoping():
 
 def test_version_resolution():
     """Verify version resolution in _version.py and options parser."""
+    import re
     import mktxp
     from mktxp._version import get_version
+
     version = get_version()
-    assert version == "2.0.2"
-    assert mktxp.__version__ == "2.0.2"
+    assert re.match(r"^\d+\.\d+\.\d+", version)
+    assert mktxp.__version__ == version
+
     dispatcher = MKTXPDispatcher()
-    assert "2.0.2" in dispatcher.option_parser.description
+    assert f"version {version}" in dispatcher.option_parser.description
 
 

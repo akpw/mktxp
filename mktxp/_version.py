@@ -20,7 +20,7 @@ def get_version() -> str:
     try:
         return pkg_version("mktxp")
     except PackageNotFoundError:
-        return "2.0.2"
+        return "unknown"
 
 
 __version__ = get_version()
