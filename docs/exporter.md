@@ -11,6 +11,7 @@
   - [Minimal Router Entry](#minimal-router-entry)
   - [Canonical Template](#canonical-template)
   - [System Settings (`_mktxp.conf`)](#system-settings-_mktxpconf)
+- [Wireless Client Metrics](#wireless-client-metrics)
 - [Prometheus Scrape Configuration](#prometheus-scrape-configuration)
 - [Multi-Target Exporter Pattern (`/probe`)](#multi-target-exporter-pattern-probe)
 - [Production Daemon Deployments](#production-daemon-deployments)
@@ -84,6 +85,30 @@ Tune daemon-level parameters with `mktxp edit -i`:
 ```
 
 > 📖 *For the complete configuration reference, multi-router `[default]` inheritance, parallel scraping, and Docker deployment, see the [Configuration Guide](configuration.md).*
+
+---
+
+## Wireless Client Metrics
+
+With `wireless_clients` / `capsman_clients` enabled, every connected station is exported as one info series plus a set of per-client gauges and counters. The `wlan_` and `capsman_` families are identical in shape:
+
+| Metric | Type | Labels (in addition to `routerboard_name`, `routerboard_address`) |
+|---|---|---|
+| `mktxp_{wlan,capsman}_clients_devices_info` | info | `dhcp_name`, `dhcp_address`, `mac_address`, `ssid`, `interface`, `band` |
+| `mktxp_{wlan,capsman}_clients_uptime_seconds` | gauge | `dhcp_name`, `mac_address` |
+| `mktxp_{wlan,capsman}_clients_tx_rate_bps` | gauge | `dhcp_name`, `mac_address` |
+| `mktxp_{wlan,capsman}_clients_rx_rate_bps` | gauge | `dhcp_name`, `mac_address` |
+| `mktxp_{wlan,capsman}_clients_signal_strength` | gauge | `dhcp_name`, `mac_address` |
+| `mktxp_{wlan,capsman}_clients_tx_bytes` / `_rx_bytes` | counter | `dhcp_name`, `mac_address` |
+| `mktxp_wlan_clients_signal_to_noise`, `mktxp_wlan_clients_tx_ccq` | gauge | `dhcp_name`, `mac_address` |
+
+The info metric carries only labels that stay constant while a station is connected, so each client maps to a single time series. Values that change from scrape to scrape (uptime, negotiated rates, signal) are exported as gauges and can be joined to the info series on `mac_address`, e.g.:
+
+```promql
+mktxp_wlan_clients_tx_rate_bps * on (routerboard_name, mac_address) group_left (ssid, band) mktxp_wlan_clients_devices_info
+```
+
+Negotiated rates are parsed from the RouterOS rate string (e.g. `866.6Mbps-80MHz/2S/SGI` → `866600000`), uptime from the RouterOS duration string (e.g. `1d2h3m4s` → `93784`). A value that cannot be parsed is logged and its sample omitted; the rest of the scrape is unaffected.
 
 ---
 
