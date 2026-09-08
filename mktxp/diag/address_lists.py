@@ -41,7 +41,9 @@ class AddressListDiagHandler(BaseDiagHandler):
 
         status_group = group.add_mutually_exclusive_group()
         if "--dynamic-only" in parser._option_string_actions:
-            status_group._group_actions.append(parser._option_string_actions["--dynamic-only"])
+            act = parser._option_string_actions["--dynamic-only"]
+            status_group._group_actions.append(act)
+            group._group_actions.append(act)
         else:
             status_group.add_argument(
                 "--dynamic-only",
@@ -52,7 +54,9 @@ class AddressListDiagHandler(BaseDiagHandler):
             )
 
         if "--static-only" in parser._option_string_actions:
-            status_group._group_actions.append(parser._option_string_actions["--static-only"])
+            act = parser._option_string_actions["--static-only"]
+            status_group._group_actions.append(act)
+            group._group_actions.append(act)
         else:
             status_group.add_argument(
                 "--static-only",

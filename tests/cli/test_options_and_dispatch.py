@@ -136,6 +136,14 @@ def test_diag_help_formatter_scoping():
         assert "Kid Control Filters" not in im_help
         assert "Wireless & CAPsMAN Filters" not in im_help
 
+    with patch.object(sys, 'argv', ['mktxp', 'diag', '-en', 'TestRouter', '-al', 'mylist', '-h']):
+        al_help = diag_parser.format_help()
+        assert "Address List Filters (-al):" in al_help
+        assert "-al, --address_lists" in al_help
+        assert "--dynamic-only" in al_help
+        assert "--static-only" in al_help
+        assert "Kid Control Filters" not in al_help
+
 
 def test_version_resolution():
     """Verify version resolution in _version.py and options parser."""

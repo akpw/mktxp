@@ -99,7 +99,7 @@ class KidControlDiagHandler(BaseDiagHandler):
             status_group.add_argument(
                 "--dynamic-only",
                 dest="dynamic_only",
-                help="Show dynamic devices only",
+                help="Show dynamic entries only",
                 action="store_true",
                 default=False,
             )
@@ -110,7 +110,7 @@ class KidControlDiagHandler(BaseDiagHandler):
             status_group.add_argument(
                 "--static-only",
                 dest="static_only",
-                help="Show static devices only",
+                help="Show static entries only",
                 action="store_true",
                 default=False,
             )

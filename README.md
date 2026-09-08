@@ -8,7 +8,7 @@
 ![Prometheus](https://img.shields.io/badge/prometheus-exporter-blueviolet)
 [![Docker Pulls](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fghcr-badge.elias.eu.org%2Fapi%2Fakpw%2Fmktxp%2Fmktxp&query=%24.downloadCount&label=docker%20pulls&logo=docker&logoColor=white&color=2496ed)](https://github.com/akpw/mktxp/pkgs/container/mktxp)
 
-MKTXP is an extensible toolkit for MikroTik RouterOS network engineering. It provides interactive terminal diagnostics, deterministic GitOps configuration management, and a Prometheus metrics exporter within a single command-line tool.
+MKTXP is an extensible toolkit for MikroTik RouterOS network engineering. It provides interactive terminal diagnostics, deterministic GitOps configuration management, and a Prometheus metrics exporter within a lightweight command-line tool.
 
 ---
 
