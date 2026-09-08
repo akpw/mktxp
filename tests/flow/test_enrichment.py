@@ -17,6 +17,7 @@ from mktxp.flow.processor.enrichment import (
     dhcp_name,
     resolve_dhcp,
     augment_record,
+    add_registration_gauges,
 )
 
 
@@ -61,3 +62,32 @@ def test_augment_record():
     assert rec['rx_bytes'] == '2000'
     assert rec['tx_rate'] == '866 Mbps'
     assert rec['signal_strength'] == '-65'
+
+
+def test_add_registration_gauges():
+    rec = {
+        'mac_address': 'AA:BB:CC:DD:EE:FF',
+        'tx_rate': '866.6Mbps-80MHz/2S/SGI',
+        'rx_rate': '144.4Mbps',
+        'uptime': '1d2h3m4s',
+    }
+
+    add_registration_gauges(rec)
+
+    assert rec['tx_rate_bps'] == 866600000
+    assert rec['rx_rate_bps'] == 144400000
+    assert rec['uptime_seconds'] == 93784
+    # raw values are left in place for augment_record
+    assert rec['tx_rate'] == '866.6Mbps-80MHz/2S/SGI'
+    assert rec['uptime'] == '1d2h3m4s'
+
+
+def test_add_registration_gauges_skips_unparseable(capsys):
+    rec = {'mac_address': 'AA:BB:CC:DD:EE:FF', 'tx_rate': 'unknown', 'rx_rate': '6Mbps', 'uptime': ''}
+
+    add_registration_gauges(rec)
+
+    assert 'tx_rate_bps' not in rec
+    assert 'uptime_seconds' not in rec
+    assert rec['rx_rate_bps'] == 6000000
+    assert "could not parse tx_rate 'unknown'" in capsys.readouterr().out

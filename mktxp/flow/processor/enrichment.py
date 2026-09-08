@@ -17,6 +17,8 @@ from mktxp.utils.units import (
     parse_bitrates,
     parse_timedelta_seconds,
     parse_signal_strength,
+    parse_uptime_seconds,
+    parse_rate_bps,
 )
 
 
@@ -91,6 +93,27 @@ def resolve_dhcp(
     registration_record['dhcp_name'] = name
     if resolve_address:
         registration_record['dhcp_address'] = dhcp_address
+
+
+def add_registration_gauges(registration_record):
+    """Adds numeric uptime_seconds / tx_rate_bps / rx_rate_bps keys parsed from the raw RouterOS
+    registration values. Must run before augment_record, which reformats those values for display.
+    Unparseable values are reported and skipped, so the record simply lacks that gauge."""
+    for source_key, target_key, parse in (
+        ('uptime', 'uptime_seconds', parse_uptime_seconds),
+        ('tx_rate', 'tx_rate_bps', parse_rate_bps),
+        ('rx_rate', 'rx_rate_bps', parse_rate_bps),
+    ):
+        raw_value = registration_record.get(source_key)
+        if not raw_value:
+            continue
+        value = parse(raw_value)
+        if value is None:
+            print(
+                f"Warning: could not parse {source_key} '{raw_value}' for client {registration_record.get('mac_address', '')}, skipping sample"
+            )
+            continue
+        registration_record[target_key] = value
 
 
 def augment_record(router_entry, registration_record, id_key='mac_address'):

@@ -13,7 +13,7 @@
 
 
 from mktxp.cli.config import MKTXPConfigKeys
-from mktxp.flow.processor.enrichment import augment_record
+from mktxp.flow.processor.enrichment import augment_record, add_registration_gauges
 from mktxp.collector.base_collector import BaseCollector
 from mktxp.datasource.capsman_ds import CapsmanCapsMetricsDataSource, CapsmanRegistrationsMetricsDataSource, CapsmanInterfacesDatasource
 from mktxp.datasource.wireless_ds import WirelessMetricsDataSource
@@ -53,6 +53,7 @@ class CapsmanCollector(BaseCollector):
 
                 # translate / trim / augment registration records
                 for registration_record in registration_records:
+                    add_registration_gauges(registration_record)
                     augment_record(router_entry, registration_record)
 
                 tx_byte_metrics = BaseCollector.counter_collector('capsman_clients_tx_bytes', 'Number of sent packet bytes', registration_records, 'tx_bytes', ['dhcp_name', 'mac_address'])
@@ -64,8 +65,21 @@ class CapsmanCollector(BaseCollector):
                 signal_strength_metrics = BaseCollector.gauge_collector('capsman_clients_signal_strength', 'Client devices signal strength', registration_records, 'rx_signal', ['dhcp_name', 'mac_address'])
                 yield signal_strength_metrics
 
+                uptime_records = [record for record in registration_records if 'uptime_seconds' in record]
+                if uptime_records:
+                    yield BaseCollector.gauge_collector('capsman_clients_uptime_seconds', 'Client devices connection uptime in seconds', uptime_records, 'uptime_seconds', ['dhcp_name', 'mac_address'])
+
+                tx_rate_records = [record for record in registration_records if 'tx_rate_bps' in record]
+                if tx_rate_records:
+                    yield BaseCollector.gauge_collector('capsman_clients_tx_rate_bps', 'Client devices negotiated TX rate in bits per second', tx_rate_records, 'tx_rate_bps', ['dhcp_name', 'mac_address'])
+
+                rx_rate_records = [record for record in registration_records if 'rx_rate_bps' in record]
+                if rx_rate_records:
+                    yield BaseCollector.gauge_collector('capsman_clients_rx_rate_bps', 'Client devices negotiated RX rate in bits per second', rx_rate_records, 'rx_rate_bps', ['dhcp_name', 'mac_address'])
+
+                # only labels that stay constant for the lifetime of a registration, so a client maps to a single time series
                 registration_metrics = BaseCollector.info_collector('capsman_clients_devices', 'Registered client devices info',
-                                        registration_records, ['dhcp_name', 'dhcp_address', 'rx_signal', 'ssid', 'tx_rate', 'rx_rate', 'interface', 'mac_address', 'uptime', 'band'])
+                                        registration_records, ['dhcp_name', 'dhcp_address', 'ssid', 'interface', 'mac_address', 'band'])
                 yield registration_metrics
 
 
