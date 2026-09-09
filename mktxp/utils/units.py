@@ -165,3 +165,34 @@ def parse_signal_strength(signal_strength):
     wifi_signal_strength_rgx = _get_re('wifi_signal_strength_rgx', r'(-?\d+(?:\.\d+)?)')
     match = wifi_signal_strength_rgx.search(str(signal_strength))
     return match.group() if match else ""
+
+
+def parse_uptime_seconds(uptime):
+    """Parses RouterOS uptime string (e.g. '1w2d3h4m5s', '45s') into integer seconds.
+    Unlike parse_timedelta, the whole string must be a valid duration; returns None otherwise."""
+    if uptime is None:
+        return None
+    uptime_rgx = _get_re(
+        'uptime_rgx',
+        r'^((?P<weeks>\d+)w)?((?P<days>\d+)d)?((?P<hours>\d+)h)?((?P<minutes>\d+)m)?((?P<seconds>\d+)s)?((?P<milliseconds>\d+)ms)?$',
+    )
+    matched = uptime_rgx.match(str(uptime).strip())
+    if not matched or not matched.group():
+        return None
+    return int(timedelta(**{key: int(value) for key, value in matched.groupdict().items() if value}).total_seconds())
+
+
+def parse_rate_bps(rate):
+    """Parses RouterOS wireless rate string (e.g. '866.6Mbps-80MHz/2S/SGI', '6Mbps', raw '866000000') into integer bps.
+    Returns None when the value does not start with a recognizable rate."""
+    if rate is None:
+        return None
+    rate_str = str(rate).strip()
+    if rate_str.isdigit():
+        return int(rate_str)
+    rate_bps_rgx = _get_re('rate_bps_rgx', r'(?i)^(\d+(?:\.\d+)?)\s*([kmg]?)bps')
+    matched = rate_bps_rgx.match(rate_str)
+    if not matched:
+        return None
+    multiplier = {'': 1, 'k': 1000, 'm': 1000 ** 2, 'g': 1000 ** 3}[matched.group(2).lower()]
+    return int(round(float(matched.group(1)) * multiplier))
