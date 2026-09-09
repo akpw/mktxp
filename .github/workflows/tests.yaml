@@ -2,9 +2,19 @@ name: Tests
 on:
   push:
     branches: [main]
-    paths-ignore: [ '*.md', '*.rst']
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+      - '**/*.rst'
+      - 'LICENSE'
+      - '.github/FUNDING.yml'
   pull_request:
-    paths-ignore: [ '*.md', '*.rst' ]
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+      - '**/*.rst'
+      - 'LICENSE'
+      - '.github/FUNDING.yml'
 jobs:
   tests:
     name: ${{ matrix.name || matrix.python }}
