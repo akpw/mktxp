@@ -72,7 +72,7 @@ MKTXP uses two configuration files:
 - `mktxp.conf`: Router connection profiles, credentials, custom labels, and metrics switches. Edit with `mktxp edit`.
 - `_mktxp.conf`: Daemon listen sockets, timeouts, parallel scraping, GitOps rules, and CLI diagnostic thresholds. Edit with `mktxp edit -i`.
 
-Files are resolved automatically from `~/.config/mktxp/` (XDG standard) or `/etc/mktxp/` (system/Docker). Check active paths anytime with `mktxp show -cfg`.
+Files are resolved automatically from `~/.config/mktxp/` (XDG standard) or `/etc/mktxp/` (system/Docker), or explicitly overridden for any command with `--cfg-dir <path>`. Check active paths anytime with `mktxp show -cfg`.
 
 ### 1. Minimal Configuration (`mktxp.conf`)
 

@@ -43,6 +43,10 @@
    ❯ mktxp diag -en ROUTER -kc -h
    ```
 3. Transparent Alias: `mktxp print` remains available as an alias for `mktxp diag`.
+4. Global Config Directory Override: Use `--cfg-dir <path>` to run diagnostics against isolated or staging router inventories (`mktxp.conf`, `_mktxp.conf`, and `secrets.yml`):
+   ```bash
+   ❯ mktxp --cfg-dir /path/to/custom diag -en ROUTER -wc
+   ```
 
 ---
 

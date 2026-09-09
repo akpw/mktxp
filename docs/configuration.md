@@ -9,8 +9,12 @@ MKTXP uses two configuration files to cleanly separate router inventory from sys
 
 ## Configuration File Locations & Resolution
 
-MKTXP automatically resolves configuration files in the following order:
+MKTXP resolves configuration files (`mktxp.conf`, `_mktxp.conf`, and optional `secrets.yml`) in the following order:
 
+0. Explicit CLI Override (Highest Priority):
+   - `--cfg-dir <path>`
+   - Directs MKTXP to find `mktxp.conf`, `_mktxp.conf`, and `secrets.yml` in `<path>/`.
+   - Global option available across all MKTXP commands (`export`, `diag`, `rsc`, `edit`, `show`).
 1. XDG Standard Directory (Recommended):
    - `$XDG_CONFIG_HOME/mktxp/` (defaults to `~/.config/mktxp/`)
    - Files: `~/.config/mktxp/mktxp.conf` and `~/.config/mktxp/_mktxp.conf`
@@ -38,6 +42,11 @@ MKTXP provides built-in commands to inspect and edit your configuration files:
 MKTXP data config: /Users/username/.config/mktxp/mktxp.conf
 MKTXP internal config: /Users/username/.config/mktxp/_mktxp.conf
 
+# Inspect configuration from a specific custom directory
+❯ mktxp --cfg-dir /etc/mktxp show -cfg
+MKTXP data config: /etc/mktxp/mktxp.conf
+MKTXP internal config: /etc/mktxp/_mktxp.conf
+
 # List all configured router profiles and their active parameters
 ❯ mktxp show
 
@@ -49,6 +58,10 @@ MKTXP internal config: /Users/username/.config/mktxp/_mktxp.conf
 
 # Open _mktxp.conf (system, GitOps, and diagnostic configuration) in your default editor
 ❯ mktxp edit -i
+
+# Open files in a specific custom directory
+❯ mktxp --cfg-dir /path/to/custom edit
+❯ mktxp --cfg-dir /path/to/custom edit -i
 
 # Open either file using a specific editor
 ❯ mktxp edit -ed nano

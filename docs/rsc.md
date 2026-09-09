@@ -61,12 +61,16 @@ Parses a raw export and formats it into a clean, deterministic monolithic `.rsc`
 
 # Format live directly from router entry over SSH
 ❯ mktxp rsc format -en MyRouter -o ./backups/MyRouter-clean.rsc
+
+# Format live using router inventory from custom config directory
+❯ mktxp --cfg-dir /path/to/custom rsc format -en MyRouter -o ./backups/MyRouter-clean.rsc
 ```
 
 ### Options
 
 | Flag | Description |
 | :--- | :--- |
+| `--cfg-dir <path>` | Global option: Path to custom directory containing `mktxp.conf`, `_mktxp.conf` (with `[RSC]` settings), and `secrets.yml`. |
 | `-i`, `--input <path>` | Input `.rsc` file path. |
 | `-en`, `--entry-name <name>` | Router entry name from `mktxp.conf` for live SSH export. |
 | `-o`, `--out <path>` | Output file path (defaults to stdout if omitted). |

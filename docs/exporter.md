@@ -167,7 +167,8 @@ After=network.target
 
 [Service]
 User=mktxp
-ExecStart=/usr/local/bin/mktxp export
+# Use default auto-discovery (/etc/mktxp) or specify custom config directory with --cfg-dir:
+ExecStart=/usr/local/bin/mktxp --cfg-dir /etc/mktxp export
 Restart=always
 RestartSec=5s
 
@@ -180,6 +181,18 @@ Enable and start the service:
 ❯ sudo systemctl daemon-reload
 ❯ sudo systemctl enable --now mktxp
 ❯ systemctl status mktxp
+```
+
+### Multi-Instance Daemon Deployments
+
+To run multiple isolated exporter instances on the same host (e.g. separate datacenters, environments, or scrape intervals on different ports), use `--cfg-dir` to point each daemon to its own configuration directory:
+
+```bash
+# Instance 1: listening on port 49090 configured via /etc/mktxp/dc1/
+❯ mktxp --cfg-dir /etc/mktxp/dc1 export
+
+# Instance 2: listening on port 49091 configured via /etc/mktxp/dc2/
+❯ mktxp --cfg-dir /etc/mktxp/dc2 export
 ```
 
 ### FreeBSD Service
