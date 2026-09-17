@@ -134,7 +134,6 @@ class RSCDispatcher:
             help="Router entry name from mktxp.conf for live export over SSH, or '__all__' for all enabled routers",
         )
         split_parser.add_argument(
-            "-d",
             "-o",
             "--out-dir",
             dest="out_dir",
@@ -150,16 +149,10 @@ class RSCDispatcher:
             help="Include passwords and sensitive keys in live export",
         )
         split_parser.add_argument(
-            "--numbered",
-            dest="numbered_files",
-            action="store_true",
-            default=None,
-            help="Prefix split filenames with numeric indices",
-        )
-        split_parser.add_argument(
             "--no-numbered",
-            dest="numbered_files",
-            action="store_false",
+            dest="no_numbered",
+            action="store_true",
+            default=False,
             help="Do not prefix split filenames with numeric indices",
         )
         split_parser.add_argument(
@@ -311,10 +304,11 @@ class RSCDispatcher:
                     sub_name = os.path.splitext(os.path.basename(args["input"]))[0]
                 out_dir = os.path.join(base_dir, sub_name)
 
+            numbered = not args.get("no_numbered", False) if "no_numbered" in args else args.get("numbered", True)
             emitted_files = engine.split(
                 raw_text=raw_text,
                 output_dir=out_dir,
-                numbered=args.get("numbered", True),
+                numbered=numbered,
                 wrap_lines=args.get("wrap_lines", False),
                 wrap_col=args.get("wrap_col", 80),
                 extract_scripts=extract_scripts,
@@ -383,11 +377,12 @@ class RSCDispatcher:
                 continue
 
             out_dir = os.path.join(base_dir, router_name)
+            numbered = not args.get("no_numbered", False) if "no_numbered" in args else args.get("numbered", True)
             try:
                 emitted_files = engine.split(
                     raw_text=raw_text,
                     output_dir=out_dir,
-                    numbered=args.get("numbered", True),
+                    numbered=numbered,
                     wrap_lines=args.get("wrap_lines", False),
                     wrap_col=args.get("wrap_col", 80),
                     extract_scripts=extract_scripts,

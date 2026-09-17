@@ -150,7 +150,7 @@ Successfully split RouterOS export into 8 files in: ./exports/MyRouter/
 | :--- | :--- |
 | `-i`, `--input <path>` | Input `.rsc` file path. |
 | `-en`, `--entry-name <name>` | Router entry name from `mktxp.conf` for live SSH export (or `__all__` to sequentially export and split all enabled routers). |
-| `-d`, `-o`, `--out-dir <path>` | Destination directory for split `.rsc` files. |
+| `-o`, `--out-dir <path>` | Destination directory for split `.rsc` files. |
 | `--extract-scripts` | Extract multi-line scripts to standalone `.rsc` sidecar files (default: keep embedded inline). |
 | `--no-numbered` | Emit plain filenames (e.g. `base.rsc`, `wifi.rsc`) without numeric order prefixes. |
 | `--strip-macs` | Strip dynamic MAC addresses. |
@@ -168,7 +168,7 @@ When `--extract-scripts` is passed:
 
 ### Output Directory Scoping
 
-When `-d` / `-o` is omitted, `mktxp rsc split` automatically scopes output into `<base_dir>/<Name>/` (e.g. `./exports/MyRouter/`), preventing overlapping outputs when splitting multiple routers into the same directory.
+When `-o` / `--out-dir` is omitted, `mktxp rsc split` automatically scopes output into `<base_dir>/<Name>/` (e.g. `./exports/MyRouter/`), preventing overlapping outputs when splitting multiple routers into the same directory.
 
 ### Batch Export All Routers (`-en __all__`)
 

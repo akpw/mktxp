@@ -32,18 +32,8 @@ class MKTXPCommands:
 
     @classmethod
     def commands_meta(cls):
-        return "".join(
-            (
-                "{",
-                f"{cls.DIAG}, ",
-                f"{cls.RSC}, ",
-                f"{cls.EXPORT}, ",
-                f"{cls.EDIT}, ",
-                f"{cls.SHOW}, ",
-                f"{cls.INFO}, ",
-                "}",
-            )
-        )
+        cmds = [cls.DIAG, cls.RSC, cls.EXPORT, cls.EDIT, cls.SHOW, cls.INFO]
+        return "{" + ", ".join(cmds) + "}"
 
 
 class MKTXPOptionsParser:
@@ -150,7 +140,7 @@ For more information, run: 'mktxp -h'
         # 3. Export command
         subparsers.add_parser(
             MKTXPCommands.EXPORT,
-            description="Starts exporting Miktorik Router Metrics to Prometheus",
+            description="Starts exporting MikroTik Router Metrics to Prometheus",
             formatter_class=MKTXPHelpFormatter,
         )
 
