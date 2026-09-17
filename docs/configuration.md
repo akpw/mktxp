@@ -115,7 +115,7 @@ Parameters defined under `[default]` apply to all configured routers unless expl
 | `port` | Integer | `8728` | RouterOS API port (`8728` for plaintext, `8729` for SSL). |
 | `username` | String | `username` | RouterOS user with `api` and `read` permissions. |
 | `password` | String | `password` | Password for the monitoring user. |
-| `credentials_file` | String | `""` | Path to an external YAML file containing `username` and `password`. |
+| `credentials_file` | String | `""` | Path to an external YAML file containing API credentials (`username`, `password`) and optional live GitOps RSC SSH credentials (`rsc_ssh_user`, `ssh_key_file`, `rsc_ssh_port`). |
 | `enabled` | Boolean | `True` | Enables or disables metrics collection for this device. |
 | `module_only` | Boolean | `False` | When `True`, skips default `/metrics` scraping; device is used exclusively as a probe module via `/probe`. |
 | `use_ssl` | Boolean | `False` | Connect via RouterOS API-SSL service (port 8729). |
@@ -124,6 +124,36 @@ Parameters defined under `[default]` apply to all configured routers unless expl
 | `ssl_check_hostname`| Boolean | `True` | Verify that router hostname matches certificate hostname. |
 | `ssl_ca_file` | String | `""` | Path to custom CA certificate bundle (leave empty for system store). |
 | `plaintext_login` | Boolean | `True` | Use post-6.43 plaintext authentication handshake (set to `False` for legacy ROS < 6.43). |
+| `rsc_ssh_port` | Integer / String | `None` | Custom SSH port for live GitOps RSC exports (e.g. `2222` for port-forwarded gateways; falls back to `_mktxp.conf [RSC] ssh_port` / `22` if omitted or `None`). |
+| `rsc_ssh_user` | String | `None` | Custom SSH user for live GitOps RSC exports (falls back to device `username` or credentials file if omitted or `None`). |
+
+#### External Secrets (`credentials_file`)
+
+Instead of storing credentials in plain text inside `mktxp.conf`, you can keep them in an external YAML file (e.g. `secrets.yml`):
+
+```ini
+[default]
+    credentials_file = secrets.yml    # Relative paths resolve to the active config dir
+    # credentials_file = ~/.config/mktxp/secrets.yml  # Tilde (~) expansion supported
+    # credentials_file = $MY_SECRETS_PATH             # Environment variables supported
+```
+
+> [!TIP]
+> **Path Resolution & Portability:**
+> - **Relative paths** (e.g. `secrets.yml` or `./secrets.yml`) resolve automatically relative to the directory containing the active `mktxp.conf` (or the directory passed via `--cfg-dir`). This makes config folders completely portable across macOS (`/Users/...`), Linux (`/home/...`), and container environments without hardcoded paths.
+> - **Tilde expansion** (`~`) and **environment variables** (`$VAR`) are fully supported.
+> - **Absolute paths** (e.g. `/etc/mktxp/secrets.yml`) continue to work unchanged.
+
+```yaml
+# RouterOS API credentials (for diagnostics & metrics)
+username: api-reader
+password: secret_password
+
+# Live GitOps RSC SSH credentials (for live configuration exports)
+rsc_ssh_user: gitops_admin
+ssh_key_file: ~/.ssh/id_ed25519
+# rsc_ssh_port: 2222     # optional SSH port fallback
+```
 
 ### Custom Labels & Naming
 

@@ -181,9 +181,12 @@ For more information, run: 'mktxp -h'
             MKTXPCommands.RSC,
         ):
             if args.get("entry_name"):
-                args["entry_name"] = UniquePartialMatchList(
-                    config_handler.registered_entries()
-                ).find(args["entry_name"])
+                if args["entry_name"] == "__all__":
+                    pass
+                else:
+                    args["entry_name"] = UniquePartialMatchList(
+                        config_handler.registered_entries()
+                    ).find(args["entry_name"])
 
         if args["sub_cmd"] in (MKTXPCommands.DIAG, MKTXPCommands.PRINT):
             if not config_handler.config_entry(args["entry_name"]).enabled:
@@ -222,11 +225,15 @@ For more information, run: 'mktxp -h'
             return path_arg
 
     @staticmethod
-    def _add_entry_name(parser, registered_only=False, required=True, help="MKTXP Entry name"):
+    def _add_entry_name(
+        parser, registered_only=False, required=True, help="MKTXP Entry name", allow_all=False
+    ):
         registered_entries = []
         if registered_only:
             try:
                 registered_entries = list(config_handler.registered_entries())
+                if allow_all:
+                    registered_entries.append("__all__")
                 if registered_entries:
                     help = f"{help} (choose from: {', '.join(registered_entries)})"
             except Exception as exc:

@@ -164,3 +164,76 @@ def test_cli_rsc_live_split(mock_fetch_export, mock_dispatch_handler, mock_optio
     files = os.listdir(target_dir)
     assert "01-base.rsc" in files
     assert "06-firewall.rsc" in files
+
+
+@patch('mktxp.cli.options.config_handler')
+@patch('mktxp.rsc.dispatcher.config_handler')
+@patch('mktxp.rsc.fetcher.SSHExportFetcher.fetch_export')
+def test_cli_rsc_split_all_batch(mock_fetch_export, mock_dispatch_handler, mock_options_handler, tmp_path, capsys):
+    mock_fetch_export.return_value = MOCK_RSC_EXPORT
+
+    router_a = MagicMock(hostname="10.0.0.1", enabled=True, username="admin", password="", credentials_file=None)
+    router_b = MagicMock(hostname="10.0.0.2", enabled=True, username="admin", password="", credentials_file=None)
+    router_c = MagicMock(hostname="10.0.0.3", enabled=False, username="admin", password="", credentials_file=None)
+
+    entries_map = {
+        "RouterA": router_a,
+        "RouterB": router_b,
+        "RouterC": router_c,
+    }
+
+    for h in (mock_options_handler, mock_dispatch_handler):
+        h.registered_entries.return_value = ["RouterA", "RouterB", "RouterC"]
+        h.config_entry.side_effect = lambda name: entries_map.get(name)
+        h.rsc_config.return_value = {"base_dir": str(tmp_path)}
+
+    test_args = ["mktxp", "rsc", "split", "-en", "__all__"]
+
+    with patch.object(sys, 'argv', test_args):
+        dispatcher = MKTXPDispatcher()
+        res = dispatcher.dispatch()
+        assert res is True
+
+    captured = capsys.readouterr()
+    assert "Skipping disabled router 'RouterC'" in captured.out
+    assert "[1/2] Fetching live RouterOS export from 'RouterA'" in captured.out
+    assert "[2/2] Fetching live RouterOS export from 'RouterB'" in captured.out
+    assert "Batch split completed: 2/2 routers succeeded." in captured.out
+
+    assert os.path.isdir(os.path.join(tmp_path, "RouterA"))
+    assert os.path.isdir(os.path.join(tmp_path, "RouterB"))
+    assert not os.path.exists(os.path.join(tmp_path, "RouterC"))
+
+
+@patch('mktxp.cli.options.config_handler')
+@patch('mktxp.rsc.dispatcher.config_handler')
+@patch('mktxp.rsc.fetcher.SSHExportFetcher.fetch_export')
+def test_cli_rsc_split_all_partial_failure(mock_fetch_export, mock_dispatch_handler, mock_options_handler, tmp_path, capsys):
+    mock_fetch_export.side_effect = [MOCK_RSC_EXPORT, ConnectionError("Connection refused")]
+
+    router_a = MagicMock(hostname="10.0.0.1", enabled=True, username="admin", password="", credentials_file=None)
+    router_b = MagicMock(hostname="10.0.0.2", enabled=True, username="admin", password="", credentials_file=None)
+
+    entries_map = {"RouterA": router_a, "RouterB": router_b}
+
+    for h in (mock_options_handler, mock_dispatch_handler):
+        h.registered_entries.return_value = ["RouterA", "RouterB"]
+        h.config_entry.side_effect = lambda name: entries_map.get(name)
+        h.rsc_config.return_value = {"base_dir": str(tmp_path)}
+
+    test_args = ["mktxp", "rsc", "split", "-en", "__all__"]
+
+    with patch.object(sys, 'argv', test_args):
+        dispatcher = MKTXPDispatcher()
+        res = dispatcher.dispatch()
+        assert res is True
+
+    captured = capsys.readouterr()
+    assert "Error fetching live export from 'RouterB': Connection refused" in captured.out
+    assert "Batch split completed: 1/2 routers succeeded." in captured.out
+    assert "Failed routers:" in captured.out
+    assert "RouterB: Connection refused" in captured.out
+
+    assert os.path.isdir(os.path.join(tmp_path, "RouterA"))
+    assert not os.path.exists(os.path.join(tmp_path, "RouterB"))
+

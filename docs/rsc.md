@@ -42,12 +42,44 @@ For local `.rsc` files, `mktxp rsc` works right out of the box with zero configu
 2. Live Router Mode (`-en <router_entry>`):
    Directly connects to a configured router over SSH, initiates an export, streams the output into the AST parser, and formats or splits it on the fly.
 
-### SSH Authentication
+### SSH Authentication & Port Settings
 
 Live exports use native SSH rather than the RouterOS API to obtain raw `/export` streams:
 - Uses your local SSH keys (`~/.ssh/id_ed25519`, `~/.ssh/id_rsa`) or active `ssh-agent`.
-- You can override the key with `--ssh-key /path/to/key` and the user with `--user <username>`.
-- The router user must have `ssh` permission policy enabled.
+- The router user must have `ssh` permission policy enabled in RouterOS.
+
+#### External Secrets (`secrets.yml`)
+
+You can keep SSH credentials centralized alongside your RouterOS API credentials inside your external `credentials_file`:
+
+```yaml
+# RouterOS API monitoring credentials
+username: api-reader
+password: secret_password
+
+# Live GitOps RSC SSH credentials
+rsc_ssh_user: gitops_admin
+ssh_key_file: ~/.ssh/id_ed25519
+# rsc_ssh_port: 2222     # optional SSH port fallback
+```
+
+#### Precedence & Resolution Hierarchy
+
+Both SSH username and port follow a strict resolution hierarchy where explicit command-line parameters always take highest precedence:
+
+##### SSH Username Resolution:
+1. **CLI Override (`--user <username>`)**: Highest priority; unconditionally overrides all configuration files and secrets.
+2. **Router Entry in `mktxp.conf`**: `rsc_ssh_user = <user>` defined under a device's section `[MyRouter]`.
+3. **Global Default in `mktxp.conf`**: `rsc_ssh_user = <user>` defined under `[default]`.
+4. **Credentials File (`secrets.yml`)**: `rsc_ssh_user: <user>` (or `ssh_user: <user>`) defined in the YAML file.
+5. **Fallback**: RouterOS API `username` from router definition / credentials file (or `"admin"`).
+
+##### SSH Port Resolution:
+1. **CLI Override (`--ssh-port <port>`)**: Highest priority; unconditionally overrides all configuration files and secrets.
+2. **Router Entry in `mktxp.conf`**: `rsc_ssh_port = <port>` under `[MyRouter]` (useful for port-forwarded gateways, e.g. `rsc_ssh_port = 2222`).
+3. **Global Default in `mktxp.conf`**: `rsc_ssh_port = <port>` under `[default]`.
+4. **Credentials File (`secrets.yml`)**: `rsc_ssh_port: <port>` (or `ssh_port: <port>`) in the YAML file.
+5. **Fallback**: `_mktxp.conf [RSC] ssh_port` setting (defaults to `22`).
 
 ---
 
@@ -94,6 +126,9 @@ Splits a raw or live `.rsc` export into modular, numbered configuration files or
 
 # Split live directly from router entry
 ❯ mktxp rsc split -en MyRouter --extract-scripts
+
+# Batch split all enabled routers sequentially
+❯ mktxp rsc split -en __all__ --extract-scripts
 ```
 
 Output Layout:
@@ -114,7 +149,7 @@ Successfully split RouterOS export into 8 files in: ./exports/MyRouter/
 | Flag | Description |
 | :--- | :--- |
 | `-i`, `--input <path>` | Input `.rsc` file path. |
-| `-en`, `--entry-name <name>` | Router entry name from `mktxp.conf` for live SSH export. |
+| `-en`, `--entry-name <name>` | Router entry name from `mktxp.conf` for live SSH export (or `__all__` to sequentially export and split all enabled routers). |
 | `-d`, `-o`, `--out-dir <path>` | Destination directory for split `.rsc` files. |
 | `--extract-scripts` | Extract multi-line scripts to standalone `.rsc` sidecar files (default: keep embedded inline). |
 | `--no-numbered` | Emit plain filenames (e.g. `base.rsc`, `wifi.rsc`) without numeric order prefixes. |
@@ -134,6 +169,15 @@ When `--extract-scripts` is passed:
 ### Output Directory Scoping
 
 When `-d` / `-o` is omitted, `mktxp rsc split` automatically scopes output into `<base_dir>/<Name>/` (e.g. `./exports/MyRouter/`), preventing overlapping outputs when splitting multiple routers into the same directory.
+
+### Batch Export All Routers (`-en __all__`)
+
+When `-en __all__` is passed:
+- **Automatic Discovery**: Discovers all router entries registered in `mktxp.conf` (or the directory passed via `--cfg-dir`).
+- **Sequential Execution**: Connects to and exports routers one by one to prevent resource contention.
+- **Enabled Filter**: Only routers configured with `enabled = True` are processed; disabled routers are reported as skipped.
+- **Scoped Subdirectories**: Each router's files are placed into `<base_dir>/<RouterName>/`.
+- **Fault Tolerance**: If an individual router fails (e.g. network timeout or SSH failure), the error is logged and the remaining routers continue processing. A final summary report details successes and failures.
 
 ---
 
@@ -160,19 +204,32 @@ Because `mktxp rsc` produces deterministic, single-line AST output with stable s
 - Committing split outputs to a Git repository turns every commit into an exact, audit-ready network changelog.
 - Hardware replacements don't trigger spurious diffs when `--strip-macs` is enabled.
 - Automated backup pipelines can run in a scheduled GitHub Action or cron job.
-- A sample script with preset router names (can be easily modified to read directly from `mktxp.conf`):
+
+### Example 1: Single Command Batch Backup
+
+Export and modularly split all active routers defined in your default configuration (`~/.config/mktxp/`):
+
+```bash
+mktxp rsc split -en __all__ --extract-scripts --strip-macs
+```
+
+### Example 2: Multi-Location GitOps Automation Script
+
+For infrastructures with separate site profiles, you can iterate across locations using `--cfg-dir`, optionally pushing to Git as shown in this example script:
 
 ```bash
 #!/usr/bin/env bash
 set -e
 
-ROUTERS=("Core-GW" "Edge-AP1" "Edge-AP2")
+# Multi-location GitOps pipeline covering separate site profiles
+LOCATIONS=("branch-office" "data-center" "remote-site")
 
-for ROUTER in "${ROUTERS[@]}"; do
-    mktxp rsc split -en "$ROUTER" -o "./configs/$ROUTER" --extract-scripts --strip-macs
+for LOC in "${LOCATIONS[@]}"; do
+    echo "Backing up site profile: $LOC"
+    mktxp --cfg-dir "/etc/mktxp/profiles/$LOC" rsc split -en __all__ --extract-scripts --strip-macs
 done
 
-git add configs/
+git add exports/
 git commit -m "Auto-backup: $(date +'%Y-%m-%d %H:%M:%S')" || exit 0
 git push origin main
 ```

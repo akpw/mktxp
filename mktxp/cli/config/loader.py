@@ -283,9 +283,31 @@ class MKTXPConfigHandler:
 
         return system_entry_reader
 
+    def _resolve_config_path(self, path):
+        if not path:
+            return ''
+        cleaned = str(path).strip().strip('\'"')
+        if not cleaned or cleaned.lower() in ('none',):
+            return ''
+        expanded = os.path.expanduser(os.path.expandvars(cleaned))
+        if not os.path.isabs(expanded):
+            base_dir = getattr(self.os_config, 'mktxp_user_dir_path', None)
+            if base_dir:
+                expanded = os.path.normpath(os.path.join(base_dir, expanded))
+            else:
+                expanded = os.path.abspath(expanded)
+        return expanded
+
     def _config_entry_reader(self, entry_name):
         config_entry_reader = {}
-        compact_config = self.system_entry.compact_default_conf_values
+        compact_config = (
+            self.system_entry.compact_default_conf_values
+            and entry_name
+            not in (
+                MKTXPConfigKeys.DEFAULT_ENTRY_KEY,
+                MKTXPConfigKeys.MKTXP_LATEST_DEFAULT_ENTRY_KEY,
+            )
+        )
         drop_keys = []
 
         for key in MKTXPConfigKeys.BOOLEAN_KEYS_NO.union(
@@ -310,6 +332,14 @@ class MKTXPConfigHandler:
                     and type(config_entry_reader[key]) is list
                 ):
                     config_entry_reader[key] = ','.join(config_entry_reader[key])
+
+                if key in (
+                    MKTXPConfigKeys.CREDENTIALS_FILE_KEY,
+                    MKTXPConfigKeys.SSL_CA_FILE,
+                ):
+                    config_entry_reader[key] = self._resolve_config_path(
+                        config_entry_reader[key]
+                    )
 
                 if (
                     compact_config
@@ -467,6 +497,14 @@ class MKTXPConfigHandler:
                 new_keys.append(key)
                 new_keys_values[key] = default_config_entry_reader[key]
 
+            if key in (
+                MKTXPConfigKeys.CREDENTIALS_FILE_KEY,
+                MKTXPConfigKeys.SSL_CA_FILE,
+            ):
+                default_config_entry_reader[key] = self._resolve_config_path(
+                    default_config_entry_reader[key]
+                )
+
         for key in MKTXPConfigKeys.INT_KEYS:
             if self.config[MKTXPConfigKeys.DEFAULT_ENTRY_KEY].get(key):
                 default_config_entry_reader[key] = self.config[
@@ -570,6 +608,8 @@ class MKTXPConfigHandler:
             MKTXPConfigKeys.FE_ADDRESS_LIST_KEY: lambda _: MKTXPConfigKeys.DEFAULT_FE_ADDRESS_LIST_KEY,
             MKTXPConfigKeys.FE_IPV6_ADDRESS_LIST_KEY: lambda _: MKTXPConfigKeys.DEFAULT_FE_IPV6_ADDRESS_LIST_KEY,
             MKTXPConfigKeys.FE_INTERFACE_NAME_FORMAT: lambda _: MKTXPConfigKeys.DEFAULT_FE_INTERFACE_NAME_FORMAT,
+            MKTXPConfigKeys.RSC_SSH_PORT_KEY: lambda _: MKTXPConfigKeys.DEFAULT_RSC_SSH_PORT,
+            MKTXPConfigKeys.RSC_SSH_USER_KEY: lambda _: MKTXPConfigKeys.DEFAULT_RSC_SSH_USER,
             MKTXPConfigKeys.MKTXP_SOCKET_TIMEOUT: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_SOCKET_TIMEOUT,
             MKTXPConfigKeys.MKTXP_INITIAL_DELAY: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_INITIAL_DELAY,
             MKTXPConfigKeys.MKTXP_MAX_DELAY: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_MAX_DELAY,

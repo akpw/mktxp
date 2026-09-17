@@ -227,3 +227,88 @@ compact_default_conf_values = True
     # 'installed_packages' should be kept because it differs from the default (True)
     assert 'installed_packages' in final_config['Router1']
     assert final_config['Router1'].as_bool('installed_packages') is False
+
+
+def test_relative_credentials_and_ssl_paths_resolved(tmpdir, monkeypatch):
+    """Test that relative credentials_file and ssl_ca_file are resolved relative to config dir,
+    and tildes and environment variables are expanded."""
+    import os
+    mktxp_conf_path = tmpdir.join("mktxp.conf")
+    _mktxp_conf_path = tmpdir.join("_mktxp.conf")
+
+    mktxp_conf_path.write("""
+[default]
+    credentials_file = secrets.yml
+    ssl_ca_file = ./certs/ca.crt
+
+[Router1]
+    hostname = 10.0.0.1
+
+[Router2]
+    hostname = 10.0.0.2
+    credentials_file = custom_secrets.yml
+
+[Router3]
+    hostname = 10.0.0.3
+    credentials_file = ~/my_secrets.yml
+
+[Router4]
+    hostname = 10.0.0.4
+    credentials_file = $MY_CUSTOM_DIR/secrets.yml
+""")
+    _mktxp_conf_path.write("""
+[MKTXP]
+verbose_mode = False
+""")
+
+    monkeypatch.setenv("MY_CUSTOM_DIR", "/custom/env/dir")
+
+    handler = MKTXPConfigHandler()
+    handler(os_config=CustomConfig(str(tmpdir)))
+
+    # Router1 inherits default relative credentials_file and ssl_ca_file
+    r1 = handler.config_entry('Router1')
+    assert r1.credentials_file == str(tmpdir.join("secrets.yml"))
+    assert r1.ssl_ca_file == str(tmpdir.join("certs/ca.crt"))
+
+    # Router2 overrides with own relative path
+    r2 = handler.config_entry('Router2')
+    assert r2.credentials_file == str(tmpdir.join("custom_secrets.yml"))
+
+    # Router3 uses tilde expansion
+    r3 = handler.config_entry('Router3')
+    assert r3.credentials_file == os.path.expanduser("~/my_secrets.yml")
+
+    # Router4 uses environment variable expansion
+    r4 = handler.config_entry('Router4')
+    assert r4.credentials_file == "/custom/env/dir/secrets.yml"
+
+
+def test_empty_credentials_file_remains_empty(tmpdir):
+    """Test that empty, whitespace, or none credentials_file resolves to empty string."""
+    mktxp_conf_path = tmpdir.join("mktxp.conf")
+    _mktxp_conf_path = tmpdir.join("_mktxp.conf")
+
+    mktxp_conf_path.write("""
+[default]
+    credentials_file = ""
+    ssl_ca_file = ""
+
+[Router1]
+    hostname = 10.0.0.1
+    credentials_file = none
+""")
+    _mktxp_conf_path.write("""
+[MKTXP]
+verbose_mode = False
+""")
+
+    handler = MKTXPConfigHandler()
+    handler(os_config=CustomConfig(str(tmpdir)))
+
+    r_def = handler.config_entry('default')
+    assert r_def.credentials_file == ""
+    assert r_def.ssl_ca_file == ""
+
+    r1 = handler.config_entry('Router1')
+    assert r1.credentials_file == ""

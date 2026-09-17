@@ -54,7 +54,9 @@ class SSHExportFetcher:
 
         hostname = config_entry.hostname
         username = config_entry.username or "admin"
-        ssh_key_file = None
+        ssh_key_file = rsc_conf.get("ssh_key_file")
+        creds_ssh_user = None
+        creds_ssh_port = None
 
         # Check credentials_file if specified
         if config_entry.credentials_file and os.path.exists(
@@ -68,13 +70,48 @@ class SSHExportFetcher:
                         ssh_key_file = creds.get("ssh_key_file") or creds.get(
                             "ssh_key", ssh_key_file
                         )
+                        creds_ssh_user = creds.get("rsc_ssh_user") or creds.get("ssh_user")
+                        port_candidate = (
+                            creds.get("rsc_ssh_port")
+                            if creds.get("rsc_ssh_port") is not None
+                            else creds.get("ssh_port")
+                        )
+                        if port_candidate is not None:
+                            try:
+                                creds_ssh_port = int(port_candidate)
+                            except (ValueError, TypeError):
+                                pass
             except Exception as exc:
                 print(
                     f"Warning: Failed reading credentials file {config_entry.credentials_file}: {exc}"
                 )
 
-        # SSH port resolution
-        ssh_port = cli_overrides.get("ssh_port") or rsc_conf.get("ssh_port") or 22
+        # RSC SSH user resolution:
+        # Priority: CLI override > Router config_entry.rsc_ssh_user > credentials_file > Router username > "admin"
+        rsc_user = getattr(config_entry, "rsc_ssh_user", None)
+        if isinstance(rsc_user, str) and rsc_user.strip() and rsc_user.strip().lower() != "none":
+            username = rsc_user.strip()
+        elif creds_ssh_user and str(creds_ssh_user).strip():
+            username = str(creds_ssh_user).strip()
+
+        # SSH port resolution:
+        # Priority: CLI override > Router config_entry.rsc_ssh_port > credentials_file > rsc_conf.get("ssh_port") > 22
+        ssh_port = None
+        if cli_overrides.get("ssh_port") is not None:
+            ssh_port = cli_overrides["ssh_port"]
+        else:
+            entry_port = getattr(config_entry, "rsc_ssh_port", None)
+            if isinstance(entry_port, (int, str)):
+                port_str = str(entry_port).strip()
+                if port_str and port_str.lower() != "none":
+                    try:
+                        ssh_port = int(port_str)
+                    except ValueError:
+                        pass
+        if ssh_port is None and creds_ssh_port is not None:
+            ssh_port = creds_ssh_port
+        if ssh_port is None:
+            ssh_port = rsc_conf.get("ssh_port") or 22
 
         # Timeout resolution
         ssh_timeout = int(rsc_conf.get("ssh_timeout", 15))
@@ -92,6 +129,8 @@ class SSHExportFetcher:
             username = cli_overrides["user"]
         if cli_overrides.get("ssh_key"):
             ssh_key_file = cli_overrides["ssh_key"]
+        if ssh_key_file:
+            ssh_key_file = os.path.expanduser(os.path.expandvars(str(ssh_key_file)))
 
         return cls(
             hostname=hostname,

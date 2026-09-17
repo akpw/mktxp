@@ -7,11 +7,21 @@ from mktxp.rsc.fetcher import SSHExportFetcher
 
 
 class MockConfigEntry:
-    def __init__(self, hostname="192.168.1.1", username="admin", password="password123", credentials_file=None):
+    def __init__(
+        self,
+        hostname="192.168.1.1",
+        username="admin",
+        password="password123",
+        credentials_file=None,
+        rsc_ssh_port=None,
+        rsc_ssh_user=None,
+    ):
         self.hostname = hostname
         self.username = username
         self.password = password
         self.credentials_file = credentials_file
+        self.rsc_ssh_port = rsc_ssh_port
+        self.rsc_ssh_user = rsc_ssh_user
 
 
 def test_fetcher_init():
@@ -51,6 +61,79 @@ def test_fetcher_from_config_entry(tmp_path):
     assert fetcher.port == 2200
     assert fetcher.timeout == 30
     assert fetcher.show_sensitive is True
+
+
+def test_fetcher_rsc_ssh_port_and_user_from_config_entry():
+    entry = MockConfigEntry(
+        hostname="192.168.88.1",
+        username="api_user",
+        rsc_ssh_port=2222,
+        rsc_ssh_user="ssh_admin"
+    )
+    fetcher = SSHExportFetcher.from_config_entry(
+        entry_name="Core-GW",
+        config_entry=entry,
+        rsc_conf={"ssh_port": 22},
+        cli_overrides={}
+    )
+    assert fetcher.hostname == "192.168.88.1"
+    assert fetcher.username == "ssh_admin"
+    assert fetcher.port == 2222
+
+
+def test_fetcher_rsc_ssh_port_and_user_fallbacks():
+    entry = MockConfigEntry(
+        hostname="192.168.88.2",
+        username="api_user",
+        rsc_ssh_port="None",
+        rsc_ssh_user="None"
+    )
+    fetcher = SSHExportFetcher.from_config_entry(
+        entry_name="Edge-AP",
+        config_entry=entry,
+        rsc_conf={"ssh_port": 22},
+        cli_overrides={}
+    )
+    assert fetcher.username == "api_user"  # falls back to router username
+    assert fetcher.port == 22  # falls back to rsc_conf ssh_port
+
+
+def test_fetcher_cli_overrides_rsc_ssh_settings():
+    entry = MockConfigEntry(
+        hostname="192.168.88.1",
+        username="api_user",
+        rsc_ssh_port=2222,
+        rsc_ssh_user="ssh_admin"
+    )
+    fetcher = SSHExportFetcher.from_config_entry(
+        entry_name="Core-GW",
+        config_entry=entry,
+        rsc_conf={"ssh_port": 22},
+        cli_overrides={"user": "cli_override_user", "ssh_port": 9999}
+    )
+    assert fetcher.username == "cli_override_user"
+    assert fetcher.port == 9999
+
+
+def test_fetcher_rsc_ssh_port_and_user_from_credentials_file(tmp_path):
+    creds_file = tmp_path / "secrets.yml"
+    creds_file.write_text("username: api_user\npassword: secret\nrsc_ssh_user: ssh_from_creds\nrsc_ssh_port: 4567\n")
+
+    entry = MockConfigEntry(
+        hostname="192.168.88.1",
+        username="api_user",
+        credentials_file=str(creds_file),
+        rsc_ssh_port="None",
+        rsc_ssh_user="None",
+    )
+    fetcher = SSHExportFetcher.from_config_entry(
+        entry_name="TestRouter",
+        config_entry=entry,
+        rsc_conf={"ssh_port": 22},
+        cli_overrides={},
+    )
+    assert fetcher.username == "ssh_from_creds"
+    assert fetcher.port == 4567
 
 
 def test_fetcher_build_ssh_command():

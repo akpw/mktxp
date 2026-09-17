@@ -88,6 +88,8 @@ class ConfigEntry:
             MKTXPConfigKeys.FE_CUSTOM_LABELS_KEY,
             MKTXPConfigKeys.FE_MODULE_ONLY_KEY,
             MKTXPConfigKeys.FE_INTERFACE_WITH_DEFAULT_NAME,
+            MKTXPConfigKeys.RSC_SSH_PORT_KEY,
+            MKTXPConfigKeys.RSC_SSH_USER_KEY,
         ],
     )
 
