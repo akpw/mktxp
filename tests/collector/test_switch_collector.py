@@ -62,3 +62,42 @@ class TestSwitchDropMetrics:
         called_labels = mock_metric_records.call_args.kwargs['metric_labels']
         assert 'rx_drop' in called_labels
         assert 'tx_drop' in called_labels
+
+    def test_crs309_switch_chip_drops_use_packet_counter_without_fabricated_zeros(self):
+        router_entry = Mock()
+        router_entry.router_id = {
+            'routerboard_name': 'core-sw-02',
+            'routerboard_address': '10.10.200.52',
+        }
+        router_entry.config_entry.switch_port = True
+        router_entry.config_entry.custom_labels = None
+        resource = router_entry.api_connection.router_api().get_resource.return_value
+        resource.call.return_value = [
+            {'name': 'ether1', 'tx-drop-packet': '1216', 'tx-drop-byte': '8300000'},
+            {'name': 'sfp-sfpplus1', 'tx-drop': '3'},
+            {'name': 'sfp-sfpplus2'},
+        ]
+
+        metrics = {metric.name: metric for metric in SwitchPortCollector.collect(router_entry)}
+        packets = metrics['mktxp_switch_tx_drop'].samples
+        bytes_dropped = metrics['mktxp_switch_tx_drop_byte'].samples
+
+        assert {(sample.labels['name'], int(sample.value)) for sample in packets} == {
+            ('ether1', 1216), ('sfp-sfpplus1', 3),
+        }
+        assert {(sample.labels['name'], int(sample.value)) for sample in bytes_dropped} == {
+            ('ether1', 8300000),
+        }
+        resource.call.assert_called_once_with('print', {'stats': 'detail'})
+
+    @patch('mktxp.collector.switch_collector.SwitchPortMetricsDataSource.metric_records')
+    def test_crs309_cpu_lane_drop_counts_are_summed(self, mock_metric_records):
+        router_entry = Mock()
+        router_entry.config_entry.switch_port = True
+        mock_metric_records.return_value = [
+            {'name': 'switch1-cpu', 'tx_drop_packet': '2,3', 'tx_drop_byte': '600,900'},
+        ]
+
+        metrics = {metric.name: metric for metric in SwitchPortCollector.collect(router_entry)}
+        assert float(metrics['mktxp_switch_tx_drop'].samples[0].value) == 5
+        assert float(metrics['mktxp_switch_tx_drop_byte'].samples[0].value) == 1500

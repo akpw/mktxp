@@ -26,7 +26,7 @@ class SwitchPortCollector(BaseCollector):
         switch_port_labels = ['name', 'driver_rx_byte', 'driver_rx_packet', 'driver_tx_byte',  'driver_tx_packet',
                               'rx_bytes', 'rx_broadcast', 'rx_pause', 'rx_multicast', 'rx_fcs_error', 'rx_align_error', 'rx_fragment', 'rx_overflow',
                               'tx_bytes', 'tx_broadcast', 'tx_pause', 'tx_multicast', 'tx_underrun', 'tx_collision', 'tx_deferred',
-                              'rx_drop', 'tx_drop']
+                              'rx_drop', 'tx_drop', 'tx_drop_packet', 'tx_drop_byte']
 
         switch_port_records = SwitchPortMetricsDataSource.metric_records(router_entry, metric_labels = switch_port_labels)
         if switch_port_records:
@@ -35,6 +35,11 @@ class SwitchPortCollector(BaseCollector):
                     if field in record and ',' in record[field]: # https://help.mikrotik.com/docs/display/ROS/Switch+Chip+Features#SwitchChipFeatures-Statistics
                         # Sum each CPU lane for the total
                         record[field] = str(sum([int(count) for count in record[field].split(",")]))
+                # CRS3xx reports ASIC TX drops as tx-drop-packet, while other
+                # switch chips use tx-drop. Prefer the explicit packet counter
+                # when both fields are available.
+                if 'tx_drop_packet' in record:
+                    record['tx_drop'] = record['tx_drop_packet']
             yield BaseCollector.counter_collector('switch_driver_rx_byte', 'Total count of received bytes', switch_port_records, 'driver_rx_byte', ['name'])
             yield BaseCollector.counter_collector('switch_driver_rx_packet', 'Total count of received packets', switch_port_records, 'driver_rx_packet', ['name'])
             yield BaseCollector.counter_collector('switch_driver_tx_byte', 'Total count of transmitted bytes', switch_port_records, 'driver_tx_byte', ['name'])
@@ -55,4 +60,8 @@ class SwitchPortCollector(BaseCollector):
             yield BaseCollector.counter_collector('switch_tx_underrun', 'Total count of transmitted underrun packets', switch_port_records, 'tx_underrun', ['name'])
             yield BaseCollector.counter_collector('switch_tx_collision', 'Total count of transmitted frames that made collisions', switch_port_records, 'tx_collision', ['name'])
             yield BaseCollector.counter_collector('switch_tx_deferred', 'Total count of transmitted frames that were delayed on its first transmit attempt', switch_port_records, 'tx_deferred', ['name'])
-            yield BaseCollector.counter_collector('switch_tx_drop', 'Total count of transmitted dropped frames', switch_port_records, 'tx_drop', ['name'])
+            # Do not turn a missing hardware counter into a misleading zero.
+            tx_drop_records = [record for record in switch_port_records if 'tx_drop' in record]
+            yield BaseCollector.counter_collector('switch_tx_drop', 'Total count of transmitted dropped frames', tx_drop_records, 'tx_drop', ['name'])
+            tx_drop_byte_records = [record for record in switch_port_records if 'tx_drop_byte' in record]
+            yield BaseCollector.counter_collector('switch_tx_drop_byte', 'Total count of transmitted dropped bytes', tx_drop_byte_records, 'tx_drop_byte', ['name'])
