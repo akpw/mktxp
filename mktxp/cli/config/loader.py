@@ -601,6 +601,7 @@ class MKTXPConfigHandler:
             MKTXPConfigKeys.PASSWD_KEY: lambda _: MKTXPConfigKeys.DEFAULT_PASSWORD_KEY,
             MKTXPConfigKeys.CREDENTIALS_FILE_KEY: lambda _: MKTXPConfigKeys.DEFAULT_CREDENTIALS_FILE_KEY,
             MKTXPConfigKeys.FE_CUSTOM_LABELS_KEY: lambda _: MKTXPConfigKeys.DEFAULT_FE_CUSTOM_LABELS_KEY,
+            MKTXPConfigKeys.FE_PROBE_ALLOWED_TARGETS_KEY: lambda _: MKTXPConfigKeys.DEFAULT_FE_PROBE_ALLOWED_TARGETS,
             MKTXPConfigKeys.PORT_KEY: lambda _: MKTXPConfigKeys.DEFAULT_MKTXP_PORT,
             MKTXPConfigKeys.SSL_CA_FILE: lambda _: MKTXPConfigKeys.DEFAULT_SSL_CA_FILE,
             MKTXPConfigKeys.FE_REMOTE_DHCP_ENTRY: lambda _: MKTXPConfigKeys.DEFAULT_FE_REMOTE_DHCP_ENTRY,

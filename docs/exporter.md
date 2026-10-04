@@ -133,6 +133,7 @@ For large or dynamic infrastructure, MKTXP supports Prometheus dynamic target di
    ```ini
    [router-module]
        module_only = True
+       probe_allowed_targets = 192.168.88.0/24, 10.0.0.0/16, *.corp.local
        username = mktxp_user
        password = secret_password
    ```
@@ -156,6 +157,12 @@ For large or dynamic infrastructure, MKTXP supports Prometheus dynamic target di
          - target_label: __address__
            replacement: mktxp_host_ip:49090
    ```
+
+### Security Safeguards for `/probe`
+- **Module restriction (Breaking Change)**: Dynamic `target` overrides are strictly permitted only for sections configured with `module_only = True`. Static router entries reject dynamic target overrides with `403 Forbidden` (they can only be scraped at their configured `hostname`). If your Prometheus setup was dynamically probing a static router section, change that section to `module_only = True`.
+- **Target Allowlisting**: All dynamic targets must match an allowed CIDR subnet, IP address, or hostname configured via `probe_allowed_targets` (per-module in `mktxp.conf` or globally in `_mktxp.conf`). Setting `probe_allowed_targets = *` explicitly allows any target.
+- **DNS Consideration for Hostnames**: If using hostname or wildcard domain rules (e.g. `*.corp.local`), targets are matched textually against the query parameter. Ensure the DNS resolver used by MKTXP is trusted, as whoever controls DNS resolution determines which IP address receives the API connection and credentials.
+- **Disabling `/probe`**: If dynamic probing is not needed, disable the endpoint completely by setting `enable_probe = False` in `_mktxp.conf`.
 
 ---
 
