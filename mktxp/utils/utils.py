@@ -374,7 +374,8 @@ def check_for_updates(cur_version):
     Returns a tuple: (<current version>, <newest version>)"""
     try:
         cur_version, channel = parse_ros_version(cur_version)
-        available_versions = get_available_updates(channel)
+        # pass the TTL hash explicitly: a default argument is evaluated only once, at import time
+        available_versions = get_available_updates(channel, get_ttl_hash())
         if available_versions:
             newest_version = sorted(available_versions)[-1]
             return cur_version, newest_version

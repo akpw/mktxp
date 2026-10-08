@@ -172,3 +172,27 @@ class TestGetAvailableUpdates:
             cur, newest = utils.check_for_updates('7.15 (stable)')
             assert cur == parse('7.15')
             assert newest == parse('7.16')
+
+    def test_check_for_updates_refetches_after_ttl(self):
+        """check_for_updates should fetch the feed again once the TTL period changes,
+        so a long-running exporter picks up new releases."""
+        def feed(version):
+            mock_response = MagicMock()
+            mock_response.read.return_value = f'''<?xml version="1.0"?>
+                <rss><channel>
+                    <item><title>{version} changelog</title></item>
+                </channel></rss>'''.encode()
+            mock_response.__enter__ = lambda s: s
+            mock_response.__exit__ = MagicMock(return_value=False)
+            return mock_response
+
+        with patch('urllib.request.urlopen', side_effect=[feed('7.16'), feed('7.17')]) as mock_urlopen:
+            with patch('mktxp.utils.utils.get_ttl_hash', return_value=100):
+                _, first = utils.check_for_updates('7.15 (stable)')
+                _, cached = utils.check_for_updates('7.15 (stable)')
+            with patch('mktxp.utils.utils.get_ttl_hash', return_value=101):
+                _, refreshed = utils.check_for_updates('7.15 (stable)')
+
+            assert first == cached == parse('7.16')
+            assert refreshed == parse('7.17')
+            assert mock_urlopen.call_count == 2
