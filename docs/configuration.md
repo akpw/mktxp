@@ -119,6 +119,7 @@ Parameters defined under `[default]` apply to all configured routers unless expl
 | `credentials_file` | String | `""` | Path to an external YAML file containing API credentials (`username`, `password`) and optional live GitOps RSC SSH credentials (`rsc_ssh_user`, `ssh_key_file`, `rsc_ssh_port`). |
 | `enabled` | Boolean | `True` | Enables or disables metrics collection for this device. |
 | `module_only` | Boolean | `False` | When `True`, skips default `/metrics` scraping; device is used exclusively as a probe module via `/probe`. |
+| `probe_allowed_targets` | String | `None` | Allowed probe targets for dynamic modules: comma-separated CIDR subnets (e.g. `10.0.0.0/8, 192.168.88.0/24`), IPs, hostnames/wildcards (e.g. `*.corp.local`), or `*` for all. Dynamic target overrides are rejected if not matched. |
 | `use_ssl` | Boolean | `False` | Connect via RouterOS API-SSL service (port 8729). |
 | `no_ssl_certificate`| Boolean | `False` | Connect via API-SSL without validating router SSL certificate. |
 | `ssl_certificate_verify` | Boolean | `False` | Verify SSL certificate against CA store. |
@@ -246,10 +247,12 @@ Enable or disable specific metric collectors per router or globally under `[defa
     compact_default_conf_values = False
     prometheus_headers_deduplication = False
 
-    # Multi-target /probe connection pool
+    # Multi-target /probe connection pool and security
     probe_connection_pool = False
     probe_connection_pool_ttl = 300
     probe_connection_pool_max_size = 128
+    enable_probe = True
+    probe_allowed_targets = None
 ```
 
 #### Key Daemon Settings Explained:
@@ -258,6 +261,8 @@ Enable or disable specific metric collectors per router or globally under `[defa
 - `max_scrape_duration` & `total_max_scrape_duration`: Bound individual and total collection times to avoid Prometheus scrape timeouts.
 - `compact_default_conf_values`: Automatically compacts `mktxp.conf` so only non-default values are preserved on router sections.
 - `probe_connection_pool`: Reuses open API connections for incoming `/probe` requests keyed by `module + target`.
+- `enable_probe`: Enables the `/probe` multi-target scraping endpoint (defaults to `True`; set to `False` to completely disable `/probe`).
+- `probe_allowed_targets`: Global target allowlist for dynamic `/probe` requests (e.g. `10.0.0.0/8, 192.168.0.0/16, *.corp.local`, or `*` for all). Can be overridden on individual module definitions in `mktxp.conf`.
 
 ---
 

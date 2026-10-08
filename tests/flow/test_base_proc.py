@@ -259,7 +259,8 @@ def test_probe_target_override_applies_hostname(monkeypatch):
     class DummyEntry:
         enabled = True
         hostname = 'original'
-        module_only = False
+        module_only = True
+        probe_allowed_targets = ['1.2.3.4']
 
         def _replace(self, **kwargs):
             entry = DummyEntry()
@@ -326,6 +327,141 @@ def test_probe_target_override_applies_hostname(monkeypatch):
     assert body == b'ok'
     handler = captured['registry'].registered[0]
     assert handler.entries_handler.config_entry.hostname == '1.2.3.4'
+
+
+def test_probe_target_override_forbidden_for_static_module(monkeypatch):
+    from mktxp.exporter import router as base_proc
+
+    class DummySystemEntry:
+        probe_connection_pool = False
+        probe_connection_pool_ttl = 0
+        probe_connection_pool_max_size = 0
+
+    class DummyEntry:
+        enabled = True
+        hostname = 'original'
+        module_only = False
+
+    class DummyConfigHandler:
+        system_entry = DummySystemEntry()
+
+        def registered_entry(self, name):
+            return True
+
+        def config_entry(self, name):
+            return DummyEntry()
+
+    monkeypatch.setattr(base_proc, 'config_handler', DummyConfigHandler())
+
+    router = base_proc.MetricsRouter(lambda environ, start_response: [])
+    status_headers = []
+
+    def start_response(status, headers):
+        status_headers.append((status, headers))
+
+    body = b''.join(router({'PATH_INFO': '/probe', 'QUERY_STRING': 'module=router1&target=1.2.3.4'}, start_response))
+
+    assert status_headers[0][0].startswith('403')
+    assert b'Target override is not allowed for static module' in body
+
+
+def test_probe_target_denied_not_in_allowlist(monkeypatch):
+    from mktxp.exporter import router as base_proc
+
+    class DummySystemEntry:
+        probe_connection_pool = False
+        probe_connection_pool_ttl = 0
+        probe_connection_pool_max_size = 0
+
+    class DummyEntry:
+        enabled = True
+        hostname = 'original'
+        module_only = True
+        probe_allowed_targets = '10.0.0.0/8, 192.168.1.0/24'
+
+    class DummyConfigHandler:
+        system_entry = DummySystemEntry()
+
+        def registered_entry(self, name):
+            return True
+
+        def config_entry(self, name):
+            return DummyEntry()
+
+    monkeypatch.setattr(base_proc, 'config_handler', DummyConfigHandler())
+
+    router = base_proc.MetricsRouter(lambda environ, start_response: [])
+    status_headers = []
+
+    def start_response(status, headers):
+        status_headers.append((status, headers))
+
+    body = b''.join(router({'PATH_INFO': '/probe', 'QUERY_STRING': 'module=router1&target=172.16.0.1'}, start_response))
+
+    assert status_headers[0][0].startswith('403')
+    assert b"Target '172.16.0.1' is not allowed for module 'router1'" in body
+
+
+def test_probe_target_denied_no_allowlist_configured(monkeypatch):
+    from mktxp.exporter import router as base_proc
+
+    class DummySystemEntry:
+        probe_connection_pool = False
+        probe_connection_pool_ttl = 0
+        probe_connection_pool_max_size = 0
+        probe_allowed_targets = None
+
+    class DummyEntry:
+        enabled = True
+        hostname = 'original'
+        module_only = True
+        probe_allowed_targets = None
+
+    class DummyConfigHandler:
+        system_entry = DummySystemEntry()
+
+        def registered_entry(self, name):
+            return True
+
+        def config_entry(self, name):
+            return DummyEntry()
+
+    monkeypatch.setattr(base_proc, 'config_handler', DummyConfigHandler())
+
+    router = base_proc.MetricsRouter(lambda environ, start_response: [])
+    status_headers = []
+
+    def start_response(status, headers):
+        status_headers.append((status, headers))
+
+    body = b''.join(router({'PATH_INFO': '/probe', 'QUERY_STRING': 'module=router1&target=10.0.0.1'}, start_response))
+
+    assert status_headers[0][0].startswith('403')
+    assert b'has no probe_allowed_targets defined' in body
+
+
+def test_probe_endpoint_disabled(monkeypatch):
+    from mktxp.exporter import router as base_proc
+
+    class DummySystemEntry:
+        probe_connection_pool = False
+        enable_probe = False
+
+    class DummyConfigHandler:
+        system_entry = DummySystemEntry()
+
+    monkeypatch.setattr(base_proc, 'config_handler', DummyConfigHandler())
+
+    router = base_proc.MetricsRouter(lambda environ, start_response: [])
+    status_headers = []
+
+    def start_response(status, headers):
+        status_headers.append((status, headers))
+
+    body = b''.join(router({'PATH_INFO': '/probe', 'QUERY_STRING': 'module=router1'}, start_response))
+
+    assert status_headers[0][0].startswith('403')
+    assert b'Probe endpoint is disabled in configuration' in body
 
 
 def test_probe_module_only_requires_target(monkeypatch):

@@ -97,3 +97,50 @@ def test_export_processor_exists():
     """Verify ExportProcessor has start method."""
     assert hasattr(ExportProcessor, 'start')
     assert callable(ExportProcessor.start)
+
+
+def test_parse_allowed_targets():
+    from mktxp.exporter.router import parse_allowed_targets
+
+    assert parse_allowed_targets(None) == []
+    assert parse_allowed_targets('None') == []
+    assert parse_allowed_targets('') == []
+    assert parse_allowed_targets('192.168.1.0/24, 10.0.0.1, *.lan') == ['192.168.1.0/24', '10.0.0.1', '*.lan']
+    assert parse_allowed_targets(['10.0.0.0/8', '192.168.1.1']) == ['10.0.0.0/8', '192.168.1.1']
+    assert parse_allowed_targets(['10.0.0.0/8, 192.168.1.1', 'None']) == ['10.0.0.0/8', '192.168.1.1']
+
+
+def test_is_target_allowed():
+    from mktxp.exporter.router import is_target_allowed
+
+    # Empty rules
+    assert is_target_allowed('192.168.1.1', []) is False
+    assert is_target_allowed('', ['*']) is False
+
+    # Wildcard
+    assert is_target_allowed('192.168.1.1', ['*']) is True
+    assert is_target_allowed('anything.example.com', ['*']) is True
+
+    # IPv4 CIDR and IP
+    rules = ['192.168.88.0/24', '10.10.10.1']
+    assert is_target_allowed('192.168.88.1', rules) is True
+    assert is_target_allowed('192.168.88.254', rules) is True
+    assert is_target_allowed('10.10.10.1', rules) is True
+    assert is_target_allowed('10.10.10.2', rules) is False
+    assert is_target_allowed('172.16.0.1', rules) is False
+
+    # IPv6 CIDR and IP
+    v6_rules = ['2001:db8::/32', 'fe80::1']
+    assert is_target_allowed('2001:db8::1234', v6_rules) is True
+    assert is_target_allowed('[2001:db8::1234]', v6_rules) is True
+    assert is_target_allowed('fe80::1', v6_rules) is True
+    assert is_target_allowed('2001:db9::1', v6_rules) is False
+
+    # Hostname and domain wildcards
+    host_rules = ['*.internal', '.corp.local', 'gateway.lan']
+    assert is_target_allowed('router1.internal', host_rules) is True
+    assert is_target_allowed('core.corp.local', host_rules) is True
+    assert is_target_allowed('gateway.lan', host_rules) is True
+    assert is_target_allowed('gateway.lan.evil.com', host_rules) is False
+    assert is_target_allowed('attacker.internal.evil.com', host_rules) is False
+    assert is_target_allowed('evil.com', host_rules) is False

@@ -89,6 +89,7 @@ class ConfigEntry:
             MKTXPConfigKeys.FE_BRIDGE_VLAN_KEY,
             MKTXPConfigKeys.FE_CUSTOM_LABELS_KEY,
             MKTXPConfigKeys.FE_MODULE_ONLY_KEY,
+            MKTXPConfigKeys.FE_PROBE_ALLOWED_TARGETS_KEY,
             MKTXPConfigKeys.FE_INTERFACE_WITH_DEFAULT_NAME,
             MKTXPConfigKeys.RSC_SSH_PORT_KEY,
             MKTXPConfigKeys.RSC_SSH_USER_KEY,
@@ -120,6 +121,8 @@ class ConfigEntry:
             MKTXPConfigKeys.MKTXP_PROBE_CONNECTION_POOL,
             MKTXPConfigKeys.MKTXP_PROBE_CONNECTION_POOL_TTL,
             MKTXPConfigKeys.MKTXP_PROBE_CONNECTION_POOL_MAX_SIZE,
+            MKTXPConfigKeys.MKTXP_ENABLE_PROBE,
+            MKTXPConfigKeys.FE_PROBE_ALLOWED_TARGETS_KEY,
             MKTXPConfigKeys.MKTXP_HTTP_SERVER_THREADS,
         ],
     )
@@ -149,5 +152,7 @@ mockSystemEntry = ConfigEntry.MKTXPSystemEntry(
     probe_connection_pool=False,
     probe_connection_pool_ttl=MKTXPConfigKeys.DEFAULT_MKTXP_PROBE_CONNECTION_POOL_TTL,
     probe_connection_pool_max_size=MKTXPConfigKeys.DEFAULT_MKTXP_PROBE_CONNECTION_POOL_MAX_SIZE,
+    enable_probe=True,
+    probe_allowed_targets=MKTXPConfigKeys.DEFAULT_FE_PROBE_ALLOWED_TARGETS,
     http_server_threads=MKTXPConfigKeys.DEFAULT_MKTXP_HTTP_SERVER_THREADS,
 )

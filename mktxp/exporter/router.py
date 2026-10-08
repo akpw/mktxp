@@ -11,6 +11,7 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
+import ipaddress
 from urllib.parse import parse_qs
 from prometheus_client import make_wsgi_app, CollectorRegistry as PrometheusCollectorRegistry
 
@@ -19,6 +20,76 @@ from mktxp.flow.collector_handler import ProbeCollectorHandler
 from mktxp.flow.collector_registry import CollectorRegistry as MKTXPCollectorRegistry
 from mktxp.flow.probe_connection_pool import ProbeConnectionPool
 from mktxp.flow.probe_entries_provider import ProbeEntriesProvider
+
+
+def parse_allowed_targets(allowed_targets):
+    """Parses allowed targets configuration into a list of normalized strings."""
+    if not allowed_targets or allowed_targets == 'None':
+        return []
+    if isinstance(allowed_targets, str):
+        items = [item.strip() for item in allowed_targets.split(',')]
+    elif isinstance(allowed_targets, (list, tuple)):
+        items = []
+        for item in allowed_targets:
+            if isinstance(item, str):
+                items.extend([sub.strip() for sub in item.split(',')])
+            else:
+                items.append(str(item).strip())
+    else:
+        return []
+    return [item for item in items if item and item != 'None']
+
+
+def is_target_allowed(target: str, allowed_targets: list) -> bool:
+    """
+    Checks whether a probe target is permitted by the allowed_targets list.
+    Supports:
+    - '*' : wildcard allowing all targets
+    - IP addresses and CIDR subnets (e.g. '192.168.88.0/24', '10.0.0.1', '2001:db8::/32')
+    - Domain wildcards (e.g. '*.internal', '.corp.local')
+    - Exact hostnames (e.g. 'router1.lan', 'localhost')
+    """
+    if not target or not allowed_targets:
+        return False
+
+    target_str = target.strip()
+    target_clean = target_str.strip('[]')
+    target_ip = None
+    try:
+        target_ip = ipaddress.ip_address(target_clean)
+    except ValueError:
+        target_ip = None
+
+    for rule in allowed_targets:
+        rule = rule.strip()
+        if not rule:
+            continue
+        if rule == '*':
+            return True
+
+        if target_ip is not None:
+            try:
+                network = ipaddress.ip_network(rule, strict=False)
+                if target_ip in network:
+                    return True
+            except ValueError:
+                pass
+
+        target_lower = target_str.lower()
+        rule_lower = rule.lower()
+
+        if target_lower == rule_lower:
+            return True
+
+        if rule_lower.startswith('*.'):
+            suffix = rule_lower[1:]  # e.g. .corp.local
+            if target_lower.endswith(suffix):
+                return True
+        elif rule_lower.startswith('.'):
+            if target_lower.endswith(rule_lower):
+                return True
+
+    return False
 
 
 class MetricsRouter:
@@ -36,6 +107,12 @@ class MetricsRouter:
     def __call__(self, environ, start_response):
         path = environ.get("PATH_INFO", "")
         if path == "/probe":
+            if not getattr(config_handler.system_entry, "enable_probe", True):
+                return self._error(
+                    start_response,
+                    "Probe endpoint is disabled in configuration",
+                    status="403 Forbidden",
+                )
             return self._handle_probe(environ, start_response)
         return self.metrics_app(environ, start_response)
 
@@ -59,8 +136,36 @@ class MetricsRouter:
             return self._error(start_response, "Invalid 'target' parameter")
 
         target = targets[0].strip() if len(targets) == 1 else None
-        if config_entry.module_only and not target:
-            return self._error(start_response, f"Module '{module}' requires a target override")
+
+        if not config_entry.module_only and target and target != config_entry.hostname:
+            return self._error(
+                start_response,
+                f"Target override is not allowed for static module '{module}'. Only modules configured with module_only = True accept dynamic targets.",
+                status="403 Forbidden",
+            )
+
+        if config_entry.module_only:
+            if not target:
+                return self._error(start_response, f"Module '{module}' requires a target override")
+
+            raw_allowed = getattr(config_entry, "probe_allowed_targets", None)
+            if not raw_allowed or raw_allowed == "None":
+                raw_allowed = getattr(config_handler.system_entry, "probe_allowed_targets", None)
+
+            allowed_targets = parse_allowed_targets(raw_allowed)
+            if not allowed_targets:
+                return self._error(
+                    start_response,
+                    f"Target override rejected: module '{module}' has no probe_allowed_targets defined. Specify allowed target IPs, CIDRs, or hostnames in configuration (or '*' to permit all).",
+                    status="403 Forbidden",
+                )
+
+            if not is_target_allowed(target, allowed_targets):
+                return self._error(
+                    start_response,
+                    f"Target '{target}' is not allowed for module '{module}'",
+                    status="403 Forbidden",
+                )
 
         config_override = config_entry._replace(hostname=target) if target else None
         probe_entries = ProbeEntriesProvider(
@@ -79,10 +184,10 @@ class MetricsRouter:
         return self._safe_probe_response(probe_app, environ, start_response, module, target)
 
     @staticmethod
-    def _error(start_response, message):
+    def _error(start_response, message, status="503 Service Unavailable"):
         body = f"Error: {message}\n".encode("utf-8")
         start_response(
-            "503 Service Unavailable",
+            status,
             [
                 ("Content-Type", "text/plain; charset=utf-8"),
                 ("Content-Length", str(len(body))),
