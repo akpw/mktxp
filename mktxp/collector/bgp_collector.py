@@ -24,43 +24,102 @@ class BGPCollector(BaseCollector):
         if not router_entry.config_entry.bgp:
             return
 
-        bgp_labels = ['name', 'remote_address', 'remote_as', 'local_as', 'remote_afi', 'local_afi', 'remote_messages', 'remote_bytes', 'local_messages', 'local_bytes', 'prefix_count', 'established', 'uptime']
+        bgp_labels = [
+            'name', 'remote_address', 'remote_as', 'local_as', 'remote_afi', 'local_afi',
+            'remote_id', 'local_id', 'remote_capabilities', 'local_capabilities',
+            'remote_messages', 'remote_bytes', 'local_messages', 'local_bytes',
+            'prefix_count', 'output_prefix_count', 'established', 'uptime', 'last_notification',
+        ]
         translation_table = {
-                'established': lambda value: '1' if value=='true' else '0',
-                'uptime': lambda value: parse_timedelta_milliseconds(value) if value else '0'
-                }
+            'established': lambda value: '1' if value == 'true' else '0',
+            'uptime': lambda value: parse_timedelta_milliseconds(value) if value else '0',
+        }
         bgp_records = BGPMetricsDataSource.metric_records(router_entry, metric_labels=bgp_labels, translation_table = translation_table)
 
         if bgp_records:
-            session_info_labes = ['name', 'remote_address', 'remote_as', 'local_as', 'remote_afi', 'local_afi']
-            bgp_sessions_metrics = BaseCollector.info_collector('bgp_sessions', 'BGP sessions info', bgp_records, session_info_labes)
-            yield bgp_sessions_metrics
+            session_info_labels = [
+                'name', 'remote_address', 'remote_as', 'local_as', 'remote_afi', 'local_afi',
+                'remote_id', 'local_id', 'remote_capabilities', 'local_capabilities',
+                'last_notification',
+            ]
+            yield BaseCollector.info_collector(
+                'bgp_sessions', 'BGP sessions info', bgp_records, session_info_labels
+            )
 
-            session_id_labes = ['name']
-            remote_messages_metrics = BaseCollector.counter_collector('bgp_remote_messages', 'Number of remote messages', bgp_records, 'remote_messages', session_id_labes)
-            yield remote_messages_metrics
+            session_id_labels = ['name']
+            yield BaseCollector.counter_collector(
+                'bgp_remote_messages', 'Number of remote messages',
+                bgp_records, 'remote_messages', session_id_labels
+            )
+            yield BaseCollector.counter_collector(
+                'bgp_local_messages', 'Number of local messages',
+                bgp_records, 'local_messages', session_id_labels
+            )
+            yield BaseCollector.counter_collector(
+                'bgp_remote_bytes', 'Number of remote bytes',
+                bgp_records, 'remote_bytes', session_id_labels
+            )
+            yield BaseCollector.counter_collector(
+                'bgp_local_bytes', 'Number of local bytes',
+                bgp_records, 'local_bytes', session_id_labels
+            )
+            yield BaseCollector.gauge_collector(
+                'bgp_prefix_count', 'BGP prefix count',
+                bgp_records, 'prefix_count', session_id_labels
+            )
+            advertised_prefix_counts = BGPMetricsDataSource.advertised_prefix_counts(
+                router_entry, [record['name'] for record in bgp_records if record.get('name')]
+            )
+            if advertised_prefix_counts:
+                yield BaseCollector.gauge_collector(
+                    'bgp_advertised_prefixes',
+                    'Current number of prefixes advertised to each BGP peer by address family',
+                    advertised_prefix_counts,
+                    'count',
+                    ['peer', 'afi'],
+                )
+            advertised_prefix_records = [
+                record for record in bgp_records
+                if record.get('output_prefix_count') not in (None, '')
+            ]
+            if advertised_prefix_records:
+                yield BaseCollector.gauge_collector(
+                    'bgp_advertised_prefix_count',
+                    'Current number of prefixes advertised to each BGP peer',
+                    advertised_prefix_records,
+                    'output_prefix_count',
+                    session_id_labels,
+                )
+            yield BaseCollector.gauge_collector(
+                'bgp_established', 'BGP established',
+                bgp_records, 'established', session_id_labels
+            )
+            yield BaseCollector.gauge_collector(
+                'bgp_uptime', 'BGP uptime in milliseconds',
+                bgp_records, 'uptime', session_id_labels
+            )
 
+        connection_labels = [
+            'name', 'instance', 'templates', 'connect', 'listen', 'local_address',
+            'remote_address', 'remote_as', 'local_role', 'local_ttl', 'remote_port',
+        ]
+        bgp_connections = BGPMetricsDataSource.metric_records(
+            router_entry, metric_labels=connection_labels, path='connection'
+        )
+        if bgp_connections:
+            yield BaseCollector.info_collector(
+                'bgp_connections', 'BGP connection configuration info',
+                bgp_connections, connection_labels
+            )
 
-            local_messages_metrics = BaseCollector.counter_collector('bgp_local_messages', 'Number of local messages', bgp_records, 'local_messages', session_id_labes)
-            yield local_messages_metrics
-
-
-            remote_bytes_metrics = BaseCollector.counter_collector('bgp_remote_bytes', 'Number of remote bytes', bgp_records, 'remote_bytes', session_id_labes)
-            yield remote_bytes_metrics
-
-
-            local_bytes_metrics = BaseCollector.counter_collector('bgp_local_bytes', 'Number of local bytes', bgp_records, 'local_bytes', session_id_labes)
-            yield local_bytes_metrics
-
-
-            prefix_count_metrics = BaseCollector.gauge_collector('bgp_prefix_count', 'BGP prefix count', bgp_records, 'prefix_count', session_id_labes)
-            yield prefix_count_metrics
-
-
-            established_metrics = BaseCollector.gauge_collector('bgp_established', 'BGP established', bgp_records, 'established', session_id_labes)
-            yield established_metrics
-
-
-            uptime_metrics = BaseCollector.gauge_collector('bgp_uptime', 'BGP uptime in milliseconds', bgp_records, 'uptime', session_id_labes)
-            yield uptime_metrics
-
+        instance_labels = [
+            'name', 'as', 'cluster_id', 'ignore_as_path_len', 'multipath',
+            'router_id', 'routing_table', 'vrf', 'inactive',
+        ]
+        bgp_instances = BGPMetricsDataSource.metric_records(
+            router_entry, metric_labels=instance_labels, path='instance'
+        )
+        if bgp_instances:
+            yield BaseCollector.info_collector(
+                'bgp_instances', 'BGP instances info', bgp_instances, instance_labels
+            )
