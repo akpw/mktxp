@@ -60,8 +60,8 @@ def test_bgp_collector_exports_session_and_configuration_metrics():
     ), patch(
         'mktxp.collector.bgp_collector.BGPMetricsDataSource.advertised_prefix_counts',
         return_value=[
-            {'name': 'peer-a', 'afi': 'ipv4', 'count': 2},
-            {'name': 'peer-a', 'afi': 'ipv6', 'count': 1},
+            {**router_id, 'name': 'peer-a', 'afi': 'ipv4', 'count': 2},
+            {**router_id, 'name': 'peer-a', 'afi': 'ipv6', 'count': 1},
         ],
     ) as advertised_prefix_counts:
         metrics = list(BGPCollector.collect(router_entry))
@@ -84,7 +84,12 @@ def test_bgp_collector_exports_session_and_configuration_metrics():
     assert session_labels['last_notification'] == ''
     assert session_labels['remote_capabilities'] == 'mp,as4'
     assert metrics[6].samples[0].value == 2
-    assert metrics[6].samples[0].labels == {'name': 'peer-a', 'afi': 'ipv4'}
+    assert metrics[6].samples[0].labels == {
+        'name': 'peer-a',
+        'afi': 'ipv4',
+        'routerboard_name': 'router-a',
+        'routerboard_address': '192.0.2.1',
+    }
     assert metrics[7].samples[0].value == '17'
     assert metrics[8].samples[0].value == 1
     advertised_prefix_counts.assert_called_once_with(router_entry, ['peer-a'])

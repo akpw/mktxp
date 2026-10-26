@@ -69,7 +69,11 @@ class BGPMetricsDataSource:
                         'afi': afi,
                         'count': count,
                     })
-            return counts
+            return BaseDSProcessor.trimmed_records(
+                router_entry,
+                router_records=counts,
+                metric_labels=['name', 'afi', 'count'],
+            )
         except Exception as exc:
             print(f'Error getting BGP advertised prefix counts from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None

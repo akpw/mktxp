@@ -52,6 +52,10 @@ def test_bgp_datasource_uses_legacy_peer_path_and_skips_unsupported_paths():
 
 def test_bgp_datasource_counts_advertisements_with_count_only_queries():
     router_entry = Mock()
+    router_entry.router_id = {
+        'routerboard_name': 'router-a',
+        'routerboard_address': '192.0.2.1',
+    }
 
     with patch(
         'mktxp.datasource.bgp_ds.SystemResourceMetricsDataSource.os_version',
@@ -65,8 +69,18 @@ def test_bgp_datasource_counts_advertisements_with_count_only_queries():
         )
 
     assert result == [
-        {'peer': 'peer-a', 'afi': 'ipv4', 'count': 2},
-        {'peer': 'peer-a', 'afi': 'ipv6', 'count': 1},
+        {
+            **router_entry.router_id,
+            'name': 'peer-a',
+            'afi': 'ipv4',
+            'count': 2,
+        },
+        {
+            **router_entry.router_id,
+            'name': 'peer-a',
+            'afi': 'ipv6',
+            'count': 1,
+        },
     ]
     assert count_records.call_args_list[0].kwargs == {
         'api_path': '/routing/bgp/advertisements',
@@ -80,6 +94,10 @@ def test_bgp_datasource_counts_advertisements_with_count_only_queries():
 
 def test_bgp_datasource_keeps_successful_counts_when_one_query_fails():
     router_entry = Mock()
+    router_entry.router_id = {
+        'routerboard_name': 'router-a',
+        'routerboard_address': '192.0.2.1',
+    }
 
     with patch(
         'mktxp.datasource.bgp_ds.SystemResourceMetricsDataSource.os_version',
@@ -90,4 +108,9 @@ def test_bgp_datasource_keeps_successful_counts_when_one_query_fails():
     ):
         result = BGPMetricsDataSource.advertised_prefix_counts(router_entry, ['peer-a'])
 
-    assert result == [{'peer': 'peer-a', 'afi': 'ipv4', 'count': 2}]
+    assert result == [{
+        **router_entry.router_id,
+        'name': 'peer-a',
+        'afi': 'ipv4',
+        'count': 2,
+    }]
