@@ -76,7 +76,7 @@ class BGPCollector(BaseCollector):
                     'Current number of prefixes advertised to each BGP peer by address family',
                     advertised_prefix_counts,
                     'count',
-                    ['peer', 'afi'],
+                    ['name', 'afi'],
                 )
             advertised_prefix_records = [
                 record for record in bgp_records

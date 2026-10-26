@@ -65,7 +65,7 @@ class BGPMetricsDataSource:
                     if count is None:
                         continue
                     counts.append({
-                        'peer': peer,
+                        'name': peer,
                         'afi': afi,
                         'count': count,
                     })
