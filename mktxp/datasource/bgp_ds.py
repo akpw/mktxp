@@ -17,23 +17,63 @@ from mktxp.datasource.system_resource_ds import SystemResourceMetricsDataSource
 from mktxp.utils.utils import routerOS7_version
 
 class BGPMetricsDataSource:
-    ''' Wireless Metrics data provider
-    '''             
+    '''BGP metrics data provider'''
+
     @staticmethod
-    def metric_records(router_entry, *, metric_labels = None, translation_table = None):
+    def metric_records(router_entry, *, metric_labels=None, translation_table=None, path='session'):
         if metric_labels is None:
-            metric_labels = []                
+            metric_labels = []
         try:
-            bgp_routing_path = '/routing/bgp/session'
-
-            # legacy 6.x versions use a different path
             ver = SystemResourceMetricsDataSource.os_version(router_entry)
-            if not routerOS7_version(ver):
-                bgp_routing_path = '/routing/bgp/peer'
+            bgp_paths = {
+                'connection': '/routing/bgp/connection',
+                'instance': '/routing/bgp/instance',
+                'session': '/routing/bgp/session',
+            }
 
-            bgp_records = router_entry.api_connection.router_api().get_resource(bgp_routing_path).get()
+            if not routerOS7_version(ver):
+                bgp_paths = {
+                    'connection': '/routing/bgp/peer',
+                    'session': '/routing/bgp/peer',
+                }
+
+            if path not in bgp_paths:
+                return []
+
+            bgp_path = bgp_paths[path]
+            bgp_records = router_entry.api_connection.router_api().get_resource(bgp_path).get()
             return BaseDSProcessor.trimmed_records(router_entry, router_records = bgp_records, metric_labels = metric_labels, translation_table = translation_table)
         except Exception as exc:
-            print(f'Error getting BGP sessions info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
+            print(f'Error getting BGP {path} info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
             return None
 
+    @staticmethod
+    def advertised_prefix_counts(router_entry, peers):
+        try:
+            ver = SystemResourceMetricsDataSource.os_version(router_entry)
+            if not routerOS7_version(ver):
+                return []
+
+            counts = []
+            for peer in peers:
+                for afi, routeros_afi in (('ipv4', 'ip'), ('ipv6', 'ipv6')):
+                    count = BaseDSProcessor.count_records(
+                        router_entry,
+                        api_path='/routing/bgp/advertisements',
+                        api_query={'peer': peer, 'afi': routeros_afi},
+                    )
+                    if count is None:
+                        continue
+                    counts.append({
+                        'name': peer,
+                        'afi': afi,
+                        'count': count,
+                    })
+            return BaseDSProcessor.trimmed_records(
+                router_entry,
+                router_records=counts,
+                metric_labels=['name', 'afi', 'count'],
+            )
+        except Exception as exc:
+            print(f'Error getting BGP advertised prefix counts from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
+            return None

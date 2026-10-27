@@ -112,6 +112,14 @@ Negotiated rates are parsed from the RouterOS rate string (e.g. `866.6Mbps-80MHz
 
 ---
 
+## BGP Metrics
+
+Enable `bgp = True` for a router to export BGP session status, uptime, received prefix count, cumulative message/byte counts, negotiated peer details (including the last notification), connection and instance configuration info, and the current advertised-prefix count per peer and address family (`mktxp_bgp_advertised_prefixes`). RouterOS 7 connection info comes from `/routing/bgp/connection`; RouterOS 6 uses its legacy `/routing/bgp/peer` configuration resource. The `mktxp_bgp_connections_info` metric represents configured connections, while `mktxp_bgp_established` represents current session state. The advertisements API response is filtered per peer/address family and counted by MKTXP.
+
+MKTXP reports RouterOS session counters as exposed by the API; message and byte counters are per session and are not divided by address family. The API does not expose advertised-prefix counts per address family here.
+
+---
+
 ## Prometheus Scrape Configuration
 
 Add MKTXP to your `/etc/prometheus/prometheus.yml`:
