@@ -133,3 +133,59 @@ def test_routeros_api_receive_monkey_patch():
 
     # Verify the tag was cleaned from the buffer despite the exception
     assert tag not in communicator.response_buffor
+
+
+@pytest.mark.parametrize('password_bytes', [
+    b's3cr3t',
+    b'secret with spaces',
+    b"secret'with'singlequotes",
+    b'secret"with"doublequotes',
+    b'both\'and"quotes',
+    b'has=equals .tag=99\'sneaky',
+    b'multi\nline\\slash',
+])
+def test_connect_masks_password_on_login_failure(capsys, password_bytes):
+    from routeros_api.exceptions import RouterOsApiCommunicationError
+    from routeros_api.sentence import CommandSentence
+
+    cmd = CommandSentence(b'/', b'login', tag=b'1')
+    cmd.set(b'name', b'mktxp')
+    cmd.set(b'password', password_bytes)
+    msg = f'Error "invalid user name or password (6)" executing command {cmd}'
+    api_exc = RouterOsApiCommunicationError(msg, b'invalid user name or password (6)')
+
+    pool = MagicMock()
+    pool.connected = False
+    pool.get_api.side_effect = api_exc
+
+    with patch('mktxp.flow.router_connection.RouterOsApiPool', return_value=pool):
+        connection = RouterAPIConnection('router-a', _config_entry(use_ssl=False))
+        connection._in_connect_timeout = lambda *_: False
+
+        with pytest.raises(RouterAPIConnectionError):
+            connection.connect()
+
+    out = capsys.readouterr().out
+    assert 'invalid user name or password (6)' in out
+    assert (
+        "executing command b'/login =name=mktxp =password=*** .tag=1'" in out
+        or 'executing command b"/login =name=mktxp =password=*** .tag=1"' in out
+    )
+
+
+def test_sanitize_error_message_handles_untagged_and_fatal_errors():
+    from routeros_api.exceptions import RouterOsApiFatalCommunicationError
+    from routeros_api.sentence import CommandSentence
+    from mktxp.flow.router_connection import _sanitize_error_message
+
+    untagged_cmd = CommandSentence(b'/', b'login')
+    untagged_cmd.set(b'name', b'mktxp')
+    untagged_cmd.set(b'password', b'untagged secret with spaces')
+    fatal_exc = RouterOsApiFatalCommunicationError(f'Fatal error executing command {untagged_cmd}')
+
+    masked = _sanitize_error_message(fatal_exc)
+    assert '=password=***' in masked
+    assert 'untagged' not in masked
+    assert 'secret' not in masked
+
+    assert _sanitize_error_message(TimeoutError('timed out')) == 'timed out'

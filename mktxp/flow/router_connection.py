@@ -12,6 +12,7 @@
 ## GNU General Public License for more details.
 
 
+import re
 import ssl
 import socket
 import collections
@@ -61,6 +62,26 @@ routeros_api.api_communicator.base.ApiCommunicatorBase.receive = _patched_receiv
 
 # done with patching hopefully, moving on
 from routeros_api import RouterOsApiPool
+from routeros_api.exceptions import RouterOsApiCommunicationError
+
+_PASSWORD_TAGGED_CMD_RE = re.compile(r"=password=.*(?= \.tag=[^ '\"]*\\?['\"])", re.DOTALL)
+_PASSWORD_UNTAGGED_CMD_RE = re.compile(r"=password=.*?(?=\\?['\"](?:, b?['\"]|$))", re.DOTALL)
+_PASSWORD_FALLBACK_RE = re.compile(r"=password=[^ '\"]*")
+
+
+def _sanitize_error_message(exc):
+    """Mask router passwords embedded in RouterOS API exception messages."""
+    if isinstance(exc, RouterOsApiCommunicationError) and exc.args:
+        message = str(exc.args[0])
+    else:
+        message = str(exc)
+
+    for pattern in (_PASSWORD_TAGGED_CMD_RE, _PASSWORD_UNTAGGED_CMD_RE):
+        masked, count = pattern.subn('=password=***', message)
+        if count:
+            return masked
+
+    return _PASSWORD_FALLBACK_RE.sub('=password=***', message)
 
 class RouterAPIConnectionError(Exception):
     pass
@@ -186,4 +207,4 @@ class RouterAPIConnection:
             self.api = None
             self.successive_failure_count += 1
             self.last_failure_timestamp = connect_time.timestamp()
-            print(f'{connect_time.strftime("%Y-%m-%d %H:%M:%S")} Connection to router {self.router_name}@{self.config_entry.hostname} has failed: {exc}')
+            print(f'{connect_time.strftime("%Y-%m-%d %H:%M:%S")} Connection to router {self.router_name}@{self.config_entry.hostname} has failed: {_sanitize_error_message(exc)}')
