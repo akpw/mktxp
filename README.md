@@ -1,7 +1,7 @@
 # MKTXP
 
 ![License](https://img.shields.io/badge/License-GNU%20GPL-blue.svg)
-![Language](https://img.shields.io/badge/python-v3.9+-blue)
+![Language](https://img.shields.io/badge/python-v3.10+-blue)
 ![Platform](https://img.shields.io/badge/mikrotik-routeros-orange)
 ![Diagnostics](https://img.shields.io/badge/cli-diagnostics-blue)
 ![GitOps](https://img.shields.io/badge/gitops-rsc%20config-2ea44f)
@@ -40,7 +40,7 @@ MKTXP is an extensible toolkit for MikroTik RouterOS network engineering. It pro
 ❯ docker pull ghcr.io/akpw/mktxp:latest
 ```
 
-*Requirements: Python >= 3.9. Supported on Linux, macOS, and FreeBSD.*
+*Requirements: Python >= 3.10. Supported on Linux, macOS, and FreeBSD.*
 
 ### Ready-to-Run Monitoring & Logging Stack
 
