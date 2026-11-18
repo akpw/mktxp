@@ -29,6 +29,6 @@ class NeighborCollector(BaseCollector):
 
         if router_entry.config_entry.ipv6_neighbor:
             metric_labels = ['address', 'interface', 'mac_address', 'status', 'comment']
-            records = NeighborDataSource.metric_records(router_entry, metric_labels=metric_labels)
+            records = NeighborDataSource.metric_records(router_entry, metric_labels=metric_labels, ipv6=True)
             metrics = BaseCollector.info_collector('ipv6_neighbor', 'Reachable neighbors (IPv6)', records, metric_labels=metric_labels)
             yield metrics
