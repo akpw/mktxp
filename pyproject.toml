@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mktxp"
-version = "2.1.0"
+version = "2.1.1"
 description = "MikroTik RouterOS CLI Diagnostic Tool, GitOps Configuration Manager, and Prometheus Exporter"
 readme = "README.md"
 authors = [
