@@ -183,7 +183,7 @@ Enable or disable specific metric collectors per router or globally under `[defa
 | `bridge_vlan` | `False` | Bridge VLAN table and untagged/tagged port mappings. |
 | `switch_port` | `False` | Switch chip port counters and statistics. |
 | `poe` | `True` | PoE output wattage, current, and port status. |
-| `route` / `ipv6_route` | `True` / `False` | Active routing table route counts. |
+| `route` / `ipv6_route` | `True` / `False` | Total and active routing table route counts (overall and per protocol). |
 | `pool` / `ipv6_pool` | `True` / `False` | IP address pool utilization and counts. |
 | `firewall` / `ipv6_firewall` | `True` / `False` | Firewall filter and NAT rule byte/packet counters. |
 | `neighbor` / `ipv6_neighbor` | `True` / `False` | ARP and IPv6 neighbor discovery counts. |
@@ -203,7 +203,7 @@ Enable or disable specific metric collectors per router or globally under `[defa
 | `kid_control_dynamic` | `False` | Kid Control traffic metrics for all devices. |
 | `public_ip` | `True` | Public WAN IP detection. |
 | `queue` | `True` | Simple queue and tree queue bandwidth utilization. |
-| `bfd` / `bgp` | `False` | BFD and BGP routing protocol peering states. |
+| `bfd` / `bgp` / `ospf` | `False` | BFD, BGP, and OSPF routing protocol peering/neighbor states (and OSPF LSA count). |
 | `routing_stats` | `False` | Routing engine process statistics. |
 | `eoip` / `gre` / `ipip` / `ipsec` | `False` | Tunnel interface states and IPSec active peers. |
 | `lte` | `False` | Cellular LTE signal strength and modem parameters. |

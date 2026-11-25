@@ -75,6 +75,7 @@ class ConfigEntry:
             MKTXPConfigKeys.FE_CHECK_FOR_UPDATES,
             MKTXPConfigKeys.FE_BFD_KEY,
             MKTXPConfigKeys.FE_BGP_KEY,
+            MKTXPConfigKeys.FE_OSPF_KEY,
             MKTXPConfigKeys.FE_KID_CONTROL_DEVICE,
             MKTXPConfigKeys.FE_KID_CONTROL_DYNAMIC,
             MKTXPConfigKeys.FE_EOIP_KEY,

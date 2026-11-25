@@ -79,6 +79,7 @@ class RouterEntry:
                             CollectorKeys.USER_COLLECTOR: 0,
                             CollectorKeys.BFD_COLLECTOR: 0,
                             CollectorKeys.BGP_COLLECTOR: 0,
+                            CollectorKeys.OSPF_COLLECTOR: 0,
                             CollectorKeys.ROUTING_STATS_COLLECTOR: 0,
                             CollectorKeys.EOIP_COLLECTOR: 0,
                             CollectorKeys.GRE_COLLECTOR: 0,

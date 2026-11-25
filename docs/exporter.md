@@ -67,7 +67,7 @@ At minimum, each router entry in `mktxp.conf` needs connection credentials:
 
 ### Canonical Template
 
-To view or customize the comprehensive list of metrics collected by MKTXP (including PoE, BGP, WireGuard, LTE, Kid Control, and bridge VLANs), refer to the canonical template:
+To view or customize the comprehensive list of metrics collected by MKTXP (including PoE, BGP, OSPF, WireGuard, LTE, Kid Control, and bridge VLANs), refer to the canonical template:
 - [`mktxp/cli/config/mktxp.conf`](../mktxp/cli/config/mktxp.conf) in this repository.
 - Edit locally using `mktxp edit`.
 
@@ -117,6 +117,13 @@ Negotiated rates are parsed from the RouterOS rate string (e.g. `866.6Mbps-80MHz
 Enable `bgp = True` for a router to export BGP session status, uptime, received prefix count, cumulative message/byte counts, negotiated peer details (including the last notification), connection and instance configuration info, and the current advertised-prefix count per peer and address family (`mktxp_bgp_advertised_prefixes`). RouterOS 7 connection info comes from `/routing/bgp/connection`; RouterOS 6 uses its legacy `/routing/bgp/peer` configuration resource. The `mktxp_bgp_connections_info` metric represents configured connections, while `mktxp_bgp_established` represents current session state. The advertisements API response is filtered per peer/address family and counted by MKTXP.
 
 MKTXP reports RouterOS session counters as exposed by the API; message and byte counters are per session and are not divided by address family. The API does not expose advertised-prefix counts per address family here.
+
+---
+
+## OSPF & Route Metrics
+
+* **OSPF (`ospf = True`):** Queries `/routing/ospf/neighbor` (compatible with both RouterOS 7 and RouterOS 6) to export `mktxp_ospf_neighbors_info`, `mktxp_ospf_neighbor_full`, `mktxp_ospf_neighbor_state_changes`, and `mktxp_ospf_neighbor_adjacency` (in milliseconds), plus total LSA database count (`mktxp_ospf_lsa_count`) via `/routing/ospf/lsa` `count-only`.
+* **Routes (`route = True` / `ipv6_route = True`):** In addition to total RIB counts (`mktxp_routes_total_routes`, `mktxp_routes_protocol_count`), MKTXP exports active-only route counts (`mktxp_routes_active_routes`, `mktxp_routes_active_protocol_count`, and their `_ipv6` counterparts) filtered by `active=yes`.
 
 ---
 

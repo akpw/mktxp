@@ -44,6 +44,7 @@ from mktxp.collector.queue_collector import QueueSimpleCollector
 from mktxp.collector.kid_control_device_collector import KidDeviceCollector
 from mktxp.collector.bfd_collector import BFDCollector
 from mktxp.collector.bgp_collector import BGPCollector
+from mktxp.collector.ospf_collector import OSPFCollector
 from mktxp.collector.routing_stats_collector import RoutingStatsCollector
 from mktxp.collector.eoip_collector import EOIPCollector
 from mktxp.collector.gre_collector import GRECollector
@@ -100,6 +101,7 @@ class CollectorRegistry:
         self.register(CollectorKeys.KID_CONTROL_DEVICE_COLLECTOR, KidDeviceCollector.collect)
         self.register(CollectorKeys.BFD_COLLECTOR, BFDCollector.collect)
         self.register(CollectorKeys.BGP_COLLECTOR, BGPCollector.collect)
+        self.register(CollectorKeys.OSPF_COLLECTOR, OSPFCollector.collect)
         self.register(CollectorKeys.EOIP_COLLECTOR, EOIPCollector.collect)
         self.register(CollectorKeys.GRE_COLLECTOR, GRECollector.collect)
         self.register(CollectorKeys.IPIP_COLLECTOR, IPIPCollector.collect)

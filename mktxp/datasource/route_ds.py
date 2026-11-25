@@ -33,8 +33,14 @@ class RouteMetricsDataSource:
                 # Abort if there was an error
                 return None
 
-            # Get counts per protocol
+            # Get total active routes
+            active_routes = BaseDSProcessor.count_records(router_entry, api_path=api_path, api_query={'active': 'yes'})
+            if active_routes is None:
+                return None
+
+            # Get counts per protocol (all and active)
             routes_per_protocol = {}
+            active_routes_per_protocol = {}
             for label in metric_labels:
                 count = BaseDSProcessor.count_records(router_entry, api_path=api_path, api_query={f'{label}': 'yes'})
                 if count is None:
@@ -42,9 +48,20 @@ class RouteMetricsDataSource:
                     return None
                 routes_per_protocol[label] = count
 
+                active_count = BaseDSProcessor.count_records(
+                    router_entry,
+                    api_path=api_path,
+                    api_query={f'{label}': 'yes', 'active': 'yes'},
+                )
+                if active_count is None:
+                    return None
+                active_routes_per_protocol[label] = active_count
+
             return {
                 'total_routes': total_routes,
-                'routes_per_protocol': routes_per_protocol
+                'active_routes': active_routes,
+                'routes_per_protocol': routes_per_protocol,
+                'active_routes_per_protocol': active_routes_per_protocol,
             }
         except Exception as exc:
             print(f'Error getting {"IPv6" if ipv6 else "IPv4"} routes info from router {router_entry.router_name}@{router_entry.config_entry.hostname}: {exc}')
