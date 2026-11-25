@@ -189,3 +189,13 @@ def test_sanitize_error_message_handles_untagged_and_fatal_errors():
     assert 'secret' not in masked
 
     assert _sanitize_error_message(TimeoutError('timed out')) == 'timed out'
+
+
+def test_tcp_nodelay_monkey_patch():
+    import socket
+    import routeros_api.api_socket
+
+    mock_sock = MagicMock()
+    routeros_api.api_socket.set_keepalive(mock_sock, after_idle_sec=10)
+
+    mock_sock.setsockopt.assert_any_call(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)

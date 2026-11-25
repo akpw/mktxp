@@ -122,7 +122,7 @@ MKTXP reports RouterOS session counters as exposed by the API; message and byte 
 
 ## OSPF & Route Metrics
 
-* **OSPF (`ospf = True`):** Queries `/routing/ospf/neighbor` (compatible with both RouterOS 7 and RouterOS 6) to export `mktxp_ospf_neighbors_info`, `mktxp_ospf_neighbor_full`, `mktxp_ospf_neighbor_state_changes`, and `mktxp_ospf_neighbor_adjacency` (in milliseconds), plus total LSA database count (`mktxp_ospf_lsa_count`) via `/routing/ospf/lsa` `count-only`.
+* **OSPF (`ospf = True`):** Queries `/routing/ospf/neighbor` (compatible with both RouterOS 7 and RouterOS 6) to export `mktxp_ospf_neighbors_info`, `mktxp_ospf_neighbor_state` (0=Down .. 7=Full), `mktxp_ospf_neighbor_full`, `mktxp_ospf_neighbor_state_changes`, `mktxp_ospf_neighbor_adjacency` (in milliseconds), `mktxp_ospf_neighbor_ls_retransmits`, `mktxp_ospf_neighbor_ls_requests`, `mktxp_ospf_neighbor_db_summaries`, and `mktxp_ospf_area_neighbors_count` (ROS 7), plus total LSA database count (`mktxp_ospf_lsa_count`) via `/routing/ospf/lsa` `count-only`.
 * **Routes (`route = True` / `ipv6_route = True`):** In addition to total RIB counts (`mktxp_routes_total_routes`, `mktxp_routes_protocol_count`), MKTXP exports active-only route counts (`mktxp_routes_active_routes`, `mktxp_routes_active_protocol_count`, and their `_ipv6` counterparts) filtered by `active=yes`.
 
 ---

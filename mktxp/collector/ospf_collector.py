@@ -13,8 +13,21 @@
 
 
 from mktxp.collector.base_collector import BaseCollector
+from mktxp.datasource.base_ds import BaseDSProcessor
 from mktxp.datasource.ospf_ds import OSPFMetricsDataSource
 from mktxp.utils.units import parse_timedelta_milliseconds
+
+
+OSPF_NEIGHBOR_STATE_MAP = {
+    'down': 0,
+    'attempt': 1,
+    'init': 2,
+    '2-way': 3,
+    'exstart': 4,
+    'exchange': 5,
+    'loading': 6,
+    'full': 7,
+}
 
 
 class OSPFCollector(BaseCollector):
@@ -26,8 +39,9 @@ class OSPFCollector(BaseCollector):
             return
 
         ospf_labels = [
-            'instance', 'area', 'router_id', 'address',
+            'instance', 'area', 'interface', 'router_id', 'address',
             'state', 'state_changes', 'adjacency', 'priority',
+            'ls_retransmits', 'ls_requests', 'db_summaries',
         ]
         translation_table = {
             'adjacency': lambda value: parse_timedelta_milliseconds(value) if value else '0',
@@ -39,10 +53,18 @@ class OSPFCollector(BaseCollector):
         )
 
         if neighbor_records:
+            area_counts = {}
             for record in neighbor_records:
-                record['full'] = '1' if str(record.get('state', '')).lower() == 'full' else '0'
+                state_key = str(record.get('state', '')).strip().lower()
+                record['state_code'] = OSPF_NEIGHBOR_STATE_MAP.get(state_key, -1)
+                record['full'] = '1' if state_key == 'full' else '0'
 
-            neighbor_info_labels = ['instance', 'area', 'router_id', 'address', 'state']
+                area = record.get('area')
+                if area:
+                    area_key = (record.get('instance', ''), area)
+                    area_counts[area_key] = area_counts.get(area_key, 0) + 1
+
+            neighbor_info_labels = ['instance', 'area', 'interface', 'router_id', 'address', 'state']
             yield BaseCollector.info_collector(
                 'ospf_neighbors',
                 'OSPF active neighbors info',
@@ -50,7 +72,14 @@ class OSPFCollector(BaseCollector):
                 neighbor_info_labels,
             )
 
-            neighbor_id_labels = ['instance', 'area', 'router_id', 'address']
+            neighbor_id_labels = ['instance', 'area', 'interface', 'router_id', 'address']
+            yield BaseCollector.gauge_collector(
+                'ospf_neighbor_state',
+                'OSPF neighbor FSM state (0=Down, 1=Attempt, 2=Init, 3=2-Way, 4=ExStart, 5=Exchange, 6=Loading, 7=Full)',
+                neighbor_records,
+                'state_code',
+                neighbor_id_labels,
+            )
             yield BaseCollector.gauge_collector(
                 'ospf_neighbor_full',
                 'OSPF neighbor is in Full state (1 = Full, 0 = otherwise)',
@@ -72,6 +101,53 @@ class OSPFCollector(BaseCollector):
                 'adjacency',
                 neighbor_id_labels,
             )
+
+            ls_retransmits_records = [r for r in neighbor_records if 'ls_retransmits' in r]
+            if ls_retransmits_records:
+                yield BaseCollector.gauge_collector(
+                    'ospf_neighbor_ls_retransmits',
+                    'Number of pending OSPF LS retransmits per neighbor',
+                    ls_retransmits_records,
+                    'ls_retransmits',
+                    neighbor_id_labels,
+                )
+
+            ls_requests_records = [r for r in neighbor_records if 'ls_requests' in r]
+            if ls_requests_records:
+                yield BaseCollector.gauge_collector(
+                    'ospf_neighbor_ls_requests',
+                    'Number of pending OSPF LS requests per neighbor',
+                    ls_requests_records,
+                    'ls_requests',
+                    neighbor_id_labels,
+                )
+
+            db_summaries_records = [r for r in neighbor_records if 'db_summaries' in r]
+            if db_summaries_records:
+                yield BaseCollector.gauge_collector(
+                    'ospf_neighbor_db_summaries',
+                    'Number of pending OSPF DB summaries per neighbor',
+                    db_summaries_records,
+                    'db_summaries',
+                    neighbor_id_labels,
+                )
+
+            if area_counts:
+                area_records = BaseDSProcessor.trimmed_records(
+                    router_entry,
+                    router_records=[
+                        {'instance': instance, 'area': area, 'count': count}
+                        for (instance, area), count in area_counts.items()
+                    ],
+                    metric_labels=['instance', 'area', 'count'],
+                )
+                yield BaseCollector.gauge_collector(
+                    'ospf_area_neighbors_count',
+                    'Number of active OSPF neighbors per area',
+                    area_records,
+                    'count',
+                    ['instance', 'area'],
+                )
 
         lsa_records = OSPFMetricsDataSource.lsa_count(router_entry)
         if lsa_records:

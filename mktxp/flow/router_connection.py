@@ -60,6 +60,16 @@ def _patched_receive(self, tag):
         return response
 routeros_api.api_communicator.base.ApiCommunicatorBase.receive = _patched_receive
 
+# 4. Enable TCP_NODELAY on RouterOS API sockets to avoid Nagle + delayed-ACK stalls
+#    caused by routeros_api sending each API sentence word in a separate socket.send() call.
+import routeros_api.api_socket
+_original_set_keepalive = routeros_api.api_socket.set_keepalive
+def _patched_set_keepalive(sock, *args, **kwargs):
+    _original_set_keepalive(sock, *args, **kwargs)
+    if hasattr(socket, 'TCP_NODELAY'):
+        sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+routeros_api.api_socket.set_keepalive = _patched_set_keepalive
+
 # done with patching hopefully, moving on
 from routeros_api import RouterOsApiPool
 from routeros_api.exceptions import RouterOsApiCommunicationError
