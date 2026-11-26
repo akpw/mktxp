@@ -59,6 +59,10 @@ class OSPFCollector(BaseCollector):
                 record['state_code'] = OSPF_NEIGHBOR_STATE_MAP.get(state_key, -1)
                 record['full'] = '1' if state_key == 'full' else '0'
 
+                # RouterOS 7 omits these counters while they are 0 (RouterOS 6 always returns them)
+                for counter in ('ls_retransmits', 'ls_requests', 'db_summaries'):
+                    record.setdefault(counter, '0')
+
                 area = record.get('area')
                 if area:
                     area_key = (record.get('instance', ''), area)
@@ -102,35 +106,27 @@ class OSPFCollector(BaseCollector):
                 neighbor_id_labels,
             )
 
-            ls_retransmits_records = [r for r in neighbor_records if 'ls_retransmits' in r]
-            if ls_retransmits_records:
-                yield BaseCollector.gauge_collector(
-                    'ospf_neighbor_ls_retransmits',
-                    'Number of pending OSPF LS retransmits per neighbor',
-                    ls_retransmits_records,
-                    'ls_retransmits',
-                    neighbor_id_labels,
-                )
-
-            ls_requests_records = [r for r in neighbor_records if 'ls_requests' in r]
-            if ls_requests_records:
-                yield BaseCollector.gauge_collector(
-                    'ospf_neighbor_ls_requests',
-                    'Number of pending OSPF LS requests per neighbor',
-                    ls_requests_records,
-                    'ls_requests',
-                    neighbor_id_labels,
-                )
-
-            db_summaries_records = [r for r in neighbor_records if 'db_summaries' in r]
-            if db_summaries_records:
-                yield BaseCollector.gauge_collector(
-                    'ospf_neighbor_db_summaries',
-                    'Number of pending OSPF DB summaries per neighbor',
-                    db_summaries_records,
-                    'db_summaries',
-                    neighbor_id_labels,
-                )
+            yield BaseCollector.gauge_collector(
+                'ospf_neighbor_ls_retransmits',
+                'Number of pending OSPF LS retransmits per neighbor',
+                neighbor_records,
+                'ls_retransmits',
+                neighbor_id_labels,
+            )
+            yield BaseCollector.gauge_collector(
+                'ospf_neighbor_ls_requests',
+                'Number of pending OSPF LS requests per neighbor',
+                neighbor_records,
+                'ls_requests',
+                neighbor_id_labels,
+            )
+            yield BaseCollector.gauge_collector(
+                'ospf_neighbor_db_summaries',
+                'Number of pending OSPF DB summaries per neighbor',
+                neighbor_records,
+                'db_summaries',
+                neighbor_id_labels,
+            )
 
             if area_counts:
                 area_records = BaseDSProcessor.trimmed_records(
