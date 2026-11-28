@@ -137,6 +137,9 @@ def test_ospf_collector_handles_ros6_records_without_area():
             'address': '10.1.1.122',
             'state': 'Full',
             'state-changes': '4',
+            'ls-retransmits': '0',
+            'ls-requests': '0',
+            'db-summaries': '0',
             'adjacency': '2m',
         }
     ]
@@ -154,12 +157,67 @@ def test_ospf_collector_handles_ros6_records_without_area():
         'mktxp_ospf_neighbor_full',
         'mktxp_ospf_neighbor_state_changes',
         'mktxp_ospf_neighbor_adjacency',
+        'mktxp_ospf_neighbor_ls_retransmits',
+        'mktxp_ospf_neighbor_ls_requests',
+        'mktxp_ospf_neighbor_db_summaries',
     ]
     assert metrics['mktxp_ospf_neighbors'].samples[0].labels['area'] == ''
     assert metrics['mktxp_ospf_neighbors'].samples[0].labels['interface'] == 'ether2'
     assert metrics['mktxp_ospf_neighbor_state'].samples[0].value == 7
     assert metrics['mktxp_ospf_neighbor_full'].samples[0].value == '1'
     assert float(metrics['mktxp_ospf_neighbor_adjacency'].samples[0].value) == 120000.0
+
+
+def test_ospf_collector_exports_ros7_omitted_ls_counters_as_zero():
+    router_id = {
+        'routerboard_name': 'router-a',
+        'routerboard_address': '192.0.2.1',
+    }
+    router_entry = Mock()
+    router_entry.router_name = 'router-a'
+    router_entry.config_entry.hostname = '192.0.2.1'
+    router_entry.config_entry.ospf = True
+    router_entry.config_entry.custom_labels = None
+    router_entry.router_id = router_id
+
+    # ROS 7 omits ls-retransmits / ls-requests / db-summaries while they are 0
+    raw_neighbors = [
+        {
+            'instance': 'ospf-instance-1',
+            'area': 'backbone',
+            'interface': 'gre-tunnel1',
+            'router-id': '198.51.100.1',
+            'address': '203.0.113.1',
+            'state': 'Full',
+            'state-changes': '5',
+            'adjacency': '3d4h',
+        },
+        {
+            'instance': 'ospf-instance-1',
+            'area': 'backbone',
+            'interface': 'gre-tunnel2',
+            'router-id': '198.51.100.2',
+            'address': '203.0.113.5',
+            'state': 'Full',
+            'state-changes': '5',
+            'adjacency': '3d4h',
+            'ls-retransmits': '7',
+        },
+    ]
+    router_entry.api_connection.router_api.return_value.get_resource.return_value.get.return_value = raw_neighbors
+
+    with patch(
+        'mktxp.datasource.ospf_ds.BaseDSProcessor.count_records',
+        return_value=None,
+    ):
+        metrics = {m.name: m for m in OSPFCollector.collect(router_entry)}
+
+    def by_interface(name):
+        return {s.labels['interface']: s.value for s in metrics[name].samples}
+
+    assert by_interface('mktxp_ospf_neighbor_ls_retransmits') == {'gre-tunnel1': '0', 'gre-tunnel2': '7'}
+    assert by_interface('mktxp_ospf_neighbor_ls_requests') == {'gre-tunnel1': '0', 'gre-tunnel2': '0'}
+    assert by_interface('mktxp_ospf_neighbor_db_summaries') == {'gre-tunnel1': '0', 'gre-tunnel2': '0'}
 
 
 def test_ospf_collector_skips_when_disabled():
